@@ -2,9 +2,14 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-> État actuel : le dépôt est vide (aucun commit, aucun fichier source). Ce document décrit
-> l'intention du projet. Il devra être mis à jour dès que le code, les commandes de build/test
-> et le déploiement existent réellement.
+## Commandes
+
+```bash
+node --test tests/calc.test.mjs   # vérifie le moteur contre le classeur Excel
+```
+
+Pas de build : `frontend/` est servi tel quel. Pour un aperçu local,
+`npx http-server frontend -p 4173 -c-1` (configuration dans `.claude/launch.json`).
 
 ## Contexte
 
@@ -26,8 +31,13 @@ Conséquence pratique : pas de `npm install`/`npm run build`. Le code servi est 
 
 ## Logique de calcul
 
-Référence : le fichier Excel dans `/docs` (à ajouter au dépôt). En cas de divergence entre le code
-et l'Excel, l'Excel fait foi.
+Documentée en détail dans [docs/modele-de-calcul.md](docs/modele-de-calcul.md), classeur de
+référence dans `docs/`. En cas de divergence entre le code et l'Excel, l'Excel fait foi — **sauf**
+les deux écarts délibérés documentés en fin de ce fichier (comparaison net/net, et refus de
+trancher quand l'enveloppe est insuffisante).
+
+Tout changement du moteur doit laisser `node --test tests/calc.test.mjs` au vert : la fixture
+contient les valeurs réellement calculées par Excel sur 25 ans.
 
 - Enveloppe globale mensuelle fixe, répartie en mensualité + charges (achat) ou loyer (location).
   Le surplus de chaque côté est investi en bourse.
@@ -40,8 +50,12 @@ et l'Excel, l'Excel fait foi.
 
 ## Conventions
 
-- Interface et labels en français.
-- [à compléter : convention de nommage des variables, style de code]
+- Interface, labels, noms de variables, de fonctions et de classes CSS **en français**.
+- JS en `camelCase`, classes CSS en `bloc__element--modificateur`.
+- `frontend/js/calc.js` est un module **pur** : aucune logique financière ailleurs, aucun accès
+  au DOM dedans. C'est ce qui permet de le tester sous Node et de le réutiliser côté PHP plus tard.
+- Les taux se saisissent en pourcentage à l'écran et se stockent en fraction dans le modèle
+  (conversion dans `app.js`, jamais dans `calc.js`).
 
 ## Workflow Git
 

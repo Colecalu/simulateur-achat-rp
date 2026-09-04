@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Acheter ou louer ma résidence principale ?</title>
+  <meta name="description" content="Comparez l'achat de votre résidence principale et la location, à enveloppe budgétaire identique.">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="entete">
+  <div class="entete__contenu">
+    <h1>Dois-je acheter ma résidence principale&nbsp;?</h1>
+    <p class="entete__sous-titre">
+      À budget mensuel identique&nbsp;: ce que le logement ne consomme pas est investi en bourse,
+      des deux côtés. On compare les deux patrimoines, nets d'impôt.
+    </p>
+  </div>
+</header>
+
+<main class="page">
+
+  <!-- ================= SAISIE ================= -->
+  <form class="panneau" id="formulaire" autocomplete="off">
+
+    <details class="groupe" open>
+      <summary class="groupe__titre">Votre situation</summary>
+      <div class="groupe__corps">
+        <label class="champ">
+          <span class="champ__libelle">Capital disponible aujourd'hui</span>
+          <span class="champ__saisie">
+            <input type="number" id="capitalInitial" step="1000" min="0">
+            <span class="champ__unite">€</span>
+          </span>
+        </label>
+        <label class="champ">
+          <span class="champ__libelle">Enveloppe mensuelle logement + épargne</span>
+          <span class="champ__saisie">
+            <input type="number" id="enveloppeMensuelle" step="50" min="0">
+            <span class="champ__unite">€/mois</span>
+          </span>
+          <span class="champ__aide">Le budget total que vous consacrez au logement ET à l'épargne. Identique dans les deux scénarios.</span>
+        </label>
+      </div>
+    </details>
+
+    <details class="groupe" open>
+      <summary class="groupe__titre">Le bien</summary>
+      <div class="groupe__corps">
+        <label class="champ">
+          <span class="champ__libelle">Prix net vendeur</span>
+          <span class="champ__saisie">
+            <input type="number" id="prixNetVendeur" step="5000" min="0">
+            <span class="champ__unite">€</span>
+          </span>
+        </label>
+        <label class="champ">
+          <span class="champ__libelle">Type de bien</span>
+          <span class="champ__saisie">
+            <select id="typeBien">
+              <option value="ancien">Ancien</option>
+              <option value="neuf">Neuf</option>
+            </select>
+          </span>
+          <span class="champ__aide">Détermine les droits de mutation dans les frais de notaire.</span>
+        </label>
+        <label class="champ">
+          <span class="champ__libelle">Frais d'agence</span>
+          <span class="champ__saisie">
+            <input type="number" id="fraisAgence" step="1000" min="0">
+            <span class="champ__unite">€</span>
+          </span>
+        </label>
+        <label class="champ">
+          <span class="champ__libelle">Travaux</span>
+          <span class="champ__saisie">
+            <input type="number" id="travaux" step="1000" min="0">
+            <span class="champ__unite">€</span>
+          </span>
+        </label>
+        <label class="champ">
+          <span class="champ__libelle">Frais bancaires d'acquisition</span>
+          <span class="champ__saisie">
+            <input type="number" id="fraisBancaires" step="100" min="0">
+            <span class="champ__unite">€</span>
+          </span>
+        </label>
+        <label class="champ">
+          <span class="champ__libelle">Valeur réelle du bien après travaux</span>
+          <span class="champ__saisie">
+            <input type="number" id="valeurEstimee" step="5000" min="0">
+            <span class="champ__unite">€</span>
+          </span>
+          <span class="champ__aide">Ce que vous en tireriez à la revente en année 0. Souvent inférieure au total dépensé&nbsp;: les frais de notaire ne se récupèrent pas.</span>
+        </label>
+      </div>
+    </details>
+
+    <details class="groupe" open>
+      <summary class="groupe__titre">Le crédit</summary>
+      <div class="groupe__corps">
+        <label class="champ">
+          <span class="champ__libelle">Apport</span>
+          <span class="champ__saisie">
+            <input type="number" id="apport" step="5000" min="0">
+            <span class="champ__unite">€</span>
+          </span>
+        </label>
+        <label class="champ">
+          <span class="champ__libelle">Durée</span>
+          <span class="champ__saisie">
+            <input type="number" id="dureeAnnees" step="1" min="1" max="30">
+            <span class="champ__unite">ans</span>
+          </span>
+        </label>
+        <label class="champ">
+          <span class="champ__libelle">Taux du crédit</span>
+          <span class="champ__saisie">
+            <input type="number" id="tauxCredit" step="0.05" min="0" data-pourcentage>
+            <span class="champ__unite">%</span>
+          </span>
+        </label>
+        <label class="champ">
+          <span class="champ__libelle">Taux d'assurance emprunteur</span>
+          <span class="champ__saisie">
+            <input type="number" id="tauxAssurance" step="0.01" min="0" data-pourcentage>
+            <span class="champ__unite">%</span>
+          </span>
+          <span class="champ__aide">Calculée sur le capital restant dû&nbsp;: elle décroît avec le remboursement.</span>
+        </label>
+      </div>
+    </details>
+
+    <details class="groupe">
+      <summary class="groupe__titre">Charges de propriétaire</summary>
+      <div class="groupe__corps">
+        <label class="champ">
+          <span class="champ__libelle">Charges de copropriété</span>
+          <span class="champ__saisie">
+            <input type="number" id="chargesCopro" step="100" min="0">
+            <span class="champ__unite">€/an</span>
+          </span>
+        </label>
+        <label class="champ">
+          <span class="champ__libelle">Taxe foncière</span>
+          <span class="champ__saisie">
+            <input type="number" id="taxeFonciere" step="100" min="0">
+            <span class="champ__unite">€/an</span>
+          </span>
+        </label>
+        <label class="champ">
+          <span class="champ__libelle">Revalorisation du bien</span>
+          <span class="champ__saisie">
+            <input type="number" id="revalBien" step="0.25" data-pourcentage>
+            <span class="champ__unite">%/an</span>
+          </span>
+        </label>
+        <label class="champ">
+          <span class="champ__libelle">Revalorisation des charges</span>
+          <span class="champ__saisie">
+            <input type="number" id="revalCharges" step="0.25" data-pourcentage>
+            <span class="champ__unite">%/an</span>
+          </span>
+        </label>
+        <label class="champ">
+          <span class="champ__libelle">Revalorisation de la taxe foncière</span>
+          <span class="champ__saisie">
+            <input type="number" id="revalTaxeFonciere" step="0.25" data-pourcentage>
+            <span class="champ__unite">%/an</span>
+          </span>
+        </label>
+        <label class="champ">
+          <span class="champ__libelle">Frais de revente</span>
+          <span class="champ__saisie">
+            <input type="number" id="fraisRevente" step="1000" min="0">
+            <span class="champ__unite">€</span>
+          </span>
+        </label>
+      </div>
+    </details>
+
+    <details class="groupe">
+      <summary class="groupe__titre">Si vous restez locataire</summary>
+      <div class="groupe__corps">
+        <label class="champ">
+          <span class="champ__libelle">Loyer (charges comprises)</span>
+          <span class="champ__saisie">
+            <input type="number" id="loyer" step="50" min="0">
+            <span class="champ__unite">€/mois</span>
+          </span>
+        </label>
+        <label class="champ">
+          <span class="champ__libelle">Revalorisation du loyer</span>
+          <span class="champ__saisie">
+            <input type="number" id="revalLoyer" step="0.25" data-pourcentage>
+            <span class="champ__unite">%/an</span>
+          </span>
+        </label>
+      </div>
+    </details>
+
+    <details class="groupe">
+      <summary class="groupe__titre">Hypothèses de marché</summary>
+      <div class="groupe__corps">
+        <label class="champ">
+          <span class="champ__libelle">Rendement de la bourse</span>
+          <span class="champ__saisie">
+            <input type="number" id="rendementBourse" step="0.25" data-pourcentage>
+            <span class="champ__unite">%/an</span>
+          </span>
+          <span class="champ__aide">À saisir en <strong>brut</strong>, avant impôt.</span>
+        </label>
+        <label class="champ">
+          <span class="champ__libelle">Fiscalité sur les plus-values</span>
+          <span class="champ__saisie">
+            <input type="number" id="fiscalitePlusValues" step="0.1" min="0" max="100" data-pourcentage>
+            <span class="champ__unite">%</span>
+          </span>
+          <span class="champ__aide">31,4&nbsp;% = flat tax sur compte-titres. Un PEA ou une assurance-vie sont moins taxés.</span>
+        </label>
+      </div>
+    </details>
+
+    <div class="panneau__actions">
+      <button type="button" class="bouton bouton--discret" id="reinitialiser">Réinitialiser</button>
+    </div>
+  </form>
+
+  <!-- ================= RÉSULTATS ================= -->
+  <section class="resultats" aria-live="polite">
+
+    <p class="alerte" id="alerteEnveloppe" hidden>
+      Votre enveloppe mensuelle ne couvre pas le coût de propriétaire
+      (<strong id="alerteCout"></strong>). Augmentez-la, ou revoyez le prix du bien&nbsp;:
+      en l'état, le scénario d'achat n'est pas finançable.
+    </p>
+
+    <div class="verdict" id="verdict">
+      <div class="verdict__entete">
+        <h2 class="verdict__question">Si vous revendez dans</h2>
+        <div class="verdict__horizon">
+          <input type="range" id="horizon" min="1" max="25" step="1" value="20"
+                 aria-label="Horizon de revente en années">
+          <output class="verdict__annees" id="horizonLabel">20 ans</output>
+        </div>
+      </div>
+      <p class="verdict__chiffre" id="verdictChiffre">—</p>
+      <p class="verdict__phrase" id="verdictPhrase"></p>
+      <p class="verdict__detail" id="verdictDetail"></p>
+    </div>
+
+    <div class="kpis" id="kpis"></div>
+
+    <figure class="carte carte--graphique">
+      <figcaption class="carte__entete">
+        <h3 class="carte__titre">Patrimoine net d'impôt, année par année</h3>
+        <p class="carte__legende">
+          Bien immobilier net de dette + portefeuille boursier, après impôt sur les plus-values.
+        </p>
+      </figcaption>
+      <div class="legende" id="legendePatrimoine"></div>
+      <div class="graphique"><canvas id="graphPatrimoine"></canvas></div>
+    </figure>
+
+    <figure class="carte carte--graphique">
+      <figcaption class="carte__entete">
+        <h3 class="carte__titre">Écart de patrimoine&nbsp;: achat − location</h3>
+        <p class="carte__legende">
+          Au-dessus de zéro, l'achat vous laisse plus riche à cette date&nbsp;; en dessous, la location.
+        </p>
+      </figcaption>
+      <div class="graphique graphique--court"><canvas id="graphEcart"></canvas></div>
+    </figure>
+
+    <details class="carte carte--tableau">
+      <summary class="carte__titre carte__titre--pliable">Détail année par année</summary>
+      <div class="tableau-defilant">
+        <table class="tableau" id="tableauDetail">
+          <thead>
+            <tr>
+              <th scope="col">Année</th>
+              <th scope="col">Valeur du bien</th>
+              <th scope="col">Capital restant dû</th>
+              <th scope="col">Déboursé sur l'année</th>
+              <th scope="col">Patrimoine immo net</th>
+              <th scope="col">Portefeuille achat</th>
+              <th scope="col">Patrimoine achat</th>
+              <th scope="col">Loyer</th>
+              <th scope="col">Patrimoine location</th>
+              <th scope="col">Écart</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </details>
+
+    <p class="avertissement">
+      Simulation à hypothèses constantes&nbsp;: ni inflation générale, ni changement de situation,
+      ni revente anticipée subie. Le rendement boursier est supposé régulier, ce qu'aucun marché ne fait.
+      Un résultat serré (moins de quelques milliers d'euros d'écart) doit se lire comme une égalité.
+    </p>
+  </section>
+
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script type="module" src="js/app.js"></script>
+</body>
+</html>

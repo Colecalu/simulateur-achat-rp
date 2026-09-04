@@ -30,3 +30,6 @@ desktop.ini
 
 # Déploiement
 .ftp-deploy-sync-state.json
+
+# Aperçu local
+.claude/launch.json
