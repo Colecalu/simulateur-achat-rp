@@ -10,7 +10,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { simuler, fraisDeNotaire, mensualiteCredit } from '../frontend/js/calc.js';
+import calc from '../frontend/js/calc.js';
+
+const { simuler, fraisDeNotaire, mensualiteCredit } = calc;
 
 const attendu = JSON.parse(
   readFileSync(new URL('./fixtures/excel-paris.json', import.meta.url), 'utf8')

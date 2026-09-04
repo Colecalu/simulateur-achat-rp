@@ -1,8 +1,15 @@
 /**
  * Liaison entre le formulaire, le moteur de calcul et l'affichage.
  * Aucune logique financière ici : elle vit entièrement dans calc.js.
+ *
+ * Script classique (pas de module ES) pour que la page fonctionne aussi
+ * ouverte en file://. calc.js doit donc être chargé avant celui-ci.
  */
-import { DEFAUTS, simuler } from './calc.js';
+(function () {
+  'use strict';
+
+  const DEFAUTS = window.SimuRP.DEFAUTS;
+  const simuler = window.SimuRP.simuler;
 
 /* ------------------------------------------------------------------ Outils */
 
@@ -256,6 +263,18 @@ function optionsCommunes() {
 }
 
 function dessinerGraphiques(resultat, horizon) {
+  // Chart.js vient d'un CDN : hors ligne, il manque. Les chiffres et le tableau
+  // restent justes, on se contente de le dire au lieu de casser la page.
+  if (typeof Chart === 'undefined') {
+    document.querySelectorAll('.graphique').forEach((zone) => {
+      zone.innerHTML =
+        '<p class="graphique__absent">Graphique indisponible : la librairie Chart.js ' +
+        'n\'a pas pu être chargée (connexion internet requise). Les chiffres et le ' +
+        'tableau ci-dessous restent exacts.</p>';
+    });
+    return;
+  }
+
   const etiquettes = resultat.annees.map((a) => a.annee);
   const achat = resultat.annees.map((a) => a.patrimoineTotalAchat);
   const location = resultat.annees.map((a) => a.patrimoineTotalLocation);
@@ -382,3 +401,5 @@ function initialiser() {
 }
 
 initialiser();
+
+})();

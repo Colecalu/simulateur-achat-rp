@@ -54,6 +54,10 @@ contient les valeurs réellement calculées par Excel sur 25 ans.
 - JS en `camelCase`, classes CSS en `bloc__element--modificateur`.
 - `frontend/js/calc.js` est un module **pur** : aucune logique financière ailleurs, aucun accès
   au DOM dedans. C'est ce qui permet de le tester sous Node et de le réutiliser côté PHP plus tard.
+- **Pas de modules ES** (`import`/`export`, `<script type="module">`). Ils sont bloqués par CORS
+  en `file://`, ce qui rend la page totalement inerte quand on l'ouvre par double-clic. Les
+  scripts sont donc classiques, encapsulés en IIFE ; `calc.js` s'expose en `window.SimuRP` côté
+  navigateur et en `module.exports` côté Node. `calc.js` doit être chargé **avant** `app.js`.
 - Les taux se saisissent en pourcentage à l'écran et se stockent en fraction dans le modèle
   (conversion dans `app.js`, jamais dans `calc.js`).
 

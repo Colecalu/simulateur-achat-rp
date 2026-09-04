@@ -321,6 +321,15 @@ h1, h2, h3 { margin: 0; font-weight: 600; letter-spacing: -0.01em; }
 }
 
 .graphique { position: relative; height: 340px; }
+.graphique__absent {
+  margin: 0;
+  padding: 16px;
+  border: 1px dashed var(--trait);
+  border-radius: var(--rayon);
+  color: var(--encre-3);
+  font-size: .8125rem;
+  max-width: 60ch;
+}
 .graphique--court { height: 220px; }
 @media (max-width: 560px) {
   .graphique { height: 260px; }
