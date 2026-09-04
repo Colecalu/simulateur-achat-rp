@@ -1,0 +1,32 @@
+# Secrets / configuration locale
+.env
+.env.*
+backend/config.local.php
+backend/config/*.local.php
+
+# Dépendances
+vendor/
+node_modules/
+
+# Dumps et sauvegardes base de données
+*.sql
+*.sql.gz
+*.dump
+
+# Logs
+*.log
+logs/
+
+# Éditeurs / IDE
+.vscode/
+.idea/
+*.swp
+*~
+
+# Système
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Déploiement
+.ftp-deploy-sync-state.json
