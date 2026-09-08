@@ -45,7 +45,6 @@
 
     rendementBourse: 0.05, // BRUT, pas net d'impôt
     fiscalitePlusValues: 0.314, // flat tax CTO 2026 ; PEA/AV ont d'autres taux
-    fraisRevente: 0,
 
     horizon: 25,
   };
@@ -184,7 +183,6 @@
       var patrimoineNetImmo = valeurBien - pa.crdFin;
 
       cumulDecaisse += a === 1 ? e.apport + totalDebourseAnnuel : totalDebourseAnnuel;
-      var cashSiRevente = patrimoineNetImmo - e.fraisRevente;
 
       // Ce que l'enveloppe laisse disponible pour la bourse, de chaque côté
       var surplusProprio = Math.max(enveloppeAnnuelle - totalDebourseAnnuel, 0);
@@ -217,9 +215,8 @@
         taxeFonciere: taxe,
         totalDebourseAnnuel: totalDebourseAnnuel,
         patrimoineNetImmo: patrimoineNetImmo,
-        cashSiRevente: cashSiRevente,
         cumulDecaisse: cumulDecaisse,
-        gainCashPur: cashSiRevente - cumulDecaisse,
+        gainCashPur: patrimoineNetImmo - cumulDecaisse,
         surplusProprio: surplusProprio,
         capitalAchatBrut: capitalAchat,
         impotAchat: impotAchat,

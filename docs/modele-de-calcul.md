@@ -153,7 +153,137 @@ n'est pas finançable.
   compte réellement.
 - Pas de coût de mobilité côté locataire (déménagements), pas de gros travaux
   imprévus côté propriétaire au-delà des charges saisies.
-- Les frais de revente s'appliquent au « cash net si revente », mais **pas** au
-  patrimoine total comparé — reproduit du classeur ; sans effet tant que le champ
-  vaut 0.
+- Les frais de revente ont été retirés du modèle (arbitrage produit, septembre 2026) :
+  ils étaient toujours à 0 et n'entraient pas dans le patrimoine comparé.
 - L'horizon est plafonné à 25 ans.
+
+
+---
+
+# Extension « mise en location »
+
+Implémentation : `frontend/js/calc-location.js`. Tests : `tests/location.test.mjs`.
+
+Le module **consomme** la sortie de `calc.js` (capital restant dû, intérêts,
+charges, valeur du bien) sans jamais la recalculer. `calc.js` ignore son existence.
+
+## Principe
+
+À partir d'une année de bascule N, le bien n'est plus revendu : il est loué,
+l'utilisateur se loge ailleurs. Avant N, la trajectoire est **strictement celle du
+scénario d'achat** — le bien est encore la résidence principale, donc exonéré de
+plus-value. Le deuxième graphique compare cette trajectoire au scénario de
+location pure, sur la **même échelle Y** que le premier graphique.
+
+## Cash-flow locatif annuel
+
+```
+revenus bruts    = loyer perçu × 12 × (1 − taux de vacance)
+charges          = frais annexes + charges de copro + taxe foncière
+cash-flow avant impôt = revenus bruts − charges − (mensualité crédit + assurance)
+```
+
+Les deux loyers (perçu et futur) sont saisis **au moment de la bascule** puis
+indexés à l'IRL déjà utilisé par le scénario location.
+
+## Fiscalité — location nue (foncier réel)
+
+```
+charges déductibles = charges copro + taxe foncière + frais annexes
+                    + intérêts d'emprunt + assurance emprunteur
+résultat foncier    = revenus bruts − charges déductibles
+```
+
+- **Résultat positif** : on impute d'abord le stock de déficit reporté, puis
+  `impôt = base × (TMI + prélèvements sociaux)`.
+- **Résultat négatif** : la part due aux charges financières (intérêts +
+  assurance) n'est **jamais** imputable sur le revenu global et part
+  intégralement en report. Le reste est imputable sur le revenu global dans la
+  limite de **10 700 €/an** — l'économie d'impôt correspondante
+  (`imputable × TMI`) est comptée comme un gain de trésorerie. L'excédent se
+  reporte sur les revenus fonciers des **10 années suivantes**.
+
+Les reports sont tenus dans une file datée, purgée **chaque année** — y compris
+les exercices déficitaires, sinon un stock jamais consommé ne s'éteindrait jamais.
+
+## Fiscalité — location meublée (LMNP réel, BIC)
+
+```
+dotation = prix × 85 % / 30 ans        (bâti, terrain non amortissable)
+         + travaux / 10 ans
+         + prix × 5 % / 7 ans          (mobilier)
+
+base imposable = max(0, revenus bruts − charges déductibles − amortissement)
+impôt          = base × TMI            (pas de prélèvements sociaux en BIC)
+```
+
+L'excédent d'amortissement se reporte **sans limite de montant ni de durée**. Un
+déficit BIC hors amortissement s'impute sur les résultats positifs suivants,
+avant l'amortissement.
+
+## Plus-value immobilière
+
+L'exonération résidence principale est perdue dès la bascule.
+
+```
+prix d'acquisition fiscal = prix net vendeur + frais de notaire + frais d'agence + travaux
+plus-value brute          = valeur du bien − prix d'acquisition fiscal
+```
+
+Les **frais bancaires d'acquisition** sont exclus : ce sont des frais de prêt, pas
+d'acquisition.
+
+Abattements pour durée de détention, comptés **depuis l'achat initial** :
+
+| Détention | Abattement IR | Abattement PS |
+|---|---|---|
+| < 6 ans | 0 % | 0 % |
+| 6 à 21 ans | 6 %/an | 1,65 %/an |
+| 22e année | 4 % → exonéré | 1,60 % |
+| 23 à 30 ans | exonéré | 9 %/an → exonéré |
+
+```
+impôt = PV imposable × (1 − abattement IR) × 19 %
+      + PV imposable × (1 − abattement PS) × prélèvements sociaux
+```
+
+Sur un horizon de 25 ans, l'exonération IR est atteinte (22 ans) mais jamais
+celle des prélèvements sociaux (30 ans).
+
+**Réintégration des amortissements** : depuis la loi de finances 2025, les
+amortissements déduits en LMNP sont réintégrés dans la plus-value imposable. Le
+module le fait par défaut en meublé (`reintegrerAmortissements`), comme le fait
+le classeur `simulateur-lmnp-premium.xlsx`. La spécification initiale de ce
+module ne le prévoyait pas : c'est un écart délibéré, désactivable.
+
+## Patrimoine et portefeuille
+
+Pour chaque année t ≥ N :
+
+```
+versement au portefeuille = max(enveloppe annuelle − loyer futur, 0) + cash-flow net
+patrimoine = valeur du bien − capital restant dû − impôt de plus-value
+           + portefeuille net d'impôt
+```
+
+Le versement **peut être négatif** : un cash-flow locatif dégradé ponctionne le
+portefeuille. Dans ce cas la base fiscale du portefeuille est réduite d'autant,
+ce qui traite le retrait comme un remboursement de capital — approximation
+assumée, la réalité étant un retrait au prorata des plus-values latentes.
+
+## Paramètres non exposés dans l'interface
+
+Ils vivent dans `DEFAUTS_LOCATION` et sont modifiables par le code :
+durées d'amortissement, quote-part du bâti, part du mobilier, plafond du déficit
+imputable, durée de report, taux d'IR sur plus-value (19 %), réintégration des
+amortissements.
+
+## Limites propres à ce module
+
+- Le régime réel est supposé dans les deux cas : ni micro-foncier ni micro-BIC.
+- La condition de location nue pendant 3 ans après imputation d'un déficit
+  foncier n'est pas modélisée (sans objet pour une mise en location durable).
+- Pas de tolérance du délai d'un an de vente après départ de la résidence
+  principale : la plus-value est due dès la bascule.
+- L'amortissement LMNP démarre à la bascule, sur la base du prix d'achat initial,
+  sans réévaluation de la valeur d'entrée dans l'activité.

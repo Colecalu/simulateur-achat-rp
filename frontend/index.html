@@ -170,13 +170,6 @@
             <span class="champ__unite">%/an</span>
           </span>
         </label>
-        <label class="champ">
-          <span class="champ__libelle">Frais de revente</span>
-          <span class="champ__saisie">
-            <input type="number" id="fraisRevente" step="1000" min="0">
-            <span class="champ__unite">€</span>
-          </span>
-        </label>
       </div>
     </details>
 
@@ -263,6 +256,112 @@
       <div class="graphique"><canvas id="graphPatrimoine"></canvas></div>
     </figure>
 
+    <!-- ========== MISE EN LOCATION (divulgation progressive) ========== -->
+    <div class="mel">
+      <button type="button" class="mel__declencheur" id="melOuvrir"
+              aria-expanded="false" aria-controls="melPanneau">
+        Et si vous mettiez ce bien en location plus tard&nbsp;?
+      </button>
+
+      <div class="mel__panneau" id="melPanneau" hidden>
+        <div class="mel__entete">
+          <h3 class="carte__titre">Mise en location à partir d'une certaine année</h3>
+          <button type="button" class="mel__fermer" id="melFermer"
+                  aria-label="Fermer le module de mise en location">×</button>
+        </div>
+        <p class="carte__legende">
+          Au lieu de revendre, vous gardez le bien, vous le louez, et vous vous logez ailleurs.
+          Le loyer encaissé (net d'impôt et de charges) et ce qui reste de votre enveloppe
+          alimentent le portefeuille.
+        </p>
+
+        <form class="mel__champs" id="melFormulaire" autocomplete="off">
+          <label class="champ">
+            <span class="champ__libelle">Année de mise en location</span>
+            <span class="champ__saisie">
+              <input type="number" id="melAnneeBascule" min="1" max="25" step="1"
+                     placeholder="ex. 10">
+              <span class="champ__unite">e année</span>
+            </span>
+          </label>
+          <label class="champ">
+            <span class="champ__libelle">Loyer que vous percevrez</span>
+            <span class="champ__saisie">
+              <input type="number" id="melLoyerPercu" min="0" step="50" placeholder="ex. 1800">
+              <span class="champ__unite">€/mois</span>
+            </span>
+          </label>
+          <label class="champ">
+            <span class="champ__libelle">Loyer que vous paierez pour vous loger</span>
+            <span class="champ__saisie">
+              <input type="number" id="melLoyerFutur" min="0" step="50" placeholder="ex. 1600">
+              <span class="champ__unite">€/mois</span>
+            </span>
+          </label>
+
+          <details class="mel__avance">
+            <summary class="groupe__titre">Paramètres avancés</summary>
+            <div class="mel__avance-corps">
+              <label class="champ">
+                <span class="champ__libelle">Régime fiscal</span>
+                <span class="champ__saisie">
+                  <select id="melRegime">
+                    <option value="meuble">Meublé — LMNP réel</option>
+                    <option value="nu">Nu — foncier réel</option>
+                  </select>
+                </span>
+                <span class="champ__aide">Le meublé amortit le bien&nbsp;; le nu peut créer du déficit foncier.</span>
+              </label>
+              <label class="champ">
+                <span class="champ__libelle">Tranche marginale d'imposition</span>
+                <span class="champ__saisie">
+                  <input type="number" id="melTmi" min="0" max="60" step="1" data-pourcentage>
+                  <span class="champ__unite">%</span>
+                </span>
+              </label>
+              <label class="champ">
+                <span class="champ__libelle">Frais annexes</span>
+                <span class="champ__saisie">
+                  <input type="number" id="melFraisAnnexes" min="0" step="50">
+                  <span class="champ__unite">€/an</span>
+                </span>
+                <span class="champ__aide">Forfait&nbsp;: gestion locative, assurance PNO, comptable.</span>
+              </label>
+              <label class="champ">
+                <span class="champ__libelle">Vacance locative</span>
+                <span class="champ__saisie">
+                  <input type="number" id="melTauxVacance" min="0" max="100" step="1" data-pourcentage>
+                  <span class="champ__unite">%</span>
+                </span>
+              </label>
+              <label class="champ">
+                <span class="champ__libelle">Prélèvements sociaux</span>
+                <span class="champ__saisie">
+                  <input type="number" id="melPrelevementsSociaux" min="0" max="100" step="0.1" data-pourcentage>
+                  <span class="champ__unite">%</span>
+                </span>
+                <span class="champ__aide">18,6&nbsp;% à compter de 2026.</span>
+              </label>
+            </div>
+          </details>
+        </form>
+
+        <p class="mel__incomplet" id="melIncomplet">
+          Renseignez les trois champs ci-dessus pour afficher la comparaison.
+        </p>
+      </div>
+    </div>
+
+    <figure class="carte carte--graphique" id="carteMel" hidden>
+      <figcaption class="carte__entete">
+        <h3 class="carte__titre">Si vous mettez le bien en location au lieu de le revendre</h3>
+        <p class="carte__legende" id="melLegendeTexte"></p>
+      </figcaption>
+      <div class="legende" id="legendeMel"></div>
+      <div class="graphique"><canvas id="graphMiseEnLocation"></canvas></div>
+      <p class="carte__legende" id="melNote"></p>
+    </figure>
+
     <figure class="carte carte--graphique">
       <figcaption class="carte__entete">
         <h3 class="carte__titre">Écart de patrimoine&nbsp;: achat − location</h3>
@@ -307,6 +406,7 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="js/calc.js"></script>
+<script src="js/calc-location.js"></script>
 <script src="js/app.js"></script>
 </body>
 </html>

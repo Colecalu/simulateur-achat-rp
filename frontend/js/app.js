@@ -10,6 +10,8 @@
 
   const DEFAUTS = window.SimuRP.DEFAUTS;
   const simuler = window.SimuRP.simuler;
+  const DEFAUTS_LOCATION = window.SimuRPLocation.DEFAUTS_LOCATION;
+  const simulerMiseEnLocation = window.SimuRPLocation.simulerMiseEnLocation;
 
 /* ------------------------------------------------------------------ Outils */
 
@@ -61,6 +63,54 @@ function remplirFormulaire(valeurs) {
     const v = valeurs[champ];
     el.value = POURCENTAGES.has(champ) ? +(v * 100).toFixed(4) : v;
   }
+}
+
+/* ------------------------------------------- Formulaire « mise en location » */
+
+/** Champs du palier 2 : id du champ → clé d'option, et conversion éventuelle. */
+const CHAMPS_MEL_AVANCES = {
+  melRegime: { cle: 'regime' },
+  melTmi: { cle: 'tmi', pourcentage: true },
+  melFraisAnnexes: { cle: 'fraisAnnexes' },
+  melTauxVacance: { cle: 'tauxVacance', pourcentage: true },
+  melPrelevementsSociaux: { cle: 'tauxPrelevementsSociaux', pourcentage: true },
+};
+
+function remplirFormulaireMel() {
+  for (const [id, def] of Object.entries(CHAMPS_MEL_AVANCES)) {
+    const el = document.getElementById(id);
+    const v = DEFAUTS_LOCATION[def.cle];
+    el.value = def.pourcentage ? +(v * 100).toFixed(4) : v;
+  }
+}
+
+/**
+ * Lit le module de mise en location.
+ * @returns {object|null} les options, ou null tant que le palier 1 est incomplet
+ */
+function lireFormulaireMel() {
+  const nombre = (id) => {
+    const v = parseFloat(document.getElementById(id).value);
+    return Number.isFinite(v) ? v : null;
+  };
+
+  const anneeBascule = nombre('melAnneeBascule');
+  const loyerPercu = nombre('melLoyerPercu');
+  const loyerFutur = nombre('melLoyerFutur');
+  if (anneeBascule === null || loyerPercu === null || loyerFutur === null) return null;
+
+  const options = { anneeBascule, loyerPercu, loyerFutur };
+  for (const [id, def] of Object.entries(CHAMPS_MEL_AVANCES)) {
+    const el = document.getElementById(id);
+    if (el.tagName === 'SELECT') {
+      options[def.cle] = el.value;
+      continue;
+    }
+    const v = parseFloat(el.value);
+    const valeur = Number.isFinite(v) ? v : DEFAUTS_LOCATION[def.cle] * (def.pourcentage ? 100 : 1);
+    options[def.cle] = def.pourcentage ? valeur / 100 : valeur;
+  }
+  return options;
 }
 
 /* ------------------------------------------------------------------ Verdict */
@@ -212,6 +262,25 @@ function afficherTableau(resultat) {
 
 let graphPatrimoine = null;
 let graphEcart = null;
+let graphMel = null;
+
+/**
+ * Bornes Y communes aux deux graphiques de patrimoine, pour que la
+ * comparaison visuelle de l'un à l'autre soit honnête. On ne force pas le
+ * zéro : cela écraserait les courbes sans rien apporter.
+ */
+function bornesCommunes(series) {
+  const valeurs = series.flat().filter((v) => Number.isFinite(v));
+  if (!valeurs.length) return {};
+  const min = Math.min(...valeurs);
+  const max = Math.max(...valeurs);
+  const marge = (max - min) * 0.05 || 1000;
+  const pas = 50000;
+  return {
+    min: Math.floor((min - marge) / pas) * pas,
+    max: Math.ceil((max + marge) / pas) * pas,
+  };
+}
 
 const infobulle = {
   backgroundColor: () => jeton('--surface'),
@@ -262,7 +331,7 @@ function optionsCommunes() {
   };
 }
 
-function dessinerGraphiques(resultat, horizon) {
+function dessinerGraphiques(resultat, horizon, mel) {
   // Chart.js vient d'un CDN : hors ligne, il manque. Les chiffres et le tableau
   // restent justes, on se contente de le dire au lieu de casser la page.
   if (typeof Chart === 'undefined') {
@@ -309,16 +378,60 @@ function dessinerGraphiques(resultat, horizon) {
     ],
   };
 
+  // Échelle Y partagée entre le graphique 1 et le graphique « mise en
+  // location » : sans elle, deux graphiques superposés à échelles différentes
+  // suggèrent des écarts qui n'existent pas.
+  const melPatrimoine = mel ? mel.annees.map((a) => a.patrimoineTotal) : null;
+  const bornes = mel
+    ? bornesCommunes([achat, location, melPatrimoine])
+    : {};
+
+  const optionsPatrimoine = optionsCommunes();
+  Object.assign(optionsPatrimoine.scales.y, bornes);
+
   if (graphPatrimoine) {
     graphPatrimoine.data = donneesLignes;
-    graphPatrimoine.options = optionsCommunes();
+    graphPatrimoine.options = optionsPatrimoine;
     graphPatrimoine.update('none');
   } else {
     graphPatrimoine = new Chart($('#graphPatrimoine'), {
       type: 'line',
       data: donneesLignes,
-      options: optionsCommunes(),
+      options: optionsPatrimoine,
     });
+  }
+
+  // --- Graphique « achat + mise en location » vs location de référence ---
+  $('#carteMel').hidden = !mel;
+  if (mel) {
+    const cMel = jeton('--achat-location');
+    const donneesMel = {
+      labels: etiquettes,
+      datasets: [
+        serie(`Achat + mise en location dès l'année ${mel.anneeBascule}`, melPatrimoine, cMel),
+        serie('Location (référence)', location, cLocation),
+      ],
+    };
+
+    const optionsMel = optionsCommunes();
+    Object.assign(optionsMel.scales.y, bornes);
+
+    if (graphMel) {
+      graphMel.data = donneesMel;
+      graphMel.options = optionsMel;
+      graphMel.update('none');
+    } else {
+      graphMel = new Chart($('#graphMiseEnLocation'), {
+        type: 'line',
+        data: donneesMel,
+        options: optionsMel,
+      });
+    }
+
+    $('#legendeMel').innerHTML = `
+      <span class="legende__item"><span class="pastille pastille--achat-location"></span>Achat + mise en location dès l'année ${mel.anneeBascule}</span>
+      <span class="legende__item"><span class="pastille pastille--location"></span>Location (référence)</span>
+    `;
   }
 
   // Écart : la couleur suit l'entité gagnante, pas le signe abstrait.
@@ -374,17 +487,46 @@ function recalculer() {
   rafraichir();
 }
 
+/** Texte d'accompagnement du deuxième graphique. */
+function afficherTexteMel(mel, horizon) {
+  const ligne = mel.annees[horizon - 1];
+  const reference = dernierResultat.annees[horizon - 1].patrimoineTotalLocation;
+  const ecart = ligne.patrimoineTotal - reference;
+  const regime = mel.options.regime === 'nu' ? 'location nue' : 'meublé (LMNP réel)';
+
+  $('#melLegendeTexte').textContent =
+    `Le bien n'est plus revendu : à partir de l'année ${mel.anneeBascule} il est loué en ` +
+    `${regime}, et vous vous logez ailleurs. Jusqu'à la bascule, la courbe est celle du ` +
+    'scénario d\'achat.';
+
+  const sens = ecart >= 0 ? 'devant' : 'derrière';
+  $('#melNote').textContent =
+    `À ${horizon} ans : ${euros.format(ligne.patrimoineTotal)} contre ` +
+    `${euros.format(reference)} en restant locataire, soit ${signe(ecart)} — ${sens}. ` +
+    `Impôt de plus-value déduit : ${euros.format(ligne.impotPlusValue)} ` +
+    `(abattement de ${Math.round(ligne.abattementIR * 100)} % sur l'IR et ` +
+    `${Math.round(ligne.abattementPS * 100)} % sur les prélèvements sociaux, ` +
+    `pour ${horizon} ans de détention).`;
+}
+
 function rafraichir() {
   if (!dernierResultat) return;
   const horizon = parseInt($('#horizon').value, 10);
+
+  const optionsMel = $('#melPanneau').hidden ? null : lireFormulaireMel();
+  const mel = optionsMel ? simulerMiseEnLocation(dernierResultat, optionsMel) : null;
+  $('#melIncomplet').hidden = !!mel || $('#melPanneau').hidden;
+
   afficherVerdict(dernierResultat, horizon);
   afficherKpis(dernierResultat, horizon);
   afficherTableau(dernierResultat);
-  dessinerGraphiques(dernierResultat, horizon);
+  dessinerGraphiques(dernierResultat, horizon, mel);
+  if (mel) afficherTexteMel(mel, horizon);
 }
 
 function initialiser() {
   remplirFormulaire(DEFAUTS);
+  remplirFormulaireMel();
   $('#formulaire').addEventListener('input', recalculer);
   $('#horizon').addEventListener('input', rafraichir);
   $('#reinitialiser').addEventListener('click', () => {
@@ -392,6 +534,22 @@ function initialiser() {
     $('#horizon').value = 20;
     recalculer();
   });
+
+  // Divulgation progressive : le module n'existe qu'après un clic explicite.
+  $('#melOuvrir').addEventListener('click', () => {
+    $('#melPanneau').hidden = false;
+    $('#melOuvrir').hidden = true;
+    $('#melOuvrir').setAttribute('aria-expanded', 'true');
+    $('#melAnneeBascule').focus();
+    rafraichir();
+  });
+  $('#melFermer').addEventListener('click', () => {
+    $('#melPanneau').hidden = true;
+    $('#melOuvrir').hidden = false;
+    $('#melOuvrir').setAttribute('aria-expanded', 'false');
+    rafraichir();
+  });
+  $('#melFormulaire').addEventListener('input', rafraichir);
 
   // Le thème peut changer sans rechargement : on redessine avec les nouveaux jetons.
   window.matchMedia('(prefers-color-scheme: dark)')

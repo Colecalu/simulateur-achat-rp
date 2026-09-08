@@ -5,7 +5,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Commandes
 
 ```bash
-node --test tests/calc.test.mjs   # vérifie le moteur contre le classeur Excel
+node --test tests/calc.test.mjs tests/location.test.mjs   # moteur + mise en location
 ```
 
 Pas de build : `frontend/` est servi tel quel. Pour un aperçu local,
@@ -54,6 +54,9 @@ contient les valeurs réellement calculées par Excel sur 25 ans.
 - JS en `camelCase`, classes CSS en `bloc__element--modificateur`.
 - `frontend/js/calc.js` est un module **pur** : aucune logique financière ailleurs, aucun accès
   au DOM dedans. C'est ce qui permet de le tester sous Node et de le réutiliser côté PHP plus tard.
+- `frontend/js/calc-location.js` (extension « mise en location ») **consomme** la sortie de
+  `calc.js` et ne la modifie jamais. Toute nouvelle variante de scénario suit ce patron :
+  un module isolé qui lit le résultat de base, pas une réécriture du moteur.
 - **Pas de modules ES** (`import`/`export`, `<script type="module">`). Ils sont bloqués par CORS
   en `file://`, ce qui rend la page totalement inerte quand on l'ouvre par double-clic. Les
   scripts sont donc classiques, encapsulés en IIFE ; `calc.js` s'expose en `window.SimuRP` côté
