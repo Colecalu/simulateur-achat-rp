@@ -176,61 +176,10 @@ function afficherVerdict(resultat, horizon) {
   $('#verdictDetail').textContent = detail.join(' ');
 }
 
-/* --------------------------------------------------------------------- KPIs */
+/* ------------------------------------------------------------------ Alerte */
 
-function afficherKpis(resultat, horizon) {
-  const an1 = resultat.annees[0];
-  const ligne = resultat.annees[horizon - 1];
-
-  const cartes = [
-    {
-      libelle: 'Mensualité crédit + assurance',
-      valeur: eurosPrecis.format(resultat.mensualiteTotale),
-      note: `sur ${resultat.entrees.dureeAnnees} ans`,
-    },
-    {
-      libelle: 'Coût mensuel de propriétaire',
-      valeur: eurosPrecis.format(resultat.coutMensuelProprio),
-      note: 'mensualité + charges + taxe foncière',
-      pastille: 'achat',
-    },
-    {
-      libelle: 'Loyer de départ',
-      valeur: eurosPrecis.format(an1.loyerAnnuel / 12),
-      note: 'charges comprises',
-      pastille: 'location',
-    },
-    {
-      libelle: 'Frais de notaire',
-      valeur: euros.format(resultat.fraisNotaire),
-      note: `${resultat.entrees.typeBien === 'neuf' ? 'neuf' : 'ancien'} · non récupérables`,
-    },
-    {
-      libelle: 'Épargne investie (an 1)',
-      valeur: `${eurosPrecis.format(an1.surplusProprio / 12)} / ${eurosPrecis.format(an1.surplusLocataire / 12)}`,
-      note: 'propriétaire / locataire, par mois',
-    },
-    {
-      libelle: 'Capital emprunté',
-      valeur: euros.format(resultat.dettes),
-      note: `intérêts payés à ${horizon} ans : ${euros.format(
-        resultat.annees.slice(0, horizon).reduce((t, a) => t + a.interets, 0)
-      )}`,
-    },
-  ];
-
-  $('#kpis').innerHTML = cartes.map((c) => `
-    <div class="kpi">
-      <div class="kpi__libelle">
-        ${c.pastille ? `<span class="pastille pastille--${c.pastille}"></span>` : ''}
-        ${c.libelle}
-      </div>
-      <div class="kpi__valeur">${c.valeur}</div>
-      <div class="kpi__note">${c.note}</div>
-    </div>
-  `).join('');
-
-  // Rappel du montant manquant si l'enveloppe ne finance pas l'achat.
+/** Prévient quand l'enveloppe ne finance pas le scénario d'achat. */
+function afficherAlerte(resultat) {
   const alerte = $('#alerteEnveloppe');
   alerte.hidden = resultat.enveloppeSuffisante;
   if (!resultat.enveloppeSuffisante) {
@@ -239,30 +188,9 @@ function afficherKpis(resultat, horizon) {
   }
 }
 
-/* ----------------------------------------------------------------- Tableau */
-
-function afficherTableau(resultat) {
-  const lignes = resultat.annees.map((a) => `
-    <tr>
-      <td>${a.annee}</td>
-      <td>${euros.format(a.valeurBien)}</td>
-      <td>${euros.format(a.crdFin)}</td>
-      <td>${euros.format(a.totalDebourseAnnuel)}</td>
-      <td>${euros.format(a.patrimoineNetImmo)}</td>
-      <td>${euros.format(a.capitalAchatNet)}</td>
-      <td>${euros.format(a.patrimoineTotalAchat)}</td>
-      <td>${euros.format(a.loyerAnnuel)}</td>
-      <td>${euros.format(a.patrimoineTotalLocation)}</td>
-      <td class="${a.ecart >= 0 ? 'positif' : 'negatif'}">${signe(a.ecart)}</td>
-    </tr>
-  `).join('');
-  $('#tableauDetail').querySelector('tbody').innerHTML = lignes;
-}
-
 /* --------------------------------------------------------------- Graphiques */
 
 let graphPatrimoine = null;
-let graphEcart = null;
 let graphMel = null;
 
 /**
@@ -435,43 +363,6 @@ function dessinerGraphiques(resultat, horizon, mel) {
     `;
   }
 
-  // Écart : la couleur suit l'entité gagnante, pas le signe abstrait.
-  const optionsEcart = optionsCommunes();
-  optionsEcart.plugins.tooltip.callbacks.label = (ctx) => {
-    const v = ctx.parsed.y;
-    return ` ${v >= 0 ? 'Achat' : 'Location'} devant de ${euros.format(Math.abs(v))}`;
-  };
-  optionsEcart.scales.y.grid.color = (ctx) =>
-    (ctx.tick.value === 0 ? jeton('--axe') : jeton('--grille'));
-
-  const donneesEcart = {
-    labels: etiquettes,
-    datasets: [{
-      label: 'Écart',
-      data: ecart,
-      backgroundColor: ecart.map((v, i) =>
-        i === horizon - 1
-          ? (v >= 0 ? cAchat : cLocation)
-          : (v >= 0 ? jeton('--achat-fond') : jeton('--location-fond'))),
-      borderColor: ecart.map((v) => (v >= 0 ? cAchat : cLocation)),
-      borderWidth: 1,
-      borderRadius: 4,
-      borderSkipped: false,
-    }],
-  };
-
-  if (graphEcart) {
-    graphEcart.data = donneesEcart;
-    graphEcart.options = optionsEcart;
-    graphEcart.update('none');
-  } else {
-    graphEcart = new Chart($('#graphEcart'), {
-      type: 'bar',
-      data: donneesEcart,
-      options: optionsEcart,
-    });
-  }
-
   // Légende maison : l'identité des séries ne repose jamais sur la seule couleur.
   $('#legendePatrimoine').innerHTML = `
     <span class="legende__item"><span class="pastille pastille--achat"></span>Achat</span>
@@ -518,11 +409,36 @@ function rafraichir() {
   const mel = optionsMel ? simulerMiseEnLocation(dernierResultat, optionsMel) : null;
   $('#melIncomplet').hidden = !!mel || $('#melPanneau').hidden;
 
+  afficherAlerte(dernierResultat);
   afficherVerdict(dernierResultat, horizon);
-  afficherKpis(dernierResultat, horizon);
-  afficherTableau(dernierResultat);
   dessinerGraphiques(dernierResultat, horizon, mel);
   if (mel) afficherTexteMel(mel, horizon);
+}
+
+/* -------------------------------------------------- Parcours par étapes */
+
+const etapes = () => [...document.querySelectorAll('.etape')];
+let etapeCourante = 1;
+
+/** Affiche une étape et met le fil d'Ariane en accord. */
+function allerEtape(n) {
+  const total = etapes().length;
+  etapeCourante = Math.min(Math.max(n, 1), total);
+
+  for (const section of etapes()) {
+    section.hidden = Number(section.dataset.etape) !== etapeCourante;
+  }
+
+  for (const puce of document.querySelectorAll('.fil__puce')) {
+    const rang = Number(puce.dataset.aller);
+    puce.classList.toggle('fil__puce--active', rang === etapeCourante);
+    // « Vue » et non « validée » : rien n'est obligatoire, on ne bloque personne.
+    puce.classList.toggle('fil__puce--vue', rang < etapeCourante);
+    puce.setAttribute('aria-current', rang === etapeCourante ? 'step' : 'false');
+  }
+
+  $('#etapePrecedente').disabled = etapeCourante === 1;
+  $('#etapeSuivante').disabled = etapeCourante === total;
 }
 
 function initialiser() {
@@ -533,8 +449,16 @@ function initialiser() {
   $('#reinitialiser').addEventListener('click', () => {
     remplirFormulaire(DEFAUTS);
     $('#horizon').value = 20;
+    allerEtape(1);
     recalculer();
   });
+
+  $('#etapePrecedente').addEventListener('click', () => allerEtape(etapeCourante - 1));
+  $('#etapeSuivante').addEventListener('click', () => allerEtape(etapeCourante + 1));
+  for (const puce of document.querySelectorAll('.fil__puce')) {
+    puce.addEventListener('click', () => allerEtape(Number(puce.dataset.aller)));
+  }
+  allerEtape(1);
 
   // Divulgation progressive : le module n'existe qu'après un clic explicite.
   $('#melOuvrir').addEventListener('click', () => {

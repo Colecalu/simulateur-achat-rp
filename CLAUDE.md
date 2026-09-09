@@ -63,6 +63,13 @@ contient les valeurs réellement calculées par Excel sur 25 ans.
   navigateur et en `module.exports` côté Node. `calc.js` doit être chargé **avant** `app.js`.
 - Les taux se saisissent en pourcentage à l'écran et se stockent en fraction dans le modèle
   (conversion dans `app.js`, jamais dans `calc.js`).
+- **Une seule visualisation par défaut** : le graphique du patrimoine net d'impôt et l'encadré
+  « si vous revendez dans… ». Le module de mise en location reste masqué jusqu'à un clic. Cette
+  sobriété est un choix assumé — ne pas rajouter d'indicateurs ou de graphiques sans demande
+  explicite.
+- La saisie se fait **par étapes** (`.etape`, une par section, pilotées par `allerEtape()` dans
+  `app.js`). Aucune étape n'est bloquante : tous les champs ont un défaut, on peut sauter
+  directement à n'importe quelle étape par le fil.
 
 ## Workflow Git
 
