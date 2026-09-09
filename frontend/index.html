@@ -31,28 +31,29 @@
         <article class="bulle" data-bulle="1" data-colonnes="1">
           <button type="button" class="bulle__declencheur" data-ouvrir="1">
             <span class="bulle__numero">1</span>
-            <span class="bulle__titre">Votre situation</span>
+            <span class="bulle__titre">Votre point de départ</span>
             <span class="bulle__cadenas" aria-hidden="true"></span>
           </button>
           <div class="bulle__corps">
-            <p class="bulle__intro">De quoi disposez-vous aujourd'hui, et combien pouvez-vous consacrer chaque mois au logement <em>et</em> à l'épargne&nbsp;? Ce budget sera identique dans les deux scénarios&nbsp;: c'est ce qui rend la comparaison honnête.</p>
+            <p class="bulle__intro">On compare deux trajectoires patrimoniales — rester locataire, ou devenir propriétaire — en les faisant partir <em>du même point</em>. Ce point, c'est ce que vous avez déjà et ce que vous pouvez y consacrer chaque mois.</p>
             <div class="bulle__champs">
             <label class="champ">
-          <span class="champ__libelle">Capital disponible aujourd'hui</span>
-            <span class="champ__court">Capital</span>
+          <span class="champ__libelle">Patrimoine financier aujourd'hui</span>
+            <span class="champ__court">Patrimoine</span>
           <span class="champ__saisie">
             <input type="number" id="capitalInitial" step="1000" min="0">
             <span class="champ__unite">€</span>
           </span>
+          <span class="champ__aide">Épargne, placements, liquidités&nbsp;: ce qui pourra servir d'apport, ou rester investi si vous n'achetez pas.</span>
         </label>
             <label class="champ">
-          <span class="champ__libelle">Enveloppe mensuelle logement + épargne</span>
-            <span class="champ__court">Enveloppe</span>
+          <span class="champ__libelle">Effort mensuel&nbsp;: logement + épargne</span>
+            <span class="champ__court">Effort</span>
           <span class="champ__saisie">
             <input type="number" id="enveloppeMensuelle" step="50" min="0">
             <span class="champ__unite">€/mois</span>
           </span>
-          <span class="champ__aide">Le budget total que vous consacrez au logement ET à l'épargne. Identique dans les deux scénarios.</span>
+          <span class="champ__aide">Ce que vous sortez chaque mois pour vous loger et pour investir. Le même montant des deux côtés&nbsp;: c'est ce qui rend la comparaison honnête.</span>
         </label>
             </div>
             <div class="bulle__pied">
@@ -87,6 +88,7 @@
               <option value="ancien">Ancien</option>
               <option value="neuf">Neuf</option>
             </select>
+            <span class="champ__unite"></span>
           </span>
           <span class="champ__aide">Détermine les droits de mutation dans les frais de notaire.</span>
         </label>

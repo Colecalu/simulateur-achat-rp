@@ -401,22 +401,6 @@ function rafraichir() {
 const BULLES = [...document.querySelectorAll('.bulle')].map((b) => Number(b.dataset.bulle));
 const bulle = (n) => document.querySelector(`.bulle[data-bulle="${n}"]`);
 
-/** Rend une valeur de champ lisible : « 420 000 € », « 3,5 %/an », « Ancien ». */
-function valeurLisible(el) {
-  if (el.tagName === 'SELECT') return el.options[el.selectedIndex].text;
-
-  const unite = el.closest('.champ__saisie').querySelector('.champ__unite').textContent.trim();
-  const v = parseFloat(el.value);
-  if (!Number.isFinite(v)) return '—';
-
-  const periode = unite.includes('/mois') ? '/mois' : unite.includes('/an') ? '/an' : '';
-  if (unite.startsWith('€')) return euros.format(v) + periode;
-  if (unite.startsWith('%')) {
-    return v.toLocaleString('fr-FR', { maximumFractionDigits: 2 }) + ' %' + periode;
-  }
-  return `${v} ${unite}`;
-}
-
 /** Bulles déjà validées : leurs champs deviennent modifiables sur place. */
 const validees = new Set();
 /** Bulle actuellement agrandie au centre, ou null. */
