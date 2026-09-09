@@ -28,7 +28,7 @@
 
     <div class="plateau__haut">
       <div class="case" data-case="1">
-        <article class="bulle" data-bulle="1" data-cle="enveloppeMensuelle">
+        <article class="bulle" data-bulle="1" data-colonnes="1">
           <button type="button" class="bulle__declencheur" data-ouvrir="1">
             <span class="bulle__numero">1</span>
             <span class="bulle__titre">Votre situation</span>
@@ -62,7 +62,7 @@
         </article>
       </div>
       <div class="case" data-case="2">
-        <article class="bulle" data-bulle="2" data-cle="prixNetVendeur">
+        <article class="bulle" data-bulle="2" data-colonnes="2">
           <button type="button" class="bulle__declencheur" data-ouvrir="2">
             <span class="bulle__numero">2</span>
             <span class="bulle__titre">L'opération</span>
@@ -134,7 +134,7 @@
 
     <div class="plateau__gauche">
       <div class="case" data-case="3">
-        <article class="bulle" data-bulle="3" data-cle="tauxCredit">
+        <article class="bulle" data-bulle="3" data-colonnes="2">
           <button type="button" class="bulle__declencheur" data-ouvrir="3">
             <span class="bulle__numero">3</span>
             <span class="bulle__titre">Le financement</span>
@@ -169,7 +169,7 @@
         </label>
             <label class="champ">
           <span class="champ__libelle">Taux d'assurance emprunteur</span>
-            <span class="champ__court">Assurance</span>
+            <span class="champ__court">Assur.</span>
           <span class="champ__saisie">
             <input type="number" id="tauxAssurance" step="0.01" min="0" data-pourcentage>
             <span class="champ__unite">%</span>
@@ -184,7 +184,7 @@
         </article>
       </div>
       <div class="case" data-case="4">
-        <article class="bulle" data-bulle="4" data-cle="chargesCopro">
+        <article class="bulle" data-bulle="4" data-colonnes="1">
           <button type="button" class="bulle__declencheur" data-ouvrir="4">
             <span class="bulle__numero">4</span>
             <span class="bulle__titre">Les dépenses annuelles</span>
@@ -225,7 +225,7 @@
         </article>
       </div>
       <div class="case" data-case="5">
-        <article class="bulle" data-bulle="5" data-cle="rendementBourse">
+        <article class="bulle" data-bulle="5" data-colonnes="2">
           <button type="button" class="bulle__declencheur" data-ouvrir="5">
             <span class="bulle__numero">5</span>
             <span class="bulle__titre">Le scénario de marché</span>
@@ -236,7 +236,7 @@
             <div class="bulle__champs">
             <label class="champ">
           <span class="champ__libelle">Rendement de la bourse</span>
-            <span class="champ__court">Rendement</span>
+            <span class="champ__court">Bourse</span>
           <span class="champ__saisie">
             <input type="number" id="rendementBourse" step="0.25" data-pourcentage>
             <span class="champ__unite">%/an</span>
@@ -245,7 +245,7 @@
         </label>
             <label class="champ">
           <span class="champ__libelle">Revalorisation du bien</span>
-            <span class="champ__court">Reval. bien</span>
+            <span class="champ__court">Bien</span>
           <span class="champ__saisie">
             <input type="number" id="revalBien" step="0.25" data-pourcentage>
             <span class="champ__unite">%/an</span>
@@ -253,7 +253,7 @@
         </label>
             <label class="champ">
           <span class="champ__libelle">Revalorisation du loyer</span>
-            <span class="champ__court">Indexation</span>
+            <span class="champ__court">Loyer</span>
           <span class="champ__saisie">
             <input type="number" id="revalLoyer" step="0.25" data-pourcentage>
             <span class="champ__unite">%/an</span>
@@ -261,7 +261,7 @@
         </label>
             <label class="champ">
           <span class="champ__libelle">Revalorisation des charges</span>
-            <span class="champ__court">Reval. charges</span>
+            <span class="champ__court">Charges</span>
           <span class="champ__saisie">
             <input type="number" id="revalCharges" step="0.25" data-pourcentage>
             <span class="champ__unite">%/an</span>
@@ -269,7 +269,7 @@
         </label>
             <label class="champ">
           <span class="champ__libelle">Revalorisation de la taxe foncière</span>
-            <span class="champ__court">Reval. taxe</span>
+            <span class="champ__court">Taxe</span>
           <span class="champ__saisie">
             <input type="number" id="revalTaxeFonciere" step="0.25" data-pourcentage>
             <span class="champ__unite">%/an</span>
@@ -277,7 +277,7 @@
         </label>
             <label class="champ">
           <span class="champ__libelle">Fiscalité sur les plus-values</span>
-            <span class="champ__court">Fiscalité</span>
+            <span class="champ__court">Impôt</span>
           <span class="champ__saisie">
             <input type="number" id="fiscalitePlusValues" step="0.1" min="0" max="100" data-pourcentage>
             <span class="champ__unite">%</span>
@@ -311,8 +311,7 @@
           </div>
         </div>
         <p class="verdict__chiffre" id="verdictChiffre">—</p>
-        <p class="verdict__phrase" id="verdictPhrase"></p>
-        <p class="verdict__detail" id="verdictDetail"></p>
+        <p class="verdict__mesure" id="verdictMesure"></p>
       </div>
 
       <figure class="carte carte--graphique">

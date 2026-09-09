@@ -67,6 +67,8 @@ contient les valeurs réellement calculées par Excel sur 25 ans.
   « si vous revendez dans… ». Le module de mise en location reste masqué jusqu'à un clic. Cette
   sobriété est un choix assumé — ne pas rajouter d'indicateurs ou de graphiques sans demande
   explicite.
+- L'encadré de verdict est réduit au strict nécessaire : le curseur d'horizon, le chiffre, et une
+  seule ligne qui dit ce que ce chiffre mesure. Ne pas y réintroduire de commentaire.
 - La saisie se fait dans un **plateau de cinq bulles** autour de la visualisation : deux en haut
   (leur largeur cumulée = celle de la visualisation), trois à gauche (toutes visibles sans
   défilement sur un écran d'ordinateur). Les hauteurs sont **bornées** (`grid-auto-rows` en haut,
@@ -84,8 +86,13 @@ contient les valeurs réellement calculées par Excel sur 25 ans.
 - **Une fois validée, une bulle reste modifiable sur place.** Faire varier une hypothèse sans
   ouvrir de fenêtre est l'essence du simulateur — c'est non négociable. Les champs y sont
   dépouillés de tout habillage (bordure, fond, remplissage) pour se lire comme du texte : c'est
-  ce chrome, et non la taille de police, qui les rendait illisibles à cette échelle. Le champ
-  désigné par `data-cle` s'affiche en grand au-dessus des autres (`.champ--cle`, `order: -1`).
+  ce chrome, et non la taille de police, qui les rendait illisibles à cette échelle.
+- **Tous les champs ont le même traitement** : aucun n'est mis en avant. Une ligne par champ,
+  libellé à gauche, valeur à droite. Le nombre de colonnes est déclaré par bulle
+  (`data-colonnes`) et les rangées se partagent toute la hauteur (`grid-auto-rows: 1fr`) : pas
+  d'espace mort en bas de bulle. Les libellés courts sont calibrés pour tenir dans une cellule
+  à deux colonnes (~8 caractères) ; vérifier après tout changement qu'aucun
+  `.champ__court` n'a `scrollWidth > getBoundingClientRect().width`.
 - Les libellés existent en deux versions : long (`.champ__libelle`, vue zoomée) et court
   (`.champ__court`, bulle repliée), tous deux écrits en HTML.
 - Toute modification de densité se revérifie en mesurant le jeu

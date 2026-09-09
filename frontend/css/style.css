@@ -324,25 +324,40 @@ h1, h2, h3 { margin: 0; font-weight: 600; letter-spacing: -0.01em; }
  * hypothèse est l'essence du simulateur. Ils sont dépouillés de tout habillage
  * (bordure, fond, remplissage) pour se lire comme du texte : c'est ce chrome,
  * pas la taille de police, qui les rendait illisibles à cette échelle.
+ *
+ * Tous les champs ont le MÊME traitement : aucun n'est mis en avant. Le nombre
+ * de colonnes est déclaré par bulle (`data-colonnes`) pour répartir ses champs
+ * en deux ou trois rangées, et les rangées se partagent toute la hauteur
+ * disponible — aucun espace mort en bas de bulle.
  */
+.bulle--validee .bulle__corps { flex: 1; min-height: 0; }
+
 .bulle--validee .bulle__champs {
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-  gap: 0 14px;
-  align-content: start;
+  flex: 1;
+  min-height: 0;
+  grid-auto-rows: 1fr;
+  align-content: stretch;
+  gap: 0 18px;
 }
+.bulle[data-colonnes="1"].bulle--validee .bulle__champs { grid-template-columns: minmax(0, 1fr); }
+.bulle[data-colonnes="2"].bulle--validee .bulle__champs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.bulle[data-colonnes="3"].bulle--validee .bulle__champs { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 
 .bulle--validee .champ {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
-  gap: 8px;
+  gap: 4px;
   min-width: 0;
-  padding: 1px 0;
-  border-bottom: 1px solid transparent;
-  transition: border-color .12s ease;
+  min-height: 0;
+  padding: 0 1px;
+  border-bottom: 1px solid var(--trait);
 }
-.bulle--validee .champ:hover,
-.bulle--validee .champ:focus-within { border-bottom-color: var(--trait); }
+/* Pas de trait sous la dernière ligne de chaque colonne. */
+.bulle--validee .champ:last-child,
+.bulle[data-colonnes="2"].bulle--validee .champ:nth-last-child(2):nth-child(odd) {
+  border-bottom-color: transparent;
+}
 
 .bulle--validee .champ__libelle { display: none; }
 .bulle--validee .champ__court {
@@ -355,78 +370,45 @@ h1, h2, h3 { margin: 0; font-weight: 600; letter-spacing: -0.01em; }
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
 .bulle--validee .champ__saisie {
   flex: 0 0 auto;
+  margin-left: auto;
   background: transparent;
   border: 0;
   border-radius: 0;
   box-shadow: none;
 }
+.bulle--validee .champ:hover .champ__court,
+.bulle--validee .champ:focus-within .champ__court { color: var(--encre-2); }
+.bulle--validee .champ:hover,
+.bulle--validee .champ:focus-within { background: var(--surface-creuse); }
+
 .bulle--validee .champ input,
 .bulle--validee .champ select {
-  width: 74px;
+  width: 6ch;
+  min-width: 0;
   padding: 0;
   text-align: right;
-  font-size: .8125rem;
-  font-weight: 550;
+  font-size: .875rem;
+  font-weight: 600;
   color: var(--encre);
 }
 .bulle--validee .champ select { width: auto; text-align: left; }
-.bulle--validee .champ__unite { padding: 0 0 0 3px; font-size: .6875rem; }
-
-/* Le champ dominant occupe toute la largeur, en grand : c'est lui qu'on lit
-   d'abord et qu'on fait varier le plus souvent. */
-.bulle--validee .champ--cle {
-  grid-column: 1 / -1;
-  order: -1;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 0;
-  padding: 0 0 2px;
-  border-bottom: 0;
-}
-.bulle--validee .champ--cle .champ__court {
+.bulle[data-colonnes="1"].bulle--validee .champ input { width: 9ch; font-size: .9375rem; }
+.bulle[data-colonnes="1"].bulle--validee .champ__court { font-size: .8125rem; }
+.bulle--validee .champ__unite {
+  padding: 0 0 0 3px;
   font-size: .625rem;
-  text-transform: uppercase;
-  letter-spacing: .06em;
+  color: var(--encre-3);
 }
-.bulle--validee .champ--cle .champ__saisie {
-  align-self: flex-start;
-  max-width: 100%;
-  border-bottom: 1px solid transparent;
-}
-.bulle--validee .champ--cle:hover .champ__saisie,
-.bulle--validee .champ--cle:focus-within .champ__saisie { border-bottom-color: var(--trait); }
-.bulle--validee .champ--cle input,
-.bulle--validee .champ--cle select {
-  width: 7ch;
-  flex: 0 1 auto;
-  text-align: left;
-  font-size: 1.5rem;
-  font-weight: 650;
-  letter-spacing: -0.02em;
-  line-height: 1.15;
-}
-.plateau__haut .bulle--validee .champ--cle input { font-size: 1.75rem; }
 
-/*
- * Écran court : quelques pixels rendus par bulle, plutôt qu'une barre de
- * défilement dans la plus fournie.
- *
- * L'ordre compte : `.champ input` et `.champ--cle input` ont la même
- * spécificité, donc la règle générique DOIT venir en premier, sinon elle
- * écrase le chiffre dominant et le ramène à la taille des autres.
- */
+/* Écran court : un cran de moins, uniformément. */
 @media (max-height: 820px) {
   .bulle--validee .champ input,
-  .bulle--validee .champ select { font-size: .6875rem; }
+  .bulle--validee .champ select { font-size: .8125rem; }
   .bulle--validee .champ__court { font-size: .6875rem; }
-
-  .bulle--validee .champ--cle input,
-  .bulle--validee .champ--cle select { font-size: 1.125rem; }
-  .plateau__haut .bulle--validee .champ--cle input { font-size: 1.375rem; }
 }
-.bulle--validee .champ--cle .champ__unite { font-size: .875rem; padding-left: 4px; }
 
 /* --- Zoomée : plein centre, saisie confortable -------------------------- */
 .voile {
@@ -592,14 +574,15 @@ h1, h2, h3 { margin: 0; font-weight: 600; letter-spacing: -0.01em; }
   border: 1px solid var(--trait);
   border-radius: var(--rayon-large);
   box-shadow: var(--ombre);
-  padding: 24px;
+  padding: 16px 24px 20px;
+  text-align: center;
 }
 .verdict__entete {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 12px 18px;
-  margin-bottom: 14px;
+  gap: 10px 18px;
+  margin-bottom: 8px;
 }
 .verdict__question { font-size: .9375rem; font-weight: 500; color: var(--encre-2); }
 .verdict__horizon { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 220px; }
@@ -615,7 +598,7 @@ h1, h2, h3 { margin: 0; font-weight: 600; letter-spacing: -0.01em; }
 .verdict__chiffre {
   margin: 0;
   font-family: var(--police-chiffres);
-  font-size: clamp(2.25rem, 6vw, 3.25rem);
+  font-size: clamp(2rem, 5vw, 2.75rem);
   font-weight: 650;
   line-height: 1.05;
   letter-spacing: -0.03em;
@@ -625,8 +608,12 @@ h1, h2, h3 { margin: 0; font-weight: 600; letter-spacing: -0.01em; }
 .verdict__chiffre--location { color: var(--location); }
 .verdict__chiffre--indecis { color: var(--encre-3); }
 
-.verdict__phrase { margin: 10px 0 0; font-size: 1.0625rem; max-width: 58ch; }
-.verdict__detail { margin: 6px 0 0; font-size: .875rem; color: var(--encre-2); max-width: 62ch; }
+.verdict__mesure {
+  margin: 2px auto 0;
+  max-width: 46ch;
+  font-size: .9375rem;
+  color: var(--encre-2);
+}
 
 
 .pastille { width: 8px; height: 8px; border-radius: 2px; flex: none; }

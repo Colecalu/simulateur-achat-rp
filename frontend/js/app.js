@@ -119,11 +119,11 @@ function lireFormulaireMel() {
 function afficherVerdict(resultat, horizon) {
   const ligne = resultat.annees[horizon - 1];
   const ecart = ligne.ecart;
-  const achatGagne = ecart >= 0;
 
   $('#horizonLabel').textContent = `${horizon} an${horizon > 1 ? 's' : ''}`;
 
   const chiffre = $('#verdictChiffre');
+  const mesure = $('#verdictMesure');
 
   // Enveloppe insuffisante : le modèle plafonne les deux épargnes à zéro et
   // ne facture nulle part le déficit du propriétaire. L'écart calculé serait
@@ -131,49 +131,27 @@ function afficherVerdict(resultat, horizon) {
   if (!resultat.enveloppeSuffisante) {
     chiffre.textContent = '—';
     chiffre.className = 'verdict__chiffre verdict__chiffre--indecis';
-    $('#verdictPhrase').textContent =
-      'Impossible de comparer : votre enveloppe ne finance pas le scénario d\'achat.';
-    $('#verdictDetail').textContent =
-      `Il manque ${eurosPrecis.format(
+    mesure.textContent =
+      `Votre enveloppe ne finance pas l'achat : il manque ${eurosPrecis.format(
         resultat.coutMensuelProprio - resultat.entrees.enveloppeMensuelle
-      )} par mois la première année. Ajustez l'enveloppe, le prix du bien, l'apport ` +
-      'ou la durée du crédit pour obtenir une comparaison valable.';
+      )} par mois la première année.`;
     return;
   }
 
   chiffre.textContent = signe(ecart);
   chiffre.className = 'verdict__chiffre ' +
-    (achatGagne ? 'verdict__chiffre--achat' : 'verdict__chiffre--location');
+    (ecart >= 0 ? 'verdict__chiffre--achat' : 'verdict__chiffre--location');
 
   // Sous ~1 % du patrimoine comparé, l'écart n'est pas un signal exploitable.
   const reference = Math.max(ligne.patrimoineTotalAchat, ligne.patrimoineTotalLocation);
-  const negligeable = Math.abs(ecart) < reference * 0.01;
-
-  if (negligeable) {
-    $('#verdictPhrase').textContent =
-      'Les deux scénarios se valent : l\'écart est dans le bruit des hypothèses.';
-  } else {
-    $('#verdictPhrase').textContent = achatGagne
-      ? `Acheter vous laisse ${euros.format(Math.abs(ecart))} de patrimoine en plus qu'en restant locataire.`
-      : `Rester locataire vous laisse ${euros.format(Math.abs(ecart))} de patrimoine en plus qu'en achetant.`;
+  if (Math.abs(ecart) < reference * 0.01) {
+    mesure.textContent = 'd\'écart : à cette échéance, les deux scénarios se valent.';
+    return;
   }
 
-  const bascule = resultat.premiereAnneeFavorable;
-  const detail = [];
-  detail.push(
-    `Achat : ${euros.format(ligne.patrimoineTotalAchat)} ` +
-    `(${euros.format(ligne.patrimoineNetImmo)} de bien net de dette ` +
-    `+ ${euros.format(ligne.capitalAchatNet)} de portefeuille). ` +
-    `Location : ${euros.format(ligne.patrimoineTotalLocation)} de portefeuille.`
-  );
-  if (bascule === null) {
-    detail.push('Sur 25 ans, la location reste devant à chaque échéance.');
-  } else if (bascule === 1) {
-    detail.push('L\'achat est devant dès la première année.');
-  } else {
-    detail.push(`L\'achat repasse devant la location à partir de l\'année ${bascule}.`);
-  }
-  $('#verdictDetail').textContent = detail.join(' ');
+  mesure.textContent = ecart >= 0
+    ? 'de patrimoine en plus en achetant qu\'en restant locataire.'
+    : 'de patrimoine en plus en restant locataire qu\'en achetant.';
 }
 
 /* ------------------------------------------------------------------ Alerte */
@@ -480,12 +458,6 @@ function volerVers(el, appliquerChangement) {
 /** Reflète l'état de chaque bulle : verrouillée, ouvrable ou validée. */
 function majBulles() {
   const prochaine = prochaineBulle();
-
-  // Le champ mis en avant par la bulle, marqué une fois pour toutes.
-  for (const el of document.querySelectorAll('.bulle[data-cle]')) {
-    const cle = document.getElementById(el.dataset.cle);
-    if (cle) cle.closest('.champ').classList.add('champ--cle');
-  }
 
   for (const n of BULLES) {
     const el = bulle(n);
