@@ -116,7 +116,7 @@ h1, h2, h3 { margin: 0; font-weight: 600; letter-spacing: -0.01em; }
 
 .plateau {
   display: grid;
-  grid-template-columns: 268px minmax(0, 1fr);
+  grid-template-columns: 292px minmax(0, 1fr);
   grid-template-areas:
     "coin   haut"
     "gauche visu";
@@ -176,6 +176,7 @@ h1, h2, h3 { margin: 0; font-weight: 600; letter-spacing: -0.01em; }
 /* ----------------------------------------------------------------- Bulles */
 
 .bulle {
+  position: relative;
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -188,50 +189,56 @@ h1, h2, h3 { margin: 0; font-weight: 600; letter-spacing: -0.01em; }
   transition: border-color .15s ease, opacity .2s ease, box-shadow .15s ease;
 }
 
-.bulle__tete {
+/*
+ * Au repos, le déclencheur couvre TOUTE la bulle : gros numéro centré, titre
+ * dessous. Une fois la bulle validée il redevient une simple ligne d'en-tête
+ * et laisse la place aux champs.
+ */
+.bulle__declencheur {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 10px;
+  justify-content: center;
+  gap: 6px;
   width: 100%;
-  padding: 12px 14px;
+  padding: 12px;
   border: 0;
   background: transparent;
   font: inherit;
-  text-align: left;
+  text-align: center;
   cursor: pointer;
-  flex: none;
+  transition: background .12s ease;
 }
+
 .bulle__numero {
-  display: grid;
-  place-items: center;
-  width: 24px; height: 24px;
-  flex: none;
-  border-radius: 50%;
-  background: var(--surface-creuse);
-  color: var(--encre-3);
-  font-size: .75rem;
+  display: block;
+  font-size: 2.75rem;
   font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.04em;
   font-variant-numeric: tabular-nums;
-  transition: background .15s ease, color .15s ease;
+  color: var(--encre-3);
+  transition: color .15s ease;
 }
+.plateau__haut .bulle__numero { font-size: 3rem; }
+
 .bulle__titre {
-  flex: 1;
-  min-width: 0;
-  font-size: .875rem;
+  font-size: .9375rem;
   font-weight: 600;
-  color: var(--encre);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  color: var(--encre-2);
+  max-width: 100%;
 }
 
 /* Cadenas dessiné en CSS : anse + corps, pas d'image à charger. */
-.bulle__cadenas { display: none; flex: none; width: 14px; height: 16px; position: relative; }
+.bulle__cadenas { display: none; width: 13px; height: 15px; position: relative; margin-top: 2px; }
 .bulle__cadenas::before {
   content: "";
   position: absolute;
   left: 3px; top: 0;
-  width: 8px; height: 7px;
+  width: 7px; height: 7px;
   border: 1.6px solid var(--encre-3);
   border-bottom: 0;
   border-radius: 4px 4px 0 0;
@@ -240,45 +247,107 @@ h1, h2, h3 { margin: 0; font-weight: 600; letter-spacing: -0.01em; }
   content: "";
   position: absolute;
   left: 0; bottom: 0;
-  width: 14px; height: 10px;
+  width: 13px; height: 9px;
   border-radius: 2px;
   background: var(--encre-3);
 }
 
 .bulle__corps {
-  display: flex;
+  display: none;
   flex-direction: column;
   min-height: 0;
-  padding: 0 14px 14px;
+  padding: 0 11px 8px;
+  /* Filet : le contenu est dimensionné pour tenir, mais un champ coupé par
+     le overflow:hidden de la bulle serait pire qu'une barre de défilement. */
   overflow-y: auto;
-  overscroll-behavior: contain;
+  scrollbar-width: thin;
 }
 .bulle__intro { display: none; }
 .bulle__pied { display: none; }
-
-.bulle__champs { display: grid; gap: 10px; align-content: start; }
+.bulle__champs { display: grid; gap: 8px; align-content: start; }
 
 /* --- Verrouillée : grisée, inerte -------------------------------------- */
-.bulle--verrouillee { opacity: .5; }
-.bulle--verrouillee .bulle__tete { cursor: not-allowed; }
+.bulle--verrouillee { opacity: .45; }
+.bulle--verrouillee .bulle__declencheur { cursor: not-allowed; }
 .bulle--verrouillee .bulle__cadenas { display: block; }
-.bulle--verrouillee .bulle__corps { display: none; }
 
 /* --- Prochaine à remplir : elle appelle le clic ------------------------- */
-.bulle--ouvrable { border-color: var(--achat); }
-.bulle--ouvrable .bulle__numero { background: var(--achat); color: #fff; }
-.bulle--ouvrable .bulle__corps { display: none; }
-.bulle--ouvrable .bulle__tete:hover { background: var(--achat-voile); }
-.bulle--ouvrable::after {
+.bulle--ouvrable { border-color: var(--achat); box-shadow: 0 0 0 3px var(--achat-voile), var(--ombre); }
+.bulle--ouvrable .bulle__numero { color: var(--achat); }
+.bulle--ouvrable .bulle__titre { color: var(--encre); }
+.bulle--ouvrable .bulle__declencheur:hover { background: var(--achat-voile); }
+.bulle--ouvrable .bulle__declencheur::after {
   content: "Cliquez pour remplir";
-  padding: 0 14px 14px;
   font-size: .75rem;
   color: var(--achat);
 }
 
-/* --- Validée : champs modifiables sur place ---------------------------- */
-.bulle--validee .bulle__numero { background: var(--succes); color: #fff; }
-.bulle--validee .bulle__tete { cursor: default; }
+/* --- Validée : champs modifiables sur place, sans défilement ------------ */
+.bulle--validee .bulle__corps { display: flex; }
+
+.bulle--validee .bulle__declencheur {
+  position: static;
+  z-index: auto;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 7px;
+  padding: 7px 11px 5px;
+  text-align: left;
+}
+.bulle--validee .bulle__numero {
+  display: grid;
+  place-items: center;
+  width: 20px; height: 20px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--succes);
+  color: #fff;
+  font-size: .6875rem;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+.bulle--validee .bulle__titre {
+  font-size: .8125rem;
+  color: var(--encre);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.bulle--validee .bulle__declencheur:hover { background: var(--surface-creuse); }
+
+/*
+ * Deux colonnes de lignes d'une seule hauteur : six champs tiennent en trois
+ * rangées, sans la moindre barre de défilement.
+ */
+/* Le nombre de colonnes suit la largeur réelle, pas la position : deux dans
+   une bulle de gauche, trois dans une bulle du haut sur grand écran, deux à
+   nouveau quand cette même bulle rétrécit sur mobile. */
+.bulle--validee .bulle__champs {
+  grid-template-columns: repeat(auto-fit, minmax(124px, 1fr));
+  gap: 4px 9px;
+}
+.bulle--validee .champ {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+.bulle--validee .champ__libelle { display: none; }
+.bulle--validee .champ__court {
+  display: block;
+  flex: 0 1 auto;
+  min-width: 0;
+  font-size: .6875rem;
+  color: var(--encre-3);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.bulle--validee .champ__saisie { flex: 1 1 64px; min-width: 0; }
+.bulle--validee .champ input,
+.bulle--validee .champ select { padding: 2px 5px; font-size: .6875rem; }
+.bulle--validee .champ__unite { padding: 0 6px 0 2px; font-size: .625rem; }
 
 /* --- Zoomée : plein centre, saisie confortable -------------------------- */
 .voile {
@@ -305,10 +374,28 @@ h1, h2, h3 { margin: 0; font-weight: 600; letter-spacing: -0.01em; }
   border-color: var(--achat);
   box-shadow: 0 24px 64px rgba(11, 11, 11, .28);
 }
-.bulle--zoom .bulle__tete { padding: 20px 24px 0; cursor: default; }
-.bulle--zoom .bulle__numero { width: 30px; height: 30px; font-size: .875rem; background: var(--achat); color: #fff; }
-.bulle--zoom .bulle__titre { font-size: 1.25rem; white-space: normal; }
-.bulle--zoom .bulle__corps { display: flex; padding: 0 24px 20px; }
+.bulle--zoom .bulle__declencheur {
+  position: static;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 12px;
+  padding: 20px 24px 0;
+  cursor: default;
+}
+.bulle--zoom .bulle__numero {
+  display: grid;
+  place-items: center;
+  width: 34px; height: 34px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--achat);
+  color: #fff;
+  font-size: 1rem;
+  letter-spacing: 0;
+}
+.bulle--zoom .bulle__titre { font-size: 1.25rem; color: var(--encre); }
+.bulle--zoom .bulle__corps { display: flex; padding: 0 24px 20px; overflow-y: auto; }
 .bulle--zoom .bulle__intro {
   display: block;
   margin: 10px 0 18px;
@@ -317,18 +404,24 @@ h1, h2, h3 { margin: 0; font-weight: 600; letter-spacing: -0.01em; }
   max-width: 60ch;
 }
 .bulle--zoom .bulle__intro em { font-style: normal; font-weight: 600; color: var(--encre); }
-.bulle--zoom .bulle__champs { grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 14px; }
+.bulle--zoom .bulle__champs {
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 14px;
+}
+.bulle--zoom .champ { display: grid; gap: 4px; }
+.bulle--zoom .champ__libelle { display: block; }
+.bulle--zoom .champ__court { display: none; }
 .bulle--zoom .bulle__pied { display: flex; justify-content: flex-end; padding-top: 20px; }
 
 /* Le contenu n'apparaît qu'une fois la bulle arrivée : pendant le voyage,
    la mise à l'échelle le déformerait. */
 @keyframes contenuZoom { from { opacity: 0; } to { opacity: 1; } }
 .bulle--zoom .bulle__corps,
-.bulle--zoom .bulle__tete { animation: contenuZoom .24s ease .18s backwards; }
+.bulle--zoom .bulle__declencheur { animation: contenuZoom .24s ease .18s backwards; }
 
 @media (prefers-reduced-motion: reduce) {
   .bulle--zoom .bulle__corps,
-  .bulle--zoom .bulle__tete,
+  .bulle--zoom .bulle__declencheur,
   .voile { animation: none; }
 }
 
@@ -336,6 +429,7 @@ h1, h2, h3 { margin: 0; font-weight: 600; letter-spacing: -0.01em; }
 
 .champ { display: grid; gap: 4px; min-width: 0; }
 .champ__libelle { font-size: .75rem; color: var(--encre-2); }
+.champ__court { display: none; }
 .champ__saisie {
   display: flex;
   align-items: center;

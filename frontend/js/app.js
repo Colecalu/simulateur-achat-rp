@@ -473,8 +473,8 @@ function majBulles() {
     el.classList.toggle('bulle--ouvrable', estOuvrable && n !== bulleZoomee);
     el.classList.toggle('bulle--verrouillee', !estValidee && !estOuvrable);
 
-    const tete = el.querySelector('.bulle__tete');
-    tete.disabled = estValidee || (!estOuvrable && n !== bulleZoomee);
+    const tete = el.querySelector('.bulle__declencheur');
+    tete.disabled = !estValidee && !estOuvrable && n !== bulleZoomee;
     tete.setAttribute('aria-expanded', String(n === bulleZoomee));
 
     // Une bulle non validée ne doit pas pouvoir être modifiée au clavier.
@@ -514,7 +514,7 @@ function validerBulle(n) {
 
   // On enchaîne : la bulle suivante devient visiblement la prochaine à remplir.
   const suivante = prochaineBulle();
-  if (suivante !== null) bulle(suivante).querySelector('.bulle__tete').focus();
+  if (suivante !== null) bulle(suivante).querySelector('.bulle__declencheur').focus();
 }
 
 function initialiserBulles() {

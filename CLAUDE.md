@@ -72,6 +72,16 @@ contient les valeurs réellement calculées par Excel sur 25 ans.
   défilement sur un écran d'ordinateur). Les hauteurs sont **bornées** (`grid-auto-rows` en haut,
   `grid-template-rows: repeat(4, 1fr)` à gauche) et chaque bulle défile en interne : une bulle
   qui s'étire pousserait toute la mise en page.
+- Au repos, une bulle affiche un **gros numéro centré** avec son titre dessous, et le
+  déclencheur (`.bulle__declencheur`) couvre toute la bulle : elle est cliquable partout.
+  Une fois validée, ce même déclencheur redevient une ligne d'en-tête et laisse la place aux
+  champs.
+- **Aucune barre de défilement dans une bulle validée.** Les champs y sont affichés en grille
+  `auto-fit / minmax(124px, 1fr)` — deux colonnes à gauche, trois en haut sur grand écran, deux
+  à nouveau sur mobile — avec un **libellé court** (`.champ__court`, saisi en HTML à côté du
+  libellé long). Toute modification de densité doit être revérifiée en mesurant le jeu
+  `hauteur de bulle − (en-tête + contenu + padding)` : il doit rester positif, sinon
+  `overflow: hidden` coupe silencieusement la dernière rangée.
 - **Premier passage strictement séquentiel** : seule la bulle suivante est ouvrable, les autres
   sont grisées et leurs champs `disabled`. Une fois validée, une bulle devient modifiable sur
   place, sans rejouer le zoom.
