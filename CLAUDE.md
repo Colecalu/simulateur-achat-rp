@@ -70,6 +70,13 @@ contient les valeurs réellement calculées par Excel sur 25 ans.
 - La saisie se fait **par étapes** (`.etape`, une par section, pilotées par `allerEtape()` dans
   `app.js`). Aucune étape n'est bloquante : tous les champs ont un défaut, on peut sauter
   directement à n'importe quelle étape par le fil.
+- Chaque étape parcourue dépose une **bulle de récapitulatif** dans le rail de gauche
+  (`majRail()`). Les champs qu'une bulle affiche sont déclarés en HTML par
+  `data-resume="id1,id2"` sur la `<section class="etape">` — pas de liste en dur dans le JS.
+- Dans `majRail()`, les bulles sont insérées **directement à leur place** et jamais déplacées
+  ensuite : re-parenter un nœud annule son animation CSS en cours et la relance à chaque
+  frappe. Le retrait de la classe d'animation a un filet `setTimeout`, car `animationend` ne
+  part pas dans un onglet en arrière-plan.
 
 ## Workflow Git
 

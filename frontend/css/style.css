@@ -106,11 +106,22 @@ h1, h2, h3 { margin: 0; font-weight: 600; letter-spacing: -0.01em; }
 /* ----------------------------------------------------------------- Layout */
 
 .page {
-  max-width: 860px;
+  max-width: 1160px;
   margin: 0 auto;
   padding: 24px;
   display: grid;
   gap: 24px;
+}
+
+/* Sous l'étape active : le rail des bulles remplies, puis le résultat. */
+.atelier {
+  display: grid;
+  grid-template-columns: 280px minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+}
+@media (max-width: 900px) {
+  .atelier { grid-template-columns: minmax(0, 1fr); }
 }
 
 /* --------------------------------------------------------------- Parcours */
@@ -183,6 +194,116 @@ h1, h2, h3 { margin: 0; font-weight: 600; letter-spacing: -0.01em; }
 @media (max-width: 620px) {
   .fil__mot { display: none; }
   .fil__puce { flex: none; padding: 7px; }
+}
+
+/* Parcours terminé : la carte se replie, tout se modifie depuis le rail. */
+.parcours--termine .parcours__pied { justify-content: flex-start; }
+
+/* --------------------------------------------------------- Rail des bulles */
+
+.rail {
+  display: grid;
+  gap: 10px;
+  align-content: start;
+  position: sticky;
+  top: 24px;
+}
+.rail[hidden] { display: none; }
+
+@media (max-width: 900px) {
+  .rail {
+    position: static;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  }
+}
+
+.bulle {
+  display: grid;
+  gap: 6px;
+  width: 100%;
+  /* Sans ce min-width, le libellé en nowrap impose sa largeur intrinsèque
+     et la bulle déborde du rail au lieu de tronquer. */
+  min-width: 0;
+  text-align: left;
+  font: inherit;
+  padding: 12px 14px;
+  border: 1px solid var(--trait);
+  border-radius: var(--rayon);
+  background: var(--surface);
+  cursor: pointer;
+  transition: border-color .12s ease, background .12s ease, transform .12s ease;
+}
+.bulle:hover { border-color: var(--achat); transform: translateX(2px); }
+
+.bulle--active {
+  border-color: var(--achat);
+  box-shadow: 0 0 0 3px var(--achat-voile);
+}
+
+.bulle__entete { display: flex; align-items: center; gap: 7px; min-width: 0; }
+
+.bulle__coche {
+  width: 15px; height: 15px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--achat);
+  position: relative;
+}
+.bulle__coche::after {
+  content: "";
+  position: absolute;
+  left: 4.5px; top: 2.5px;
+  width: 4px; height: 7px;
+  border: solid #fff;
+  border-width: 0 1.6px 1.6px 0;
+  transform: rotate(45deg);
+}
+
+.bulle__titre {
+  font-size: .8125rem;
+  font-weight: 600;
+  color: var(--encre);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bulle__ligne {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  min-width: 0;
+  font-size: .75rem;
+}
+.bulle__libelle {
+  flex: 1 1 auto;
+  min-width: 0;
+  color: var(--encre-3);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.bulle__valeur {
+  flex: 0 0 auto;
+  color: var(--encre-2);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* Arrivée de la bulle : elle tombe de la carte d'étape, juste au-dessus. */
+@keyframes bulleEntree {
+  from { opacity: 0; transform: translateY(-22px) scale(.94); }
+  60%  { opacity: 1; }
+  to   { opacity: 1; transform: none; }
+}
+.bulle--entree { animation: bulleEntree .34s cubic-bezier(.2, .8, .3, 1); }
+
+@media (prefers-reduced-motion: reduce) {
+  .bulle--entree { animation: none; }
+  .bulle:hover { transform: none; }
 }
 
 /* Contenu d'une étape */

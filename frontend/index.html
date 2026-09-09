@@ -51,7 +51,7 @@
       </button>
     </nav>
 
-      <section class="etape" data-etape="1" hidden>
+      <section class="etape" data-etape="1" data-resume="capitalInitial,enveloppeMensuelle" hidden>
         <p class="etape__rang">Étape 1 sur 6</p>
         <h2 class="etape__titre">Votre situation</h2>
         <p class="etape__intro">De quoi disposez-vous aujourd'hui, et combien pouvez-vous consacrer chaque mois au logement <em>et</em> à l'épargne&nbsp;? Ce budget sera identique dans les deux scénarios&nbsp;: c'est ce qui rend la comparaison honnête.</p>
@@ -74,7 +74,7 @@
         </div>
       </section>
 
-      <section class="etape" data-etape="2" hidden>
+      <section class="etape" data-etape="2" data-resume="prixNetVendeur,typeBien,travaux" hidden>
         <p class="etape__rang">Étape 2 sur 6</p>
         <h2 class="etape__titre">Le bien</h2>
         <p class="etape__intro">Ce que vous achetez, et ce qu'il coûte réellement. Les frais de notaire sont calculés automatiquement à partir du prix et du type de bien.</p>
@@ -128,7 +128,7 @@
         </div>
       </section>
 
-      <section class="etape" data-etape="3" hidden>
+      <section class="etape" data-etape="3" data-resume="apport,dureeAnnees,tauxCredit" hidden>
         <p class="etape__rang">Étape 3 sur 6</p>
         <h2 class="etape__titre">Le crédit</h2>
         <p class="etape__intro">Ce que vous empruntez, et à quel prix. Le reste de votre capital continue de travailler en bourse.</p>
@@ -165,7 +165,7 @@
         </div>
       </section>
 
-      <section class="etape" data-etape="4" hidden>
+      <section class="etape" data-etape="4" data-resume="chargesCopro,taxeFonciere" hidden>
         <p class="etape__rang">Étape 4 sur 6</p>
         <h2 class="etape__titre">Charges de propriétaire</h2>
         <p class="etape__intro">Ce que le bien vous coûte chaque année une fois acheté, et comment tout cela évolue avec le temps.</p>
@@ -208,7 +208,7 @@
         </div>
       </section>
 
-      <section class="etape" data-etape="5" hidden>
+      <section class="etape" data-etape="5" data-resume="loyer" hidden>
         <p class="etape__rang">Étape 5 sur 6</p>
         <h2 class="etape__titre">Si vous restez locataire</h2>
         <p class="etape__intro">L'autre vie&nbsp;: celle où vous n'achetez pas. Le loyer remplace la mensualité, et tout ce que l'enveloppe ne consomme pas part en bourse.</p>
@@ -230,7 +230,7 @@
         </div>
       </section>
 
-      <section class="etape" data-etape="6" hidden>
+      <section class="etape" data-etape="6" data-resume="rendementBourse,fiscalitePlusValues" hidden>
         <p class="etape__rang">Étape 6 sur 6</p>
         <h2 class="etape__titre">Hypothèses de marché</h2>
         <p class="etape__intro">Ce que devient l'argent que vous n'immobilisez pas dans le logement. C'est l'hypothèse la plus lourde de conséquences.</p>
@@ -257,11 +257,16 @@
     <div class="parcours__pied">
       <button type="button" class="bouton" id="etapePrecedente">← Précédent</button>
       <button type="button" class="bouton bouton--primaire" id="etapeSuivante">Suivant →</button>
+      <button type="button" class="bouton bouton--discret" id="etapeRouvrir" hidden>Modifier mes réponses</button>
       <button type="button" class="bouton bouton--discret" id="reinitialiser">Réinitialiser</button>
     </div>
   </form>
 
-  <!-- ========================== RÉSULTAT ============================= -->
+  <!-- ==================== RAIL + RÉSULTAT ============================ -->
+  <div class="atelier">
+
+  <aside class="rail" id="rail" aria-label="Étapes renseignées" hidden></aside>
+
   <section class="resultats" aria-live="polite">
 
     <p class="alerte" id="alerteEnveloppe" hidden>
@@ -417,6 +422,8 @@
       Un résultat serré (moins de quelques milliers d'euros d'écart) doit se lire comme une égalité.
     </p>
   </section>
+
+  </div>
 
 </main>
 

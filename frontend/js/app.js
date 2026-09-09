@@ -409,6 +409,7 @@ function rafraichir() {
   const mel = optionsMel ? simulerMiseEnLocation(dernierResultat, optionsMel) : null;
   $('#melIncomplet').hidden = !!mel || $('#melPanneau').hidden;
 
+  majRail();
   afficherAlerte(dernierResultat);
   afficherVerdict(dernierResultat, horizon);
   dessinerGraphiques(dernierResultat, horizon, mel);
@@ -418,27 +419,131 @@ function rafraichir() {
 /* -------------------------------------------------- Parcours par étapes */
 
 const etapes = () => [...document.querySelectorAll('.etape')];
-let etapeCourante = 1;
 
-/** Affiche une étape et met le fil d'Ariane en accord. */
+/** Étape ouverte en haut de page ; null = parcours terminé, carte repliée. */
+let etapeCourante = 1;
+/** Étapes déjà parcourues : elles ont leur bulle dans le rail. */
+const etapesVues = new Set();
+
+/** Rend une valeur de champ lisible dans une bulle : « 420 000 € », « 3,5 % ». */
+function valeurLisible(el) {
+  if (el.tagName === 'SELECT') return el.options[el.selectedIndex].text;
+
+  const unite = el.closest('.champ__saisie').querySelector('.champ__unite').textContent.trim();
+  const v = parseFloat(el.value);
+  if (!Number.isFinite(v)) return '—';
+
+  const periode = unite.includes('/mois') ? '/mois' : unite.includes('/an') ? '/an' : '';
+  if (unite.startsWith('€')) return euros.format(v) + periode;
+  if (unite.startsWith('%')) {
+    return v.toLocaleString('fr-FR', { maximumFractionDigits: 2 }) + ' %' + periode;
+  }
+  return `${v} ${unite}`;
+}
+
+/** Contenu d'une bulle : le titre de l'étape et ses valeurs marquantes. */
+function contenuBulle(n) {
+  const section = document.querySelector(`.etape[data-etape="${n}"]`);
+  const titre = section.querySelector('.etape__titre').textContent;
+  const ids = (section.dataset.resume || '').split(',').filter(Boolean);
+
+  const lignes = ids.map((id) => {
+    const el = document.getElementById(id);
+    const libelle = el.closest('.champ').querySelector('.champ__libelle').textContent;
+    return `<span class="bulle__ligne">
+        <span class="bulle__libelle" title="${libelle}">${libelle}</span>
+        <span class="bulle__valeur">${valeurLisible(el)}</span>
+      </span>`;
+  });
+
+  return `<span class="bulle__entete"><span class="bulle__coche" aria-hidden="true"></span>
+      <span class="bulle__titre">${titre}</span></span>${lignes.join('')}`;
+}
+
+/**
+ * Met le rail à jour. Les bulles existantes sont rafraîchies sur place ; seules
+ * les nouvelles sont animées, sinon l'animation rejouerait à chaque frappe.
+ */
+function majRail() {
+  const rail = $('#rail');
+  const rangs = [...etapesVues].sort((a, b) => a - b);
+
+  for (const n of rangs) {
+    let bulle = rail.querySelector(`[data-bulle="${n}"]`);
+    const nouvelle = !bulle;
+
+    if (nouvelle) {
+      bulle = document.createElement('button');
+      bulle.type = 'button';
+      bulle.className = 'bulle';
+      bulle.dataset.bulle = n;
+      bulle.addEventListener('click', () => allerEtape(n));
+
+      // Insertion directement à sa place : on peut sauter d'étape, et un
+      // déplacement de nœud après coup annulerait l'animation en cours.
+      const apres = rangs
+        .filter((r) => r > n)
+        .map((r) => rail.querySelector(`[data-bulle="${r}"]`))
+        .find(Boolean);
+      rail.insertBefore(bulle, apres || null);
+    }
+
+    bulle.innerHTML = contenuBulle(n);
+    bulle.classList.toggle('bulle--active', n === etapeCourante);
+
+    if (nouvelle) {
+      bulle.classList.add('bulle--entree');
+      const nettoyer = () => bulle.classList.remove('bulle--entree');
+      bulle.addEventListener('animationend', nettoyer, { once: true });
+      // Filet : dans un onglet en arrière-plan l'animation ne tourne pas et
+      // `animationend` ne part jamais — la classe resterait collée à la bulle.
+      setTimeout(nettoyer, 600);
+    }
+  }
+
+  // Purge après réinitialisation. Aucune remise en ordre ici : les bulles sont
+  // déjà insérées à leur place, et déplacer un nœud casserait son animation.
+  for (const bulle of rail.querySelectorAll('.bulle')) {
+    if (!etapesVues.has(Number(bulle.dataset.bulle))) bulle.remove();
+  }
+  rail.hidden = rangs.length === 0;
+}
+
+/**
+ * Ouvre une étape en haut de page. `null` replie la carte : le parcours est
+ * terminé, tout se consulte et se modifie depuis le rail.
+ */
 function allerEtape(n) {
   const total = etapes().length;
-  etapeCourante = Math.min(Math.max(n, 1), total);
+  etapeCourante = n === null ? null : Math.min(Math.max(n, 1), total);
+  const termine = etapeCourante === null;
+
+  // Une étape quittée reste acquise : sa bulle ne disparaît plus du rail.
+  if (!termine) etapesVues.add(etapeCourante);
 
   for (const section of etapes()) {
     section.hidden = Number(section.dataset.etape) !== etapeCourante;
   }
 
+  $('#formulaire').classList.toggle('parcours--termine', termine);
+  $('#etapePrecedente').hidden = termine;
+  $('#etapeSuivante').hidden = termine;
+  $('#etapeRouvrir').hidden = !termine;
+
   for (const puce of document.querySelectorAll('.fil__puce')) {
     const rang = Number(puce.dataset.aller);
     puce.classList.toggle('fil__puce--active', rang === etapeCourante);
-    // « Vue » et non « validée » : rien n'est obligatoire, on ne bloque personne.
-    puce.classList.toggle('fil__puce--vue', rang < etapeCourante);
+    puce.classList.toggle('fil__puce--vue', etapesVues.has(rang) && rang !== etapeCourante);
     puce.setAttribute('aria-current', rang === etapeCourante ? 'step' : 'false');
   }
 
-  $('#etapePrecedente').disabled = etapeCourante === 1;
-  $('#etapeSuivante').disabled = etapeCourante === total;
+  if (!termine) {
+    $('#etapePrecedente').disabled = etapeCourante === 1;
+    $('#etapeSuivante').textContent =
+      etapeCourante === total ? 'Terminer ✓' : 'Suivant →';
+  }
+
+  majRail();
 }
 
 function initialiser() {
@@ -449,12 +554,17 @@ function initialiser() {
   $('#reinitialiser').addEventListener('click', () => {
     remplirFormulaire(DEFAUTS);
     $('#horizon').value = 20;
+    etapesVues.clear();
     allerEtape(1);
     recalculer();
   });
 
   $('#etapePrecedente').addEventListener('click', () => allerEtape(etapeCourante - 1));
-  $('#etapeSuivante').addEventListener('click', () => allerEtape(etapeCourante + 1));
+  $('#etapeSuivante').addEventListener('click', () => {
+    const dernière = etapeCourante === etapes().length;
+    allerEtape(dernière ? null : etapeCourante + 1);
+  });
+  $('#etapeRouvrir').addEventListener('click', () => allerEtape(1));
   for (const puce of document.querySelectorAll('.fil__puce')) {
     puce.addEventListener('click', () => allerEtape(Number(puce.dataset.aller)));
   }
