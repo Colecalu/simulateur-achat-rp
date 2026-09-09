@@ -69,6 +69,13 @@ contient les valeurs réellement calculées par Excel sur 25 ans.
   explicite.
 - L'encadré de verdict est réduit au strict nécessaire : le curseur d'horizon, le chiffre, et une
   seule ligne qui dit ce que ce chiffre mesure. Ne pas y réintroduire de commentaire.
+- **Aucun résultat n'est affiché tant que les cinq bulles ne sont pas validées.** Tous les champs
+  ont une valeur par défaut, donc le moteur sait toujours calculer — mais afficher ce calcul
+  donnerait à une hypothèse l'allure d'une réponse à une question que l'utilisateur n'a pas encore
+  posée. `majAttente()` bascule `#visu` entre `data-etat="attente"` (carte d'attente + jauge de
+  progression) et `data-etat="pret"`. Les graphiques sont **créés seulement une fois la zone
+  visible**, et `resize()` est rappelé au passage attente → prêt : un canevas dimensionné dans un
+  conteneur masqué reste à zéro.
 - La saisie se fait dans un **plateau de cinq bulles** autour de la visualisation : deux en haut
   (leur largeur cumulée = celle de la visualisation), trois à gauche (toutes visibles sans
   défilement sur un écran d'ordinateur). Les hauteurs sont **bornées** (`grid-auto-rows` en haut,

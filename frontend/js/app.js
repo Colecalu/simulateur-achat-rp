@@ -388,6 +388,8 @@ function rafraichir() {
   $('#melIncomplet').hidden = !!mel || $('#melPanneau').hidden;
 
   majBulles();
+  if (!majAttente()) return;
+
   afficherAlerte(dernierResultat);
   afficherVerdict(dernierResultat, horizon);
   dessinerGraphiques(dernierResultat, horizon, mel);
@@ -419,6 +421,43 @@ function valeurLisible(el) {
 const validees = new Set();
 /** Bulle actuellement agrandie au centre, ou null. */
 let bulleZoomee = null;
+
+/** Toutes les bulles sont-elles renseignées ? Sans quoi rien n'est affiché. */
+function parcoursComplet() {
+  return BULLES.every((n) => validees.has(n));
+}
+
+/**
+ * Zone de résultat en attente : tant qu'une bulle manque, on n'affiche aucun
+ * chiffre. Calculer sur des valeurs par défaut donnerait une réponse d'allure
+ * sérieuse à une question que l'utilisateur n'a pas encore posée.
+ */
+function majAttente() {
+  const complet = parcoursComplet();
+  const visu = $('#visu');
+  const etaitEnAttente = visu.dataset.etat === 'attente';
+  visu.dataset.etat = complet ? 'pret' : 'attente';
+
+  if (!complet) {
+    const faites = validees.size;
+    const jauge = $('#attenteJauge');
+    jauge.setAttribute('aria-valuenow', String(faites));
+    jauge.innerHTML = BULLES.map(
+      (n) => `<span class="attente__cran${validees.has(n) ? ' attente__cran--faite' : ''}"></span>`
+    ).join('');
+    $('#attenteCompte').textContent = faites === 0
+      ? 'Aucune bulle renseignée pour le moment.'
+      : `${faites} bulle${faites > 1 ? 's' : ''} sur ${BULLES.length} renseignée${faites > 1 ? 's' : ''}.`;
+  } else if (etaitEnAttente) {
+    // Les graphiques ont été dimensionnés alors que leur conteneur était
+    // masqué : il faut les remesurer une fois la zone révélée.
+    for (const graphique of [graphPatrimoine, graphMel]) {
+      if (graphique) graphique.resize();
+    }
+  }
+
+  return complet;
+}
 
 /** Première bulle non validée : la seule ouvrable au premier passage. */
 function prochaineBulle() {

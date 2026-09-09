@@ -555,6 +555,64 @@ h1, h2, h3 { margin: 0; font-weight: 600; letter-spacing: -0.01em; }
 .bouton--primaire:hover { background: var(--achat); color: #fff; filter: brightness(1.08); }
 .bouton--discret { border-color: transparent; background: transparent; font-size: .8125rem; }
 
+/* ---------------------------------------------------------------- Attente */
+
+/*
+ * Tant qu'une bulle n'est pas renseignée, la zone de résultat n'affiche aucun
+ * chiffre. Calculer sur les valeurs par défaut donnerait à une hypothèse
+ * l'allure d'une réponse.
+ */
+.plateau__visu[data-etat="attente"] > :not(.attente) { display: none; }
+.plateau__visu[data-etat="pret"] .attente { display: none; }
+
+.attente {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 320px;
+  padding: 40px 24px;
+  text-align: center;
+  background: var(--surface);
+  border: 1px dashed color-mix(in srgb, var(--encre-3) 45%, transparent);
+  border-radius: var(--rayon-large);
+}
+
+.attente__titre {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--encre-2);
+}
+.attente__texte {
+  margin: 0;
+  max-width: 52ch;
+  font-size: .875rem;
+  color: var(--encre-3);
+}
+
+.attente__jauge {
+  display: flex;
+  gap: 6px;
+  margin-top: 6px;
+}
+.attente__cran {
+  width: 40px;
+  height: 6px;
+  border-radius: 99px;
+  background: color-mix(in srgb, var(--encre-3) 22%, transparent);
+  transition: background .2s ease;
+}
+.attente__cran--faite { background: var(--achat); border-color: var(--achat); }
+
+.attente__compte {
+  margin: 0;
+  font-size: .8125rem;
+  color: var(--encre-3);
+  font-variant-numeric: tabular-nums;
+}
+
 /* -------------------------------------------------------------- Résultats */
 
 

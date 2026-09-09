@@ -293,7 +293,18 @@
       </div>
     </div>
 
-    <section class="plateau__visu" aria-live="polite">
+    <section class="plateau__visu" id="visu" data-etat="attente" aria-live="polite">
+
+      <div class="attente" id="attente">
+        <p class="attente__titre">Votre réponse s'affichera ici</p>
+        <p class="attente__texte">
+          Renseignez les cinq bulles pour comparer l'achat et la location. Rien n'est calculé
+          tant qu'il manque une donnée&nbsp;: pas de chiffre inventé à partir de valeurs par défaut.
+        </p>
+        <div class="attente__jauge" id="attenteJauge" role="progressbar"
+             aria-valuemin="0" aria-valuemax="5" aria-valuenow="0"></div>
+        <p class="attente__compte" id="attenteCompte"></p>
+      </div>
 
       <p class="alerte" id="alerteEnveloppe" hidden>
         Votre enveloppe mensuelle ne couvre pas le coût de propriétaire
