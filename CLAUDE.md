@@ -76,12 +76,17 @@ contient les valeurs réellement calculées par Excel sur 25 ans.
   déclencheur (`.bulle__declencheur`) couvre toute la bulle : elle est cliquable partout.
   Une fois validée, ce même déclencheur redevient une ligne d'en-tête et laisse la place aux
   champs.
-- **Aucune barre de défilement dans une bulle validée.** Les champs y sont affichés en grille
-  `auto-fit / minmax(124px, 1fr)` — deux colonnes à gauche, trois en haut sur grand écran, deux
-  à nouveau sur mobile — avec un **libellé court** (`.champ__court`, saisi en HTML à côté du
-  libellé long). Toute modification de densité doit être revérifiée en mesurant le jeu
+- **Une bulle repliée AFFICHE, elle n'édite pas.** Elle montre un résumé en texte : une
+  étiquette, un chiffre dominant en grand (`data-cle`), puis deux ou trois valeurs secondaires
+  en discret (`data-resume`), rendus par `contenuResume()`. Toute la saisie se fait dans la vue
+  zoomée, qu'un clic n'importe où sur la bulle rouvre. Faire tenir des champs éditables dans
+  130 px de haut a été essayé : bordures, remplissage et largeur minimale rendent le résultat
+  illisible.
+- Les libellés existent en deux versions : long (`.champ__libelle`, vue zoomée) et court
+  (`.champ__court`, résumés), tous deux écrits en HTML.
+- Toute modification de densité se revérifie en mesurant le jeu
   `hauteur de bulle − (en-tête + contenu + padding)` : il doit rester positif, sinon
-  `overflow: hidden` coupe silencieusement la dernière rangée.
+  `overflow: hidden` coupe silencieusement la dernière ligne, sans barre pour le signaler.
 - **Premier passage strictement séquentiel** : seule la bulle suivante est ouvrable, les autres
   sont grisées et leurs champs `disabled`. Une fois validée, une bulle devient modifiable sur
   place, sans rejouer le zoom.

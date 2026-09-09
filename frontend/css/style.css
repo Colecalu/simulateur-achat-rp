@@ -256,9 +256,9 @@ h1, h2, h3 { margin: 0; font-weight: 600; letter-spacing: -0.01em; }
   display: none;
   flex-direction: column;
   min-height: 0;
-  padding: 0 11px 8px;
-  /* Filet : le contenu est dimensionné pour tenir, mais un champ coupé par
-     le overflow:hidden de la bulle serait pire qu'une barre de défilement. */
+  padding: 0 12px 10px;
+  /* Filet : un résumé coupé par le overflow:hidden de la bulle serait pire
+     qu'une barre de défilement. En pratique elle n'apparaît jamais. */
   overflow-y: auto;
   scrollbar-width: thin;
 }
@@ -292,7 +292,7 @@ h1, h2, h3 { margin: 0; font-weight: 600; letter-spacing: -0.01em; }
   align-items: center;
   justify-content: flex-start;
   gap: 7px;
-  padding: 7px 11px 5px;
+  padding: 9px 12px 4px;
   text-align: left;
 }
 .bulle--validee .bulle__numero {
@@ -314,40 +314,61 @@ h1, h2, h3 { margin: 0; font-weight: 600; letter-spacing: -0.01em; }
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.bulle--validee .bulle__declencheur:hover { background: var(--surface-creuse); }
+.bulle--validee .bulle__declencheur { cursor: pointer; }
+.bulle--validee:hover { border-color: var(--achat); }
+.bulle--validee:hover .bulle__declencheur { background: var(--surface-creuse); }
 
 /*
- * Deux colonnes de lignes d'une seule hauteur : six champs tiennent en trois
- * rangées, sans la moindre barre de défilement.
+ * La bulle repliée affiche un résumé en TEXTE : un chiffre dominant, puis les
+ * valeurs secondaires. Un champ de saisie coûte une bordure, un remplissage et
+ * une largeur minimale ; à 130 px de haut, il devient illisible. La saisie vit
+ * dans le zoom, qu'un clic sur la bulle rouvre.
  */
-/* Le nombre de colonnes suit la largeur réelle, pas la position : deux dans
-   une bulle de gauche, trois dans une bulle du haut sur grand écran, deux à
-   nouveau quand cette même bulle rétrécit sur mobile. */
-.bulle--validee .bulle__champs {
-  grid-template-columns: repeat(auto-fit, minmax(124px, 1fr));
-  gap: 4px 9px;
-}
-.bulle--validee .champ {
+.bulle--validee .bulle__champs { display: none; }
+
+.bulle__resume { display: none; }
+.bulle--validee .bulle__resume {
   display: flex;
-  align-items: center;
-  gap: 6px;
-  min-width: 0;
+  flex-direction: column;
+  gap: 2px;
+  padding-top: 0;
 }
-.bulle--validee .champ__libelle { display: none; }
-.bulle--validee .champ__court {
-  display: block;
-  flex: 0 1 auto;
-  min-width: 0;
-  font-size: .6875rem;
+
+.resume__cleMot {
+  font-size: .625rem;
+  text-transform: uppercase;
+  letter-spacing: .06em;
   color: var(--encre-3);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  line-height: 1.2;
 }
-.bulle--validee .champ__saisie { flex: 1 1 64px; min-width: 0; }
-.bulle--validee .champ input,
-.bulle--validee .champ select { padding: 2px 5px; font-size: .6875rem; }
-.bulle--validee .champ__unite { padding: 0 6px 0 2px; font-size: .625rem; }
+
+.resume__cle {
+  font-size: 1.5rem;
+  font-weight: 650;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  color: var(--encre);
+}
+.plateau__haut .resume__cleMot {
+  font-size: .625rem;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: var(--encre-3);
+  line-height: 1.2;
+}
+
+.resume__cle { font-size: 1.75rem; }
+
+.resume__reste {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 12px;
+  font-size: .8125rem;
+  color: var(--encre-2);
+}
+.resume__item { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.resume__mot { color: var(--encre-3); }
 
 /* --- Zoomée : plein centre, saisie confortable -------------------------- */
 .voile {

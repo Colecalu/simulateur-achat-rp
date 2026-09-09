@@ -409,6 +409,7 @@ function rafraichir() {
   const mel = optionsMel ? simulerMiseEnLocation(dernierResultat, optionsMel) : null;
   $('#melIncomplet').hidden = !!mel || $('#melPanneau').hidden;
 
+  majBulles();
   afficherAlerte(dernierResultat);
   afficherVerdict(dernierResultat, horizon);
   dessinerGraphiques(dernierResultat, horizon, mel);
@@ -419,6 +420,57 @@ function rafraichir() {
 
 const BULLES = [...document.querySelectorAll('.bulle')].map((b) => Number(b.dataset.bulle));
 const bulle = (n) => document.querySelector(`.bulle[data-bulle="${n}"]`);
+
+/** Rend une valeur de champ lisible : « 420 000 € », « 3,5 %/an », « Ancien ». */
+function valeurLisible(el) {
+  if (el.tagName === 'SELECT') return el.options[el.selectedIndex].text;
+
+  const unite = el.closest('.champ__saisie').querySelector('.champ__unite').textContent.trim();
+  const v = parseFloat(el.value);
+  if (!Number.isFinite(v)) return '—';
+
+  const periode = unite.includes('/mois') ? '/mois' : unite.includes('/an') ? '/an' : '';
+  if (unite.startsWith('€')) return euros.format(v) + periode;
+  if (unite.startsWith('%')) {
+    return v.toLocaleString('fr-FR', { maximumFractionDigits: 2 }) + ' %' + periode;
+  }
+  return `${v} ${unite}`;
+}
+
+/**
+ * Résumé d'une bulle repliée : un chiffre dominant, puis les valeurs
+ * secondaires en discret.
+ *
+ * On affiche du TEXTE, pas des champs de saisie : à cette taille, un champ
+ * éditable — bordure, remplissage, largeur minimale — devient illisible. La
+ * modification passe par le zoom, qu'un clic sur la bulle rouvre.
+ */
+function contenuResume(n) {
+  const el = bulle(n);
+  const cle = el.dataset.cle;
+  const autres = (el.dataset.resume || '').split(',').filter(Boolean);
+
+  // Le chiffre dominant est étiqueté : sans cela « 1 500 €/an » sous le titre
+  // « Charges de propriétaire » pourrait être la copro comme la taxe foncière.
+  let principal = '';
+  if (cle) {
+    const champ = document.getElementById(cle);
+    const mot = champ.closest('.champ').querySelector('.champ__court').textContent;
+    principal =
+      `<span class="resume__cleMot">${mot}</span>` +
+      `<span class="resume__cle">${valeurLisible(champ)}</span>`;
+  }
+
+  const secondaire = autres
+    .map((id) => {
+      const champ = document.getElementById(id);
+      const court = champ.closest('.champ').querySelector('.champ__court').textContent;
+      return `<span class="resume__item"><span class="resume__mot">${court}</span> ${valeurLisible(champ)}</span>`;
+    })
+    .join('');
+
+  return `${principal}<span class="resume__reste">${secondaire}</span>`;
+}
 
 /** Bulles déjà validées : leurs champs deviennent modifiables sur place. */
 const validees = new Set();
@@ -477,10 +529,13 @@ function majBulles() {
     tete.disabled = !estValidee && !estOuvrable && n !== bulleZoomee;
     tete.setAttribute('aria-expanded', String(n === bulleZoomee));
 
-    // Une bulle non validée ne doit pas pouvoir être modifiée au clavier.
+    // Les champs ne sont saisissables que dans la vue zoomée ; au repos la
+    // bulle n'affiche qu'un résumé.
     for (const champ of el.querySelectorAll('input, select')) {
-      champ.disabled = !estValidee && n !== bulleZoomee;
+      champ.disabled = n !== bulleZoomee;
     }
+
+    if (estValidee) el.querySelector('.bulle__resume').innerHTML = contenuResume(n);
   }
 }
 
