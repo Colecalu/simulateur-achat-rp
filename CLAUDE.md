@@ -67,29 +67,33 @@ contient les valeurs réellement calculées par Excel sur 25 ans.
   « si vous revendez dans… ». Le module de mise en location reste masqué jusqu'à un clic. Cette
   sobriété est un choix assumé — ne pas rajouter d'indicateurs ou de graphiques sans demande
   explicite.
-- La saisie se fait dans un **plateau de six bulles** autour de la visualisation : deux en haut
-  (leur largeur cumulée = celle de la visualisation), quatre à gauche (toutes visibles sans
+- La saisie se fait dans un **plateau de cinq bulles** autour de la visualisation : deux en haut
+  (leur largeur cumulée = celle de la visualisation), trois à gauche (toutes visibles sans
   défilement sur un écran d'ordinateur). Les hauteurs sont **bornées** (`grid-auto-rows` en haut,
-  `grid-template-rows: repeat(4, 1fr)` à gauche) et chaque bulle défile en interne : une bulle
-  qui s'étire pousserait toute la mise en page.
-- Au repos, une bulle affiche un **gros numéro centré** avec son titre dessous, et le
-  déclencheur (`.bulle__declencheur`) couvre toute la bulle : elle est cliquable partout.
-  Une fois validée, ce même déclencheur redevient une ligne d'en-tête et laisse la place aux
-  champs.
-- **Une bulle repliée AFFICHE, elle n'édite pas.** Elle montre un résumé en texte : une
-  étiquette, un chiffre dominant en grand (`data-cle`), puis deux ou trois valeurs secondaires
-  en discret (`data-resume`), rendus par `contenuResume()`. Toute la saisie se fait dans la vue
-  zoomée, qu'un clic n'importe où sur la bulle rouvre. Faire tenir des champs éditables dans
-  130 px de haut a été essayé : bordures, remplissage et largeur minimale rendent le résultat
-  illisible.
+  `grid-template-rows: repeat(3, 1fr)` à gauche) : une bulle qui s'étire pousserait toute la mise
+  en page.
+  1. Votre situation · 2. L'opération · 3. Le financement · 4. Les dépenses annuelles (charges du
+  propriétaire **et** loyer du locataire) · 5. Le scénario de marché (rendement, fiscalité et
+  toutes les revalorisations).
+  La bulle 5 est destinée à devenir un **filtre de scénarios** (optimiste / moyen / pessimiste,
+  adossés à des séries historiques réelles) appliqué par-dessus le reste du modèle : y regrouper
+  toutes les hypothèses d'évolution est délibéré.
+- **Premier passage strictement séquentiel** : seule la bulle suivante est ouvrable, les autres
+  sont grisées et leurs champs `disabled`. Un clic ouvre la bulle en grand au centre, avec ses
+  libellés longs et ses textes d'aide.
+- **Une fois validée, une bulle reste modifiable sur place.** Faire varier une hypothèse sans
+  ouvrir de fenêtre est l'essence du simulateur — c'est non négociable. Les champs y sont
+  dépouillés de tout habillage (bordure, fond, remplissage) pour se lire comme du texte : c'est
+  ce chrome, et non la taille de police, qui les rendait illisibles à cette échelle. Le champ
+  désigné par `data-cle` s'affiche en grand au-dessus des autres (`.champ--cle`, `order: -1`).
 - Les libellés existent en deux versions : long (`.champ__libelle`, vue zoomée) et court
-  (`.champ__court`, résumés), tous deux écrits en HTML.
+  (`.champ__court`, bulle repliée), tous deux écrits en HTML.
 - Toute modification de densité se revérifie en mesurant le jeu
   `hauteur de bulle − (en-tête + contenu + padding)` : il doit rester positif, sinon
-  `overflow: hidden` coupe silencieusement la dernière ligne, sans barre pour le signaler.
-- **Premier passage strictement séquentiel** : seule la bulle suivante est ouvrable, les autres
-  sont grisées et leurs champs `disabled`. Une fois validée, une bulle devient modifiable sur
-  place, sans rejouer le zoom.
+  `overflow: hidden` coupe silencieusement la dernière ligne. Un `overflow-y: auto` sert de
+  filet — sur un écran de 768 px de haut, la bulle 5 l'utilise, ce qui est le comportement voulu.
+- Dans les règles de densité, **l'ordre compte** : `.champ input` et `.champ--cle input` ont la
+  même spécificité, donc la règle générique doit toujours précéder celle du champ dominant.
 - Le zoom au centre est une animation **FLIP** (`volerVers()`) : on mesure avant, on applique la
   classe, on mesure après, on joue l'écart à l'envers. Toute animation en cours sur l'élément est
   annulée avant d'en lancer une nouvelle. Le contenu n'apparaît qu'après le voyage, sinon la mise

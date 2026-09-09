@@ -437,41 +437,6 @@ function valeurLisible(el) {
   return `${v} ${unite}`;
 }
 
-/**
- * Résumé d'une bulle repliée : un chiffre dominant, puis les valeurs
- * secondaires en discret.
- *
- * On affiche du TEXTE, pas des champs de saisie : à cette taille, un champ
- * éditable — bordure, remplissage, largeur minimale — devient illisible. La
- * modification passe par le zoom, qu'un clic sur la bulle rouvre.
- */
-function contenuResume(n) {
-  const el = bulle(n);
-  const cle = el.dataset.cle;
-  const autres = (el.dataset.resume || '').split(',').filter(Boolean);
-
-  // Le chiffre dominant est étiqueté : sans cela « 1 500 €/an » sous le titre
-  // « Charges de propriétaire » pourrait être la copro comme la taxe foncière.
-  let principal = '';
-  if (cle) {
-    const champ = document.getElementById(cle);
-    const mot = champ.closest('.champ').querySelector('.champ__court').textContent;
-    principal =
-      `<span class="resume__cleMot">${mot}</span>` +
-      `<span class="resume__cle">${valeurLisible(champ)}</span>`;
-  }
-
-  const secondaire = autres
-    .map((id) => {
-      const champ = document.getElementById(id);
-      const court = champ.closest('.champ').querySelector('.champ__court').textContent;
-      return `<span class="resume__item"><span class="resume__mot">${court}</span> ${valeurLisible(champ)}</span>`;
-    })
-    .join('');
-
-  return `${principal}<span class="resume__reste">${secondaire}</span>`;
-}
-
 /** Bulles déjà validées : leurs champs deviennent modifiables sur place. */
 const validees = new Set();
 /** Bulle actuellement agrandie au centre, ou null. */
@@ -516,6 +481,12 @@ function volerVers(el, appliquerChangement) {
 function majBulles() {
   const prochaine = prochaineBulle();
 
+  // Le champ mis en avant par la bulle, marqué une fois pour toutes.
+  for (const el of document.querySelectorAll('.bulle[data-cle]')) {
+    const cle = document.getElementById(el.dataset.cle);
+    if (cle) cle.closest('.champ').classList.add('champ--cle');
+  }
+
   for (const n of BULLES) {
     const el = bulle(n);
     const estValidee = validees.has(n);
@@ -529,13 +500,11 @@ function majBulles() {
     tete.disabled = !estValidee && !estOuvrable && n !== bulleZoomee;
     tete.setAttribute('aria-expanded', String(n === bulleZoomee));
 
-    // Les champs ne sont saisissables que dans la vue zoomée ; au repos la
-    // bulle n'affiche qu'un résumé.
+    // Une fois la bulle validée, ses champs restent modifiables sur place :
+    // faire varier une hypothèse ne doit pas demander de rouvrir une fenêtre.
     for (const champ of el.querySelectorAll('input, select')) {
-      champ.disabled = n !== bulleZoomee;
+      champ.disabled = !estValidee && n !== bulleZoomee;
     }
-
-    if (estValidee) el.querySelector('.bulle__resume').innerHTML = contenuResume(n);
   }
 }
 

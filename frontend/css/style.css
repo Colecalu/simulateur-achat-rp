@@ -131,7 +131,7 @@ h1, h2, h3 { margin: 0; font-weight: 600; letter-spacing: -0.01em; }
   grid-template-columns: 1fr 1fr;
   /* Hauteur bornée, comme les bulles de gauche : sinon la bulle la plus
      fournie s'étire et pousse toute la mise en page vers le bas. */
-  grid-auto-rows: 144px;
+  grid-auto-rows: 158px;
   gap: 14px;
 }
 .plateau__visu { grid-area: visu; display: grid; gap: 16px; min-width: 0; }
@@ -142,13 +142,13 @@ h1, h2, h3 { margin: 0; font-weight: 600; letter-spacing: -0.01em; }
   position: sticky;
   top: 16px;
   display: grid;
-  grid-template-rows: repeat(4, minmax(0, 1fr));
+  grid-template-rows: repeat(3, minmax(0, 1fr));
   gap: 14px;
   /* Les quatre bulles doivent tenir sous l'en-tête ET sous la rangée du haut,
      sans jamais provoquer de défilement sur un écran d'ordinateur classique. */
-  height: calc(100vh - 300px);
-  min-height: 360px;
-  max-height: 600px;
+  height: calc(100vh - 318px);
+  min-height: 340px;
+  max-height: 620px;
 }
 
 .case { min-height: 0; min-width: 0; }
@@ -167,6 +167,7 @@ h1, h2, h3 { margin: 0; font-weight: 600; letter-spacing: -0.01em; }
     grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   }
   .plateau__coin { justify-content: flex-end; }
+  .plateau__haut { grid-auto-rows: minmax(140px, auto); }
 }
 
 @media (max-width: 640px) {
@@ -319,56 +320,113 @@ h1, h2, h3 { margin: 0; font-weight: 600; letter-spacing: -0.01em; }
 .bulle--validee:hover .bulle__declencheur { background: var(--surface-creuse); }
 
 /*
- * La bulle repliée affiche un résumé en TEXTE : un chiffre dominant, puis les
- * valeurs secondaires. Un champ de saisie coûte une bordure, un remplissage et
- * une largeur minimale ; à 130 px de haut, il devient illisible. La saisie vit
- * dans le zoom, qu'un clic sur la bulle rouvre.
+ * Bulle validée : les champs restent MODIFIABLES sur place — faire varier une
+ * hypothèse est l'essence du simulateur. Ils sont dépouillés de tout habillage
+ * (bordure, fond, remplissage) pour se lire comme du texte : c'est ce chrome,
+ * pas la taille de police, qui les rendait illisibles à cette échelle.
  */
-.bulle--validee .bulle__champs { display: none; }
+.bulle--validee .bulle__champs {
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 0 14px;
+  align-content: start;
+}
 
-.bulle__resume { display: none; }
-.bulle--validee .bulle__resume {
+.bulle--validee .champ {
   display: flex;
-  flex-direction: column;
-  gap: 2px;
-  padding-top: 0;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
+  padding: 1px 0;
+  border-bottom: 1px solid transparent;
+  transition: border-color .12s ease;
 }
+.bulle--validee .champ:hover,
+.bulle--validee .champ:focus-within { border-bottom-color: var(--trait); }
 
-.resume__cleMot {
-  font-size: .625rem;
-  text-transform: uppercase;
-  letter-spacing: .06em;
+.bulle--validee .champ__libelle { display: none; }
+.bulle--validee .champ__court {
+  display: block;
+  flex: 0 1 auto;
+  min-width: 0;
+  font-size: .75rem;
   color: var(--encre-3);
-  line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
-
-.resume__cle {
-  font-size: 1.5rem;
-  font-weight: 650;
-  line-height: 1.1;
-  letter-spacing: -0.02em;
-  font-variant-numeric: tabular-nums;
+.bulle--validee .champ__saisie {
+  flex: 0 0 auto;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+.bulle--validee .champ input,
+.bulle--validee .champ select {
+  width: 74px;
+  padding: 0;
+  text-align: right;
+  font-size: .8125rem;
+  font-weight: 550;
   color: var(--encre);
 }
-.plateau__haut .resume__cleMot {
+.bulle--validee .champ select { width: auto; text-align: left; }
+.bulle--validee .champ__unite { padding: 0 0 0 3px; font-size: .6875rem; }
+
+/* Le champ dominant occupe toute la largeur, en grand : c'est lui qu'on lit
+   d'abord et qu'on fait varier le plus souvent. */
+.bulle--validee .champ--cle {
+  grid-column: 1 / -1;
+  order: -1;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0;
+  padding: 0 0 2px;
+  border-bottom: 0;
+}
+.bulle--validee .champ--cle .champ__court {
   font-size: .625rem;
   text-transform: uppercase;
   letter-spacing: .06em;
-  color: var(--encre-3);
-  line-height: 1.2;
 }
-
-.resume__cle { font-size: 1.75rem; }
-
-.resume__reste {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 2px 12px;
-  font-size: .8125rem;
-  color: var(--encre-2);
+.bulle--validee .champ--cle .champ__saisie {
+  align-self: flex-start;
+  max-width: 100%;
+  border-bottom: 1px solid transparent;
 }
-.resume__item { font-variant-numeric: tabular-nums; white-space: nowrap; }
-.resume__mot { color: var(--encre-3); }
+.bulle--validee .champ--cle:hover .champ__saisie,
+.bulle--validee .champ--cle:focus-within .champ__saisie { border-bottom-color: var(--trait); }
+.bulle--validee .champ--cle input,
+.bulle--validee .champ--cle select {
+  width: 7ch;
+  flex: 0 1 auto;
+  text-align: left;
+  font-size: 1.5rem;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+.plateau__haut .bulle--validee .champ--cle input { font-size: 1.75rem; }
+
+/*
+ * Écran court : quelques pixels rendus par bulle, plutôt qu'une barre de
+ * défilement dans la plus fournie.
+ *
+ * L'ordre compte : `.champ input` et `.champ--cle input` ont la même
+ * spécificité, donc la règle générique DOIT venir en premier, sinon elle
+ * écrase le chiffre dominant et le ramène à la taille des autres.
+ */
+@media (max-height: 820px) {
+  .bulle--validee .champ input,
+  .bulle--validee .champ select { font-size: .6875rem; }
+  .bulle--validee .champ__court { font-size: .6875rem; }
+
+  .bulle--validee .champ--cle input,
+  .bulle--validee .champ--cle select { font-size: 1.125rem; }
+  .plateau__haut .bulle--validee .champ--cle input { font-size: 1.375rem; }
+}
+.bulle--validee .champ--cle .champ__unite { font-size: .875rem; padding-left: 4px; }
 
 /* --- Zoomée : plein centre, saisie confortable -------------------------- */
 .voile {
