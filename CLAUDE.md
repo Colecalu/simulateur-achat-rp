@@ -94,7 +94,13 @@ contient les valeurs réellement calculées par Excel sur 25 ans.
   ouvrir de fenêtre est l'essence du simulateur — c'est non négociable. Les champs y sont
   dépouillés de tout habillage (bordure, fond, remplissage) pour se lire comme du texte : c'est
   ce chrome, et non la taille de police, qui les rendait illisibles à cette échelle.
-- **Tous les champs ont le même traitement** : aucun n'est mis en avant. Une ligne par champ,
+- **Tous les champs ne se valent pas.** Un paramètre mérite une place à l écran en proportion de
+  la fréquence à laquelle on y touche. Les champs marqués `data-role="reglage"` (frais d agence,
+  frais bancaires, assurance emprunteur, revalorisation des charges et de la taxe foncière,
+  fiscalité des plus-values) sont nécessaires au calcul mais fixés une fois : ils disparaissent de
+  la bulle repliée et ne vivent que dans la vue zoomée. La règle CSS doit exclure `.bulle--zoom`,
+  sinon une bulle validée puis rouverte les masquerait aussi.
+- **Tous les champs visibles ont le même traitement** : aucun n'est mis en avant. Une ligne par champ,
   libellé à gauche, valeur à droite. Le nombre de colonnes est déclaré par bulle
   (`data-colonnes`) et les rangées se partagent toute la hauteur (`grid-auto-rows: 1fr`) : pas
   d'espace mort en bas de bulle. Les libellés courts sont calibrés pour tenir dans une cellule

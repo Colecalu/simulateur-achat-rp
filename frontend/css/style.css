@@ -359,6 +359,14 @@ h1, h2, h3 { margin: 0; font-weight: 600; letter-spacing: -0.01em; }
   border-bottom-color: transparent;
 }
 
+/*
+ * Un paramètre mérite une place à l'écran en proportion de la fréquence à
+ * laquelle on y touche. Les réglages — nécessaires au calcul mais fixés une
+ * fois pour toutes — disparaissent de la bulle repliée et ne vivent que dans
+ * la vue zoomée.
+ */
+.bulle--validee:not(.bulle--zoom) .champ[data-role="reglage"] { display: none; }
+
 .bulle--validee .champ__libelle { display: none; }
 .bulle--validee .champ__court {
   display: block;
