@@ -67,16 +67,21 @@ contient les valeurs réellement calculées par Excel sur 25 ans.
   « si vous revendez dans… ». Le module de mise en location reste masqué jusqu'à un clic. Cette
   sobriété est un choix assumé — ne pas rajouter d'indicateurs ou de graphiques sans demande
   explicite.
-- La saisie se fait **par étapes** (`.etape`, une par section, pilotées par `allerEtape()` dans
-  `app.js`). Aucune étape n'est bloquante : tous les champs ont un défaut, on peut sauter
-  directement à n'importe quelle étape par le fil.
-- Chaque étape parcourue dépose une **bulle de récapitulatif** dans le rail de gauche
-  (`majRail()`). Les champs qu'une bulle affiche sont déclarés en HTML par
-  `data-resume="id1,id2"` sur la `<section class="etape">` — pas de liste en dur dans le JS.
-- Dans `majRail()`, les bulles sont insérées **directement à leur place** et jamais déplacées
-  ensuite : re-parenter un nœud annule son animation CSS en cours et la relance à chaque
-  frappe. Le retrait de la classe d'animation a un filet `setTimeout`, car `animationend` ne
-  part pas dans un onglet en arrière-plan.
+- La saisie se fait dans un **plateau de six bulles** autour de la visualisation : deux en haut
+  (leur largeur cumulée = celle de la visualisation), quatre à gauche (toutes visibles sans
+  défilement sur un écran d'ordinateur). Les hauteurs sont **bornées** (`grid-auto-rows` en haut,
+  `grid-template-rows: repeat(4, 1fr)` à gauche) et chaque bulle défile en interne : une bulle
+  qui s'étire pousserait toute la mise en page.
+- **Premier passage strictement séquentiel** : seule la bulle suivante est ouvrable, les autres
+  sont grisées et leurs champs `disabled`. Une fois validée, une bulle devient modifiable sur
+  place, sans rejouer le zoom.
+- Le zoom au centre est une animation **FLIP** (`volerVers()`) : on mesure avant, on applique la
+  classe, on mesure après, on joue l'écart à l'envers. Toute animation en cours sur l'élément est
+  annulée avant d'en lancer une nouvelle. Le contenu n'apparaît qu'après le voyage, sinon la mise
+  à l'échelle le déformerait.
+- **Pas de `<form>` imbriqué** : le plateau est un `<div>`, car il contient le `<form>` du module
+  de mise en location. Deux formulaires imbriqués sont invalides et le parseur supprime
+  silencieusement la balise interne.
 
 ## Workflow Git
 

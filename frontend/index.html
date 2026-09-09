@@ -13,49 +13,30 @@
   <div class="entete__contenu">
     <h1>Dois-je acheter ma résidence principale&nbsp;?</h1>
     <p class="entete__sous-titre">
-      À budget mensuel identique&nbsp;: ce que le logement ne consomme pas est investi en bourse,
-      des deux côtés. On compare les deux patrimoines, nets d'impôt.
+      Remplissez les six bulles dans l'ordre. À budget mensuel identique, on compare
+      les deux patrimoines nets d'impôt.
     </p>
   </div>
 </header>
 
 <main class="page">
+  <div class="plateau" id="formulaire">
 
-  <!-- ======================= SAISIE PAR ÉTAPES ======================= -->
-  <form class="parcours" id="formulaire" autocomplete="off">
+    <div class="plateau__coin">
+      <button type="button" class="bouton bouton--discret" id="reinitialiser">Réinitialiser</button>
+    </div>
 
-    <nav class="fil" id="fil" aria-label="Étapes de la saisie">
-      <button type="button" class="fil__puce" data-aller="1" aria-label="Étape 1 : Votre situation">
-        <span class="fil__numero">1</span>
-        <span class="fil__mot">Situation</span>
-      </button>
-      <button type="button" class="fil__puce" data-aller="2" aria-label="Étape 2 : Le bien">
-        <span class="fil__numero">2</span>
-        <span class="fil__mot">Le bien</span>
-      </button>
-      <button type="button" class="fil__puce" data-aller="3" aria-label="Étape 3 : Le crédit">
-        <span class="fil__numero">3</span>
-        <span class="fil__mot">Le crédit</span>
-      </button>
-      <button type="button" class="fil__puce" data-aller="4" aria-label="Étape 4 : Charges de propriétaire">
-        <span class="fil__numero">4</span>
-        <span class="fil__mot">Charges</span>
-      </button>
-      <button type="button" class="fil__puce" data-aller="5" aria-label="Étape 5 : Si vous restez locataire">
-        <span class="fil__numero">5</span>
-        <span class="fil__mot">Location</span>
-      </button>
-      <button type="button" class="fil__puce" data-aller="6" aria-label="Étape 6 : Hypothèses de marché">
-        <span class="fil__numero">6</span>
-        <span class="fil__mot">Marché</span>
-      </button>
-    </nav>
-
-      <section class="etape" data-etape="1" data-resume="capitalInitial,enveloppeMensuelle" hidden>
-        <p class="etape__rang">Étape 1 sur 6</p>
-        <h2 class="etape__titre">Votre situation</h2>
-        <p class="etape__intro">De quoi disposez-vous aujourd'hui, et combien pouvez-vous consacrer chaque mois au logement <em>et</em> à l'épargne&nbsp;? Ce budget sera identique dans les deux scénarios&nbsp;: c'est ce qui rend la comparaison honnête.</p>
-        <div class="etape__champs">
+    <div class="plateau__haut">
+      <div class="case" data-case="1">
+        <article class="bulle" data-bulle="1" data-resume="capitalInitial,enveloppeMensuelle">
+          <button type="button" class="bulle__tete" data-ouvrir="1">
+            <span class="bulle__numero">1</span>
+            <span class="bulle__titre">Votre situation</span>
+            <span class="bulle__cadenas" aria-hidden="true"></span>
+          </button>
+          <div class="bulle__corps">
+            <p class="bulle__intro">De quoi disposez-vous aujourd'hui, et combien pouvez-vous consacrer chaque mois au logement <em>et</em> à l'épargne&nbsp;? Ce budget sera identique dans les deux scénarios&nbsp;: c'est ce qui rend la comparaison honnête.</p>
+            <div class="bulle__champs">
         <label class="champ">
           <span class="champ__libelle">Capital disponible aujourd'hui</span>
           <span class="champ__saisie">
@@ -71,14 +52,23 @@
           </span>
           <span class="champ__aide">Le budget total que vous consacrez au logement ET à l'épargne. Identique dans les deux scénarios.</span>
         </label>
-        </div>
-      </section>
-
-      <section class="etape" data-etape="2" data-resume="prixNetVendeur,typeBien,travaux" hidden>
-        <p class="etape__rang">Étape 2 sur 6</p>
-        <h2 class="etape__titre">Le bien</h2>
-        <p class="etape__intro">Ce que vous achetez, et ce qu'il coûte réellement. Les frais de notaire sont calculés automatiquement à partir du prix et du type de bien.</p>
-        <div class="etape__champs">
+            </div>
+            <div class="bulle__pied">
+              <button type="button" class="bouton bouton--primaire" data-valider="1">Valider</button>
+            </div>
+          </div>
+        </article>
+      </div>
+      <div class="case" data-case="2">
+        <article class="bulle" data-bulle="2" data-resume="prixNetVendeur,typeBien,travaux">
+          <button type="button" class="bulle__tete" data-ouvrir="2">
+            <span class="bulle__numero">2</span>
+            <span class="bulle__titre">Le bien</span>
+            <span class="bulle__cadenas" aria-hidden="true"></span>
+          </button>
+          <div class="bulle__corps">
+            <p class="bulle__intro">Ce que vous achetez, et ce qu'il coûte réellement. Les frais de notaire sont calculés automatiquement à partir du prix et du type de bien.</p>
+            <div class="bulle__champs">
         <label class="champ">
           <span class="champ__libelle">Prix net vendeur</span>
           <span class="champ__saisie">
@@ -125,14 +115,26 @@
           </span>
           <span class="champ__aide">Ce que vous en tireriez à la revente en année 0. Souvent inférieure au total dépensé&nbsp;: les frais de notaire ne se récupèrent pas.</span>
         </label>
-        </div>
-      </section>
+            </div>
+            <div class="bulle__pied">
+              <button type="button" class="bouton bouton--primaire" data-valider="2">Valider</button>
+            </div>
+          </div>
+        </article>
+      </div>
+    </div>
 
-      <section class="etape" data-etape="3" data-resume="apport,dureeAnnees,tauxCredit" hidden>
-        <p class="etape__rang">Étape 3 sur 6</p>
-        <h2 class="etape__titre">Le crédit</h2>
-        <p class="etape__intro">Ce que vous empruntez, et à quel prix. Le reste de votre capital continue de travailler en bourse.</p>
-        <div class="etape__champs">
+    <div class="plateau__gauche">
+      <div class="case" data-case="3">
+        <article class="bulle" data-bulle="3" data-resume="apport,dureeAnnees,tauxCredit">
+          <button type="button" class="bulle__tete" data-ouvrir="3">
+            <span class="bulle__numero">3</span>
+            <span class="bulle__titre">Le crédit</span>
+            <span class="bulle__cadenas" aria-hidden="true"></span>
+          </button>
+          <div class="bulle__corps">
+            <p class="bulle__intro">Ce que vous empruntez, et à quel prix. Le reste de votre capital continue de travailler en bourse.</p>
+            <div class="bulle__champs">
         <label class="champ">
           <span class="champ__libelle">Apport</span>
           <span class="champ__saisie">
@@ -162,14 +164,23 @@
           </span>
           <span class="champ__aide">Calculée sur le capital restant dû&nbsp;: elle décroît avec le remboursement.</span>
         </label>
-        </div>
-      </section>
-
-      <section class="etape" data-etape="4" data-resume="chargesCopro,taxeFonciere" hidden>
-        <p class="etape__rang">Étape 4 sur 6</p>
-        <h2 class="etape__titre">Charges de propriétaire</h2>
-        <p class="etape__intro">Ce que le bien vous coûte chaque année une fois acheté, et comment tout cela évolue avec le temps.</p>
-        <div class="etape__champs">
+            </div>
+            <div class="bulle__pied">
+              <button type="button" class="bouton bouton--primaire" data-valider="3">Valider</button>
+            </div>
+          </div>
+        </article>
+      </div>
+      <div class="case" data-case="4">
+        <article class="bulle" data-bulle="4" data-resume="chargesCopro,taxeFonciere">
+          <button type="button" class="bulle__tete" data-ouvrir="4">
+            <span class="bulle__numero">4</span>
+            <span class="bulle__titre">Charges de propriétaire</span>
+            <span class="bulle__cadenas" aria-hidden="true"></span>
+          </button>
+          <div class="bulle__corps">
+            <p class="bulle__intro">Ce que le bien vous coûte chaque année une fois acheté, et comment tout cela évolue avec le temps.</p>
+            <div class="bulle__champs">
         <label class="champ">
           <span class="champ__libelle">Charges de copropriété</span>
           <span class="champ__saisie">
@@ -205,14 +216,23 @@
             <span class="champ__unite">%/an</span>
           </span>
         </label>
-        </div>
-      </section>
-
-      <section class="etape" data-etape="5" data-resume="loyer" hidden>
-        <p class="etape__rang">Étape 5 sur 6</p>
-        <h2 class="etape__titre">Si vous restez locataire</h2>
-        <p class="etape__intro">L'autre vie&nbsp;: celle où vous n'achetez pas. Le loyer remplace la mensualité, et tout ce que l'enveloppe ne consomme pas part en bourse.</p>
-        <div class="etape__champs">
+            </div>
+            <div class="bulle__pied">
+              <button type="button" class="bouton bouton--primaire" data-valider="4">Valider</button>
+            </div>
+          </div>
+        </article>
+      </div>
+      <div class="case" data-case="5">
+        <article class="bulle" data-bulle="5" data-resume="loyer">
+          <button type="button" class="bulle__tete" data-ouvrir="5">
+            <span class="bulle__numero">5</span>
+            <span class="bulle__titre">Si vous restez locataire</span>
+            <span class="bulle__cadenas" aria-hidden="true"></span>
+          </button>
+          <div class="bulle__corps">
+            <p class="bulle__intro">L'autre vie&nbsp;: celle où vous n'achetez pas. Le loyer remplace la mensualité, et tout ce que l'enveloppe ne consomme pas part en bourse.</p>
+            <div class="bulle__champs">
         <label class="champ">
           <span class="champ__libelle">Loyer (charges comprises)</span>
           <span class="champ__saisie">
@@ -227,14 +247,23 @@
             <span class="champ__unite">%/an</span>
           </span>
         </label>
-        </div>
-      </section>
-
-      <section class="etape" data-etape="6" data-resume="rendementBourse,fiscalitePlusValues" hidden>
-        <p class="etape__rang">Étape 6 sur 6</p>
-        <h2 class="etape__titre">Hypothèses de marché</h2>
-        <p class="etape__intro">Ce que devient l'argent que vous n'immobilisez pas dans le logement. C'est l'hypothèse la plus lourde de conséquences.</p>
-        <div class="etape__champs">
+            </div>
+            <div class="bulle__pied">
+              <button type="button" class="bouton bouton--primaire" data-valider="5">Valider</button>
+            </div>
+          </div>
+        </article>
+      </div>
+      <div class="case" data-case="6">
+        <article class="bulle" data-bulle="6" data-resume="rendementBourse,fiscalitePlusValues">
+          <button type="button" class="bulle__tete" data-ouvrir="6">
+            <span class="bulle__numero">6</span>
+            <span class="bulle__titre">Hypothèses de marché</span>
+            <span class="bulle__cadenas" aria-hidden="true"></span>
+          </button>
+          <div class="bulle__corps">
+            <p class="bulle__intro">Ce que devient l'argent que vous n'immobilisez pas dans le logement. C'est l'hypothèse la plus lourde de conséquences.</p>
+            <div class="bulle__champs">
         <label class="champ">
           <span class="champ__libelle">Rendement de la bourse</span>
           <span class="champ__saisie">
@@ -251,54 +280,47 @@
           </span>
           <span class="champ__aide">31,4&nbsp;% = flat tax sur compte-titres. Un PEA ou une assurance-vie sont moins taxés.</span>
         </label>
-        </div>
-      </section>
-
-    <div class="parcours__pied">
-      <button type="button" class="bouton" id="etapePrecedente">← Précédent</button>
-      <button type="button" class="bouton bouton--primaire" id="etapeSuivante">Suivant →</button>
-      <button type="button" class="bouton bouton--discret" id="etapeRouvrir" hidden>Modifier mes réponses</button>
-      <button type="button" class="bouton bouton--discret" id="reinitialiser">Réinitialiser</button>
-    </div>
-  </form>
-
-  <!-- ==================== RAIL + RÉSULTAT ============================ -->
-  <div class="atelier">
-
-  <aside class="rail" id="rail" aria-label="Étapes renseignées" hidden></aside>
-
-  <section class="resultats" aria-live="polite">
-
-    <p class="alerte" id="alerteEnveloppe" hidden>
-      Votre enveloppe mensuelle ne couvre pas le coût de propriétaire
-      (<strong id="alerteCout"></strong>). Augmentez-la, ou revoyez le prix du bien&nbsp;:
-      en l'état, le scénario d'achat n'est pas finançable.
-    </p>
-
-    <div class="verdict" id="verdict">
-      <div class="verdict__entete">
-        <h2 class="verdict__question">Si vous revendez dans</h2>
-        <div class="verdict__horizon">
-          <input type="range" id="horizon" min="1" max="25" step="1" value="20"
-                 aria-label="Horizon de revente en années">
-          <output class="verdict__annees" id="horizonLabel">20 ans</output>
-        </div>
+            </div>
+            <div class="bulle__pied">
+              <button type="button" class="bouton bouton--primaire" data-valider="6">Valider</button>
+            </div>
+          </div>
+        </article>
       </div>
-      <p class="verdict__chiffre" id="verdictChiffre">—</p>
-      <p class="verdict__phrase" id="verdictPhrase"></p>
-      <p class="verdict__detail" id="verdictDetail"></p>
     </div>
 
-    <figure class="carte carte--graphique">
-      <figcaption class="carte__entete">
-        <h3 class="carte__titre">Patrimoine net d'impôt, année par année</h3>
-        <p class="carte__legende">
-          Bien immobilier net de dette + portefeuille boursier, après impôt sur les plus-values.
-        </p>
-      </figcaption>
-      <div class="legende" id="legendePatrimoine"></div>
-      <div class="graphique"><canvas id="graphPatrimoine"></canvas></div>
-    </figure>
+    <section class="plateau__visu" aria-live="polite">
+
+      <p class="alerte" id="alerteEnveloppe" hidden>
+        Votre enveloppe mensuelle ne couvre pas le coût de propriétaire
+        (<strong id="alerteCout"></strong>). Augmentez-la, ou revoyez le prix du bien&nbsp;:
+        en l'état, le scénario d'achat n'est pas finançable.
+      </p>
+
+      <div class="verdict" id="verdict">
+        <div class="verdict__entete">
+          <h2 class="verdict__question">Si vous revendez dans</h2>
+          <div class="verdict__horizon">
+            <input type="range" id="horizon" min="1" max="25" step="1" value="20"
+                   aria-label="Horizon de revente en années">
+            <output class="verdict__annees" id="horizonLabel">20 ans</output>
+          </div>
+        </div>
+        <p class="verdict__chiffre" id="verdictChiffre">—</p>
+        <p class="verdict__phrase" id="verdictPhrase"></p>
+        <p class="verdict__detail" id="verdictDetail"></p>
+      </div>
+
+      <figure class="carte carte--graphique">
+        <figcaption class="carte__entete">
+          <h3 class="carte__titre">Patrimoine net d'impôt, année par année</h3>
+          <p class="carte__legende">
+            Bien immobilier net de dette + portefeuille boursier, après impôt sur les plus-values.
+          </p>
+        </figcaption>
+        <div class="legende" id="legendePatrimoine"></div>
+        <div class="graphique"><canvas id="graphPatrimoine"></canvas></div>
+      </figure>
 
     <!-- ========== MISE EN LOCATION (divulgation progressive) ========== -->
     <div class="mel">
@@ -416,15 +438,16 @@
       <p class="carte__legende" id="melNote"></p>
     </figure>
 
-    <p class="avertissement">
-      Simulation à hypothèses constantes&nbsp;: ni inflation générale, ni changement de situation,
-      ni revente anticipée subie. Le rendement boursier est supposé régulier, ce qu'aucun marché ne fait.
-      Un résultat serré (moins de quelques milliers d'euros d'écart) doit se lire comme une égalité.
-    </p>
-  </section>
+      <p class="avertissement">
+        Simulation à hypothèses constantes&nbsp;: ni inflation générale, ni changement de situation,
+        ni revente anticipée subie. Le rendement boursier est supposé régulier, ce qu'aucun marché ne fait.
+        Un résultat serré (moins de quelques milliers d'euros d'écart) doit se lire comme une égalité.
+      </p>
+    </section>
 
   </div>
 
+  <div class="voile" id="voile" hidden></div>
 </main>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>

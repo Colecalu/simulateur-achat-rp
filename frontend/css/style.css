@@ -92,249 +92,250 @@ h1, h2, h3 { margin: 0; font-weight: 600; letter-spacing: -0.01em; }
   background: var(--surface);
 }
 .entete__contenu {
-  max-width: 1280px;
+  max-width: 1360px;
   margin: 0 auto;
-  padding: 28px 24px 24px;
+  padding: 18px 24px 16px;
 }
-.entete h1 { font-size: 1.6rem; line-height: 1.25; }
+.entete h1 { font-size: 1.35rem; line-height: 1.25; }
 .entete__sous-titre {
-  margin: 8px 0 0;
+  margin: 5px 0 0;
+  font-size: .875rem;
   max-width: 62ch;
   color: var(--encre-2);
 }
 
 /* ----------------------------------------------------------------- Layout */
 
+/* ---------------------------------------------------------------- Plateau */
+
 .page {
-  max-width: 1160px;
+  max-width: 1360px;
   margin: 0 auto;
-  padding: 24px;
-  display: grid;
-  gap: 24px;
+  padding: 16px 24px 24px;
 }
 
-/* Sous l'étape active : le rail des bulles remplies, puis le résultat. */
-.atelier {
+.plateau {
   display: grid;
-  grid-template-columns: 280px minmax(0, 1fr);
-  gap: 24px;
+  grid-template-columns: 268px minmax(0, 1fr);
+  grid-template-areas:
+    "coin   haut"
+    "gauche visu";
+  gap: 14px;
   align-items: start;
 }
-@media (max-width: 900px) {
-  .atelier { grid-template-columns: minmax(0, 1fr); }
+
+.plateau__coin { grid-area: coin; display: flex; align-items: end; height: 100%; padding-bottom: 4px; }
+.plateau__haut {
+  grid-area: haut;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  /* Hauteur bornée, comme les bulles de gauche : sinon la bulle la plus
+     fournie s'étire et pousse toute la mise en page vers le bas. */
+  grid-auto-rows: 144px;
+  gap: 14px;
+}
+.plateau__visu { grid-area: visu; display: grid; gap: 16px; min-width: 0; }
+
+/* Les quatre bulles de gauche tiennent dans un écran, sans défilement. */
+.plateau__gauche {
+  grid-area: gauche;
+  position: sticky;
+  top: 16px;
+  display: grid;
+  grid-template-rows: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+  /* Les quatre bulles doivent tenir sous l'en-tête ET sous la rangée du haut,
+     sans jamais provoquer de défilement sur un écran d'ordinateur classique. */
+  height: calc(100vh - 300px);
+  min-height: 360px;
+  max-height: 600px;
 }
 
-/* --------------------------------------------------------------- Parcours */
+.case { min-height: 0; min-width: 0; }
 
-.parcours {
+
+@media (max-width: 1040px) {
+  .plateau {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: "coin" "haut" "gauche" "visu";
+  }
+  .plateau__gauche {
+    position: static;
+    height: auto;
+    max-height: none;
+    grid-template-rows: none;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  }
+  .plateau__coin { justify-content: flex-end; }
+}
+
+@media (max-width: 640px) {
+  .plateau__haut { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* ----------------------------------------------------------------- Bulles */
+
+.bulle {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
   background: var(--surface);
   border: 1px solid var(--trait);
   border-radius: var(--rayon-large);
   box-shadow: var(--ombre);
   overflow: hidden;
+  transition: border-color .15s ease, opacity .2s ease, box-shadow .15s ease;
 }
 
-/* Fil d'étapes */
-.fil {
-  display: flex;
-  gap: 4px;
-  padding: 14px 16px;
-  border-bottom: 1px solid var(--trait);
-  background: var(--surface-creuse);
-  overflow-x: auto;
-  scrollbar-width: none;
-}
-.fil::-webkit-scrollbar { display: none; }
-
-.fil__puce {
-  flex: 1;
-  min-width: max-content;
+.bulle__tete {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 7px 12px;
+  gap: 10px;
+  width: 100%;
+  padding: 12px 14px;
   border: 0;
-  border-radius: 999px;
   background: transparent;
   font: inherit;
-  font-size: .8125rem;
-  color: var(--encre-3);
+  text-align: left;
   cursor: pointer;
-  white-space: nowrap;
-  transition: background .12s ease, color .12s ease;
+  flex: none;
 }
-.fil__puce:hover { background: var(--surface); color: var(--encre-2); }
-
-.fil__numero {
+.bulle__numero {
   display: grid;
   place-items: center;
-  width: 22px; height: 22px;
+  width: 24px; height: 24px;
   flex: none;
   border-radius: 50%;
-  border: 1.5px solid currentColor;
-  font-size: .6875rem;
-  font-weight: 600;
+  background: var(--surface-creuse);
+  color: var(--encre-3);
+  font-size: .75rem;
+  font-weight: 700;
   font-variant-numeric: tabular-nums;
+  transition: background .15s ease, color .15s ease;
 }
-
-.fil__puce--vue { color: var(--encre-2); }
-.fil__puce--vue .fil__numero {
-  background: var(--encre-3);
-  border-color: var(--encre-3);
-  color: var(--surface);
-}
-
-.fil__puce--active { background: var(--surface); color: var(--achat); font-weight: 600; }
-.fil__puce--active .fil__numero {
-  background: var(--achat);
-  border-color: var(--achat);
-  color: #fff;
-}
-
-@media (max-width: 620px) {
-  .fil__mot { display: none; }
-  .fil__puce { flex: none; padding: 7px; }
-}
-
-/* Parcours terminé : la carte se replie, tout se modifie depuis le rail. */
-.parcours--termine .parcours__pied { justify-content: flex-start; }
-
-/* --------------------------------------------------------- Rail des bulles */
-
-.rail {
-  display: grid;
-  gap: 10px;
-  align-content: start;
-  position: sticky;
-  top: 24px;
-}
-.rail[hidden] { display: none; }
-
-@media (max-width: 900px) {
-  .rail {
-    position: static;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  }
-}
-
-.bulle {
-  display: grid;
-  gap: 6px;
-  width: 100%;
-  /* Sans ce min-width, le libellé en nowrap impose sa largeur intrinsèque
-     et la bulle déborde du rail au lieu de tronquer. */
-  min-width: 0;
-  text-align: left;
-  font: inherit;
-  padding: 12px 14px;
-  border: 1px solid var(--trait);
-  border-radius: var(--rayon);
-  background: var(--surface);
-  cursor: pointer;
-  transition: border-color .12s ease, background .12s ease, transform .12s ease;
-}
-.bulle:hover { border-color: var(--achat); transform: translateX(2px); }
-
-.bulle--active {
-  border-color: var(--achat);
-  box-shadow: 0 0 0 3px var(--achat-voile);
-}
-
-.bulle__entete { display: flex; align-items: center; gap: 7px; min-width: 0; }
-
-.bulle__coche {
-  width: 15px; height: 15px;
-  flex: none;
-  border-radius: 50%;
-  background: var(--achat);
-  position: relative;
-}
-.bulle__coche::after {
-  content: "";
-  position: absolute;
-  left: 4.5px; top: 2.5px;
-  width: 4px; height: 7px;
-  border: solid #fff;
-  border-width: 0 1.6px 1.6px 0;
-  transform: rotate(45deg);
-}
-
 .bulle__titre {
-  font-size: .8125rem;
+  flex: 1;
+  min-width: 0;
+  font-size: .875rem;
   font-weight: 600;
   color: var(--encre);
-  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.bulle__ligne {
+/* Cadenas dessiné en CSS : anse + corps, pas d'image à charger. */
+.bulle__cadenas { display: none; flex: none; width: 14px; height: 16px; position: relative; }
+.bulle__cadenas::before {
+  content: "";
+  position: absolute;
+  left: 3px; top: 0;
+  width: 8px; height: 7px;
+  border: 1.6px solid var(--encre-3);
+  border-bottom: 0;
+  border-radius: 4px 4px 0 0;
+}
+.bulle__cadenas::after {
+  content: "";
+  position: absolute;
+  left: 0; bottom: 0;
+  width: 14px; height: 10px;
+  border-radius: 2px;
+  background: var(--encre-3);
+}
+
+.bulle__corps {
   display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 10px;
-  min-width: 0;
+  flex-direction: column;
+  min-height: 0;
+  padding: 0 14px 14px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.bulle__intro { display: none; }
+.bulle__pied { display: none; }
+
+.bulle__champs { display: grid; gap: 10px; align-content: start; }
+
+/* --- Verrouillée : grisée, inerte -------------------------------------- */
+.bulle--verrouillee { opacity: .5; }
+.bulle--verrouillee .bulle__tete { cursor: not-allowed; }
+.bulle--verrouillee .bulle__cadenas { display: block; }
+.bulle--verrouillee .bulle__corps { display: none; }
+
+/* --- Prochaine à remplir : elle appelle le clic ------------------------- */
+.bulle--ouvrable { border-color: var(--achat); }
+.bulle--ouvrable .bulle__numero { background: var(--achat); color: #fff; }
+.bulle--ouvrable .bulle__corps { display: none; }
+.bulle--ouvrable .bulle__tete:hover { background: var(--achat-voile); }
+.bulle--ouvrable::after {
+  content: "Cliquez pour remplir";
+  padding: 0 14px 14px;
   font-size: .75rem;
-}
-.bulle__libelle {
-  flex: 1 1 auto;
-  min-width: 0;
-  color: var(--encre-3);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.bulle__valeur {
-  flex: 0 0 auto;
-  color: var(--encre-2);
-  font-weight: 500;
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
+  color: var(--achat);
 }
 
-/* Arrivée de la bulle : elle tombe de la carte d'étape, juste au-dessus. */
-@keyframes bulleEntree {
-  from { opacity: 0; transform: translateY(-22px) scale(.94); }
-  60%  { opacity: 1; }
-  to   { opacity: 1; transform: none; }
-}
-.bulle--entree { animation: bulleEntree .34s cubic-bezier(.2, .8, .3, 1); }
+/* --- Validée : champs modifiables sur place ---------------------------- */
+.bulle--validee .bulle__numero { background: var(--succes); color: #fff; }
+.bulle--validee .bulle__tete { cursor: default; }
 
-@media (prefers-reduced-motion: reduce) {
-  .bulle--entree { animation: none; }
-  .bulle:hover { transform: none; }
+/* --- Zoomée : plein centre, saisie confortable -------------------------- */
+.voile {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  background: rgba(11, 11, 11, .42);
+  animation: voileEntree .22s ease;
 }
+.voile[hidden] { display: none; }
+@keyframes voileEntree { from { opacity: 0; } to { opacity: 1; } }
 
-/* Contenu d'une étape */
-.etape { padding: 24px; }
-.etape[hidden] { display: none; }
-
-.etape__rang {
-  margin: 0 0 6px;
-  font-size: .75rem;
-  color: var(--encre-3);
-  font-variant-numeric: tabular-nums;
+.bulle--zoom {
+  position: fixed;
+  z-index: 50;
+  top: 50%;
+  left: 50%;
+  transform-origin: top left;
+  width: min(680px, calc(100vw - 32px));
+  max-height: calc(100vh - 48px);
+  height: auto;
+  margin: 0;
+  translate: -50% -50%;
+  border-color: var(--achat);
+  box-shadow: 0 24px 64px rgba(11, 11, 11, .28);
 }
-.etape__titre { font-size: 1.25rem; }
-.etape__intro {
-  margin: 8px 0 0;
+.bulle--zoom .bulle__tete { padding: 20px 24px 0; cursor: default; }
+.bulle--zoom .bulle__numero { width: 30px; height: 30px; font-size: .875rem; background: var(--achat); color: #fff; }
+.bulle--zoom .bulle__titre { font-size: 1.25rem; white-space: normal; }
+.bulle--zoom .bulle__corps { display: flex; padding: 0 24px 20px; }
+.bulle--zoom .bulle__intro {
+  display: block;
+  margin: 10px 0 18px;
   color: var(--encre-2);
   font-size: .9375rem;
-  max-width: 62ch;
+  max-width: 60ch;
 }
-.etape__intro em { font-style: normal; font-weight: 600; color: var(--encre); }
+.bulle--zoom .bulle__intro em { font-style: normal; font-weight: 600; color: var(--encre); }
+.bulle--zoom .bulle__champs { grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 14px; }
+.bulle--zoom .bulle__pied { display: flex; justify-content: flex-end; padding-top: 20px; }
 
-.etape__champs {
-  margin-top: 20px;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 16px;
-  align-items: start;
+/* Le contenu n'apparaît qu'une fois la bulle arrivée : pendant le voyage,
+   la mise à l'échelle le déformerait. */
+@keyframes contenuZoom { from { opacity: 0; } to { opacity: 1; } }
+.bulle--zoom .bulle__corps,
+.bulle--zoom .bulle__tete { animation: contenuZoom .24s ease .18s backwards; }
+
+@media (prefers-reduced-motion: reduce) {
+  .bulle--zoom .bulle__corps,
+  .bulle--zoom .bulle__tete,
+  .voile { animation: none; }
 }
 
-.champ { display: grid; gap: 5px; }
-.champ__libelle { font-size: .8125rem; color: var(--encre-2); }
+/* ----------------------------------------------------------------- Champs */
+
+.champ { display: grid; gap: 4px; min-width: 0; }
+.champ__libelle { font-size: .75rem; color: var(--encre-2); }
 .champ__saisie {
   display: flex;
   align-items: center;
@@ -352,65 +353,55 @@ h1, h2, h3 { margin: 0; font-weight: 600; letter-spacing: -0.01em; }
   min-width: 0;
   border: 0;
   background: transparent;
-  padding: 10px 11px;
+  padding: 7px 9px;
   font: inherit;
+  font-size: .875rem;
   font-variant-numeric: tabular-nums;
   color: var(--encre);
   border-radius: var(--rayon);
 }
 .champ input:focus, .champ select:focus { outline: none; }
+.champ input:disabled, .champ select:disabled { cursor: not-allowed; }
 .champ select { cursor: pointer; }
 .champ__unite {
-  padding: 0 11px 0 4px;
-  font-size: .8125rem;
+  padding: 0 10px 0 4px;
+  font-size: .75rem;
   color: var(--encre-3);
   white-space: nowrap;
 }
-.champ__aide { font-size: .75rem; color: var(--encre-3); line-height: 1.4; }
+.bulle--zoom .champ input, .bulle--zoom .champ select { padding: 10px 11px; font-size: 1rem; }
+.bulle--zoom .champ__libelle { font-size: .8125rem; }
 
-.parcours__pied {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  padding: 16px 24px;
-  border-top: 1px solid var(--trait);
-  background: var(--surface-creuse);
-}
-#reinitialiser { margin-left: auto; }
+/* Les aides alourdiraient une petite bulle : réservées à la vue zoomée. */
+.champ__aide { display: none; font-size: .75rem; color: var(--encre-3); line-height: 1.4; }
+.bulle--zoom .champ__aide { display: block; }
 
-@media (max-width: 480px) {
-  .parcours__pied { padding: 14px 16px; gap: 8px; }
-  .etape { padding: 20px 16px; }
-  .bouton { padding: 9px 12px; font-size: .8125rem; }
-}
+/* ---------------------------------------------------------------- Boutons */
 
 .bouton {
   font: inherit;
   font-size: .875rem;
-  padding: 9px 16px;
+  padding: 9px 18px;
   border-radius: var(--rayon);
   border: 1px solid var(--trait);
   background: var(--surface);
   color: var(--encre-2);
   cursor: pointer;
   white-space: nowrap;
-  transition: background .12s ease, color .12s ease, opacity .12s ease;
+  transition: background .12s ease, color .12s ease, filter .12s ease;
 }
-.bouton:hover:not(:disabled) { background: var(--plan); color: var(--encre); }
-.bouton:disabled { opacity: .4; cursor: default; }
-
+.bouton:hover { background: var(--plan); color: var(--encre); }
 .bouton--primaire {
   background: var(--achat);
   border-color: var(--achat);
   color: #fff;
   font-weight: 500;
 }
-.bouton--primaire:hover:not(:disabled) { background: var(--achat); color: #fff; filter: brightness(1.08); }
-.bouton--discret { border-color: transparent; background: transparent; }
+.bouton--primaire:hover { background: var(--achat); color: #fff; filter: brightness(1.08); }
+.bouton--discret { border-color: transparent; background: transparent; font-size: .8125rem; }
 
 /* -------------------------------------------------------------- Résultats */
 
-.resultats { display: grid; gap: 20px; min-width: 0; }
 
 .alerte {
   margin: 0;

@@ -409,141 +409,130 @@ function rafraichir() {
   const mel = optionsMel ? simulerMiseEnLocation(dernierResultat, optionsMel) : null;
   $('#melIncomplet').hidden = !!mel || $('#melPanneau').hidden;
 
-  majRail();
   afficherAlerte(dernierResultat);
   afficherVerdict(dernierResultat, horizon);
   dessinerGraphiques(dernierResultat, horizon, mel);
   if (mel) afficherTexteMel(mel, horizon);
 }
 
-/* -------------------------------------------------- Parcours par étapes */
+/* -------------------------------------------------- Plateau de bulles */
 
-const etapes = () => [...document.querySelectorAll('.etape')];
+const BULLES = [...document.querySelectorAll('.bulle')].map((b) => Number(b.dataset.bulle));
+const bulle = (n) => document.querySelector(`.bulle[data-bulle="${n}"]`);
 
-/** Étape ouverte en haut de page ; null = parcours terminé, carte repliée. */
-let etapeCourante = 1;
-/** Étapes déjà parcourues : elles ont leur bulle dans le rail. */
-const etapesVues = new Set();
+/** Bulles déjà validées : leurs champs deviennent modifiables sur place. */
+const validees = new Set();
+/** Bulle actuellement agrandie au centre, ou null. */
+let bulleZoomee = null;
 
-/** Rend une valeur de champ lisible dans une bulle : « 420 000 € », « 3,5 % ». */
-function valeurLisible(el) {
-  if (el.tagName === 'SELECT') return el.options[el.selectedIndex].text;
-
-  const unite = el.closest('.champ__saisie').querySelector('.champ__unite').textContent.trim();
-  const v = parseFloat(el.value);
-  if (!Number.isFinite(v)) return '—';
-
-  const periode = unite.includes('/mois') ? '/mois' : unite.includes('/an') ? '/an' : '';
-  if (unite.startsWith('€')) return euros.format(v) + periode;
-  if (unite.startsWith('%')) {
-    return v.toLocaleString('fr-FR', { maximumFractionDigits: 2 }) + ' %' + periode;
-  }
-  return `${v} ${unite}`;
+/** Première bulle non validée : la seule ouvrable au premier passage. */
+function prochaineBulle() {
+  return BULLES.find((n) => !validees.has(n)) ?? null;
 }
 
-/** Contenu d'une bulle : le titre de l'étape et ses valeurs marquantes. */
-function contenuBulle(n) {
-  const section = document.querySelector(`.etape[data-etape="${n}"]`);
-  const titre = section.querySelector('.etape__titre').textContent;
-  const ids = (section.dataset.resume || '').split(',').filter(Boolean);
+/**
+ * Anime un élément depuis sa position précédente vers la nouvelle (FLIP).
+ * On mesure avant, on applique le changement, on mesure après, puis on joue
+ * l'écart à l'envers : le navigateur n'anime qu'une transformation.
+ */
+function volerVers(el, appliquerChangement) {
+  // Un vol précédent encore en cours fausserait la mesure et les deux
+  // transformations se superposeraient (clics rapides, onglet en arrière-plan
+  // où les animations ne progressent pas).
+  for (const anim of el.getAnimations()) anim.cancel();
 
-  const lignes = ids.map((id) => {
-    const el = document.getElementById(id);
-    const libelle = el.closest('.champ').querySelector('.champ__libelle').textContent;
-    return `<span class="bulle__ligne">
-        <span class="bulle__libelle" title="${libelle}">${libelle}</span>
-        <span class="bulle__valeur">${valeurLisible(el)}</span>
-      </span>`;
+  const avant = el.getBoundingClientRect();
+  appliquerChangement();
+  const apres = el.getBoundingClientRect();
+
+  if (!avant.width || !apres.width) return null;
+
+  const dx = avant.left - apres.left;
+  const dy = avant.top - apres.top;
+  const echelle = avant.width / apres.width;
+
+  return el.animate(
+    [
+      { transform: `translate(${dx}px, ${dy}px) scale(${echelle})`, opacity: 0.75 },
+      { transform: 'translate(0, 0) scale(1)', opacity: 1 },
+    ],
+    { duration: 420, easing: 'cubic-bezier(.22, .8, .28, 1)' }
+  );
+}
+
+/** Reflète l'état de chaque bulle : verrouillée, ouvrable ou validée. */
+function majBulles() {
+  const prochaine = prochaineBulle();
+
+  for (const n of BULLES) {
+    const el = bulle(n);
+    const estValidee = validees.has(n);
+    const estOuvrable = n === prochaine;
+
+    el.classList.toggle('bulle--validee', estValidee);
+    el.classList.toggle('bulle--ouvrable', estOuvrable && n !== bulleZoomee);
+    el.classList.toggle('bulle--verrouillee', !estValidee && !estOuvrable);
+
+    const tete = el.querySelector('.bulle__tete');
+    tete.disabled = estValidee || (!estOuvrable && n !== bulleZoomee);
+    tete.setAttribute('aria-expanded', String(n === bulleZoomee));
+
+    // Une bulle non validée ne doit pas pouvoir être modifiée au clavier.
+    for (const champ of el.querySelectorAll('input, select')) {
+      champ.disabled = !estValidee && n !== bulleZoomee;
+    }
+  }
+}
+
+function ouvrirBulle(n) {
+  if (bulleZoomee !== null) return;
+  const el = bulle(n);
+
+  bulleZoomee = n;
+  $('#voile').hidden = false;
+  volerVers(el, () => {
+    el.classList.add('bulle--zoom');
+    el.classList.remove('bulle--ouvrable', 'bulle--verrouillee');
   });
 
-  return `<span class="bulle__entete"><span class="bulle__coche" aria-hidden="true"></span>
-      <span class="bulle__titre">${titre}</span></span>${lignes.join('')}`;
+  majBulles();
+  const premier = el.querySelector('input, select');
+  if (premier) premier.focus();
 }
 
-/**
- * Met le rail à jour. Les bulles existantes sont rafraîchies sur place ; seules
- * les nouvelles sont animées, sinon l'animation rejouerait à chaque frappe.
- */
-function majRail() {
-  const rail = $('#rail');
-  const rangs = [...etapesVues].sort((a, b) => a - b);
+function validerBulle(n) {
+  if (bulleZoomee !== n) return;
+  const el = bulle(n);
 
-  for (const n of rangs) {
-    let bulle = rail.querySelector(`[data-bulle="${n}"]`);
-    const nouvelle = !bulle;
+  validees.add(n);
+  bulleZoomee = null;
+  $('#voile').hidden = true;
 
-    if (nouvelle) {
-      bulle = document.createElement('button');
-      bulle.type = 'button';
-      bulle.className = 'bulle';
-      bulle.dataset.bulle = n;
-      bulle.addEventListener('click', () => allerEtape(n));
+  volerVers(el, () => el.classList.remove('bulle--zoom'));
+  majBulles();
+  recalculer();
 
-      // Insertion directement à sa place : on peut sauter d'étape, et un
-      // déplacement de nœud après coup annulerait l'animation en cours.
-      const apres = rangs
-        .filter((r) => r > n)
-        .map((r) => rail.querySelector(`[data-bulle="${r}"]`))
-        .find(Boolean);
-      rail.insertBefore(bulle, apres || null);
-    }
-
-    bulle.innerHTML = contenuBulle(n);
-    bulle.classList.toggle('bulle--active', n === etapeCourante);
-
-    if (nouvelle) {
-      bulle.classList.add('bulle--entree');
-      const nettoyer = () => bulle.classList.remove('bulle--entree');
-      bulle.addEventListener('animationend', nettoyer, { once: true });
-      // Filet : dans un onglet en arrière-plan l'animation ne tourne pas et
-      // `animationend` ne part jamais — la classe resterait collée à la bulle.
-      setTimeout(nettoyer, 600);
-    }
-  }
-
-  // Purge après réinitialisation. Aucune remise en ordre ici : les bulles sont
-  // déjà insérées à leur place, et déplacer un nœud casserait son animation.
-  for (const bulle of rail.querySelectorAll('.bulle')) {
-    if (!etapesVues.has(Number(bulle.dataset.bulle))) bulle.remove();
-  }
-  rail.hidden = rangs.length === 0;
+  // On enchaîne : la bulle suivante devient visiblement la prochaine à remplir.
+  const suivante = prochaineBulle();
+  if (suivante !== null) bulle(suivante).querySelector('.bulle__tete').focus();
 }
 
-/**
- * Ouvre une étape en haut de page. `null` replie la carte : le parcours est
- * terminé, tout se consulte et se modifie depuis le rail.
- */
-function allerEtape(n) {
-  const total = etapes().length;
-  etapeCourante = n === null ? null : Math.min(Math.max(n, 1), total);
-  const termine = etapeCourante === null;
-
-  // Une étape quittée reste acquise : sa bulle ne disparaît plus du rail.
-  if (!termine) etapesVues.add(etapeCourante);
-
-  for (const section of etapes()) {
-    section.hidden = Number(section.dataset.etape) !== etapeCourante;
+function initialiserBulles() {
+  for (const n of BULLES) {
+    bulle(n).querySelector(`[data-ouvrir="${n}"]`)
+      .addEventListener('click', () => ouvrirBulle(n));
+    bulle(n).querySelector(`[data-valider="${n}"]`)
+      .addEventListener('click', () => validerBulle(n));
   }
 
-  $('#formulaire').classList.toggle('parcours--termine', termine);
-  $('#etapePrecedente').hidden = termine;
-  $('#etapeSuivante').hidden = termine;
-  $('#etapeRouvrir').hidden = !termine;
+  // Fermer par le voile ou par Échap vaut validation : tous les champs ont
+  // déjà une valeur, il n'y a rien à annuler.
+  $('#voile').addEventListener('click', () => validerBulle(bulleZoomee));
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && bulleZoomee !== null) validerBulle(bulleZoomee);
+  });
 
-  for (const puce of document.querySelectorAll('.fil__puce')) {
-    const rang = Number(puce.dataset.aller);
-    puce.classList.toggle('fil__puce--active', rang === etapeCourante);
-    puce.classList.toggle('fil__puce--vue', etapesVues.has(rang) && rang !== etapeCourante);
-    puce.setAttribute('aria-current', rang === etapeCourante ? 'step' : 'false');
-  }
-
-  if (!termine) {
-    $('#etapePrecedente').disabled = etapeCourante === 1;
-    $('#etapeSuivante').textContent =
-      etapeCourante === total ? 'Terminer ✓' : 'Suivant →';
-  }
-
-  majRail();
+  majBulles();
 }
 
 function initialiser() {
@@ -554,21 +543,12 @@ function initialiser() {
   $('#reinitialiser').addEventListener('click', () => {
     remplirFormulaire(DEFAUTS);
     $('#horizon').value = 20;
-    etapesVues.clear();
-    allerEtape(1);
+    validees.clear();
+    majBulles();
     recalculer();
   });
 
-  $('#etapePrecedente').addEventListener('click', () => allerEtape(etapeCourante - 1));
-  $('#etapeSuivante').addEventListener('click', () => {
-    const dernière = etapeCourante === etapes().length;
-    allerEtape(dernière ? null : etapeCourante + 1);
-  });
-  $('#etapeRouvrir').addEventListener('click', () => allerEtape(1));
-  for (const puce of document.querySelectorAll('.fil__puce')) {
-    puce.addEventListener('click', () => allerEtape(Number(puce.dataset.aller)));
-  }
-  allerEtape(1);
+  initialiserBulles();
 
   // Divulgation progressive : le module n'existe qu'après un clic explicite.
   $('#melOuvrir').addEventListener('click', () => {
