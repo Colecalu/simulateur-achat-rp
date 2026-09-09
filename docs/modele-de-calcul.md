@@ -183,8 +183,17 @@ charges          = frais annexes + charges de copro + taxe foncière
 cash-flow avant impôt = revenus bruts − charges − (mensualité crédit + assurance)
 ```
 
-Les deux loyers (perçu et futur) sont saisis **au moment de la bascule** puis
-indexés à l'IRL déjà utilisé par le scénario location.
+Les deux loyers (perçu et futur) sont saisis **en euros du moment de la bascule**,
+puis indexés à l'IRL à partir de là. C'est le seul endroit de l'application où un
+montant n'est pas exprimé en euros d'aujourd'hui, et c'est délibéré : ces montants
+décrivent une décision future — relouer son bien, se loger ailleurs, éventuellement
+moins cher. Ils n'ont donc pas à suivre la trajectoire du loyer de référence, qui
+décrit une autre vie.
+
+Conséquence à connaître : saisir le même montant que le loyer de la barre latérale
+revient à se loger **moins cher en euros constants** que le locataire de référence
+à la même date. C'est une hypothèse valide, pas une erreur, mais elle doit être
+consciente.
 
 ## Fiscalité — location nue (foncier réel)
 
@@ -209,13 +218,27 @@ les exercices déficitaires, sinon un stock jamais consommé ne s'éteindrait ja
 ## Fiscalité — location meublée (LMNP réel, BIC)
 
 ```
-dotation = prix × 85 % / 30 ans        (bâti, terrain non amortissable)
-         + travaux / 10 ans
-         + prix × 5 % / 7 ans          (mobilier)
+valeur d'entrée dans l'activité = valeur du bien l'année de la bascule
+
+dotation = valeur d'entrée × 85 % / 30 ans     (bâti, terrain non amortissable)
+         + achat de meubles / 7 ans            (mobilier)
 
 base imposable = max(0, revenus bruts − charges déductibles − amortissement)
-impôt          = base × TMI            (pas de prélèvements sociaux en BIC)
+impôt          = base × TMI                    (pas de prélèvements sociaux en BIC)
 ```
+
+Deux choix structurants :
+
+- **La base est la valeur d'entrée dans l'activité**, pas le prix d'achat
+  historique. Un bien acheté 420 000 € et mis en location dix ans plus tard alors
+  qu'il en vaut 552 311 € s'amortit sur cette dernière valeur. Plus la bascule est
+  tardive, plus la dotation est élevée.
+- **Les travaux d'acquisition ne sont pas amortis séparément** : réalisés des
+  années plus tôt, ils sont déjà fondus dans la valeur du bien à la date d'entrée.
+- **Le mobilier est une saisie utilisateur**, pas un forfait. Il est débité du
+  portefeuille l'année de la bascule (c'est une vraie dépense) et n'est pas compté
+  dans le patrimoine, puisqu'il se déprécie à zéro. En location nue, aucun mobilier
+  n'est acheté ni amorti.
 
 L'excédent d'amortissement se reporte **sans limite de montant ni de durée**. Un
 déficit BIC hors amortissement s'impute sur les résultats positifs suivants,
@@ -261,10 +284,18 @@ module ne le prévoyait pas : c'est un écart délibéré, désactivable.
 Pour chaque année t ≥ N :
 
 ```
-versement au portefeuille = max(enveloppe annuelle − loyer futur, 0) + cash-flow net
+versement au portefeuille = max(enveloppe annuelle − loyer futur, 0)
+                          + cash-flow net
+                          − achat de meubles       (l'année de la bascule seulement)
+
 patrimoine = valeur du bien − capital restant dû − impôt de plus-value
            + portefeuille net d'impôt
 ```
+
+Après la bascule, le ménage dispose de l'enveloppe **plus** les loyers encaissés,
+et il paie un loyer **et** une mensualité de crédit. La contrainte « même
+enveloppe des deux côtés » du premier graphique ne s'applique donc plus ici :
+c'est voulu, la double sortie étant financée par un revenu locatif réel.
 
 Le versement **peut être négatif** : un cash-flow locatif dégradé ponctionne le
 portefeuille. Dans ce cas la base fiscale du portefeuille est réduite d'autant,
@@ -274,9 +305,9 @@ assumée, la réalité étant un retrait au prorata des plus-values latentes.
 ## Paramètres non exposés dans l'interface
 
 Ils vivent dans `DEFAUTS_LOCATION` et sont modifiables par le code :
-durées d'amortissement, quote-part du bâti, part du mobilier, plafond du déficit
-imputable, durée de report, taux d'IR sur plus-value (19 %), réintégration des
-amortissements.
+durées d'amortissement (bâti 30 ans, mobilier 7 ans), quote-part du bâti (85 %),
+plafond du déficit imputable, durée de report, taux d'IR sur plus-value (19 %),
+réintégration des amortissements.
 
 ## Limites propres à ce module
 
@@ -285,5 +316,11 @@ amortissements.
   foncier n'est pas modélisée (sans objet pour une mise en location durable).
 - Pas de tolérance du délai d'un an de vente après départ de la résidence
   principale : la plus-value est due dès la bascule.
-- L'amortissement LMNP démarre à la bascule, sur la base du prix d'achat initial,
-  sans réévaluation de la valeur d'entrée dans l'activité.
+- Le loyer perçu est un loyer **charges comprises** : on déclare le loyer entier
+  et on déduit 100 % des charges de copropriété, sans refacturation séparée des
+  charges récupérables.
+- Le forfait de frais annexes ne distingue pas ses composants et n'inclut pas la
+  CFE ; il ne couvre pas non plus les frais de remise en location entre deux
+  locataires.
+- Le mobilier n'est jamais renouvelé sur l'horizon, alors qu'il est amorti sur
+  7 ans.

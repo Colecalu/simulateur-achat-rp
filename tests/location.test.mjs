@@ -162,15 +162,53 @@ test('déficit foncier : un report non consommé expire au bout de 10 ans', () =
 
 /* ------------------------------------------------------ LMNP : amortissement */
 
-test('dotation d\'amortissement : bâti hors terrain, travaux, mobilier', () => {
-  const d = dotationAmortissement(base.entrees, {
+test('dotation d\'amortissement : assise sur la valeur d\'entrée dans l\'activité', () => {
+  const d = dotationAmortissement(552311, {
     quotePartBati: 0.85, dureeAmortBati: 30,
-    dureeAmortTravaux: 10,
-    partMobilier: 0.05, dureeAmortMobilier: 7,
+    achatMeubles: 15000, dureeAmortMobilier: 7,
   });
-  proche(d.bati, (420000 * 0.85) / 30, 'bâti');
-  proche(d.travaux, 50000 / 10, 'travaux');
-  proche(d.mobilier, (420000 * 0.05) / 7, 'mobilier');
+  proche(d.bati, (552311 * 0.85) / 30, 'bâti sur la valeur d\'entrée, terrain exclu');
+  proche(d.mobilier, 15000 / 7, 'mobilier réellement acheté');
+  assert.equal(d.travaux, undefined, 'les travaux sont fondus dans la valeur du bâti');
+});
+
+test('la base amortissable suit l\'année de bascule, pas le prix d\'achat', () => {
+  const tot5 = simulerMiseEnLocation(base, options({ anneeBascule: 5, achatMeubles: 15000 }));
+  const tot15 = simulerMiseEnLocation(base, options({ anneeBascule: 15, achatMeubles: 15000 }));
+  proche(
+    tot5.valeurEntreeActivite, base.annees[4].valeurBien,
+    'valeur d\'entrée = valeur du bien en année 5'
+  );
+  proche(
+    tot15.valeurEntreeActivite, base.annees[14].valeurBien,
+    'valeur d\'entrée = valeur du bien en année 15'
+  );
+  assert.ok(
+    tot15.dotationAnnuelle > tot5.dotationAnnuelle,
+    'plus la bascule est tardive, plus le bien vaut cher, plus la dotation est élevée'
+  );
+});
+
+test('l\'achat de meubles ponctionne le portefeuille, une seule fois', () => {
+  const sans = simulerMiseEnLocation(base, options({ anneeBascule: 10, achatMeubles: 0 }));
+  const avec = simulerMiseEnLocation(base, options({ anneeBascule: 10, achatMeubles: 15000 }));
+  proche(
+    avec.annees[9].versementPortefeuille,
+    sans.annees[9].versementPortefeuille - 15000,
+    'année de bascule : 15 000 € de moins investis'
+  );
+  proche(avec.annees[10].achatMobilier, 0, 'rien l\'année suivante');
+  assert.ok(
+    avec.annees[10].amortissementUtilise >= 0,
+    'le mobilier acheté est amortissable ensuite'
+  );
+});
+
+test('en location nue, aucun achat de meubles n\'est débité', () => {
+  const nu = simulerMiseEnLocation(
+    base, options({ anneeBascule: 10, regime: 'nu', achatMeubles: 15000 })
+  );
+  proche(nu.annees[9].achatMobilier, 0, 'le nu ne meuble pas');
 });
 
 test('LMNP : l\'amortissement peut annuler la base imposable, jamais la rendre négative', () => {
@@ -254,14 +292,30 @@ test('la vacance locative réduit les revenus bruts', () => {
   proche(avec.annees[0].revenusBruts, sans.annees[0].revenusBruts * 0.9, '10 % de vacance');
 });
 
-test('les deux loyers sont indexés à l\'IRL à partir de la bascule', () => {
+test('les loyers sont saisis en euros du moment de la bascule, puis indexés', () => {
   const mel = simulerMiseEnLocation(base, options({ anneeBascule: 5 }));
-  const a5 = mel.annees[4];
-  const a6 = mel.annees[5];
-  proche(a5.loyerPercuAnnuel, 1800 * 12, 'année de bascule : loyer non indexé');
-  proche(a6.loyerPercuAnnuel, 1800 * 12 * 1.01, 'année suivante : +1 % IRL');
-  proche(a5.loyerFuturAnnuel, 1600 * 12, 'loyer futur à la bascule');
-  proche(a6.loyerFuturAnnuel, 1600 * 12 * 1.01, 'loyer futur indexé pareil');
+  proche(mel.annees[4].loyerPercuAnnuel, 1800 * 12, 'année de bascule : montant saisi tel quel');
+  proche(mel.annees[5].loyerPercuAnnuel, 1800 * 12 * 1.01, 'année suivante : +1 % IRL');
+  proche(mel.annees[4].loyerFuturAnnuel, 1600 * 12, 'loyer futur à la bascule');
+  proche(mel.annees[5].loyerFuturAnnuel, 1600 * 12 * 1.01, 'loyer futur indexé pareil');
+});
+
+test('le loyer futur est indépendant de la trajectoire du loyer de référence', () => {
+  // Volontaire : le montant décrit une décision future (déménager moins cher,
+  // en province par exemple). Il n'a pas à suivre le loyer du locataire de
+  // référence, qui décrit une autre vie.
+  const mel = simulerMiseEnLocation(
+    base, options({ anneeBascule: 10, loyerFutur: base.entrees.loyer })
+  );
+  assert.ok(
+    mel.annees[9].loyerFuturAnnuel < base.annees[9].loyerAnnuel,
+    'saisir le loyer actuel à une bascule tardive = se loger moins cher en euros constants'
+  );
+  proche(
+    mel.annees[9].loyerFuturAnnuel,
+    base.annees[9].loyerAnnuel / Math.pow(1.01, 9),
+    'écart = exactement les 9 années d\'indexation non appliquées'
+  );
 });
 
 test('un cash-flow négatif ponctionne le portefeuille', () => {

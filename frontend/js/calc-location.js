@@ -26,6 +26,7 @@
     tmi: 0.3,
     fraisAnnexes: 800, // forfait annuel : gestion, PNO, comptable
     tauxVacance: 0,
+    achatMeubles: 0, // € dépensés en mobilier à la mise en location
 
     // --- Fiscalité ---
     tauxPrelevementsSociaux: 0.186, // 18,6 % à compter de 2026
@@ -34,10 +35,12 @@
     dureeReportDeficit: 10, // années de report sur les revenus fonciers
 
     // --- Amortissement LMNP ---
+    // La base est la VALEUR D'ENTRÉE DANS L'ACTIVITÉ (valeur du bien l'année
+    // de la bascule), pas le prix d'achat historique. Les travaux réalisés à
+    // l'acquisition sont donc déjà fondus dans cette valeur : ils ne font pas
+    // l'objet d'une dotation séparée.
     quotePartBati: 0.85, // le terrain (15 %) n'est pas amortissable
     dureeAmortBati: 30,
-    dureeAmortTravaux: 10,
-    partMobilier: 0.05, // % du prix net vendeur
     dureeAmortMobilier: 7,
 
     // Depuis la loi de finances 2025, les amortissements déduits sont
@@ -64,15 +67,17 @@
     return { ir: ir, ps: ps };
   }
 
-  /** Dotation annuelle d'amortissement LMNP, par composant. */
-  function dotationAmortissement(entrees, o) {
-    var bati = (entrees.prixNetVendeur * o.quotePartBati) / o.dureeAmortBati;
-    var travaux = o.dureeAmortTravaux > 0 ? entrees.travaux / o.dureeAmortTravaux : 0;
+  /**
+   * Dotation annuelle d'amortissement LMNP.
+   * @param {number} valeurEntree - valeur du bien l'année de la mise en location
+   * @param {object} o - options (quote-part bâti, durées, achat de meubles)
+   */
+  function dotationAmortissement(valeurEntree, o) {
+    var bati =
+      o.dureeAmortBati > 0 ? (valeurEntree * o.quotePartBati) / o.dureeAmortBati : 0;
     var mobilier =
-      o.dureeAmortMobilier > 0
-        ? (entrees.prixNetVendeur * o.partMobilier) / o.dureeAmortMobilier
-        : 0;
-    return { bati: bati, travaux: travaux, mobilier: mobilier };
+      o.dureeAmortMobilier > 0 ? o.achatMeubles / o.dureeAmortMobilier : 0;
+    return { bati: bati, mobilier: mobilier };
   }
 
   /**
@@ -121,7 +126,11 @@
     var N = Math.max(1, Math.round(o.anneeBascule));
     var enveloppeAnnuelle = e.enveloppeMensuelle * 12;
 
-    var dotation = dotationAmortissement(e, o);
+    // Valeur du bien l'année où il entre dans l'activité locative : c'est elle
+    // qui sert de base à l'amortissement, pas le prix payé des années plus tôt.
+    var indiceEntree = Math.min(N, base.annees.length) - 1;
+    var valeurEntreeActivite = base.annees.length ? base.annees[indiceEntree].valeurBien : 0;
+    var dotation = dotationAmortissement(valeurEntreeActivite, o);
 
     // Prix d'acquisition fiscal : les frais bancaires sont des frais de prêt,
     // pas des frais d'acquisition — ils n'entrent pas dans la base.
@@ -186,8 +195,11 @@
       // ---------------------------------------------------------------
       var anneesDepuisBascule = t - N;
 
-      // Les deux loyers sont saisis « au moment de la bascule » et indexés
-      // ensuite au même IRL que le scénario location.
+      // Les deux loyers sont saisis en euros DU MOMENT DE LA BASCULE, puis
+      // indexés à l'IRL à partir de là. C'est volontaire : ils décrivent une
+      // décision future (relouer son bien, se loger ailleurs — éventuellement
+      // moins cher, en province par exemple). Ils n'ont donc aucune raison de
+      // suivre la trajectoire du loyer de référence, qui décrit une autre vie.
       var indexation = Math.pow(1 + e.revalLoyer, anneesDepuisBascule);
       var loyerPercuAnnuel = o.loyerPercu * 12 * indexation;
       var revenusBruts = loyerPercuAnnuel * (1 - o.tauxVacance);
@@ -251,7 +263,6 @@
         // Dotation de l'année, chaque composant sur sa propre durée.
         var dotationAnnuelle =
           (anneesDepuisBascule < o.dureeAmortBati ? dotation.bati : 0) +
-          (anneesDepuisBascule < o.dureeAmortTravaux ? dotation.travaux : 0) +
           (anneesDepuisBascule < o.dureeAmortMobilier ? dotation.mobilier : 0);
 
         var amortDisponible = dotationAnnuelle + stockAmortissement;
@@ -267,7 +278,13 @@
 
       // --- Portefeuille boursier ----------------------------------------
       var reliquatEnveloppe = Math.max(enveloppeAnnuelle - loyerFuturAnnuel, 0);
-      var versement = reliquatEnveloppe + cashFlowNet; // peut être négatif
+
+      // Le mobilier est acheté une seule fois, l'année de la mise en location.
+      // C'est une sortie de trésorerie réelle : elle ponctionne le portefeuille.
+      // Le mobilier n'est pas compté dans le patrimoine (il se déprécie à zéro).
+      var achatMobilier = t === N && o.regime === 'meuble' ? o.achatMeubles : 0;
+
+      var versement = reliquatEnveloppe + cashFlowNet - achatMobilier; // peut être négatif
 
       capital = capital * (1 + e.rendementBourse) + versement;
       versements = Math.max(versements + versement, 0);
@@ -314,6 +331,7 @@
         loyerPercuAnnuel: loyerPercuAnnuel,
         loyerFuturAnnuel: loyerFuturAnnuel,
         reliquatEnveloppe: reliquatEnveloppe,
+        achatMobilier: achatMobilier,
         versementPortefeuille: versement,
         capitalPortefeuilleBrut: capital,
         impotPortefeuille: impotPortefeuille,
@@ -331,7 +349,8 @@
       options: o,
       anneeBascule: N,
       dotation: dotation,
-      dotationAnnuelle: dotation.bati + dotation.travaux + dotation.mobilier,
+      dotationAnnuelle: dotation.bati + dotation.mobilier,
+      valeurEntreeActivite: valeurEntreeActivite,
       prixAcquisitionFiscal: prixAcquisitionFiscal,
       annees: annees,
     };

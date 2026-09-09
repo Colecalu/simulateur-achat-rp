@@ -72,6 +72,7 @@ const CHAMPS_MEL_AVANCES = {
   melRegime: { cle: 'regime' },
   melTmi: { cle: 'tmi', pourcentage: true },
   melFraisAnnexes: { cle: 'fraisAnnexes' },
+  melAchatMeubles: { cle: 'achatMeubles' },
   melTauxVacance: { cle: 'tauxVacance', pourcentage: true },
   melPrelevementsSociaux: { cle: 'tauxPrelevementsSociaux', pourcentage: true },
 };

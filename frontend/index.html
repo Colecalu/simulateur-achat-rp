@@ -290,6 +290,7 @@
               <input type="number" id="melLoyerPercu" min="0" step="50" placeholder="ex. 1800">
               <span class="champ__unite">€/mois</span>
             </span>
+            <span class="champ__aide">Montant au moment de la bascule, indexé à l'IRL ensuite.</span>
           </label>
           <label class="champ">
             <span class="champ__libelle">Loyer que vous paierez pour vous loger</span>
@@ -297,6 +298,7 @@
               <input type="number" id="melLoyerFutur" min="0" step="50" placeholder="ex. 1600">
               <span class="champ__unite">€/mois</span>
             </span>
+            <span class="champ__aide">Idem&nbsp;: montant à la bascule. Il peut être plus bas que votre loyer actuel si vous prévoyez de déménager moins cher.</span>
           </label>
 
           <details class="mel__avance">
@@ -326,6 +328,14 @@
                   <span class="champ__unite">€/an</span>
                 </span>
                 <span class="champ__aide">Forfait&nbsp;: gestion locative, assurance PNO, comptable.</span>
+              </label>
+              <label class="champ">
+                <span class="champ__libelle">Achat de meubles</span>
+                <span class="champ__saisie">
+                  <input type="number" id="melAchatMeubles" min="0" step="500">
+                  <span class="champ__unite">€</span>
+                </span>
+                <span class="champ__aide">Dépensé une fois, à la mise en location. Obligatoire en meublé&nbsp;: amorti sur 7&nbsp;ans et ponctionné sur le portefeuille.</span>
               </label>
               <label class="champ">
                 <span class="champ__libelle">Vacance locative</span>
