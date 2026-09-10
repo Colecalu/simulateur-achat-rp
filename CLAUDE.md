@@ -47,6 +47,14 @@ contient les valeurs réellement calculées par Excel sur 25 ans.
 - Frais de notaire : formule différenciée **Ancien / Neuf**.
 - Patrimoine net immobilier = valeur du bien − capital restant dû.
 - La comparaison finale est toujours **nette d'impôt des deux côtés**.
+- **Le capital initial et l'enveloppe mensuelle ne changent pas l'écart**, seulement les niveaux :
+  un euro de plus alimente les deux portefeuilles à l'identique et subit la même fiscalité, donc
+  il s'annule dans la différence (tant qu'aucun surplus n'est plafonné à zéro, ce qui n'arrive que
+  hors du domaine finançable). Un test verrouille cette propriété. Conséquence produit : le profil
+  détermine la **faisabilité** et les niveaux, pas la réponse.
+- Le **salaire net est facultatif** et n'entre dans aucun calcul patrimonial. Il ne sert qu'aux
+  indicateurs `tauxEndettement` (mensualité assurance comprise / salaire, plafond usuel 35 %) et
+  `partEnveloppe`. Non renseigné, les deux valent `null` — jamais un ratio inventé.
 
 ## Conventions
 
@@ -69,22 +77,30 @@ contient les valeurs réellement calculées par Excel sur 25 ans.
   explicite.
 - L'encadré de verdict est réduit au strict nécessaire : le curseur d'horizon, le chiffre, et une
   seule ligne qui dit ce que ce chiffre mesure. Ne pas y réintroduire de commentaire.
-- **Aucun résultat n'est affiché tant que les cinq bulles ne sont pas validées.** Tous les champs
+- **Aucun résultat n'est affiché tant que le profil et les quatre bulles ne sont pas validés.** Tous les champs
   ont une valeur par défaut, donc le moteur sait toujours calculer — mais afficher ce calcul
   donnerait à une hypothèse l'allure d'une réponse à une question que l'utilisateur n'a pas encore
   posée. `majAttente()` bascule `#visu` entre `data-etat="attente"` (carte d'attente + jauge de
   progression) et `data-etat="pret"`. Les graphiques sont **créés seulement une fois la zone
   visible**, et `resize()` est rappelé au passage attente → prêt : un canevas dimensionné dans un
   conteneur masqué reste à zéro.
-- La saisie se fait dans un **plateau de cinq bulles** autour de la visualisation : deux en haut
-  (leur largeur cumulée = celle de la visualisation), trois à gauche (toutes visibles sans
-  défilement sur un écran d'ordinateur). Les hauteurs sont **bornées** (`grid-auto-rows` en haut,
-  `grid-template-rows: repeat(3, 1fr)` à gauche) : une bulle qui s'étire pousserait toute la mise
+- **Le profil est un bandeau, pas une bulle.** Il décrit l'utilisateur (patrimoine financier,
+  effort mensuel, salaire net facultatif), pas le projet : saisi une fois, il ne varie pas d'une
+  simulation à l'autre. Il vit hors du parcours numéroté, se replie sur une ligne une fois validé
+  et reste modifiable en un clic. Tant qu'il n'est pas validé, le plateau est grisé et inerte
+  (`.plateau--bloque`). Le jour où les comptes utilisateurs arrivent, c'est ce bandeau qui se
+  sauvegarde dans le profil tandis que les bulles deviennent des simulations enregistrables.
+- **Les champs du profil vivent hors de `#formulaire`** : `#profil` a donc son propre écouteur
+  `input`, sans quoi les éditer ne recalculerait rien avant le clic sur « Valider mon profil ».
+- La saisie se fait dans un **plateau de quatre bulles** autour de la visualisation : deux en haut
+  (leur largeur cumulée = celle de la visualisation), deux à gauche (visibles sans défilement sur
+  un écran d'ordinateur). Les hauteurs sont **bornées** (`grid-auto-rows` en haut,
+  `grid-template-rows: repeat(2, 1fr)` à gauche) : une bulle qui s'étire pousserait toute la mise
   en page.
-  1. Votre situation · 2. L'opération · 3. Le financement · 4. Les dépenses annuelles (charges du
-  propriétaire **et** loyer du locataire) · 5. Le scénario de marché (rendement, fiscalité et
-  toutes les revalorisations).
-  La bulle 5 est destinée à devenir un **filtre de scénarios** (optimiste / moyen / pessimiste,
+  1. L'opération · 2. Le financement · 3. Les dépenses annuelles (charges du propriétaire **et**
+  loyer du locataire) · 4. Le scénario de marché (rendement, fiscalité et toutes les
+  revalorisations).
+  La bulle 4 est destinée à devenir un **filtre de scénarios** (optimiste / moyen / pessimiste,
   adossés à des séries historiques réelles) appliqué par-dessus le reste du modèle : y regrouper
   toutes les hypothèses d'évolution est délibéré.
 - **Premier passage strictement séquentiel** : seule la bulle suivante est ouvrable, les autres

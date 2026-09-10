@@ -25,6 +25,12 @@ const POURCENTAGES = new Set([
 
 const CHAMPS = Object.keys(DEFAUTS).filter((c) => c !== 'horizon');
 
+/** Champs facultatifs : laissés vides à l'écran plutôt qu'affichés à zéro. */
+const FACULTATIFS = new Set(['salaireNet']);
+
+/** Champs du profil : saisis une fois, hors du parcours numéroté. */
+const CHAMPS_PROFIL = ['capitalInitial', 'enveloppeMensuelle', 'salaireNet'];
+
 const euros = new Intl.NumberFormat('fr-FR', {
   style: 'currency', currency: 'EUR', maximumFractionDigits: 0,
 });
@@ -61,6 +67,7 @@ function remplirFormulaire(valeurs) {
     const el = document.getElementById(champ);
     if (!el) continue;
     const v = valeurs[champ];
+    if (FACULTATIFS.has(champ) && !v) { el.value = ''; continue; }
     el.value = POURCENTAGES.has(champ) ? +(v * 100).toFixed(4) : v;
   }
 }
@@ -388,6 +395,7 @@ function rafraichir() {
   $('#melIncomplet').hidden = !!mel || $('#melPanneau').hidden;
 
   majBulles();
+  afficherProfil(dernierResultat);
   if (!majAttente()) return;
 
   afficherAlerte(dernierResultat);
@@ -406,9 +414,78 @@ const validees = new Set();
 /** Bulle actuellement agrandie au centre, ou null. */
 let bulleZoomee = null;
 
+/* ------------------------------------------------------------------ Profil */
+
+/**
+ * Le profil décrit l'utilisateur, pas le projet : il est saisi une fois et ne
+ * varie pas d'une simulation à l'autre. Il vit donc hors du parcours numéroté,
+ * dans un bandeau qui se replie sur une ligne une fois validé.
+ */
+let profilValide = false;
+
+function ouvrirProfil() {
+  $('#profil').dataset.etat = 'saisie';
+  $('#capitalInitial').focus();
+}
+
+function figerProfil() {
+  profilValide = true;
+  $('#profil').dataset.etat = 'fige';
+  majBulles();
+  recalculer();
+
+  const suivante = prochaineBulle();
+  if (suivante !== null) bulle(suivante).querySelector('.bulle__declencheur').focus();
+}
+
+/** Résumé du bandeau replié, et ratios déduits du salaire s'il est renseigné. */
+function afficherProfil(resultat) {
+  const e = resultat.entrees;
+
+  const morceaux = [
+    `<span class="profil__item"><span class="profil__mot">Patrimoine</span> ${euros.format(e.capitalInitial)}</span>`,
+    `<span class="profil__item"><span class="profil__mot">Effort</span> ${euros.format(e.enveloppeMensuelle)}/mois</span>`,
+  ];
+  if (e.salaireNet > 0) {
+    morceaux.push(
+      `<span class="profil__item"><span class="profil__mot">Salaire</span> ${euros.format(e.salaireNet)}/mois</span>`
+    );
+  }
+  $('#profilResume').innerHTML = morceaux.join('');
+
+  const ratios = $('#profilRatios');
+  if (e.salaireNet <= 0) {
+    ratios.hidden = true;
+    return;
+  }
+
+  const pourcent = (v) => `${Math.round(v * 100)} %`;
+  const phrases = [
+    `Votre effort mensuel représente ${pourcent(resultat.partEnveloppe)} de votre salaire net.`,
+  ];
+
+  // Le taux d'endettement dépend du prêt : on ne l'affiche pas avant que
+  // l'opération et le financement soient renseignés.
+  if (parcoursComplet()) {
+    const taux = resultat.tauxEndettement;
+    phrases.push(
+      `Taux d'endettement&nbsp;: <strong>${pourcent(taux)}</strong> ` +
+      `(mensualité ${eurosPrecis.format(resultat.mensualiteTotale)}).` +
+      (taux > 0.35 ? ' Au-delà du plafond de 35 % habituellement retenu par les banques.' : '')
+    );
+  }
+
+  ratios.innerHTML = phrases.join(' ');
+  ratios.classList.toggle(
+    'profil__ratios--alerte',
+    parcoursComplet() && resultat.tauxEndettement > 0.35
+  );
+  ratios.hidden = false;
+}
+
 /** Toutes les bulles sont-elles renseignées ? Sans quoi rien n'est affiché. */
 function parcoursComplet() {
-  return BULLES.every((n) => validees.has(n));
+  return profilValide && BULLES.every((n) => validees.has(n));
 }
 
 /**
@@ -429,9 +506,11 @@ function majAttente() {
     jauge.innerHTML = BULLES.map(
       (n) => `<span class="attente__cran${validees.has(n) ? ' attente__cran--faite' : ''}"></span>`
     ).join('');
-    $('#attenteCompte').textContent = faites === 0
-      ? 'Aucune bulle renseignée pour le moment.'
-      : `${faites} bulle${faites > 1 ? 's' : ''} sur ${BULLES.length} renseignée${faites > 1 ? 's' : ''}.`;
+    $('#attenteCompte').textContent = !profilValide
+      ? 'Commencez par renseigner votre profil.'
+      : faites === 0
+        ? 'Aucune bulle renseignée pour le moment.'
+        : `${faites} bulle${faites > 1 ? 's' : ''} sur ${BULLES.length} renseignée${faites > 1 ? 's' : ''}.`;
   } else if (etaitEnAttente) {
     // Les graphiques ont été dimensionnés alors que leur conteneur était
     // masqué : il faut les remesurer une fois la zone révélée.
@@ -445,6 +524,7 @@ function majAttente() {
 
 /** Première bulle non validée : la seule ouvrable au premier passage. */
 function prochaineBulle() {
+  if (!profilValide) return null;
   return BULLES.find((n) => !validees.has(n)) ?? null;
 }
 
@@ -481,6 +561,7 @@ function volerVers(el, appliquerChangement) {
 /** Reflète l'état de chaque bulle : verrouillée, ouvrable ou validée. */
 function majBulles() {
   const prochaine = prochaineBulle();
+  $('#formulaire').classList.toggle('plateau--bloque', !profilValide);
 
   for (const n of BULLES) {
     const el = bulle(n);
@@ -558,14 +639,22 @@ function initialiser() {
   remplirFormulaire(DEFAUTS);
   remplirFormulaireMel();
   $('#formulaire').addEventListener('input', recalculer);
+  // Le profil vit hors du plateau : sans son propre écouteur, l'éditer ne
+  // recalculerait rien avant le clic sur « Valider mon profil ».
+  $('#profil').addEventListener('input', recalculer);
   $('#horizon').addEventListener('input', rafraichir);
   $('#reinitialiser').addEventListener('click', () => {
     remplirFormulaire(DEFAUTS);
     $('#horizon').value = 20;
     validees.clear();
+    profilValide = false;
+    ouvrirProfil();
     majBulles();
     recalculer();
   });
+
+  $('#profilValider').addEventListener('click', figerProfil);
+  $('#profilModifier').addEventListener('click', ouvrirProfil);
 
   initialiserBulles();
 

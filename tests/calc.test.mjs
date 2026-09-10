@@ -96,6 +96,56 @@ test('horizon supérieur à la durée du prêt : plus de mensualité après remb
   );
 });
 
+test('le capital initial et l\'enveloppe ne changent pas l\'écart', () => {
+  // Propriété du modèle, pas un hasard : un euro de plus au départ, ou un euro
+  // de plus d'enveloppe, alimente les DEUX portefeuilles à l'identique et
+  // subit la même fiscalité. Il s'annule donc dans la différence, tant qu'aucun
+  // des deux surplus n'est plafonné à zéro (cas non finançable, écarté).
+  const reference = simuler().annees[19].ecart;
+
+  for (const capitalInitial of [150000, 200000, 300000]) {
+    const r = simuler({ capitalInitial });
+    proche(r.annees[19].ecart, reference, `capital ${capitalInitial}`);
+  }
+  for (const enveloppeMensuelle of [2700, 3400, 6000]) {
+    const r = simuler({ enveloppeMensuelle });
+    assert.ok(r.enveloppeSuffisante, `enveloppe ${enveloppeMensuelle} finançable`);
+    assert.ok(r.annees[0].surplusProprio > 0, 'surplus propriétaire non plafonné');
+    proche(r.annees[19].ecart, reference, `enveloppe ${enveloppeMensuelle}`);
+  }
+
+  // Ils déplacent en revanche les niveaux, et dans le même sens des deux côtés.
+  const petit = simuler({ capitalInitial: 150000 }).annees[19];
+  const grand = simuler({ capitalInitial: 300000 }).annees[19];
+  assert.ok(grand.patrimoineTotalAchat > petit.patrimoineTotalAchat);
+  assert.ok(grand.patrimoineTotalLocation > petit.patrimoineTotalLocation);
+});
+
+test('salaire non renseigné : aucun ratio n\'est inventé', () => {
+  const r = simuler();
+  assert.equal(r.entrees.salaireNet, 0, 'le salaire est facultatif');
+  assert.equal(r.tauxEndettement, null);
+  assert.equal(r.partEnveloppe, null);
+});
+
+test('taux d\'endettement et part de l\'enveloppe dans le salaire', () => {
+  const r = simuler({ salaireNet: 4500 });
+  proche(
+    r.tauxEndettement, r.mensualiteTotale / 4500,
+    'mensualité assurance comprise, comme le HCSF'
+  );
+  proche(r.partEnveloppe, 3400 / 4500, 'part de l\'enveloppe');
+  assert.ok(r.tauxEndettement > 0.5, 'ce scénario dépasse largement les 35 %');
+});
+
+test('le salaire n\'influence aucun résultat patrimonial', () => {
+  const sans = simuler();
+  const avec = simuler({ salaireNet: 4500 });
+  for (let i = 0; i < sans.annees.length; i++) {
+    proche(avec.annees[i].ecart, sans.annees[i].ecart, `année ${i + 1}`);
+  }
+});
+
 test('l\'enveloppe insuffisante est signalée', () => {
   assert.equal(simuler().enveloppeSuffisante, true);
   assert.equal(simuler({ enveloppeMensuelle: 1000 }).enveloppeSuffisante, false);

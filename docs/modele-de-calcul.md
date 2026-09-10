@@ -110,6 +110,41 @@ patrimoine location = capital net (location)
 écart               = patrimoine achat − patrimoine location
 ```
 
+## Deux grandeurs qui ne changent pas la réponse
+
+Le **capital initial** et l'**enveloppe mensuelle** déplacent les deux patrimoines
+mais jamais leur écart :
+
+| Capital initial | Écart à 20 ans | Patrimoine achat à 20 ans |
+|---|---|---|
+| 150 000 € | +84 640 € | 981 823 € |
+| 200 000 € | +84 640 € | 1 088 531 € |
+| 300 000 € | +84 640 € | 1 301 948 € |
+
+La raison est mécanique : un euro de plus au départ, ou un euro de plus
+d'enveloppe, alimente les **deux** portefeuilles à l'identique et subit la même
+fiscalité de sortie. Il s'annule donc dans la différence. Cela ne vaut que tant
+qu'aucun des deux surplus n'est plafonné à zéro — c'est-à-dire dans tout le
+domaine où le scénario d'achat est finançable.
+
+L'écart ne dépend que des **asymétries** : l'apport immobilisé dans le bien,
+l'écart entre coût de propriétaire et loyer, la revalorisation du bien, et les
+frais d'acquisition non récupérables.
+
+## Indicateurs de faisabilité
+
+Le **salaire net avant impôt** est facultatif et n'entre dans aucun calcul
+patrimonial. Il ne sert qu'à deux ratios :
+
+```
+taux d'endettement = mensualité (crédit + assurance) / salaire net
+part de l'enveloppe = enveloppe mensuelle / salaire net
+```
+
+Le taux d'endettement est calculé assurance comprise, comme le fait le HCSF, dont
+le plafond usuel est de 35 %. Sans salaire renseigné, les deux valent `null` :
+aucun ratio n'est inventé.
+
 ## Écarts délibérés avec le classeur
 
 Deux points ont été corrigés plutôt que reproduits.

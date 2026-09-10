@@ -106,6 +106,123 @@ h1, h2, h3 { margin: 0; font-weight: 600; letter-spacing: -0.01em; }
 
 /* ----------------------------------------------------------------- Layout */
 
+/* ----------------------------------------------------------------- Profil */
+
+/*
+ * Le profil décrit l'utilisateur, pas le projet. Traitement volontairement
+ * différent des bulles : pas de numéro, pas de cadenas, un bandeau qui se
+ * replie sur une ligne une fois validé et reste modifiable en un clic.
+ */
+.profil {
+  background: var(--surface);
+  border: 1px solid var(--trait);
+  border-radius: var(--rayon-large);
+  box-shadow: var(--ombre);
+  padding: 14px 20px;
+  margin-bottom: 14px;
+}
+
+.profil__ligne {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.profil[data-etat="saisie"] .profil__ligne { margin-bottom: 4px; }
+.profil[data-etat="saisie"] .profil__resume,
+.profil[data-etat="saisie"] #profilModifier { display: none; }
+.profil[data-etat="fige"] .profil__saisie { display: none; }
+
+.profil__pastille {
+  width: 22px; height: 22px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--surface-creuse);
+  border: 1px solid var(--trait);
+  position: relative;
+}
+.profil__pastille::before {
+  content: "";
+  position: absolute;
+  left: 50%; top: 5px;
+  width: 7px; height: 7px;
+  margin-left: -3.5px;
+  border-radius: 50%;
+  background: var(--encre-3);
+}
+.profil__pastille::after {
+  content: "";
+  position: absolute;
+  left: 50%; bottom: 3px;
+  width: 13px; height: 6px;
+  margin-left: -6.5px;
+  border-radius: 7px 7px 0 0;
+  background: var(--encre-3);
+}
+
+.profil__titre {
+  font-size: .9375rem;
+  font-weight: 600;
+  color: var(--encre);
+  flex: none;
+}
+
+.profil__resume {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 20px;
+  margin: 0;
+  flex: 1;
+  font-size: .875rem;
+  color: var(--encre);
+  font-variant-numeric: tabular-nums;
+}
+.profil__item { white-space: nowrap; }
+.profil__mot { color: var(--encre-3); font-weight: 400; margin-right: 4px; }
+
+#profilModifier { margin-left: auto; flex: none; }
+
+.profil__intro {
+  margin: 6px 0 14px;
+  max-width: 76ch;
+  font-size: .875rem;
+  color: var(--encre-2);
+}
+
+.profil__champs {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  align-items: start;
+}
+.profil__champs .champ__libelle {
+  display: flex;
+  align-items: flex-end;
+  min-height: 2.6em;
+  line-height: 1.3;
+  font-size: .8125rem;
+}
+.profil__champs .champ__libelle em { font-style: normal; color: var(--encre-3); }
+.profil__champs .champ__court { display: none; }
+.profil__champs .champ__aide { display: block; }
+.profil__champs .champ__unite { min-width: 56px; }
+.profil__champs .champ input { padding: 10px 11px; font-size: 1rem; }
+
+.profil__pied { display: flex; justify-content: flex-end; margin-top: 14px; }
+
+.profil__ratios {
+  margin: 10px 0 0;
+  padding-top: 10px;
+  border-top: 1px solid var(--trait);
+  font-size: .8125rem;
+  color: var(--encre-2);
+}
+.profil__ratios[hidden] { display: none; }
+.profil__ratios--alerte strong { color: var(--alerte); }
+
+/* Rien n'est ouvrable tant que le profil n'est pas posé. */
+.plateau--bloque { opacity: .45; pointer-events: none; }
+
 /* ---------------------------------------------------------------- Plateau */
 
 .page {
@@ -142,13 +259,13 @@ h1, h2, h3 { margin: 0; font-weight: 600; letter-spacing: -0.01em; }
   position: sticky;
   top: 16px;
   display: grid;
-  grid-template-rows: repeat(3, minmax(0, 1fr));
+  grid-template-rows: repeat(2, minmax(0, 1fr));
   gap: 14px;
   /* Les quatre bulles doivent tenir sous l'en-tête ET sous la rangée du haut,
      sans jamais provoquer de défilement sur un écran d'ordinateur classique. */
-  height: calc(100vh - 318px);
-  min-height: 340px;
-  max-height: 620px;
+  height: calc(100vh - 400px);
+  min-height: 300px;
+  max-height: 430px;
 }
 
 .case { min-height: 0; min-width: 0; }

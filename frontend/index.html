@@ -13,31 +13,31 @@
   <div class="entete__contenu">
     <h1>Dois-je acheter ma résidence principale&nbsp;?</h1>
     <p class="entete__sous-titre">
-      Remplissez les cinq bulles, puis faites varier ce que vous voulez&nbsp;: tout reste
-      modifiable. À budget mensuel identique, on compare les deux patrimoines nets d'impôt.
+      À budget mensuel identique, on compare deux trajectoires patrimoniales&nbsp;: rester
+      locataire, ou devenir propriétaire.
     </p>
   </div>
 </header>
 
 <main class="page">
-  <div class="plateau" id="formulaire">
 
-    <div class="plateau__coin">
-      <button type="button" class="bouton bouton--discret" id="reinitialiser">Réinitialiser</button>
+  <!-- ========================= MON PROFIL ============================ -->
+  <section class="profil" id="profil" data-etat="saisie">
+    <div class="profil__ligne">
+      <span class="profil__pastille" aria-hidden="true"></span>
+      <h2 class="profil__titre">Mon profil</h2>
+      <p class="profil__resume" id="profilResume"></p>
+      <button type="button" class="bouton bouton--discret" id="profilModifier">Modifier</button>
     </div>
 
-    <div class="plateau__haut">
-      <div class="case" data-case="1">
-        <article class="bulle" data-bulle="1" data-colonnes="1">
-          <button type="button" class="bulle__declencheur" data-ouvrir="1">
-            <span class="bulle__numero">1</span>
-            <span class="bulle__titre">Votre point de départ</span>
-            <span class="bulle__cadenas" aria-hidden="true"></span>
-          </button>
-          <div class="bulle__corps">
-            <p class="bulle__intro">On compare deux trajectoires patrimoniales — rester locataire, ou devenir propriétaire — en les faisant partir <em>du même point</em>. Ce point, c'est ce que vous avez déjà et ce que vous pouvez y consacrer chaque mois.</p>
-            <div class="bulle__champs">
-            <label class="champ">
+    <div class="profil__saisie" id="profilSaisie">
+      <p class="profil__intro">
+        Tout part de votre situation d'aujourd'hui. Elle est propre à vous, elle ne change pas
+        d'une simulation à l'autre&nbsp;: c'est le socle commun sur lequel les deux trajectoires
+        sont comparées.
+      </p>
+      <div class="profil__champs">
+          <label class="champ">
           <span class="champ__libelle">Patrimoine financier aujourd'hui</span>
             <span class="champ__court">Patrimoine</span>
           <span class="champ__saisie">
@@ -46,7 +46,7 @@
           </span>
           <span class="champ__aide">Épargne, placements, liquidités&nbsp;: ce qui pourra servir d'apport, ou rester investi si vous n'achetez pas.</span>
         </label>
-            <label class="champ">
+          <label class="champ">
           <span class="champ__libelle">Effort mensuel&nbsp;: logement + épargne</span>
             <span class="champ__court">Effort mensuel</span>
           <span class="champ__saisie">
@@ -55,17 +55,37 @@
           </span>
           <span class="champ__aide">Ce que vous sortez chaque mois pour vous loger et pour investir. Le même montant des deux côtés&nbsp;: c'est ce qui rend la comparaison honnête.</span>
         </label>
-            </div>
-            <div class="bulle__pied">
-              <button type="button" class="bouton bouton--primaire" data-valider="1">Valider</button>
-            </div>
-          </div>
-        </article>
+          <label class="champ">
+            <span class="champ__libelle">Salaire net avant impôt&nbsp;<em>(facultatif)</em></span>
+            <span class="champ__court">Salaire</span>
+            <span class="champ__saisie">
+              <input type="number" id="salaireNet" step="100" min="0" placeholder="—">
+              <span class="champ__unite">€/mois</span>
+            </span>
+            <span class="champ__aide">Sert à calculer votre taux d'endettement et la part de votre salaire que représente l'effort mensuel. N'entre dans aucun calcul de patrimoine.</span>
+          </label>
       </div>
-      <div class="case" data-case="2">
-        <article class="bulle" data-bulle="2" data-colonnes="2">
-          <button type="button" class="bulle__declencheur" data-ouvrir="2">
-            <span class="bulle__numero">2</span>
+      <div class="profil__pied">
+        <button type="button" class="bouton bouton--primaire" id="profilValider">
+          Valider mon profil
+        </button>
+      </div>
+    </div>
+
+    <p class="profil__ratios" id="profilRatios" hidden></p>
+  </section>
+
+  <div class="plateau" id="formulaire">
+
+    <div class="plateau__coin">
+      <button type="button" class="bouton bouton--discret" id="reinitialiser">Réinitialiser</button>
+    </div>
+
+    <div class="plateau__haut">
+      <div class="case" data-case="1">
+        <article class="bulle" data-bulle="1" data-colonnes="2">
+          <button type="button" class="bulle__declencheur" data-ouvrir="1">
+            <span class="bulle__numero">1</span>
             <span class="bulle__titre">L'opération</span>
             <span class="bulle__cadenas" aria-hidden="true"></span>
           </button>
@@ -127,18 +147,15 @@
         </label>
             </div>
             <div class="bulle__pied">
-              <button type="button" class="bouton bouton--primaire" data-valider="2">Valider</button>
+              <button type="button" class="bouton bouton--primaire" data-valider="1">Valider</button>
             </div>
           </div>
         </article>
       </div>
-    </div>
-
-    <div class="plateau__gauche">
-      <div class="case" data-case="3">
-        <article class="bulle" data-bulle="3" data-colonnes="1">
-          <button type="button" class="bulle__declencheur" data-ouvrir="3">
-            <span class="bulle__numero">3</span>
+      <div class="case" data-case="2">
+        <article class="bulle" data-bulle="2" data-colonnes="1">
+          <button type="button" class="bulle__declencheur" data-ouvrir="2">
+            <span class="bulle__numero">2</span>
             <span class="bulle__titre">Le financement</span>
             <span class="bulle__cadenas" aria-hidden="true"></span>
           </button>
@@ -180,20 +197,23 @@
         </label>
             </div>
             <div class="bulle__pied">
-              <button type="button" class="bouton bouton--primaire" data-valider="3">Valider</button>
+              <button type="button" class="bouton bouton--primaire" data-valider="2">Valider</button>
             </div>
           </div>
         </article>
       </div>
-      <div class="case" data-case="4">
-        <article class="bulle" data-bulle="4" data-colonnes="1">
-          <button type="button" class="bulle__declencheur" data-ouvrir="4">
-            <span class="bulle__numero">4</span>
+    </div>
+
+    <div class="plateau__gauche">
+      <div class="case" data-case="3">
+        <article class="bulle" data-bulle="3" data-colonnes="1">
+          <button type="button" class="bulle__declencheur" data-ouvrir="3">
+            <span class="bulle__numero">3</span>
             <span class="bulle__titre">Les dépenses annuelles</span>
             <span class="bulle__cadenas" aria-hidden="true"></span>
           </button>
           <div class="bulle__corps">
-            <p class="bulle__intro">Ce que chaque trajectoire vous coûte chaque année&nbsp;: les charges du propriétaire d'un côté, le loyer du locataire de l'autre. C'est la comparaison de ces deux sorties qui alimente l'épargne de chaque scénario.</p>
+            <p class="bulle__intro">Ce que chaque trajectoire vous coûte chaque année&nbsp;: les charges du propriétaire d'un côté, le loyer du locataire de l'autre. C'est l'écart entre ces deux sorties qui alimente l'épargne de chaque scénario.</p>
             <div class="bulle__champs">
             <label class="champ">
           <span class="champ__libelle">Charges de copropriété</span>
@@ -221,15 +241,15 @@
         </label>
             </div>
             <div class="bulle__pied">
-              <button type="button" class="bouton bouton--primaire" data-valider="4">Valider</button>
+              <button type="button" class="bouton bouton--primaire" data-valider="3">Valider</button>
             </div>
           </div>
         </article>
       </div>
-      <div class="case" data-case="5">
-        <article class="bulle" data-bulle="5" data-colonnes="1">
-          <button type="button" class="bulle__declencheur" data-ouvrir="5">
-            <span class="bulle__numero">5</span>
+      <div class="case" data-case="4">
+        <article class="bulle" data-bulle="4" data-colonnes="1">
+          <button type="button" class="bulle__declencheur" data-ouvrir="4">
+            <span class="bulle__numero">4</span>
             <span class="bulle__titre">Le scénario de marché</span>
             <span class="bulle__cadenas" aria-hidden="true"></span>
           </button>
@@ -288,7 +308,7 @@
         </label>
             </div>
             <div class="bulle__pied">
-              <button type="button" class="bouton bouton--primaire" data-valider="5">Valider</button>
+              <button type="button" class="bouton bouton--primaire" data-valider="4">Valider</button>
             </div>
           </div>
         </article>
@@ -300,11 +320,11 @@
       <div class="attente" id="attente">
         <p class="attente__titre">Votre réponse s'affichera ici</p>
         <p class="attente__texte">
-          Renseignez les cinq bulles pour comparer l'achat et la location. Rien n'est calculé
-          tant qu'il manque une donnée&nbsp;: pas de chiffre inventé à partir de valeurs par défaut.
+          Renseignez votre profil puis les quatre bulles. Rien n'est calculé tant qu'il manque une
+          donnée&nbsp;: pas de chiffre inventé à partir de valeurs par défaut.
         </p>
         <div class="attente__jauge" id="attenteJauge" role="progressbar"
-             aria-valuemin="0" aria-valuemax="5" aria-valuenow="0"></div>
+             aria-valuemin="0" aria-valuemax="4" aria-valuenow="0"></div>
         <p class="attente__compte" id="attenteCompte"></p>
       </div>
 

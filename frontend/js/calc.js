@@ -21,6 +21,7 @@
   var DEFAUTS = {
     capitalInitial: 200000,
     enveloppeMensuelle: 3400,
+    salaireNet: 0, // net avant impôt, €/mois. 0 = non renseigné, facultatif.
 
     prixNetVendeur: 420000,
     typeBien: 'ancien', // 'ancien' | 'neuf'
@@ -245,6 +246,12 @@
       mensualiteCredit: pret.mensualite,
       mensualiteTotale: mensualiteTotale, // crédit + assurance, premier mois
       coutMensuelProprio: annees.length ? annees[0].totalDebourseAnnuel / 12 : 0,
+
+      // Indicateurs de faisabilité, seulement si le salaire est renseigné.
+      // Le taux d'endettement se calcule sur la mensualité assurance comprise,
+      // comme le fait le HCSF (plafond usuel de 35 %).
+      tauxEndettement: e.salaireNet > 0 ? mensualiteTotale / e.salaireNet : null,
+      partEnveloppe: e.salaireNet > 0 ? e.enveloppeMensuelle / e.salaireNet : null,
       enveloppeSuffisante: annees.length
         ? annees[0].totalDebourseAnnuel <= enveloppeAnnuelle
         : true,
