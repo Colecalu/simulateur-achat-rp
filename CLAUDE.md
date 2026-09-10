@@ -122,6 +122,13 @@ contient les valeurs réellement calculées par Excel sur 25 ans.
   d'espace mort en bas de bulle. Les libellés courts sont calibrés pour tenir dans une cellule
   à deux colonnes (~8 caractères) ; vérifier après tout changement qu'aucun
   `.champ__court` n'a `scrollWidth > getBoundingClientRect().width`.
+- **Vue zoomée : deux colonnes fixes, pas de texte d aide.** Les `.champ__aide` sont masqués
+  (`display: none`, le texte reste en HTML) : des cellules de hauteurs inégales cassaient
+  l alignement des rangées. Avec deux colonnes et aucune aide, six champs tombent sur trois
+  rangées au pas régulier.
+- Un libellé est un conteneur **flex** : l espace qui précède un `<em>` y est supprimé. Écrire
+  `&nbsp;` avant la parenthèse, sinon « Frais bancaires(dossier + hypothèque) ».
+- Pas d invite écrite sur la bulle à remplir : l anneau bleu et le numéro coloré suffisent.
 - Les libellés existent en deux versions : long (`.champ__libelle`, vue zoomée) et court
   (`.champ__court`, bulle repliée), tous deux écrits en HTML.
 - Toute modification de densité se revérifie en mesurant le jeu

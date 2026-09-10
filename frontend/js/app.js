@@ -459,27 +459,19 @@ function afficherProfil(resultat) {
     return;
   }
 
-  const pourcent = (v) => `${Math.round(v * 100)} %`;
-  const phrases = [
-    `Votre effort mensuel représente ${pourcent(resultat.partEnveloppe)} de votre salaire net.`,
-  ];
-
-  // Le taux d'endettement dépend du prêt : on ne l'affiche pas avant que
+  // Le taux d'endettement dépend du prêt : rien à montrer avant que
   // l'opération et le financement soient renseignés.
-  if (parcoursComplet()) {
-    const taux = resultat.tauxEndettement;
-    phrases.push(
-      `Taux d'endettement&nbsp;: <strong>${pourcent(taux)}</strong> ` +
-      `(mensualité ${eurosPrecis.format(resultat.mensualiteTotale)}).` +
-      (taux > 0.35 ? ' Au-delà du plafond de 35 % habituellement retenu par les banques.' : '')
-    );
+  if (!parcoursComplet()) {
+    ratios.hidden = true;
+    return;
   }
 
-  ratios.innerHTML = phrases.join(' ');
-  ratios.classList.toggle(
-    'profil__ratios--alerte',
-    parcoursComplet() && resultat.tauxEndettement > 0.35
-  );
+  const taux = resultat.tauxEndettement;
+  ratios.innerHTML =
+    `Taux d'endettement&nbsp;: <strong>${Math.round(taux * 100)} %</strong> ` +
+    `(mensualité ${eurosPrecis.format(resultat.mensualiteTotale)}).` +
+    (taux > 0.35 ? ' Au-delà du plafond de 35 % habituellement retenu par les banques.' : '');
+  ratios.classList.toggle('profil__ratios--alerte', taux > 0.35);
   ratios.hidden = false;
 }
 

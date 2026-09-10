@@ -202,7 +202,7 @@ h1, h2, h3 { margin: 0; font-weight: 600; letter-spacing: -0.01em; }
   line-height: 1.3;
   font-size: .8125rem;
 }
-.profil__champs .champ__libelle em { font-style: normal; color: var(--encre-3); }
+.champ__libelle em { font-style: normal; font-weight: 400; color: var(--encre-3); }
 .profil__champs .champ__court { display: none; }
 .profil__champs .champ__aide { display: block; }
 .profil__champs .champ__unite { min-width: 56px; }
@@ -394,11 +394,6 @@ h1, h2, h3 { margin: 0; font-weight: 600; letter-spacing: -0.01em; }
 .bulle--ouvrable .bulle__numero { color: var(--achat); }
 .bulle--ouvrable .bulle__titre { color: var(--encre); }
 .bulle--ouvrable .bulle__declencheur:hover { background: var(--achat-voile); }
-.bulle--ouvrable .bulle__declencheur::after {
-  content: "Cliquez pour remplir";
-  font-size: .75rem;
-  color: var(--achat);
-}
 
 /* --- Validée : champs modifiables sur place, sans défilement ------------ */
 .bulle--validee .bulle__corps { display: flex; }
@@ -587,12 +582,11 @@ h1, h2, h3 { margin: 0; font-weight: 600; letter-spacing: -0.01em; }
   margin: 10px 0 18px;
   color: var(--encre-2);
   font-size: .9375rem;
-  max-width: 60ch;
 }
 .bulle--zoom .bulle__intro em { font-style: normal; font-weight: 600; color: var(--encre); }
 .bulle--zoom .bulle__champs {
-  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-  gap: 14px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
 }
 .bulle--zoom .champ { display: grid; gap: 4px; align-content: start; }
 
@@ -671,7 +665,7 @@ h1, h2, h3 { margin: 0; font-weight: 600; letter-spacing: -0.01em; }
 
 /* Les aides alourdiraient une petite bulle : réservées à la vue zoomée. */
 .champ__aide { display: none; font-size: .75rem; color: var(--encre-3); line-height: 1.4; }
-.bulle--zoom .champ__aide { display: block; }
+.bulle--zoom .champ__aide { display: none; }
 
 /* ---------------------------------------------------------------- Boutons */
 
