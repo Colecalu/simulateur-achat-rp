@@ -1,74 +1,98 @@
 /* =========================================================================
    Simulateur achat RP vs location — feuille de style unique.
-   Pas de framework : variables CSS + grid. Thème clair/sombre automatique.
+   Pas de framework : variables CSS + grid.
+
+   Le socle de jetons ci-dessous vient du design « Acheter ou louer »
+   (docs/design/), repris tel quel. Les noms sémantiques en français qui
+   suivent sont ceux du simulateur : ils pointent vers les jetons du design,
+   de sorte que la structure et le JavaScript n'ont pas eu à changer.
+
+   Thème CLAIR uniquement : le design ne définit pas de palette sombre, et ses
+   verts volontairement désaturés ne permettent pas d'en dériver une paire de
+   séries distinguable sous daltonisme sur fond sombre.
    ========================================================================= */
 
 :root {
   color-scheme: light;
 
-  --plan:            #f9f9f7;
-  --surface:         #fcfcfb;
-  --surface-creuse:  #f2f2ef;
+  /* ---------- Rampes du design ---------- */
+  --ink-900:#14211d; --ink-800:#1c2b27; --ink-700:#24382f; --ink-600:#354c42;
+  --ink-500:#4a5f56; --ink-400:#6b7f76; --ink-300:#8a9a92; --ink-200:#b4c0ba;
+  --ink-100:#d6ded9; --ink-50:#e8ede9;
 
-  --encre:           #0b0b0b;
-  --encre-2:         #52514e;
-  --encre-3:         #898781;
+  --cream-50:#fdfbf7; --cream-100:#f7f1e8; --cream-200:#efe6d9; --cream-300:#e3d7c5;
 
-  --trait:           rgba(11, 11, 11, 0.10);
-  --grille:          #e1e0d9;
-  --axe:             #c3c2b7;
+  --green-800:#163a2e; --green-700:#1f4d3d; --green-600:#2a6650; --green-500:#3d8168;
+  --green-200:#bcd8c9; --green-100:#dceae2; --green-50:#eef5f1;
 
-  --achat:           #2a78d6;
-  --location:        #eb6834;
-  --achat-voile:     rgba(42, 120, 214, 0.10);
-  --location-voile:  rgba(235, 104, 52, 0.10);
-  --achat-fond:      rgba(42, 120, 214, 0.32);
-  --location-fond:   rgba(235, 104, 52, 0.32);
-  --achat-location:  #1baf7a;
+  --terracotta-700:#a34e2d; --terracotta-600:#c0603a; --terracotta-500:#d3805e;
+  --terracotta-200:#eec9b6; --terracotta-100:#f6e3d9; --terracotta-50:#fbf1eb;
 
-  --succes:          #006300;
-  --alerte:          #d03b3b;
-  --alerte-fond:     rgba(208, 59, 59, 0.08);
+  --amber-600:#a2740f; --amber-500:#c08a1e; --amber-100:#f7ebd2; --amber-50:#fcf6e8;
+  --red-700:#8c2d20; --red-600:#a83a2a; --red-100:#f6ded9; --red-50:#fbeeeb;
+  --blue-700:#2c5169; --blue-600:#3a6684; --blue-100:#dde8ef; --blue-50:#eef4f8;
+  --white:#ffffff;
 
-  --rayon:           10px;
-  --rayon-large:     14px;
-  --ombre:           0 1px 2px rgba(11, 11, 11, .04), 0 8px 24px rgba(11, 11, 11, .05);
+  /* ---------- Typographie du design ---------- */
+  --font-display: "Newsreader", Georgia, "Times New Roman", serif;
+  --font-sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", monospace;
 
-  --police: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
-            "Helvetica Neue", Arial, sans-serif;
-  --police-chiffres: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-}
+  --tracking-tight: -0.02em;
+  --tracking-caps: 0.09em;
 
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    color-scheme: dark;
+  /* ---------- Rayons, ombres, mouvement ---------- */
+  --radius-sm: 6px; --radius-md: 10px; --radius-lg: 16px; --radius-xl: 24px;
+  --radius-pill: 999px;
 
-    --plan:            #0d0d0d;
-    --surface:         #1a1a19;
-    --surface-creuse:  #232322;
+  --shadow-1: 0 1px 2px rgba(20,33,29,.06);
+  --shadow-2: 0 2px 6px rgba(20,33,29,.07), 0 1px 2px rgba(20,33,29,.05);
+  --shadow-3: 0 8px 24px rgba(20,33,29,.09), 0 2px 6px rgba(20,33,29,.05);
+  --shadow-4: 0 20px 48px rgba(20,33,29,.14), 0 4px 12px rgba(20,33,29,.07);
+  --ring-focus: 0 0 0 3px rgba(42,102,80,.22);
 
-    --encre:           #ffffff;
-    --encre-2:         #c3c2b7;
-    --encre-3:         #898781;
+  --duree-rapide: 140ms;
+  --duree-base: 200ms;
+  --aise: cubic-bezier(.2,.8,.2,1);
 
-    --trait:           rgba(255, 255, 255, 0.10);
-    --grille:          #2c2c2a;
-    --axe:             #383835;
+  /* ---------- Noms du simulateur, adossés au design ---------- */
+  --plan:            var(--cream-50);    /* fond de page */
+  --surface:         var(--white);       /* carte */
+  --surface-creuse:  var(--cream-100);   /* fond en creux */
 
-    --achat:           #3987e5;
-    --location:        #d95926;
-    --achat-voile:     rgba(57, 135, 229, 0.14);
-    --location-voile:  rgba(217, 89, 38, 0.14);
-    --achat-fond:      rgba(57, 135, 229, 0.38);
-    --location-fond:   rgba(217, 89, 38, 0.38);
-    --achat-location:  #199e70;
+  --encre:           var(--ink-900);
+  --encre-2:         var(--ink-500);
+  --encre-3:         var(--ink-400);
 
-    --succes:          #0ca30c;
-    --alerte:          #e66767;
-    --alerte-fond:     rgba(230, 103, 103, 0.10);
+  --trait:           var(--ink-50);
+  --grille:          var(--ink-50);
+  --axe:             var(--ink-100);
 
-    --ombre:           0 1px 2px rgba(0, 0, 0, .30), 0 8px 24px rgba(0, 0, 0, .35);
-  }
+  /*
+   * Les deux séries de la comparaison, reprises des jetons `--data-1` et
+   * `--data-2` du design. Le vert est très peu saturé (chroma 0,058) : il ne
+   * passe pas le plancher d'une palette catégorielle classique. C'est un parti
+   * pris du design, et la séparation qui compte vraiment est bonne — ΔE 14,8
+   * en protanopie, 27,6 en vision normale. Avec deux séries seulement, une
+   * légende et des points repères, la lecture reste sans ambiguïté.
+   */
+  --achat:           var(--green-700);
+  --location:        var(--terracotta-600);
+  --achat-location:  var(--blue-600);    /* 3e série : mise en location */
+
+  --achat-voile:     var(--green-50);
+  --location-voile:  var(--terracotta-50);
+
+  --succes:          var(--green-600);
+  --alerte:          var(--red-600);
+  --alerte-fond:     var(--red-50);
+
+  --rayon:           var(--radius-sm);   /* contrôles */
+  --rayon-large:     var(--radius-lg);   /* cartes */
+  --ombre:           var(--shadow-1);
+
+  --police: var(--font-sans);
+  --police-chiffres: var(--font-mono);
 }
 
 *, *::before, *::after { box-sizing: border-box; }
@@ -81,9 +105,27 @@ body {
   color: var(--encre);
   background: var(--plan);
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
-h1, h2, h3 { margin: 0; font-weight: 600; letter-spacing: -0.01em; }
+/* Les titres passent en Newsreader, comme le design. */
+h1, h2, h3 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 500;
+  line-height: 1.28;
+  letter-spacing: var(--tracking-tight);
+}
+
+/* Les chiffres sont en Plex Mono tabulaire : ils s'alignent en colonne. */
+.tabulaire {
+  font-family: var(--police-chiffres);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--tracking-tight);
+}
+
+:focus-visible { outline: 2px solid var(--green-600); outline-offset: 2px; }
+::selection { background: var(--green-100); }
 
 /* ---------------------------------------------------------------- En-tête */
 
@@ -173,6 +215,7 @@ h1, h2, h3 { margin: 0; font-weight: 600; letter-spacing: -0.01em; }
   gap: 4px 20px;
   margin: 0;
   flex: 1;
+  font-family: var(--police-chiffres);
   font-size: .875rem;
   color: var(--encre);
   font-variant-numeric: tabular-nums;
@@ -206,7 +249,22 @@ h1, h2, h3 { margin: 0; font-weight: 600; letter-spacing: -0.01em; }
 .profil__champs .champ__court { display: none; }
 .profil__champs .champ__aide { display: block; }
 .profil__champs .champ__unite { min-width: 56px; }
-.profil__champs .champ input { padding: 10px 11px; font-size: 1rem; }
+.profil__champs .champ__saisie {
+  height: 44px;
+  padding: 0 12px;
+  background: var(--surface);
+  border: 1px solid var(--ink-100);
+  border-radius: var(--radius-sm);
+}
+.profil__champs .champ__saisie:focus-within {
+  border-color: var(--green-600);
+  box-shadow: var(--ring-focus);
+}
+.profil__champs .champ input {
+  padding: 0;
+  font-family: var(--police-chiffres);
+  font-size: 1rem;
+}
 
 .profil__pied { display: flex; justify-content: flex-end; margin-top: 14px; }
 
@@ -333,6 +391,7 @@ h1, h2, h3 { margin: 0; font-weight: 600; letter-spacing: -0.01em; }
 
 .bulle__numero {
   display: block;
+  font-family: var(--police-chiffres);
   font-size: 2.75rem;
   font-weight: 700;
   line-height: 1;
@@ -390,8 +449,11 @@ h1, h2, h3 { margin: 0; font-weight: 600; letter-spacing: -0.01em; }
 .bulle--verrouillee .bulle__cadenas { display: block; }
 
 /* --- Prochaine à remplir : elle appelle le clic ------------------------- */
-.bulle--ouvrable { border-color: var(--achat); box-shadow: 0 0 0 3px var(--achat-voile), var(--ombre); }
-.bulle--ouvrable .bulle__numero { color: var(--achat); }
+/* Carte « interactive » du design : elle se soulève au survol. */
+.bulle--ouvrable { border-color: var(--green-600); box-shadow: var(--ring-focus), var(--shadow-2); }
+.bulle--ouvrable:hover { box-shadow: var(--ring-focus), var(--shadow-3); transform: translateY(-2px); }
+.bulle--ouvrable { transition: box-shadow var(--duree-base) var(--aise), transform var(--duree-base) var(--aise); }
+.bulle--ouvrable .bulle__numero { color: var(--green-700); }
 .bulle--ouvrable .bulle__titre { color: var(--encre); }
 .bulle--ouvrable .bulle__declencheur:hover { background: var(--achat-voile); }
 
@@ -506,6 +568,8 @@ h1, h2, h3 { margin: 0; font-weight: 600; letter-spacing: -0.01em; }
 
 .bulle--validee .champ input,
 .bulle--validee .champ select {
+  font-family: var(--police-chiffres);
+  font-variant-numeric: tabular-nums;
   width: 6ch;
   min-width: 0;
   padding: 0;
@@ -660,7 +724,24 @@ h1, h2, h3 { margin: 0; font-weight: 600; letter-spacing: -0.01em; }
   color: var(--encre-3);
   white-space: nowrap;
 }
-.bulle--zoom .champ input, .bulle--zoom .champ select { padding: 10px 11px; font-size: 1rem; }
+/* Champ du design : 44 px de haut, bordure franche, anneau au focus. */
+.bulle--zoom .champ__saisie {
+  height: 44px;
+  padding: 0 12px;
+  background: var(--surface);
+  border: 1px solid var(--ink-100);
+  border-radius: var(--radius-sm);
+}
+.bulle--zoom .champ__saisie:focus-within {
+  border-color: var(--green-600);
+  box-shadow: var(--ring-focus);
+}
+.bulle--zoom .champ input, .bulle--zoom .champ select {
+  padding: 0;
+  font-family: var(--police-chiffres);
+  font-size: 1rem;
+}
+.bulle--zoom .champ select { font-family: var(--police); }
 .bulle--zoom .champ__libelle { font-size: .8125rem; }
 
 /* Les aides alourdiraient une petite bulle : réservées à la vue zoomée. */
@@ -671,25 +752,50 @@ h1, h2, h3 { margin: 0; font-weight: 600; letter-spacing: -0.01em; }
 
 .bouton {
   font: inherit;
-  font-size: .875rem;
-  padding: 9px 18px;
-  border-radius: var(--rayon);
-  border: 1px solid var(--trait);
+  font-size: .9375rem;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: .005em;
+  height: 44px;
+  padding: 0 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--ink-100);
   background: var(--surface);
-  color: var(--encre-2);
+  color: var(--encre);
+  box-shadow: var(--shadow-1);
   cursor: pointer;
   white-space: nowrap;
-  transition: background .12s ease, color .12s ease, filter .12s ease;
+  transition: background var(--duree-rapide) var(--aise),
+              border-color var(--duree-rapide) var(--aise),
+              color var(--duree-rapide) var(--aise),
+              box-shadow var(--duree-rapide) var(--aise),
+              transform 80ms var(--aise);
 }
-.bouton:hover { background: var(--plan); color: var(--encre); }
+.bouton:hover { background: var(--cream-100); }
+.bouton:active { transform: translateY(1px); }
+
 .bouton--primaire {
-  background: var(--achat);
-  border-color: var(--achat);
-  color: #fff;
-  font-weight: 500;
+  background: var(--green-700);
+  border-color: transparent;
+  color: var(--cream-50);
+  box-shadow: none;
 }
-.bouton--primaire:hover { background: var(--achat); color: #fff; filter: brightness(1.08); }
-.bouton--discret { border-color: transparent; background: transparent; font-size: .8125rem; }
+.bouton--primaire:hover { background: var(--green-800); color: var(--cream-50); }
+
+/* Variante « ghost » du design : ni fond ni bordure au repos. */
+.bouton--discret {
+  height: 34px;
+  padding: 0 12px;
+  font-size: .8125rem;
+  border-color: transparent;
+  background: transparent;
+  box-shadow: none;
+  color: var(--encre-2);
+}
+.bouton--discret:hover { background: var(--cream-100); color: var(--encre); }
 
 /* ---------------------------------------------------------------- Attente */
 
@@ -740,7 +846,7 @@ h1, h2, h3 { margin: 0; font-weight: 600; letter-spacing: -0.01em; }
   background: color-mix(in srgb, var(--encre-3) 22%, transparent);
   transition: background .2s ease;
 }
-.attente__cran--faite { background: var(--achat); border-color: var(--achat); }
+.attente__cran--faite { background: var(--green-600); }
 
 .attente__compte {
   margin: 0;
@@ -778,9 +884,17 @@ h1, h2, h3 { margin: 0; font-weight: 600; letter-spacing: -0.01em; }
   gap: 10px 18px;
   margin-bottom: 8px;
 }
-.verdict__question { font-size: .9375rem; font-weight: 500; color: var(--encre-2); }
+/* Surtitre du design : petites capitales espacées. */
+.verdict__question {
+  font-family: var(--police);
+  font-size: .6875rem;
+  font-weight: 600;
+  letter-spacing: var(--tracking-caps);
+  text-transform: uppercase;
+  color: var(--encre-2);
+}
 .verdict__horizon { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 220px; }
-.verdict__horizon input[type="range"] { flex: 1; accent-color: var(--achat); cursor: pointer; }
+.verdict__horizon input[type="range"] { flex: 1; accent-color: var(--green-600); cursor: pointer; }
 .verdict__annees {
   font-variant-numeric: tabular-nums;
   font-weight: 600;

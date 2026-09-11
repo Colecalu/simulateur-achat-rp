@@ -56,6 +56,15 @@ contient les valeurs réellement calculées par Excel sur 25 ans.
   indicateurs `tauxEndettement` (mensualité assurance comprise / salaire, plafond usuel 35 %) et
   `partEnveloppe`. Non renseigné, les deux valent `null` — jamais un ratio inventé.
 
+## Design (branche design-v2)
+
+Le socle de jetons de `frontend/css/style.css` vient du design Claude Design rangé dans
+`docs/design/` — voir son README pour ce qui a été repris et les trois écarts assumés
+(pas de thème sombre, vert de série conservé malgré les seuils, composition des pages non
+reprise). Les noms sémantiques français (`--plan`, `--encre`, `--achat`…) pointent vers les
+rampes du design : c'est ce qui permet au JavaScript, qui lit ces variables pour colorer les
+graphiques, de rester inchangé. **Thème clair uniquement.**
+
 ## Conventions
 
 - Interface, labels, noms de variables, de fonctions et de classes CSS **en français**.
