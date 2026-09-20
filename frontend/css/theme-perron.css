@@ -1,0 +1,103 @@
+/* =========================================================================
+   Thème « Perron » — terre cuite, olive et papier chaud.
+   Source : docs/design/Perron Design System.zip (tokens/*.css et readme.md).
+
+   Ce fichier ne contient QUE des valeurs. Aucune règle de mise en page :
+   la structure vit dans style.css et ne connaît que les noms sémantiques
+   définis en fin de fichier.
+   ========================================================================= */
+
+@import url("https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&display=swap");
+
+:root {
+  color-scheme: light;
+
+  /* ---------- Rampes du design, recopiées ---------- */
+  --paper-50:#FFFDF9; --paper-100:#FBF7F0; --paper-200:#F4EDE2; --paper-300:#EADFD0;
+
+  --warm-100:#E4D9CC; --warm-200:#C9BCAD; --warm-300:#A8998A; --warm-400:#8C7E70;
+  --warm-500:#6B5D52; --warm-600:#4E4239; --warm-700:#2A211B;
+
+  --clay-50:#FAF2EC; --clay-100:#F0DFD2; --clay-200:#E0C0A8; --clay-300:#C99C7B;
+  --clay-400:#B87D51; --clay-500:#A8663F; --clay-600:#8B5231; --clay-700:#653A22;
+
+  --olive-50:#F2F3EA; --olive-100:#E0E4CF; --olive-200:#C2CAA6; --olive-300:#9BA87B;
+  --olive-400:#7D8C5C; --olive-500:#6E7F58; --olive-600:#586747; --olive-700:#3F4B33;
+
+  --green-100:#DCEBDD; --green-500:#4E7A54; --green-700:#2F5335;
+  --ochre-100:#F8E9C8; --ochre-500:#C08A2E; --ochre-700:#8A6014;
+  --brick-100:#F6DAD3; --brick-500:#A8402F; --brick-700:#77291C;
+
+  /* ---------- Surfaces et encre ---------- */
+  --plan:            var(--paper-100);   /* fond de page — jamais de blanc pur */
+  --surface:         var(--paper-50);    /* carte */
+  --surface-creuse:  var(--paper-200);
+
+  --encre:           var(--warm-700);    /* brun profond, pas du noir */
+  --encre-2:         var(--warm-600);
+  --encre-3:         var(--warm-400);
+
+  --trait:           var(--warm-100);
+  --bord-champ:      var(--warm-200);
+  --grille:          var(--paper-300);
+  --axe:             var(--warm-100);
+
+  /* ---------- Accent : terre cuite, couleur de marque ---------- */
+  --accent:          var(--clay-500);
+  --accent-fort:     var(--clay-600);
+  --accent-doux:     var(--clay-50);
+  --sur-accent:      var(--paper-50);
+  --survol:          var(--paper-200);
+  --anneau:          0 0 0 3px rgba(184,125,81,.34);
+
+  /*
+   * Séries de données. Le design pose « terre cuite contre olive, partout,
+   * sans exception » — mais `--olive-500` #6E7F58 contre `--clay-500` #A8663F
+   * mesure ΔE 10,5 en vision NORMALE, sous le plancher de 15 : deux courbes
+   * difficiles à distinguer même sans daltonisme, et 3,8 en deutéranopie,
+   * c'est-à-dire confondues.
+   *
+   * La terre cuite de marque est conservée telle quelle ; seul l'olive descend
+   * d'un cran dans sa propre rampe, jusqu'à `--olive-700`. La séparation passe
+   * alors à 20,7 en vision normale et 13,9 en protanopie. Un seul jeton
+   * déplacé, l'identité intacte.
+   */
+  --achat:           var(--clay-500);
+  --location:        var(--olive-700);
+  --achat-location:  var(--ochre-500);   /* 3e série : ΔE 29,5 contre l'olive */
+
+  --achat-voile:     var(--clay-50);
+  --location-voile:  var(--olive-50);
+
+  --succes:          var(--green-500);
+  --alerte:          var(--brick-500);
+  --alerte-fond:     var(--brick-100);
+
+  /* ---------- Formes ---------- */
+  --rayon:           12px;   /* champs et boutons */
+  --rayon-large:     20px;   /* cartes */
+  --rayon-feuille:   28px;   /* modales */
+
+  /* Ombres longues, très diffuses, teintées brun — jamais du noir. */
+  --ombre:    0 1px 2px rgba(58,40,26,.06);
+  --ombre-2:  0 1px 2px rgba(58,40,26,.05), 0 6px 16px -10px rgba(58,40,26,.18);
+  --ombre-3:  0 2px 4px rgba(58,40,26,.05), 0 18px 40px -20px rgba(58,40,26,.28);
+  --ombre-creux: inset 0 1px 2px rgba(58,40,26,.06);
+
+  /* ---------- Mouvement ---------- */
+  --duree-rapide: 160ms;
+  --duree-base:   240ms;
+  --aise:         cubic-bezier(.2,.6,.25,1);
+
+  /* ---------- Typographie ---------- */
+  --police-titre: "Instrument Serif", Georgia, "Times New Roman", serif;
+  --police: "Geist", "Helvetica Neue", Arial, sans-serif;
+  /* Geist Mono est réservé à la documentation : les chiffres du produit sont
+     en Geist, avec chasse tabulaire. C'est une règle explicite du design. */
+  --police-chiffres: "Geist", "Helvetica Neue", Arial, sans-serif;
+
+  --graisse-titre: 400;
+  --interlettre-titre: -0.02em;
+  --interlettre-caps: 0.09em;
+}

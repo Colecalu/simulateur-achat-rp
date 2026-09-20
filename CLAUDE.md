@@ -58,12 +58,30 @@ contient les valeurs réellement calculées par Excel sur 25 ans.
 
 ## Design (branche design-v2)
 
-Le socle de jetons de `frontend/css/style.css` vient du design Claude Design rangé dans
-`docs/design/` — voir son README pour ce qui a été repris et les trois écarts assumés
-(pas de thème sombre, vert de série conservé malgré les seuils, composition des pages non
-reprise). Les noms sémantiques français (`--plan`, `--encre`, `--achat`…) pointent vers les
-rampes du design : c'est ce qui permet au JavaScript, qui lit ces variables pour colorer les
-graphiques, de rester inchangé. **Thème clair uniquement.**
+Deux designs Claude Design cohabitent, interchangeables à chaud — voir
+[docs/design/README.md](docs/design/README.md) pour les sources, ce qui est repris et les
+écarts assumés.
+
+- **`frontend/css/style.css` ne contient que de la structure.** Aucun `#hex`, aucun nom de pas
+  de rampe (`--clay-500`, `--green-700`), aucune police, aucun rayon, aucune ombre : uniquement
+  des noms sémantiques français (`--plan`, `--encre`, `--accent`, `--achat`, `--rayon-large`…).
+- **`frontend/css/theme-perron.css` (défaut) et `theme-foret.css` ne contiennent que des
+  valeurs** : les rampes du design recopiées, ses polices importées, puis les noms sémantiques
+  qui pointent dessus. Aucune règle de mise en page.
+- Si un rôle manque, l'ajouter **aux deux thèmes** plutôt que d'écrire une couleur dans
+  `style.css`. Une seule fuite casse la bascule.
+- C'est cette indirection qui permet au JavaScript, qui lit `--achat` et `--location` pour
+  colorer les courbes, de rester inchangé quel que soit le thème.
+- **Thème clair uniquement** : aucun des deux designs ne fournit de palette sombre, et les
+  verts y sont trop désaturés pour qu'on en dérive deux séries distinguables sous daltonisme.
+- Le sélecteur en bas de page (`.bascule`, `initialiserBascule()`) est un **outil de
+  comparaison, pas une fonctionnalité** : il remplace le `href` de `<link id="theme">` puis
+  appelle `rafraichir()` sur l'événement `load` de la nouvelle feuille — sinon les graphiques
+  gardent l'ancienne palette. À retirer une fois le design arrêté.
+- Écart corrigé dans Perron : le design impose terre cuite contre olive, mais `clay-500` contre
+  `olive-500` mesure ΔE 10,5 en vision normale et 3,8 en deutéranopie — deux courbes confondues.
+  L'olive des séries est descendu à `--olive-700`, **un pas de sa propre rampe** (ΔE 20,7 / 13,9).
+  Ne pas le remonter sans refaire la mesure.
 
 ## Conventions
 

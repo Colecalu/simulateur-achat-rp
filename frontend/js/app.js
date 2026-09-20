@@ -627,6 +627,39 @@ function initialiserBulles() {
   majBulles();
 }
 
+/* ------------------------------------------------- Comparateur de thèmes */
+
+/**
+ * Bascule entre les feuilles de thème. Outil de comparaison : il permet de
+ * juger deux designs sur les mêmes chiffres, sans recharger ni changer de
+ * branche. À retirer une fois le design arrêté.
+ *
+ * Les graphiques lisent leurs couleurs dans les variables CSS : il faut donc
+ * les redessiner une fois la nouvelle feuille appliquée.
+ */
+function initialiserBascule() {
+  const feuille = $('#theme');
+  const boutons = [...document.querySelectorAll('.bascule__choix')];
+
+  const appliquer = (nom) => {
+    feuille.href = `css/theme-${nom}.css`;
+    for (const b of boutons) {
+      b.classList.toggle('bascule__choix--actif', b.dataset.theme === nom);
+    }
+    try { localStorage.setItem('theme', nom); } catch (e) { /* navigation privée */ }
+
+    // La feuille se charge de façon asynchrone : on attend qu'elle soit prête
+    // avant de relire les jetons, sinon les courbes gardent l'ancienne palette.
+    feuille.addEventListener('load', rafraichir, { once: true });
+  };
+
+  for (const b of boutons) b.addEventListener('click', () => appliquer(b.dataset.theme));
+
+  let choisi = 'perron';
+  try { choisi = localStorage.getItem('theme') || choisi; } catch (e) { /* idem */ }
+  appliquer(choisi);
+}
+
 function initialiser() {
   remplirFormulaire(DEFAUTS);
   remplirFormulaireMel();
@@ -666,9 +699,7 @@ function initialiser() {
   });
   $('#melFormulaire').addEventListener('input', rafraichir);
 
-  // Le thème peut changer sans rechargement : on redessine avec les nouveaux jetons.
-  window.matchMedia('(prefers-color-scheme: dark)')
-    .addEventListener('change', () => rafraichir());
+  initialiserBascule();
 
   recalculer();
 }

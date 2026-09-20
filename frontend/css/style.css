@@ -1,99 +1,15 @@
 /* =========================================================================
-   Simulateur achat RP vs location — feuille de style unique.
-   Pas de framework : variables CSS + grid.
+   Simulateur achat RP vs location — structure et composants.
 
-   Le socle de jetons ci-dessous vient du design « Acheter ou louer »
-   (docs/design/), repris tel quel. Les noms sémantiques en français qui
-   suivent sont ceux du simulateur : ils pointent vers les jetons du design,
-   de sorte que la structure et le JavaScript n'ont pas eu à changer.
+   Ce fichier ne contient AUCUNE valeur de couleur, de police, de rayon ni
+   d'ombre : uniquement des noms sémantiques, définis par le fichier de thème
+   chargé dans index.html (css/theme-*.css). Changer de thème = changer ce
+   fichier-là, jamais celui-ci.
 
-   Thème CLAIR uniquement : le design ne définit pas de palette sombre, et ses
-   verts volontairement désaturés ne permettent pas d'en dériver une paire de
-   séries distinguable sous daltonisme sur fond sombre.
+   Règle : ne jamais écrire ici de `#hex` ni le nom d'un pas de rampe
+   (`--clay-500`, `--green-700`). Si un rôle manque, l'ajouter aux DEUX
+   thèmes plutôt que de nommer une couleur.
    ========================================================================= */
-
-:root {
-  color-scheme: light;
-
-  /* ---------- Rampes du design ---------- */
-  --ink-900:#14211d; --ink-800:#1c2b27; --ink-700:#24382f; --ink-600:#354c42;
-  --ink-500:#4a5f56; --ink-400:#6b7f76; --ink-300:#8a9a92; --ink-200:#b4c0ba;
-  --ink-100:#d6ded9; --ink-50:#e8ede9;
-
-  --cream-50:#fdfbf7; --cream-100:#f7f1e8; --cream-200:#efe6d9; --cream-300:#e3d7c5;
-
-  --green-800:#163a2e; --green-700:#1f4d3d; --green-600:#2a6650; --green-500:#3d8168;
-  --green-200:#bcd8c9; --green-100:#dceae2; --green-50:#eef5f1;
-
-  --terracotta-700:#a34e2d; --terracotta-600:#c0603a; --terracotta-500:#d3805e;
-  --terracotta-200:#eec9b6; --terracotta-100:#f6e3d9; --terracotta-50:#fbf1eb;
-
-  --amber-600:#a2740f; --amber-500:#c08a1e; --amber-100:#f7ebd2; --amber-50:#fcf6e8;
-  --red-700:#8c2d20; --red-600:#a83a2a; --red-100:#f6ded9; --red-50:#fbeeeb;
-  --blue-700:#2c5169; --blue-600:#3a6684; --blue-100:#dde8ef; --blue-50:#eef4f8;
-  --white:#ffffff;
-
-  /* ---------- Typographie du design ---------- */
-  --font-display: "Newsreader", Georgia, "Times New Roman", serif;
-  --font-sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", monospace;
-
-  --tracking-tight: -0.02em;
-  --tracking-caps: 0.09em;
-
-  /* ---------- Rayons, ombres, mouvement ---------- */
-  --radius-sm: 6px; --radius-md: 10px; --radius-lg: 16px; --radius-xl: 24px;
-  --radius-pill: 999px;
-
-  --shadow-1: 0 1px 2px rgba(20,33,29,.06);
-  --shadow-2: 0 2px 6px rgba(20,33,29,.07), 0 1px 2px rgba(20,33,29,.05);
-  --shadow-3: 0 8px 24px rgba(20,33,29,.09), 0 2px 6px rgba(20,33,29,.05);
-  --shadow-4: 0 20px 48px rgba(20,33,29,.14), 0 4px 12px rgba(20,33,29,.07);
-  --ring-focus: 0 0 0 3px rgba(42,102,80,.22);
-
-  --duree-rapide: 140ms;
-  --duree-base: 200ms;
-  --aise: cubic-bezier(.2,.8,.2,1);
-
-  /* ---------- Noms du simulateur, adossés au design ---------- */
-  --plan:            var(--cream-50);    /* fond de page */
-  --surface:         var(--white);       /* carte */
-  --surface-creuse:  var(--cream-100);   /* fond en creux */
-
-  --encre:           var(--ink-900);
-  --encre-2:         var(--ink-500);
-  --encre-3:         var(--ink-400);
-
-  --trait:           var(--ink-50);
-  --grille:          var(--ink-50);
-  --axe:             var(--ink-100);
-
-  /*
-   * Les deux séries de la comparaison, reprises des jetons `--data-1` et
-   * `--data-2` du design. Le vert est très peu saturé (chroma 0,058) : il ne
-   * passe pas le plancher d'une palette catégorielle classique. C'est un parti
-   * pris du design, et la séparation qui compte vraiment est bonne — ΔE 14,8
-   * en protanopie, 27,6 en vision normale. Avec deux séries seulement, une
-   * légende et des points repères, la lecture reste sans ambiguïté.
-   */
-  --achat:           var(--green-700);
-  --location:        var(--terracotta-600);
-  --achat-location:  var(--blue-600);    /* 3e série : mise en location */
-
-  --achat-voile:     var(--green-50);
-  --location-voile:  var(--terracotta-50);
-
-  --succes:          var(--green-600);
-  --alerte:          var(--red-600);
-  --alerte-fond:     var(--red-50);
-
-  --rayon:           var(--radius-sm);   /* contrôles */
-  --rayon-large:     var(--radius-lg);   /* cartes */
-  --ombre:           var(--shadow-1);
-
-  --police: var(--font-sans);
-  --police-chiffres: var(--font-mono);
-}
 
 *, *::before, *::after { box-sizing: border-box; }
 
@@ -108,24 +24,22 @@ body {
   text-rendering: optimizeLegibility;
 }
 
-/* Les titres passent en Newsreader, comme le design. */
 h1, h2, h3 {
   margin: 0;
-  font-family: var(--font-display);
-  font-weight: 500;
-  line-height: 1.28;
-  letter-spacing: var(--tracking-tight);
+  font-family: var(--police-titre);
+  font-weight: var(--graisse-titre);
+  line-height: 1.2;
+  letter-spacing: var(--interlettre-titre);
 }
 
-/* Les chiffres sont en Plex Mono tabulaire : ils s'alignent en colonne. */
+/* Les chiffres s'alignent en colonne, quel que soit le thème. */
 .tabulaire {
   font-family: var(--police-chiffres);
-  font-variant-numeric: tabular-nums;
-  letter-spacing: var(--tracking-tight);
+  font-variant-numeric: tabular-nums lining-nums;
 }
 
-:focus-visible { outline: 2px solid var(--green-600); outline-offset: 2px; }
-::selection { background: var(--green-100); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+::selection { background: var(--accent-doux); }
 
 /* ---------------------------------------------------------------- En-tête */
 
@@ -253,12 +167,12 @@ h1, h2, h3 {
   height: 44px;
   padding: 0 12px;
   background: var(--surface);
-  border: 1px solid var(--ink-100);
-  border-radius: var(--radius-sm);
+  border: 1px solid var(--bord-champ);
+  border-radius: var(--rayon);
 }
 .profil__champs .champ__saisie:focus-within {
-  border-color: var(--green-600);
-  box-shadow: var(--ring-focus);
+  border-color: var(--accent);
+  box-shadow: var(--anneau);
 }
 .profil__champs .champ input {
   padding: 0;
@@ -450,10 +364,10 @@ h1, h2, h3 {
 
 /* --- Prochaine à remplir : elle appelle le clic ------------------------- */
 /* Carte « interactive » du design : elle se soulève au survol. */
-.bulle--ouvrable { border-color: var(--green-600); box-shadow: var(--ring-focus), var(--shadow-2); }
-.bulle--ouvrable:hover { box-shadow: var(--ring-focus), var(--shadow-3); transform: translateY(-2px); }
+.bulle--ouvrable { border-color: var(--accent); box-shadow: var(--anneau), var(--ombre-2); }
+.bulle--ouvrable:hover { box-shadow: var(--anneau), var(--ombre-3); transform: translateY(-2px); }
 .bulle--ouvrable { transition: box-shadow var(--duree-base) var(--aise), transform var(--duree-base) var(--aise); }
-.bulle--ouvrable .bulle__numero { color: var(--green-700); }
+.bulle--ouvrable .bulle__numero { color: var(--accent); }
 .bulle--ouvrable .bulle__titre { color: var(--encre); }
 .bulle--ouvrable .bulle__declencheur:hover { background: var(--achat-voile); }
 
@@ -477,7 +391,7 @@ h1, h2, h3 {
   flex: none;
   border-radius: 50%;
   background: var(--succes);
-  color: #fff;
+  color: var(--sur-accent);
   font-size: .6875rem;
   font-weight: 700;
   letter-spacing: 0;
@@ -635,7 +549,7 @@ h1, h2, h3 {
   flex: none;
   border-radius: 50%;
   background: var(--achat);
-  color: #fff;
+  color: var(--sur-accent);
   font-size: 1rem;
   letter-spacing: 0;
 }
@@ -729,12 +643,12 @@ h1, h2, h3 {
   height: 44px;
   padding: 0 12px;
   background: var(--surface);
-  border: 1px solid var(--ink-100);
-  border-radius: var(--radius-sm);
+  border: 1px solid var(--bord-champ);
+  border-radius: var(--rayon);
 }
 .bulle--zoom .champ__saisie:focus-within {
-  border-color: var(--green-600);
-  box-shadow: var(--ring-focus);
+  border-color: var(--accent);
+  box-shadow: var(--anneau);
 }
 .bulle--zoom .champ input, .bulle--zoom .champ select {
   padding: 0;
@@ -761,11 +675,11 @@ h1, h2, h3 {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--ink-100);
+  border-radius: var(--rayon);
+  border: 1px solid var(--bord-champ);
   background: var(--surface);
   color: var(--encre);
-  box-shadow: var(--shadow-1);
+  box-shadow: var(--ombre);
   cursor: pointer;
   white-space: nowrap;
   transition: background var(--duree-rapide) var(--aise),
@@ -774,16 +688,16 @@ h1, h2, h3 {
               box-shadow var(--duree-rapide) var(--aise),
               transform 80ms var(--aise);
 }
-.bouton:hover { background: var(--cream-100); }
+.bouton:hover { background: var(--survol); }
 .bouton:active { transform: translateY(1px); }
 
 .bouton--primaire {
-  background: var(--green-700);
+  background: var(--accent);
   border-color: transparent;
-  color: var(--cream-50);
+  color: var(--sur-accent);
   box-shadow: none;
 }
-.bouton--primaire:hover { background: var(--green-800); color: var(--cream-50); }
+.bouton--primaire:hover { background: var(--accent-fort); color: var(--sur-accent); }
 
 /* Variante « ghost » du design : ni fond ni bordure au repos. */
 .bouton--discret {
@@ -795,7 +709,7 @@ h1, h2, h3 {
   box-shadow: none;
   color: var(--encre-2);
 }
-.bouton--discret:hover { background: var(--cream-100); color: var(--encre); }
+.bouton--discret:hover { background: var(--survol); color: var(--encre); }
 
 /* ---------------------------------------------------------------- Attente */
 
@@ -846,7 +760,7 @@ h1, h2, h3 {
   background: color-mix(in srgb, var(--encre-3) 22%, transparent);
   transition: background .2s ease;
 }
-.attente__cran--faite { background: var(--green-600); }
+.attente__cran--faite { background: var(--accent); }
 
 .attente__compte {
   margin: 0;
@@ -889,12 +803,12 @@ h1, h2, h3 {
   font-family: var(--police);
   font-size: .6875rem;
   font-weight: 600;
-  letter-spacing: var(--tracking-caps);
+  letter-spacing: var(--interlettre-caps);
   text-transform: uppercase;
   color: var(--encre-2);
 }
 .verdict__horizon { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 220px; }
-.verdict__horizon input[type="range"] { flex: 1; accent-color: var(--green-600); cursor: pointer; }
+.verdict__horizon input[type="range"] { flex: 1; accent-color: var(--accent); cursor: pointer; }
 .verdict__annees {
   font-variant-numeric: tabular-nums;
   font-weight: 600;
@@ -1050,3 +964,47 @@ input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; marg
 .mel__incomplet[hidden] { display: none; }
 
 #melNote { margin-top: 12px; }
+
+/* ------------------------------------------------- Comparateur de thèmes */
+
+/*
+ * Outil de travail, pas une fonctionnalité : il sert à comparer deux designs
+ * sur les mêmes chiffres. À retirer une fois le choix arrêté.
+ */
+.bascule {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  background: var(--surface);
+  border: 1px solid var(--trait);
+  border-radius: var(--rayon-feuille);
+  box-shadow: var(--ombre-3);
+}
+.bascule__mot {
+  font-size: .625rem;
+  font-weight: 600;
+  letter-spacing: var(--interlettre-caps);
+  text-transform: uppercase;
+  color: var(--encre-3);
+  padding-left: 4px;
+}
+.bascule__choix {
+  font: inherit;
+  font-size: .75rem;
+  padding: 5px 10px;
+  border: 0;
+  border-radius: var(--rayon);
+  background: transparent;
+  color: var(--encre-2);
+  cursor: pointer;
+  transition: background var(--duree-rapide) var(--aise), color var(--duree-rapide) var(--aise);
+}
+.bascule__choix:hover { background: var(--survol); }
+.bascule__choix--actif { background: var(--accent); color: var(--sur-accent); }
+
+@media print { .bascule { display: none; } }
