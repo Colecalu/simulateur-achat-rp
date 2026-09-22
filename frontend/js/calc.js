@@ -109,6 +109,35 @@
     return { mensualite: mensualite, lignes: lignes };
   }
 
+  /**
+   * Taux applicable à l'année `a` (1 = première année).
+   *
+   * Un taux peut être un NOMBRE — constant, comme aujourd'hui — ou une SÉRIE
+   * année par année. La série sert aux scénarios adossés à des données réelles :
+   * une décennie de marché ne monte pas de 5 % tous les ans, et c'est
+   * précisément ce que les simulateurs linéaires ratent.
+   *
+   * Au-delà de sa longueur, la série **se répète**. Rejouer la séquence en
+   * boucle se raconte — « et si cette décennie recommençait » — alors que figer
+   * la dernière valeur connue choisirait silencieusement une année au hasard
+   * comme régime permanent.
+   */
+  function tauxAnnee(valeur, a) {
+    if (!Array.isArray(valeur)) return valeur;
+    if (!valeur.length) return 0;
+    return valeur[(a - 1) % valeur.length];
+  }
+
+  /**
+   * Produit des (1 + taux) sur les années `de` à `a` incluses. Rend 1 si
+   * l'intervalle est vide. C'est la version « série » de `Math.pow(1+r, n)`.
+   */
+  function facteur(valeur, de, a) {
+    var f = 1;
+    for (var k = de; k <= a; k++) f *= 1 + tauxAnnee(valeur, k);
+    return f;
+  }
+
   /** Agrégation annuelle du tableau d'amortissement. */
   function amortissementAnnuel(lignes, nbAnnees) {
     var annees = [];
@@ -177,9 +206,10 @@
       var pa = parAnnee[a - 1];
 
       // Côté achat : coût de possession de l'année
-      var valeurBien = e.valeurEstimee * Math.pow(1 + e.revalBien, a);
-      var charges = e.chargesCopro * Math.pow(1 + e.revalCharges, a - 1);
-      var taxe = e.taxeFonciere * Math.pow(1 + e.revalTaxeFonciere, a - 1);
+      // Les revalorisations acceptent un taux constant ou une série annuelle.
+      var valeurBien = e.valeurEstimee * facteur(e.revalBien, 1, a);
+      var charges = e.chargesCopro * facteur(e.revalCharges, 1, a - 1);
+      var taxe = e.taxeFonciere * facteur(e.revalTaxeFonciere, 1, a - 1);
       var totalDebourseAnnuel = pa.totalPaye + charges + taxe;
       var patrimoineNetImmo = valeurBien - pa.crdFin;
 
@@ -187,16 +217,17 @@
 
       // Ce que l'enveloppe laisse disponible pour la bourse, de chaque côté
       var surplusProprio = Math.max(enveloppeAnnuelle - totalDebourseAnnuel, 0);
-      var loyerAnnuel = e.loyer * 12 * Math.pow(1 + e.revalLoyer, a - 1);
+      var loyerAnnuel = e.loyer * 12 * facteur(e.revalLoyer, 1, a - 1);
       var surplusLocataire = Math.max(enveloppeAnnuelle - loyerAnnuel, 0);
 
       // Portefeuille : rendement sur le capital de début d'année, puis versement
-      capitalAchat = capitalAchat * (1 + e.rendementBourse) + surplusProprio;
+      var bourse = tauxAnnee(e.rendementBourse, a);
+      capitalAchat = capitalAchat * (1 + bourse) + surplusProprio;
       versementsAchat += surplusProprio;
       var baseAchat = e.capitalInitial - e.apport + versementsAchat;
       var impotAchat = Math.max(capitalAchat - baseAchat, 0) * e.fiscalitePlusValues;
 
-      capitalLocation = capitalLocation * (1 + e.rendementBourse) + surplusLocataire;
+      capitalLocation = capitalLocation * (1 + bourse) + surplusLocataire;
       versementsLocation += surplusLocataire;
       var baseLocation = e.capitalInitial + versementsLocation;
       var impotLocation = Math.max(capitalLocation - baseLocation, 0) * e.fiscalitePlusValues;
@@ -399,6 +430,8 @@
     fraisDeNotaire: fraisDeNotaire,
     mensualiteCredit: mensualiteCredit,
     tableauAmortissement: tableauAmortissement,
+    tauxAnnee: tauxAnnee,
+    facteur: facteur,
     simuler: simuler,
     repartitionEnveloppe: repartitionEnveloppe,
     repartitionAnnuelle: repartitionAnnuelle,

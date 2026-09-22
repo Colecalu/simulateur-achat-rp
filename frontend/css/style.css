@@ -231,13 +231,21 @@ h1, h2, h3 {
   position: sticky;
   top: 16px;
   display: grid;
+  grid-template-rows: auto auto;
+  gap: 14px;
+}
+/*
+ * Les deux bulles de gauche, à hauteur bornée : elles doivent tenir sous
+ * l'en-tête ET sous la rangée du haut, sans provoquer de défilement sur un
+ * écran d'ordinateur. La carte scénario, elle, prend ce qu'il lui faut.
+ */
+.rail {
+  display: grid;
   grid-template-rows: repeat(2, minmax(0, 1fr));
   gap: 14px;
-  /* Les quatre bulles doivent tenir sous l'en-tête ET sous la rangée du haut,
-     sans jamais provoquer de défilement sur un écran d'ordinateur classique. */
-  height: calc(100vh - 400px);
-  min-height: 300px;
-  max-height: 430px;
+  height: calc(100vh - 470px);
+  min-height: 280px;
+  max-height: 400px;
 }
 
 .case { min-height: 0; min-width: 0; }
@@ -248,9 +256,10 @@ h1, h2, h3 {
     grid-template-columns: minmax(0, 1fr);
     grid-template-areas: "coin" "haut" "gauche" "visu";
   }
-  .plateau__gauche {
-    position: static;
+  .plateau__gauche { position: static; grid-template-rows: none; }
+  .rail {
     height: auto;
+    min-height: 0;
     max-height: none;
     grid-template-rows: none;
     grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -975,6 +984,68 @@ input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; marg
 .mel__incomplet[hidden] { display: none; }
 
 #melNote { margin-top: 12px; }
+
+/* ---------------------------------------------------- Scénarios de marché */
+
+/*
+ * Le filtre de scénarios s'applique par-dessus les quatre bulles : ce n'est pas
+ * une cinquième étape, d'où l'absence de numéro et d'anneau d'invite. Il reste
+ * inerte tant que les quatre bulles ne sont pas validées — un scénario n'a rien
+ * à filtrer avant qu'il y ait un résultat.
+ */
+.scenario {
+  padding: 12px 14px;
+  background: var(--surface);
+  border: 1px solid var(--trait);
+  border-radius: var(--rayon-large);
+  box-shadow: var(--ombre);
+}
+.scenario--bloque { opacity: .45; pointer-events: none; }
+.scenario__titre {
+  margin: 0 0 9px;
+  font-size: .625rem;
+  font-weight: 600;
+  letter-spacing: var(--interlettre-caps);
+  text-transform: uppercase;
+  color: var(--encre-3);
+}
+.scenario__choix { display: grid; gap: 5px; }
+.scenario__option {
+  font: inherit;
+  text-align: left;
+  padding: 7px 10px;
+  background: transparent;
+  border: 1px solid var(--trait);
+  border-radius: var(--rayon);
+  cursor: pointer;
+  transition: background var(--duree-rapide) var(--aise),
+              border-color var(--duree-rapide) var(--aise);
+}
+.scenario__option:hover { background: var(--survol); border-color: var(--bord-champ); }
+.scenario__option--actif {
+  background: var(--accent-doux);
+  border-color: var(--accent);
+}
+.scenario__nom {
+  display: block;
+  font-size: .8125rem;
+  font-weight: 600;
+  color: var(--encre);
+}
+.scenario__option--actif .scenario__nom { color: var(--accent-fort); }
+.scenario__resume {
+  display: block;
+  font-size: .6875rem;
+  color: var(--encre-3);
+  line-height: 1.35;
+}
+.scenario__note {
+  margin: 9px 0 0;
+  font-size: .6875rem;
+  color: var(--encre-3);
+  line-height: 1.4;
+}
+.scenario__note:empty { display: none; }
 
 /* ------------------------------------------- D'où vient cet écart ? */
 

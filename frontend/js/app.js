@@ -12,6 +12,9 @@
   const simuler = window.SimuRP.simuler;
   const repartitionEnveloppe = window.SimuRP.repartitionEnveloppe;
   const repartitionAnnuelle = window.SimuRP.repartitionAnnuelle;
+  const SCENARIOS = window.SimuRPScenarios.SCENARIOS;
+  const tauxEquivalent = window.SimuRPScenarios.tauxEquivalent;
+  const scenarioParCle = window.SimuRPScenarios.parCle;
   const fraisIrrecuperables = window.SimuRP.fraisIrrecuperables;
   const DEFAUTS_LOCATION = window.SimuRPLocation.DEFAUTS_LOCATION;
   const simulerMiseEnLocation = window.SimuRPLocation.simulerMiseEnLocation;
@@ -62,6 +65,12 @@ function lireFormulaire() {
     saisie[champ] = POURCENTAGES.has(champ) ? valeur / 100 : valeur;
   }
   saisie.horizon = 25; // on calcule toujours 25 ans, le curseur ne fait que lire
+
+  // Un scénario actif remplace les taux du formulaire par ses SÉRIES. Les
+  // champs de la bulle 4 n'affichent alors que le taux annuel équivalent :
+  // c'est un résumé lisible, pas ce que le moteur calcule.
+  if (scenarioActif) Object.assign(saisie, scenarioActif.taux);
+
   return saisie;
 }
 
@@ -712,6 +721,119 @@ function initialiserDetail() {
   });
 }
 
+/* ---------------------------------------------------- Scénarios de marché */
+
+/*
+ * Deuxième pilier du simulateur : appliquer des trajectoires de marché ANNÉE
+ * PAR ANNÉE plutôt qu'un taux constant. Le filtre s'applique par-dessus les
+ * quatre bulles — ce n'est pas une cinquième étape, il n'a donc ni numéro ni
+ * place dans le parcours séquentiel.
+ */
+
+/** Les cinq taux qu'un scénario pilote. */
+const TAUX_SCENARISES = [
+  'rendementBourse',
+  'revalBien',
+  'revalLoyer',
+  'revalCharges',
+  'revalTaxeFonciere',
+];
+
+/** Scénario appliqué, ou null quand l'utilisateur garde ses hypothèses. */
+let scenarioActif = null;
+/** Les taux saisis à la main, mis de côté le temps qu'un scénario s'applique. */
+let hypothesesUtilisateur = null;
+
+function construireScenarios() {
+  const choix = [
+    '<button type="button" class="scenario__option scenario__option--actif" ' +
+      'data-scenario="" role="radio" aria-checked="true">' +
+      '<span class="scenario__nom">Mes hypothèses</span>' +
+      '<span class="scenario__resume">Les taux que vous avez saisis.</span></button>',
+  ];
+  for (const sc of SCENARIOS) {
+    choix.push(
+      `<button type="button" class="scenario__option" data-scenario="${sc.cle}" ` +
+        'role="radio" aria-checked="false">' +
+        `<span class="scenario__nom">${sc.nom}</span>` +
+        `<span class="scenario__resume">${sc.resume}</span></button>`
+    );
+  }
+  $('#scenarioChoix').innerHTML = choix.join('');
+
+  for (const b of document.querySelectorAll('.scenario__option')) {
+    b.addEventListener('click', () => appliquerScenario(b.dataset.scenario));
+  }
+}
+
+/**
+ * Applique un scénario, ou rend la main à l'utilisateur quand `cle` est vide.
+ *
+ * Les champs de taux de la bulle 4 sont alors pilotés : on y écrit le taux
+ * annuel ÉQUIVALENT (moyenne géométrique) et on les désactive. Les laisser
+ * afficher les valeurs de l'utilisateur pendant qu'un scénario calcule autre
+ * chose serait un mensonge à l'écran.
+ */
+function appliquerScenario(cle) {
+  const scenario = cle ? scenarioParCle(cle) : null;
+
+  // On met les hypothèses de côté au premier scénario appliqué, pour pouvoir
+  // les rendre intactes ensuite.
+  if (scenario && !hypothesesUtilisateur) {
+    hypothesesUtilisateur = {};
+    for (const champ of TAUX_SCENARISES) {
+      hypothesesUtilisateur[champ] = document.getElementById(champ).value;
+    }
+  }
+
+  scenarioActif = scenario;
+
+  for (const champ of TAUX_SCENARISES) {
+    const el = document.getElementById(champ);
+    if (scenario) {
+      el.value = (tauxEquivalent(scenario.taux[champ]) * 100).toFixed(2).replace(/\.?0+$/, '');
+    } else if (hypothesesUtilisateur) {
+      el.value = hypothesesUtilisateur[champ];
+    }
+    el.disabled = !!scenario;
+  }
+  if (!scenario) hypothesesUtilisateur = null;
+
+  for (const b of document.querySelectorAll('.scenario__option')) {
+    const actif = b.dataset.scenario === (cle || '');
+    b.classList.toggle('scenario__option--actif', actif);
+    b.setAttribute('aria-checked', String(actif));
+  }
+
+  $('#scenarioNote').textContent = scenario
+    ? `${scenario.taux.rendementBourse.length} années de marché rejouées en boucle. ` +
+      'Les taux de la bulle 4 en donnent la moyenne annuelle.' +
+      (scenario.provisoire ? ' Valeurs provisoires.' : '')
+    : '';
+
+  recalculer();
+}
+
+/**
+ * Le filtre reste inerte tant que les quatre bulles ne sont pas validées : un
+ * scénario n'a rien à filtrer avant qu'il y ait un résultat.
+ */
+function majAvertissement() {
+  const commun =
+    'Ni inflation générale, ni changement de situation, ni revente anticipée subie. ' +
+    "Un résultat serré (moins de quelques milliers d'euros d'écart) doit se lire comme une égalité.";
+  $('#avertissement').textContent = scenarioActif
+    ? `Scénario « ${scenarioActif.nom} » appliqué : les taux varient d'une année sur l'autre, ` +
+      'et la séquence se répète au-delà de sa durée. ' + commun
+    : 'Simulation à hypothèses constantes : le rendement boursier est supposé régulier, ' +
+      "ce qu'aucun marché ne fait. " + commun;
+}
+
+function majScenario() {
+  const pret = profilValide && validees.size === BULLES.length;
+  $('#scenario').classList.toggle('scenario--bloque', !pret);
+}
+
 /* ---------------------------------------------------------------- Orchestre */
 
 let dernierResultat = null;
@@ -752,6 +874,8 @@ function rafraichir() {
   $('#melIncomplet').hidden = !!mel || $('#melPanneau').hidden;
 
   majBulles();
+  majScenario();
+  majAvertissement();
   afficherProfil(dernierResultat);
   if (!majAttente()) return;
 
@@ -929,7 +1053,10 @@ function majBulles() {
     // Une fois la bulle validée, ses champs restent modifiables sur place :
     // faire varier une hypothèse ne doit pas demander de rouvrir une fenêtre.
     for (const champ of el.querySelectorAll('input, select')) {
-      champ.disabled = !estValidee && n !== bulleZoomee;
+      // Un taux piloté par un scénario reste verrouillé, même dans une bulle
+      // validée : sinon `majBulles` le rouvrirait à chaque recalcul.
+      const pilote = scenarioActif && TAUX_SCENARISES.includes(champ.id);
+      champ.disabled = pilote || (!estValidee && n !== bulleZoomee);
     }
   }
 }
@@ -1078,6 +1205,7 @@ function initialiser() {
   remplirFormulaireMel();
   initialiserSaisie();
   initialiserDetail();
+  construireScenarios();
   $('#formulaire').addEventListener('input', recalculer);
   // Le profil vit hors du plateau : sans son propre écouteur, l'éditer ne
   // recalculerait rien avant le clic sur « Valider mon profil ».
@@ -1094,6 +1222,9 @@ function initialiser() {
     $('#horizon').value = 20;
     validees.clear();
     profilValide = false;
+    scenarioActif = null;
+    hypothesesUtilisateur = null;
+    appliquerScenario('');
     ouvrirProfil();
     majBulles();
     recalculer();

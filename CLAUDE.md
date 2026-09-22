@@ -85,6 +85,44 @@ les écarts assumés.
   L'olive des séries est descendu à `--olive-700`, **un pas de sa propre rampe** (ΔE 20,7 / 13,9).
   Ne pas le remonter sans refaire la mesure.
 
+## Scénarios de marché (deuxième pilier)
+
+Le simulateur repose sur trois piliers différenciants : **(1)** comparer deux trajectoires
+complètes pour capter le coût d'opportunité — fait ; **(2)** des scénarios adossés à des séries
+réelles — en cours ; **(3)** la mise en location ultérieure — moteur fait, visualisation à faire.
+
+- **Un taux du moteur est un nombre OU une série année par année.** `tauxAnnee(valeur, a)` et
+  `facteur(valeur, de, a)` dans `calc.js` remplacent les `Math.pow(1 + r, n)`. Un test vérifie
+  qu'une série constante donne exactement le même résultat qu'un nombre : c'est le filet de
+  sécurité de toute la bascule.
+- **C'est la raison d'être du pilier** : les simulateurs classiques proposent
+  « pessimiste / médian / optimiste » sous forme de taux constants, alors qu'aucun marché ne monte
+  de 5 % tous les ans. L'ORDRE des années compte — encaisser un krach la première année n'a pas le
+  même effet que de l'encaisser la dixième. Un test verrouille le fait qu'une série alternée ne se
+  confond pas avec sa moyenne.
+- **Une série plus courte que l'horizon se répète.** Rejouer la séquence se raconte (« et si cette
+  décennie recommençait ») ; figer la dernière valeur connue choisirait silencieusement une année
+  au hasard comme régime permanent.
+- **Les scénarios vivent dans `frontend/js/scenarios.js`**, séparés du moteur : ce sont des
+  données, pas de la logique. Les valeurs actuelles sont des **placeholders** (`provisoire: true`)
+  destinés à être remplacés par des décennies datées et sourcées.
+- **Le filtre n'est pas une cinquième étape.** Il s'applique par-dessus les quatre bulles, d'où
+  l'absence de numéro et d'anneau d'invite, et il reste inerte tant que les quatre ne sont pas
+  validées — un scénario n'a rien à filtrer avant qu'il y ait un résultat.
+- **Un scénario actif pilote les cinq taux de la bulle 4** : les champs affichent le taux annuel
+  **équivalent** (moyenne géométrique, pas arithmétique — −20 % puis +30 % font +1,98 %/an, pas
+  +5 %) et sont désactivés. Les laisser montrer les valeurs de l'utilisateur pendant que le moteur
+  calcule autre chose serait un mensonge à l'écran. `majBulles()` doit respecter ce verrouillage,
+  sinon chaque recalcul rouvrirait les champs.
+- **« Mes hypothèses » rend les valeurs intactes** : elles sont mises de côté au premier scénario
+  appliqué, jamais écrasées.
+- **L'avertissement de bas de page change avec le scénario** : « hypothèses constantes » devient
+  faux dès qu'une série tourne.
+- **Nommer les scénarios par le MARCHÉ, pas par l'issue.** Une décennie boursière difficile est
+  *favorable* à l'achat : elle pénalise surtout le locataire, dont l'épargne est plus grosse. Avec
+  les placeholders actuels, « Décennie difficile » donne +141 858 € contre +84 640 € au scénario
+  de base. Un scénario baptisé « pessimiste » qui améliore le résultat serait incompréhensible.
+
 ## Conventions
 
 - Interface, labels, noms de variables, de fonctions et de classes CSS **en français**.

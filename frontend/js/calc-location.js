@@ -15,6 +15,14 @@
 (function (global) {
   'use strict';
 
+  // Helpers du moteur de base : un taux peut être constant ou être une série
+  // année par année (scénarios historiques). Ce module ne les redéfinit pas.
+  var moteur = typeof module !== 'undefined' && module.exports
+    ? require('./calc.js')
+    : global.SimuRP;
+  var tauxAnnee = moteur.tauxAnnee;
+  var facteur = moteur.facteur;
+
   var DEFAUTS_LOCATION = {
     // --- Palier 1 : obligatoires ---
     anneeBascule: null,
@@ -200,7 +208,10 @@
       // décision future (relouer son bien, se loger ailleurs — éventuellement
       // moins cher, en province par exemple). Ils n'ont donc aucune raison de
       // suivre la trajectoire du loyer de référence, qui décrit une autre vie.
-      var indexation = Math.pow(1 + e.revalLoyer, anneesDepuisBascule);
+      // Indexé sur les années RÉELLEMENT écoulées depuis la bascule : avec une
+      // série, ce sont ces années-là du scénario qui s'appliquent, pas les
+      // premières.
+      var indexation = facteur(e.revalLoyer, N + 1, t);
       var loyerPercuAnnuel = o.loyerPercu * 12 * indexation;
       var revenusBruts = loyerPercuAnnuel * (1 - o.tauxVacance);
       var loyerFuturAnnuel = o.loyerFutur * 12 * indexation;
@@ -286,7 +297,7 @@
 
       var versement = reliquatEnveloppe + cashFlowNet - achatMobilier; // peut être négatif
 
-      capital = capital * (1 + e.rendementBourse) + versement;
+      capital = capital * (1 + tauxAnnee(e.rendementBourse, t)) + versement;
       versements = Math.max(versements + versement, 0);
       var impotPortefeuille =
         Math.max(capital - versements, 0) * e.fiscalitePlusValues;
