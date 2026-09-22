@@ -979,59 +979,138 @@ input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; marg
 /* ------------------------------------------- D'où vient cet écart ? */
 
 /*
- * Même motif de divulgation progressive que la mise en location : un bouton
- * texte discret (`.mel__declencheur`, réutilisé tel quel), tout replié par
- * défaut. La vue principale garde une seule visualisation.
+ * Divulgation progressive, mais avec un vrai bouton d'appel : le lien texte
+ * discret du module de mise en location passait inaperçu ici, parce qu'il
+ * arrive après un graphique qui occupe tout l'écran.
  */
-.detail { display: grid; gap: 12px; }
-.detail__panneau { display: grid; gap: 16px; }
+.detail { display: grid; gap: 16px; justify-items: center; }
+.detail__panneau { display: grid; gap: 16px; width: 100%; }
 .detail__panneau[hidden] { display: none; }
 
-/* Deux repères chiffrés, côte à côte, avant les graphiques. */
-.reperes {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 16px;
+.cta {
+  font: inherit;
+  font-size: 1rem;
+  font-weight: 600;
+  padding: 13px 30px;
+  color: var(--sur-accent);
+  background: var(--accent);
+  border: 1px solid transparent;
+  border-radius: var(--rayon-feuille);
+  box-shadow: var(--ombre-2);
+  cursor: pointer;
+  transition: background var(--duree-rapide) var(--aise),
+              box-shadow var(--duree-rapide) var(--aise),
+              transform var(--duree-rapide) var(--aise);
 }
-.repere {
-  min-width: 0;
-  padding: 16px 18px;
+.cta:hover { background: var(--accent-fort); box-shadow: var(--ombre-3); }
+.cta:active { transform: translateY(1px); }
+
+/*
+ * Une fois le contenu visible, le bouton n'a plus rien à appeler : il redevient
+ * discret pour ne pas concurrencer les graphiques qu'il vient d'ouvrir.
+ */
+.cta[aria-expanded="true"] {
+  font-size: .875rem;
+  font-weight: 500;
+  padding: 8px 18px;
+  color: var(--encre-2);
+  background: transparent;
+  border-color: var(--trait);
+  box-shadow: none;
+}
+.cta[aria-expanded="true"]:hover { background: var(--survol); box-shadow: none; }
+
+/* --- Quatre chiffres sur une ligne ------------------------------------ */
+
+/*
+ * Un chiffre n'a pas besoin d'une carte pour exister : pas de fond, pas
+ * d'ombre, juste un filet vertical qui sépare les colonnes.
+ */
+.kpis {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 0;
+  padding: 14px 18px;
   background: var(--surface);
   border: 1px solid var(--trait);
   border-radius: var(--rayon-large);
   box-shadow: var(--ombre);
 }
-.repere__mot {
+.kpi { min-width: 0; padding: 0 18px; border-left: 1px solid var(--trait); }
+.kpi:first-child { border-left: 0; padding-left: 0; }
+.kpi__mot {
   margin: 0;
   font-size: .625rem;
   font-weight: 600;
   letter-spacing: var(--interlettre-caps);
   text-transform: uppercase;
   color: var(--encre-3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
-.repere__chiffre {
-  margin: 6px 0 2px;
-  font-size: 1.75rem;
+.kpi__mot em { font-style: normal; font-weight: 400; text-transform: none; letter-spacing: 0; }
+.kpi__chiffre {
+  margin: 4px 0 0;
+  font-size: 1.375rem;
   font-weight: 600;
-  color: var(--achat);
-  line-height: 1.1;
+  color: var(--encre);
+  line-height: 1.15;
 }
-.repere__mesure { margin: 0; font-size: .8125rem; color: var(--encre-2); }
+.kpi:first-child .kpi__chiffre { color: var(--achat); }
+.kpi__note { margin: -8px 0 0; font-size: .8125rem; color: var(--encre-2); }
+.kpi__note:empty { display: none; }
 
-/* Mensualité contre loyer : un tableau de trois lignes, pas un graphique. */
-.duo { margin: 8px 0 0; padding: 0; list-style: none; }
-.duo li {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 5px 0;
-  border-bottom: 1px solid var(--trait);
+/*
+ * En dessous, la grille retombe sur deux colonnes : les filets verticaux
+ * deviendraient asymétriques (le premier de chaque rangée n'en a pas). On les
+ * retire et on sépare à l'espace.
+ */
+@media (max-width: 720px) {
+  .kpis { gap: 16px 12px; }
+  .kpi { padding: 0; border-left: 0; }
 }
-.duo li:last-child { border-bottom: 0; }
-.duo__mot { font-size: .8125rem; color: var(--encre-2); min-width: 0; }
-.duo__mot em { font-style: normal; color: var(--encre-3); }
-.duo__valeur { font-size: .9375rem; font-weight: 600; color: var(--encre); }
+
+/* --- Rappel du curseur ------------------------------------------------- */
+
+/*
+ * Même valeur que le curseur principal, jamais une seconde date : les deux
+ * contrôles sont deux vues d'un seul état (voir `synchroniserHorizon`).
+ */
+.rappel {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  background: var(--surface-creuse);
+  border-radius: var(--rayon-large);
+}
+.rappel__mot {
+  font-size: .625rem;
+  font-weight: 600;
+  letter-spacing: var(--interlettre-caps);
+  text-transform: uppercase;
+  color: var(--encre-3);
+  white-space: nowrap;
+}
+.rappel input[type="range"] { flex: 1; min-width: 0; accent-color: var(--accent); cursor: pointer; }
+.rappel__annees {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  font-size: .9375rem;
+  min-width: 62px;
+  text-align: right;
+}
+
+/* --- Les deux graphiques cumulés, côte à côte -------------------------- */
+.detail__duo {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+@media (max-width: 900px) {
+  .detail__duo { grid-template-columns: minmax(0, 1fr); }
+}
 
 /*
  * Les trois graphiques du détail sont plus courts que la visualisation
@@ -1039,6 +1118,8 @@ input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; marg
  */
 .graphique--court { height: 240px; }
 @media (max-width: 560px) { .graphique--court { height: 200px; } }
+
+.carte__note { margin: 12px 0 0; font-size: .8125rem; color: var(--encre-3); }
 
 /*
  * Les segments empilés de clay-200 et d'ochre-500 n'atteignent pas 3:1 sur le

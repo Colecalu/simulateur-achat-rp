@@ -129,7 +129,11 @@ function afficherVerdict(resultat, horizon) {
   const ligne = resultat.annees[horizon - 1];
   const ecart = ligne.ecart;
 
-  $('#horizonLabel').textContent = `${horizon} an${horizon > 1 ? 's' : ''}`;
+  const ans = `${horizon} an${horizon > 1 ? 's' : ''}`;
+  $('#horizonLabel').textContent = ans;
+  // Le rappel du curseur, dans la section dépliée, affiche la même date.
+  $('#horizonBis').value = horizon;
+  $('#horizonBisLabel').textContent = ans;
 
   const chiffre = $('#verdictChiffre');
   const mesure = $('#verdictMesure');
@@ -555,8 +559,6 @@ function dessinerDetail(resultat, horizon) {
   const cEpargne = jeton('--poste-epargne');
   const cLoyers = jeton('--location');
 
-  $('#titreEnveloppe').textContent = horizon === 1 ? 'la 1re année' : `sur ${horizon} ans`;
-
   graphEnveloppe = poser(
     graphEnveloppe,
     '#graphEnveloppe',
@@ -585,30 +587,44 @@ function dessinerDetail(resultat, horizon) {
   // --- Ce qui ne revient jamais ----------------------------------------
   const irr = fraisIrrecuperables(resultat, horizon);
   const cAcquisition = jeton('--poste-acquisition');
-  $('#titrePerdu').textContent = horizon === 1 ? 'la 1re année' : `sur ${horizon} ans`;
-
-  graphPerdu = poser(
-    graphPerdu,
-    '#graphPerdu',
-    'bar',
-    {
-      labels: ['Achat', 'Location'],
-      datasets: [
-        posteEmpile('Intérêts et assurance', [irr.achat.credit, 0], cCredit, false),
-        posteEmpile('Frais d’acquisition', [irr.achat.acquisition, 0], cAcquisition, false),
-        posteEmpile('Taxe foncière et charges', [irr.achat.possession, 0], cPossession, true),
-        posteEmpile('Loyers', [0, irr.location.loyers], cLoyers, true),
-      ],
-    },
-    optionsEmpilees()
-  );
-
-  legendeChiffree('#legendePerdu', [
+  // Camembert : ici on ne compare plus, on répartit. Trois parts seulement —
+  // au-delà un camembert devient illisible et l'histogramme reprend l'avantage.
+  const partsPerdu = [
+    { nom: "Frais d'acquisition", valeur: irr.achat.acquisition, couleur: cAcquisition },
     { nom: 'Intérêts et assurance', valeur: irr.achat.credit, couleur: cCredit },
-    { nom: 'Frais d’acquisition', valeur: irr.achat.acquisition, couleur: cAcquisition },
     { nom: 'Taxe foncière et charges', valeur: irr.achat.possession, couleur: cPossession },
-    { nom: 'Loyers', valeur: irr.location.loyers, couleur: cLoyers },
-  ]);
+  ];
+
+  const optionsPerdu = optionsCommunes();
+  delete optionsPerdu.scales;
+  optionsPerdu.cutout = '58%';
+  optionsPerdu.interaction = { mode: 'nearest', intersect: true };
+  optionsPerdu.plugins.tooltip.callbacks.title = (items) => items[0].label;
+  optionsPerdu.plugins.tooltip.callbacks.label = (ctx) =>
+    ` ${euros.format(ctx.parsed)} · ${pourcentEntier.format(ctx.parsed / irr.achat.total)}`;
+  delete optionsPerdu.plugins.tooltip.callbacks.footer;
+
+  graphPerdu = poser(graphPerdu, '#graphPerdu', 'doughnut', {
+    labels: partsPerdu.map((x) => x.nom),
+    datasets: [
+      {
+        data: partsPerdu.map((x) => x.valeur),
+        backgroundColor: partsPerdu.map((x) => x.couleur),
+        borderColor: jeton('--surface'),
+        borderWidth: 2,
+      },
+    ],
+  }, optionsPerdu);
+
+  legendeChiffree('#legendePerdu', partsPerdu);
+
+  // Le camembert ne compare plus rien : sans repère on ne sait pas si ce total
+  // est gros ou petit. Une ligne suffit, et elle reste honnête — le loyer, lui,
+  // est perdu en totalité.
+  $('#perduRepere').textContent =
+    `Soit ${euros.format(irr.achat.total)} en ${horizon} an${horizon > 1 ? 's' : ''}. ` +
+    `Sur la même durée, le locataire aura versé ${euros.format(irr.location.loyers)} ` +
+    'de loyers, perdus en totalité.';
 }
 
 function initialiserDetail() {
@@ -1001,6 +1017,12 @@ function initialiser() {
   // recalculerait rien avant le clic sur « Valider mon profil ».
   $('#profil').addEventListener('input', recalculer);
   $('#horizon').addEventListener('input', rafraichir);
+  // Deux contrôles, un seul état : le rappel écrit dans le curseur principal,
+  // qui reste la source de vérité. Jamais deux dates à l'écran.
+  $('#horizonBis').addEventListener('input', () => {
+    $('#horizon').value = $('#horizonBis').value;
+    rafraichir();
+  });
   $('#reinitialiser').addEventListener('click', () => {
     remplirFormulaire(DEFAUTS);
     $('#horizon').value = 20;

@@ -365,41 +365,75 @@
       </figure>
 
     <!-- ========== D'OÙ VIENT CET ÉCART ? (divulgation progressive) ==========
-         Même motif que la mise en location : un bouton texte discret, tout reste
-         replié par défaut. La vue principale garde une seule visualisation. -->
+         Un vrai bouton d'appel, centré : le lien discret passait inaperçu.
+         Tout reste replié par défaut, la vue principale garde une seule
+         visualisation. -->
     <div class="detail">
-      <button type="button" class="mel__declencheur" id="detailOuvrir"
+      <button type="button" class="cta" id="detailOuvrir"
               aria-expanded="false" aria-controls="detailPanneau">
         D'où vient cet écart&nbsp;?
       </button>
 
       <div class="detail__panneau" id="detailPanneau" hidden>
 
-        <div class="reperes">
-          <div class="repere">
-            <p class="repere__mot">Point mort</p>
-            <p class="repere__chiffre tabulaire" id="pointMort">—</p>
-            <p class="repere__mesure" id="pointMortMesure">
-              Année où l'achat repasse devant la location.
-            </p>
+        <!-- Quatre chiffres sur une ligne : un chiffre n'a pas besoin d'une
+             carte pour exister. -->
+        <div class="kpis">
+          <div class="kpi">
+            <p class="kpi__mot">Point mort</p>
+            <p class="kpi__chiffre tabulaire" id="pointMort">—</p>
           </div>
-          <div class="repere">
-            <p class="repere__mot">Chaque mois, la première année</p>
-            <ul class="duo">
-              <li>
-                <span class="duo__mot">Crédit et assurance</span>
-                <span class="duo__valeur tabulaire" id="duoMensualite">—</span>
-              </li>
-              <li>
-                <span class="duo__mot">Tout compris&nbsp;<em>(charges, taxe)</em></span>
-                <span class="duo__valeur tabulaire" id="duoProprio">—</span>
-              </li>
-              <li>
-                <span class="duo__mot">Loyer</span>
-                <span class="duo__valeur tabulaire" id="duoLoyer">—</span>
-              </li>
-            </ul>
+          <div class="kpi">
+            <p class="kpi__mot">Crédit et assurance</p>
+            <p class="kpi__chiffre tabulaire" id="duoMensualite">—</p>
           </div>
+          <div class="kpi">
+            <p class="kpi__mot">Tout compris&nbsp;<em>(charges, taxe)</em></p>
+            <p class="kpi__chiffre tabulaire" id="duoProprio">—</p>
+          </div>
+          <div class="kpi">
+            <p class="kpi__mot">Loyer</p>
+            <p class="kpi__chiffre tabulaire" id="duoLoyer">—</p>
+          </div>
+        </div>
+        <p class="kpi__note" id="pointMortMesure"></p>
+
+        <!-- Rappel du curseur : les deux graphiques ci-dessous le suivent, et
+             remonter en haut de page pour le régler était pénible. Même
+             valeur que le curseur principal, jamais une seconde date. -->
+        <div class="rappel">
+          <label class="rappel__mot" for="horizonBis">Cumulé sur</label>
+          <input type="range" id="horizonBis" min="1" max="25" step="1" value="20"
+                 aria-label="Horizon de revente en années">
+          <output class="rappel__annees" id="horizonBisLabel">20 ans</output>
+        </div>
+
+        <div class="detail__duo">
+          <figure class="carte carte--graphique">
+            <figcaption class="carte__entete">
+              <h3 class="carte__titre">Où va votre enveloppe</h3>
+              <p class="carte__legende">
+                Les deux colonnes font la même hauteur&nbsp;: c'est la même enveloppe mensuelle,
+                répartie autrement. Ce qui ne part pas dans le logement part en bourse.
+              </p>
+            </figcaption>
+            <div class="legende" id="legendeEnveloppe"></div>
+            <div class="graphique graphique--court"><canvas id="graphEnveloppe"></canvas></div>
+          </figure>
+
+          <figure class="carte carte--graphique">
+            <figcaption class="carte__entete">
+              <h3 class="carte__titre">Ce qui ne revient jamais</h3>
+              <p class="carte__legende">
+                L'argent qu'aucune revente ne rend. Le capital remboursé n'y est pas&nbsp;: il
+                revient dans votre patrimoine. Les travaux non plus&nbsp;: ils sont déjà comptés
+                dans la valeur du bien.
+              </p>
+            </figcaption>
+            <div class="legende" id="legendePerdu"></div>
+            <div class="graphique graphique--court"><canvas id="graphPerdu"></canvas></div>
+            <p class="carte__note" id="perduRepere"></p>
+          </figure>
         </div>
 
         <figure class="carte carte--graphique">
@@ -411,31 +445,6 @@
             </p>
           </figcaption>
           <div class="graphique graphique--court"><canvas id="graphPossession"></canvas></div>
-        </figure>
-
-        <figure class="carte carte--graphique">
-          <figcaption class="carte__entete">
-            <h3 class="carte__titre">Où va votre enveloppe, <span id="titreEnveloppe">sur 20 ans</span></h3>
-            <p class="carte__legende">
-              Les deux colonnes font la même hauteur&nbsp;: c'est la même enveloppe mensuelle,
-              répartie autrement. Ce qui ne part pas dans le logement part en bourse.
-            </p>
-          </figcaption>
-          <div class="legende" id="legendeEnveloppe"></div>
-          <div class="graphique graphique--court"><canvas id="graphEnveloppe"></canvas></div>
-        </figure>
-
-        <figure class="carte carte--graphique">
-          <figcaption class="carte__entete">
-            <h3 class="carte__titre">Ce qui ne revient jamais, <span id="titrePerdu">sur 20 ans</span></h3>
-            <p class="carte__legende">
-              L'argent qu'aucune revente ne rend. Le capital remboursé n'y est pas&nbsp;: il revient
-              dans votre patrimoine. Les travaux non plus&nbsp;: ils sont déjà comptés dans la valeur
-              du bien.
-            </p>
-          </figcaption>
-          <div class="legende" id="legendePerdu"></div>
-          <div class="graphique graphique--court"><canvas id="graphPerdu"></canvas></div>
         </figure>
 
       </div>

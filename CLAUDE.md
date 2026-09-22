@@ -104,11 +104,22 @@ les écarts assumés.
   « si vous revendez dans… ». Les modules « D'où vient cet écart ? » et « mise en location »
   restent masqués jusqu'à un clic. Cette sobriété est un choix assumé — ne pas rajouter
   d'indicateurs ou de graphiques sans demande explicite.
-- **La section « D'où vient cet écart ? »** (repliée) porte quatre indicateurs, tous pilotés par
-  le curseur d'horizon **déjà en place** : point mort, mensualité contre loyer, part du bien
-  possédée, répartition de l'enveloppe, frais irrécupérables. Jamais de second curseur de temps :
-  deux réglages de date à l'écran, c'est la garantie qu'on finit par comparer deux dates
-  différentes sans s'en apercevoir.
+- **La section « D'où vient cet écart ? »** est repliée derrière un vrai bouton d'appel (`.cta`,
+  plein, centré). Le lien texte discret du module de mise en location ne suffisait pas ici : il
+  arrive après un graphique qui occupe tout l'écran et personne ne le voyait. Une fois ouvert, le
+  bouton redevient discret (`.cta[aria-expanded="true"]`) — il n'a plus rien à appeler.
+- **Deux contrôles d'horizon, une seule date.** Le rappel du curseur (`#horizonBis`) évite de
+  remonter en haut de page pour régler l'année. Il **écrit dans** `#horizon`, qui reste la source
+  de vérité, et `afficherVerdict` réécrit les deux libellés. Ne jamais leur donner deux valeurs
+  indépendantes : deux dates à l'écran, c'est la garantie qu'on finit par comparer deux instants
+  différents sans s'en apercevoir.
+- **Quatre chiffres sur une ligne** (`.kpis`) : point mort, crédit et assurance, coût tout
+  compris, loyer. Pas de carte par chiffre — un filet vertical suffit. Une carte par KPI prenait
+  toute la largeur pour un nombre.
+- **« Ce qui ne revient jamais » est un camembert, pas une comparaison.** Trois parts seulement
+  (acquisition, crédit, possession) ; au-delà un camembert devient illisible. Comme il ne compare
+  plus rien, une ligne sous le graphique donne le repère locatif — le loyer est perdu à 100 %.
+  Sans elle, on ne sait pas si le total affiché est gros ou petit.
 - **Le graphique « Où va votre enveloppe » a deux colonnes de hauteur identique.** C'est la
   prémisse du simulateur rendue visible : même enveloppe, répartition différente. Opposer
   « charges de l'acheteur » (633 k€ à 20 ans) à « loyers du locataire » (423 k€) sans les épargnes
@@ -124,6 +135,13 @@ les écarts assumés.
   courbes peuvent se recroiser (un rendement boursier élevé fait repasser le locataire devant).
   Vérifier que l'avantage tient encore à l'horizon choisi avant d'annoncer un point mort, sinon
   l'écran se contredit : « point mort : 3 ans » au-dessus d'un verdict à −153 111 €.
+- **La part du bien possédée est quasi droite, et c'est correct.** À 3,5 %, le gain annuel passe
+  de 3,63 à 4,55 points sur vingt ans — un rapport de 1,25 seulement. L'intuition d'une courbe
+  exponentielle vient du tableau d'amortissement, où le capital remboursé, lui, double bien
+  (1,035^20 ≈ 2). Deux choses aplatissent la part possédée : l'apport, qui la fait démarrer haut
+  (23 % dès l'année 1), et la revalorisation du bien, qui grossit le dénominateur. La courbure
+  dépend du taux : rapport 1,85 à 6 %, et 0,84 à 1 % — c'est-à-dire légèrement concave. Ne pas
+  « corriger » ce graphique, il n'a rien de cassé.
 - **Les postes empilés sont cinq, pas six.** « Taxe foncière » et « charges de copropriété » sont
   fondues : à six entités, la paire voisine la plus proche tombe à ΔE 13,9 en vision normale, sous
   le plancher de 15. À cinq, la pire paire remonte à 20,8. La palette Perron, volontairement
