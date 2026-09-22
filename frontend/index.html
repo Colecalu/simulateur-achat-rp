@@ -412,8 +412,10 @@
         <div class="detail__duo">
           <figure class="carte carte--graphique">
             <figcaption class="carte__entete carte__entete--centre">
-              <h3 class="carte__titre">La même somme, deux destinations</h3>
+              <!-- « Versé » et non « dépensé » : l'épargne investie reste à vous. -->
+              <h3 class="carte__titre">Total versé <span id="periodeVerse">sur 20 ans</span></h3>
             </figcaption>
+            <div class="legende legende--centre legende--compacte" id="legendeEnveloppe"></div>
             <div class="paire">
               <div class="paire__part">
                 <div class="graphique graphique--rond"><canvas id="graphEnvAchat"></canvas></div>
@@ -430,8 +432,9 @@
 
           <figure class="carte carte--graphique">
             <figcaption class="carte__entete carte__entete--centre">
-              <h3 class="carte__titre">Frais irrécupérables</h3>
+              <h3 class="carte__titre">Frais irrécupérables <span id="periodePerdu">sur 20 ans</span></h3>
             </figcaption>
+            <div class="legende legende--centre legende--compacte" id="legendePerdu"></div>
             <div class="paire paire--seule">
               <div class="paire__part">
                 <div class="graphique graphique--rond"><canvas id="graphPerdu"></canvas></div>
@@ -444,7 +447,7 @@
 
         <figure class="carte carte--graphique">
           <figcaption class="carte__entete carte__entete--centre">
-            <h3 class="carte__titre">Année par année</h3>
+            <h3 class="carte__titre">Ce que devient votre enveloppe, année après année</h3>
           </figcaption>
           <div class="legende legende--centre" id="legendeAnnuel"></div>
           <!-- Deux histogrammes séparés plutôt qu'un seul à deux piles : à
@@ -464,7 +467,7 @@
 
         <figure class="carte carte--graphique">
           <figcaption class="carte__entete carte__entete--centre">
-            <h3 class="carte__titre">Part du bien réellement possédée</h3>
+            <h3 class="carte__titre">Pourcentage de détention du bien</h3>
           </figcaption>
           <div class="graphique graphique--court"><canvas id="graphPossession"></canvas></div>
         </figure>

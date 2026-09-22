@@ -1117,6 +1117,15 @@ input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; marg
 .legende--centre { justify-content: center; }
 
 /*
+ * Légende des camemberts : elle doit nommer les parts sans manger la place du
+ * graphique. D'où des libellés d'un mot (le nom complet reste dans
+ * l'infobulle), un corps plus petit et des écarts resserrés.
+ */
+.legende--compacte { gap: 10px; margin-bottom: 8px; }
+.legende--compacte .legende__item { font-size: .6875rem; gap: 5px; }
+.legende--compacte .pastille { width: 7px; height: 7px; }
+
+/*
  * Deux camemberts côte à côte pour l'enveloppe (achat, location), un seul pour
  * les frais irrécupérables. Le total sous chaque camembert porte l'information
  * que la hauteur des barres donnait avant : les deux enveloppes sont égales.

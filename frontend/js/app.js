@@ -427,17 +427,24 @@ const pourcentEntier = new Intl.NumberFormat('fr-FR', {
 
 const detailOuvert = () => !$('#detailPanneau').hidden;
 
+/** « sur 20 ans » — le libellé de période des titres cumulés. */
+const periode = (n) => `sur ${n} an${n > 1 ? 's' : ''}`;
+
 /**
  * Légende : pastille et nom, jamais de montant. Les graphiques qui la portent
  * sont partagés par deux trajectoires, où les mêmes postes valent deux choses
  * différentes. Les montants vivent dans les infobulles.
+ *
+ * Le libellé affiché est le nom COURT (`court`, un mot) : une légende à cinq
+ * entrées de trois mots mange la place du graphique qu'elle explique. Le nom
+ * complet reste dans l'infobulle, qui a la place de le porter.
  */
 function legendeSimple(cible, postes) {
   $(cible).innerHTML = postes
     .map(
       (p) =>
         `<span class="legende__item"><span class="pastille" style="background:${p.couleur}"></span>` +
-        `${p.nom}</span>`
+        `${p.court || p.nom}</span>`
     )
     .join('');
 }
@@ -483,6 +490,24 @@ function poser(graphique, selecteur, type, data, options) {
   }
   return new Chart($(selecteur), { type: type, data: data, options: options });
 }
+
+/**
+ * Vocabulaire des postes : un nom complet pour les infobulles, un nom court
+ * pour les légendes. Défini une fois — deux graphiques qui montrent le même
+ * poste doivent le nommer pareil.
+ */
+const POSTES = {
+  credit: { nom: 'Intérêts et assurance', court: 'Intérêts' },
+  capital: { nom: 'Capital remboursé', court: 'Capital' },
+  possession: { nom: 'Taxe foncière et charges', court: 'Charges' },
+  epargne: { nom: 'Épargne investie', court: 'Épargne' },
+  loyers: { nom: 'Loyers', court: 'Loyer' },
+  acquisition: { nom: "Frais d'acquisition", court: 'Acquisition' },
+};
+
+/** Un poste prêt à être dessiné : vocabulaire + couleur (+ montant). */
+const poste = (cle, couleur, valeur) =>
+  Object.assign({}, POSTES[cle], { couleur: couleur, valeur: valeur });
 
 function dessinerDetail(resultat, horizon) {
   if (!detailOuvert() || typeof Chart === 'undefined') return;
@@ -530,15 +555,24 @@ function dessinerDetail(resultat, horizon) {
   const rep = repartitionEnveloppe(resultat, horizon);
 
   graphEnvAchat = camembert(graphEnvAchat, '#graphEnvAchat', [
-    { nom: 'Intérêts et assurance', valeur: rep.achat.credit, couleur: cCredit },
-    { nom: 'Capital remboursé', valeur: rep.achat.capital, couleur: cCapital },
-    { nom: 'Taxe foncière et charges', valeur: rep.achat.possession, couleur: cPossession },
-    { nom: 'Épargne investie', valeur: rep.achat.epargne, couleur: cEpargne },
+    poste('credit', cCredit, rep.achat.credit),
+    poste('capital', cCapital, rep.achat.capital),
+    poste('possession', cPossession, rep.achat.possession),
+    poste('epargne', cEpargne, rep.achat.epargne),
   ]);
 
   graphEnvLocation = camembert(graphEnvLocation, '#graphEnvLocation', [
-    { nom: 'Loyers', valeur: rep.location.loyers, couleur: cLoyers },
-    { nom: 'Épargne investie', valeur: rep.location.epargne, couleur: cEpargne },
+    poste('loyers', cLoyers, rep.location.loyers),
+    poste('epargne', cEpargne, rep.location.epargne),
+  ]);
+
+  $('#periodeVerse').textContent = periode(horizon);
+  legendeSimple('#legendeEnveloppe', [
+    poste('credit', cCredit),
+    poste('capital', cCapital),
+    poste('possession', cPossession),
+    poste('loyers', cLoyers),
+    poste('epargne', cEpargne),
   ]);
 
   // Les deux totaux sont égaux : c'est la prémisse du simulateur, et c'est ce
@@ -549,12 +583,14 @@ function dessinerDetail(resultat, horizon) {
   // --- Frais irrécupérables --------------------------------------------
   const irr = fraisIrrecuperables(resultat, horizon);
   const partsPerdu = [
-    { nom: "Frais d'acquisition", valeur: irr.achat.acquisition, couleur: cAcquisition },
-    { nom: 'Intérêts et assurance', valeur: irr.achat.credit, couleur: cCredit },
-    { nom: 'Taxe foncière et charges', valeur: irr.achat.possession, couleur: cPossession },
+    poste('acquisition', cAcquisition, irr.achat.acquisition),
+    poste('credit', cCredit, irr.achat.credit),
+    poste('possession', cPossession, irr.achat.possession),
   ];
   graphPerdu = camembert(graphPerdu, '#graphPerdu', partsPerdu);
   $('#totalPerdu').textContent = euros.format(irr.achat.total);
+  $('#periodePerdu').textContent = periode(horizon);
+  legendeSimple('#legendePerdu', partsPerdu);
 
   // --- Année par année : deux piles par année, jamais cumulées ----------
   //
@@ -602,27 +638,27 @@ function dessinerDetail(resultat, horizon) {
   graphAnnuelAchat = poser(graphAnnuelAchat, '#graphAnnuelAchat', 'bar', {
     labels: annees,
     datasets: [
-      pile('Intérêts et assurance', annuel.map((l) => l.achat.credit), cCredit, false),
-      pile('Capital remboursé', annuel.map((l) => l.achat.capital), cCapital, false),
-      pile('Taxe foncière et charges', annuel.map((l) => l.achat.possession), cPossession, false),
-      pile('Épargne investie', annuel.map((l) => l.achat.epargne), cEpargne, true),
+      pile(POSTES.credit.nom, annuel.map((l) => l.achat.credit), cCredit, false),
+      pile(POSTES.capital.nom, annuel.map((l) => l.achat.capital), cCapital, false),
+      pile(POSTES.possession.nom, annuel.map((l) => l.achat.possession), cPossession, false),
+      pile(POSTES.epargne.nom, annuel.map((l) => l.achat.epargne), cEpargne, true),
     ],
   }, optionsAnnuelles());
 
   graphAnnuelLocation = poser(graphAnnuelLocation, '#graphAnnuelLocation', 'bar', {
     labels: annees,
     datasets: [
-      pile('Loyers', annuel.map((l) => l.location.loyers), cLoyers, false),
-      pile('Épargne investie', annuel.map((l) => l.location.epargne), cEpargne, true),
+      pile(POSTES.loyers.nom, annuel.map((l) => l.location.loyers), cLoyers, false),
+      pile(POSTES.epargne.nom, annuel.map((l) => l.location.epargne), cEpargne, true),
     ],
   }, optionsAnnuelles());
 
   legendeSimple('#legendeAnnuel', [
-    { nom: 'Intérêts et assurance', couleur: cCredit },
-    { nom: 'Capital remboursé', couleur: cCapital },
-    { nom: 'Taxe foncière et charges', couleur: cPossession },
-    { nom: 'Loyers', couleur: cLoyers },
-    { nom: 'Épargne investie', couleur: cEpargne },
+    poste('credit', cCredit),
+    poste('capital', cCapital),
+    poste('possession', cPossession),
+    poste('loyers', cLoyers),
+    poste('epargne', cEpargne),
   ]);
 
   // --- Part du bien réellement possédée --------------------------------

@@ -127,15 +127,18 @@ les écarts assumés.
   à l'horizon choisi. Ne pas y remettre de glose.
 - **« Frais irrécupérables » ne compare rien** : trois parts (acquisition, crédit, possession),
   côté achat seulement. Au-delà de cinq parts un camembert devient illisible.
-- **Trois camemberts pour les cumuls, un histogramme pour le temps.** « La même somme, deux
-  destinations » est une paire de camemberts (achat, location) ; « Frais irrécupérables » en est un
+- **Trois camemberts pour les cumuls, un histogramme pour le temps.** « Total versé » est une paire de camemberts (achat, location) ; « Frais irrécupérables » en est un
   troisième. Chacun porte **son total en dessous** : c'est ce total, et non la hauteur des barres
   d'autrefois, qui montre maintenant que les deux enveloppes sont égales (816 000 € à 20 ans).
   Ne jamais opposer « charges de l'acheteur » à « loyers du locataire » sans les épargnes : on
   conclurait que l'achat coûte 210 k€ de plus, alors que cet écart n'est pas dépensé mais investi.
   `repartitionEnveloppe()` porte cette lecture et un test verrouille l'égalité des totaux. Quand
   l'enveloppe est insuffisante, le côté achat dépasse : c'est voulu, on le montre.
-- **« Année par année » ignore volontairement le curseur** : il couvre toute la durée simulée,
+- **Les titres des deux cartes cumulées portent la période** (« Total versé sur 20 ans », « Frais
+  irrécupérables sur 20 ans ») et suivent le curseur. Sans elle, un montant cumulé ne dit pas sur
+  quelle durée il est cumulé. Dire **« versé »** et non « dépensé » : l'épargne investie est un
+  des postes, et elle reste à l'utilisateur.
+- **« Ce que devient votre enveloppe, année après année » ignore volontairement le curseur** : il couvre toute la durée simulée,
   comme la part possédée juste en dessous, pour que les deux se lisent sur le même axe de temps.
   **Deux histogrammes séparés**, achat au-dessus de location — un seul graphique à deux piles par
   année faisait cinquante barres et ne se lisait plus. Ils partagent le **même plafond d'axe Y**
@@ -146,12 +149,13 @@ les écarts assumés.
   « intérêts et assurance » montreraient des choses différentes.
 - **Les infobulles portent sur une part, pas sur l'ensemble** (`mode: 'nearest', intersect: true`).
   Lire quatre postes d'un coup quand on en pointe un seul est illisible.
-- **Les camemberts n'ont pas de légende** : l'infobulle la remplace, et la légende mangeait la
-  place du graphique. Écart assumé à la règle « l'identité ne repose jamais sur la seule
-  couleur » — elle tient encore pour les histogrammes, qui gardent la leur (`legendeSimple`,
-  pastille et nom, jamais de montant : les mêmes postes y valent deux choses selon la
-  trajectoire). Si les camemberts redeviennent illisibles, la réponse est d'étiqueter les parts
-  directement, pas de remettre une légende.
+- **Un poste, deux noms** (`POSTES` dans `app.js`) : le nom complet va dans les infobulles, qui
+  ont la place de le porter ; le nom court, d'un mot, va dans les légendes. Une légende à cinq
+  entrées de trois mots mangeait la place du graphique qu'elle explique — mais sans légende du
+  tout, un camembert ne veut rien dire avant qu'on le survole. Le vocabulaire est défini une
+  seule fois : deux graphiques qui montrent le même poste doivent le nommer pareil.
+- **Les légendes ne portent jamais de montant** (`legendeSimple`) : les graphiques qui en ont une
+  sont partagés par deux trajectoires, où les mêmes postes valent deux choses différentes.
 - **Les travaux ne sont pas des frais irrécupérables.** Le modèle les fond dans la valeur du bien
   (« valeur estimée du bien après travaux ») : ils reviennent par le prix de revente. Le capital
   remboursé non plus. En revanche les frais d'acquisition (notaire, agence, banque), les intérêts
