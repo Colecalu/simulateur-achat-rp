@@ -255,7 +255,8 @@
   SCENARIOS.push({
     cle: 'histoire-continue',
     nom: 'Trente ans réels',
-    famille: 'historique',
+    // Famille à part : c'est le seul scénario dont aucune année n'est projetée.
+    famille: 'continu',
     periode: '1991–2022',
     resume:
       'Les quatre décennies bout à bout, sans coupure : trente-deux années ' +
@@ -288,7 +289,7 @@
     var sc = SCENARIOS[n];
     sc.reel = sc.taux.rendementBourse.length;
     sc.prolongePar =
-      sc.famille === 'historique' ? MOYENNE_LONGUE : null; // null = sa propre moyenne
+      sc.famille === 'prospectif' ? null : MOYENNE_LONGUE; // null = sa propre moyenne
 
     for (var m = 0; m < CLES.length; m++) {
       var c = CLES[m];
@@ -304,6 +305,7 @@
   /** Les familles, dans l'ordre d'affichage. */
   var FAMILLES = [
     { cle: 'historique', nom: 'Décennies observées' },
+    { cle: 'continu', nom: 'Sans aucune projection' },
     { cle: 'prospectif', nom: 'Scénarios construits' },
   ];
 

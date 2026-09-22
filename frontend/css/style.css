@@ -988,64 +988,103 @@ input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; marg
 /* ---------------------------------------------------- Scénarios de marché */
 
 /*
- * Le filtre de scénarios s'applique par-dessus les quatre bulles : ce n'est pas
- * une cinquième étape, d'où l'absence de numéro et d'anneau d'invite. Il reste
- * inerte tant que les quatre bulles ne sont pas validées — un scénario n'a rien
- * à filtrer avant qu'il y ait un résultat.
+ * Le filtre s'applique par-dessus les quatre bulles : ce n'est pas une
+ * cinquième étape, d'où l'absence de numéro et d'anneau d'invite. Il reste
+ * verrouillé tant que les quatre ne sont pas validées — un scénario n'a rien à
+ * filtrer avant qu'il y ait un résultat, et le montrer ouvert donnerait huit
+ * options à lire avant même d'avoir une réponse.
  */
 .scenario {
-  padding: 12px 14px;
+  display: grid;
+  gap: 3px;
+  width: 100%;
+  font: inherit;
+  text-align: left;
+  padding: 13px 15px;
   background: var(--surface);
   border: 1px solid var(--trait);
   border-radius: var(--rayon-large);
   box-shadow: var(--ombre);
+  cursor: pointer;
+  transition: border-color var(--duree-rapide) var(--aise),
+              box-shadow var(--duree-rapide) var(--aise);
 }
+.scenario:hover { border-color: var(--accent); box-shadow: var(--ombre-2); }
 .scenario--bloque { opacity: .45; pointer-events: none; }
+
 .scenario__titre {
-  margin: 0 0 9px;
   font-size: .625rem;
   font-weight: 600;
   letter-spacing: var(--interlettre-caps);
   text-transform: uppercase;
   color: var(--encre-3);
 }
-.scenario__choix { display: grid; gap: 4px; }
+.scenario__accroche { font-size: .75rem; color: var(--encre-2); line-height: 1.35; }
+/* Ce qui tourne en ce moment : on doit savoir d'où viennent les chiffres à
+   l'écran sans avoir à ouvrir la fenêtre. */
+.scenario__actuel {
+  margin-top: 4px;
+  font-size: .875rem;
+  font-weight: 600;
+  color: var(--accent-fort);
+}
+
+/* --- La fenêtre de choix : liste à gauche, aperçu à droite -------------- */
+
+.choix {
+  position: fixed;
+  z-index: 50;
+  top: 50%;
+  left: 50%;
+  translate: -50% -50%;
+  display: grid;
+  gap: 14px;
+  width: min(960px, calc(100vw - 32px));
+  max-height: calc(100vh - 48px);
+  overflow-y: auto;
+  padding: 20px 24px 18px;
+  background: var(--surface);
+  border: 1px solid var(--accent);
+  border-radius: var(--rayon-large);
+  box-shadow: 0 24px 64px rgba(11, 11, 11, .28);
+}
+.choix[hidden] { display: none; }
+.choix__entete { display: flex; align-items: start; justify-content: space-between; gap: 16px; }
+
+.choix__intro { display: grid; gap: 7px; max-width: 78ch; }
+.choix__intro p { margin: 0; font-size: .8125rem; color: var(--encre-2); line-height: 1.5; }
+.choix__intro strong { color: var(--encre); }
+
 /*
- * Sept options tiennent dans le rail parce que chaque ligne se réduit à un nom :
- * le résumé du scénario vit dans son aperçu, qui a la place de le porter.
+ * Deux colonnes : on compare en cliquant de l'une à l'autre, sans empiler de
+ * fenêtres. Le détail n'apparaît que pour le scénario qu'on examine — c'est
+ * ce qui évite de tout donner d'un coup.
  */
-.scenario__famille {
-  margin: 8px 0 2px;
+.choix__corps {
+  display: grid;
+  grid-template-columns: 250px minmax(0, 1fr);
+  gap: 18px;
+  align-items: start;
+}
+@media (max-width: 760px) {
+  .choix__corps { grid-template-columns: minmax(0, 1fr); }
+}
+
+.choix__liste { display: grid; gap: 4px; align-content: start; }
+.choix__famille {
+  margin: 9px 0 2px;
   font-size: .5625rem;
   font-weight: 600;
   letter-spacing: var(--interlettre-caps);
   text-transform: uppercase;
   color: var(--encre-3);
 }
-.scenario__famille:first-child { margin-top: 0; }
-.scenario__periode { font-size: .6875rem; color: var(--encre-3); margin-left: 5px; }
-/* Le choix et son aperçu : deux actions distinctes sur la même ligne. */
-.scenario__ligne { display: flex; gap: 5px; align-items: stretch; }
-.scenario__ligne .scenario__option { flex: 1; min-width: 0; }
-.scenario__apercu {
-  flex: none;
-  display: grid;
-  place-items: center;
-  width: 32px;
-  padding: 0;
-  color: var(--encre-3);
-  background: transparent;
-  border: 1px solid var(--trait);
-  border-radius: var(--rayon);
-  cursor: pointer;
-  transition: background var(--duree-rapide) var(--aise), color var(--duree-rapide) var(--aise);
-}
-.scenario__apercu:hover { background: var(--survol); color: var(--accent); }
-.scenario__apercu svg { width: 15px; height: 15px; display: block; }
-.scenario__option {
+.choix__famille:first-child { margin-top: 0; }
+
+.choix__option {
   font: inherit;
   text-align: left;
-  padding: 6px 10px;
+  padding: 7px 10px;
   background: transparent;
   border: 1px solid var(--trait);
   border-radius: var(--rayon);
@@ -1053,59 +1092,32 @@ input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; marg
   transition: background var(--duree-rapide) var(--aise),
               border-color var(--duree-rapide) var(--aise);
 }
-.scenario__option:hover { background: var(--survol); border-color: var(--bord-champ); }
-.scenario__option--actif {
-  background: var(--accent-doux);
-  border-color: var(--accent);
-}
-.scenario__nom {
-  display: block;
-  font-size: .8125rem;
-  font-weight: 600;
-  color: var(--encre);
-}
-.scenario__option--actif .scenario__nom { color: var(--accent-fort); }
-.scenario__apercu { width: 30px; }
-.scenario__note {
-  margin: 9px 0 0;
-  font-size: .6875rem;
-  color: var(--encre-3);
-  line-height: 1.4;
-}
-.scenario__note:empty { display: none; }
+.choix__option:hover { background: var(--survol); border-color: var(--bord-champ); }
+.choix__option--vu { background: var(--accent-doux); border-color: var(--accent); }
+.choix__nom-option { display: block; font-size: .8125rem; font-weight: 600; color: var(--encre); }
+.choix__option--vu .choix__nom-option { color: var(--accent-fort); }
+.choix__periode { display: block; font-size: .6875rem; color: var(--encre-3); }
 
-/* --- Aperçu d'un scénario, en fenêtre ---------------------------------- */
+/* Le scénario continu est d'une autre nature : rien n'y est projeté. */
+.choix__option--continu { border-color: var(--bord-champ); border-style: dashed; }
+.choix__option--continu.choix__option--vu { border-style: solid; }
 
-/*
- * Même grammaire que la bulle zoomée : voile, fenêtre centrée, fermeture au
- * clic dehors ou à Échap. Elle vit hors du rail pour ne pas être piégée dans
- * son contexte d'empilement.
- */
-.apercu {
-  position: fixed;
-  z-index: 50;
-  top: 50%;
-  left: 50%;
-  translate: -50% -50%;
-  width: min(760px, calc(100vw - 32px));
-  max-height: calc(100vh - 48px);
-  overflow-y: auto;
-  padding: 20px 24px 22px;
-  background: var(--surface);
-  border: 1px solid var(--accent);
-  border-radius: var(--rayon-large);
-  box-shadow: 0 24px 64px rgba(11, 11, 11, .28);
-}
-.apercu[hidden] { display: none; }
-.apercu__entete {
+.choix__apercu { min-width: 0; }
+.choix__nom { margin: 0 0 2px; font-family: var(--police-titre); font-size: 1.0625rem; }
+
+.choix__pied {
   display: flex;
-  align-items: start;
-  justify-content: space-between;
-  gap: 16px;
-  margin-bottom: 14px;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  padding-top: 4px;
+  border-top: 1px solid var(--trait);
 }
+.choix__etat { margin: 0 auto 0 0; font-size: .75rem; color: var(--encre-3); }
+
+.apercu__note { margin: 10px 0 0; font-size: .75rem; color: var(--encre-3); line-height: 1.45; }
 .apercu__sources {
-  margin: 10px 0 0;
+  margin: 8px 0 0;
   padding: 0;
   list-style: none;
   font-size: .6875rem;
@@ -1116,7 +1128,6 @@ input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; marg
 /* Une réserve n'est pas une source : elle doit se remarquer. */
 .apercu__reserve { color: var(--encre-2); font-weight: 500; }
 .apercu__reserve::before { content: '⚠ '; }
-.apercu__note { margin: 10px 0 0; font-size: .75rem; color: var(--encre-3); line-height: 1.45; }
 
 /*
  * Les taux année par année, sous la courbe. La base 100 dit où l'on arrive ;

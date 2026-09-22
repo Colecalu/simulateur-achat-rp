@@ -324,12 +324,17 @@
 
       <!-- Filtre de scénarios : il s'applique PAR-DESSUS les quatre bulles,
            ce n'est pas une cinquième étape. D'où l'absence de numéro. -->
-      <div class="scenario scenario--bloque" id="scenario">
-        <p class="scenario__titre">Scénario de marché</p>
-        <div class="scenario__choix" id="scenarioChoix" role="radiogroup"
-             aria-label="Scénario de marché"></div>
-        <p class="scenario__note" id="scenarioNote"></p>
-      </div>
+      <!-- Le filtre de scénarios s'applique PAR-DESSUS les quatre bulles : ce
+           n'est pas une cinquième étape, d'où l'absence de numéro. Il reste
+           verrouillé tant qu'il n'y a pas de résultat à filtrer. -->
+      <button type="button" class="scenario scenario--bloque" id="scenarioOuvrir"
+              aria-haspopup="dialog" aria-controls="choix">
+        <span class="scenario__titre">Scénarios de marché</span>
+        <span class="scenario__accroche" id="scenarioAccroche">
+          Rejouez une décennie réelle sur votre projet.
+        </span>
+        <span class="scenario__actuel" id="scenarioActuel">Mes hypothèses</span>
+      </button>
     </div>
 
     <section class="plateau__visu" id="visu" data-etat="attente" aria-live="polite">
@@ -615,22 +620,58 @@
            dans la carte scénario. Le rail est `position: sticky`, donc un
            contexte d'empilement : une fenêtre qui y resterait passerait sous
            le voile. -->
-      <div class="apercu" id="apercu" role="dialog" aria-modal="true"
-           aria-labelledby="apercuTitre" hidden>
-        <div class="apercu__entete">
-          <div>
-            <h3 class="carte__titre" id="apercuTitre"></h3>
-            <p class="carte__legende" id="apercuResume"></p>
-          </div>
-          <button type="button" class="mel__fermer" id="apercuFermer"
-                  aria-label="Fermer l'aperçu">×</button>
+      <!-- Choix d'un scénario : la liste et l'aperçu dans UNE fenêtre. Empiler
+           deux fenêtres obligerait à fermer l'une pour revenir à l'autre, alors
+           que comparer deux décennies est exactement ce qu'on vient y faire.
+           Elle vit ici, hors du rail : le rail est `position: sticky`, donc un
+           contexte d'empilement, et une fenêtre qui y resterait passerait sous
+           le voile. -->
+      <div class="choix" id="choix" role="dialog" aria-modal="true"
+           aria-labelledby="choixTitre" hidden>
+
+        <div class="choix__entete">
+          <h3 class="carte__titre" id="choixTitre">Scénarios de marché</h3>
+          <button type="button" class="mel__fermer" id="choixFermer"
+                  aria-label="Fermer sans appliquer">×</button>
         </div>
-        <div class="graphique graphique--court"><canvas id="graphApercu"></canvas></div>
-        <!-- Les taux annuels sous la courbe : la base 100 montre où l'on
-             arrive, la suite montre par quoi on y passe. -->
-        <div class="suites" id="apercuSuites"></div>
-        <p class="apercu__note" id="apercuNote"></p>
-        <ul class="apercu__sources" id="apercuSources"></ul>
+
+        <div class="choix__intro">
+          <p>
+            Rejouez sur votre projet ce que les marchés ont réellement fait. Les premières
+            années sont datées et sourcées&nbsp;; au-delà, la courbe passe en pointillé —
+            ce n'est plus une donnée mais la moyenne de la période.
+          </p>
+          <p>
+            <strong>Ces décennies ne se reproduiront pas à l'identique.</strong> L'immobilier
+            français part aujourd'hui d'un niveau de prix qui interdit mécaniquement de refaire
+            les hausses de 2000-2010&nbsp;: il faudrait que les ménages y consacrent une part de
+            revenu qu'ils n'ont pas. C'est un terrain d'essai, pas une prévision.
+          </p>
+        </div>
+
+        <div class="choix__corps">
+          <div class="choix__liste" id="choixListe" role="radiogroup"
+               aria-label="Scénario de marché"></div>
+
+          <div class="choix__apercu">
+            <h4 class="choix__nom" id="apercuTitre"></h4>
+            <p class="carte__legende" id="apercuResume"></p>
+            <div class="graphique graphique--court"><canvas id="graphApercu"></canvas></div>
+            <!-- Les taux annuels sous la courbe : la base 100 montre où l'on
+                 arrive, la suite montre par quoi on y passe. -->
+            <div class="suites" id="apercuSuites"></div>
+            <p class="apercu__note" id="apercuNote"></p>
+            <ul class="apercu__sources" id="apercuSources"></ul>
+          </div>
+        </div>
+
+        <div class="choix__pied">
+          <p class="choix__etat" id="choixEtat"></p>
+          <button type="button" class="bouton bouton--discret" id="choixAnnuler">Annuler</button>
+          <button type="button" class="bouton bouton--primaire" id="choixAppliquer">
+            Appliquer
+          </button>
+        </div>
       </div>
 </main>
 

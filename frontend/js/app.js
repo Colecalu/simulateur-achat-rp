@@ -819,61 +819,89 @@ let scenarioActif = null;
 /** Les taux saisis à la main, mis de côté le temps qu'un scénario s'applique. */
 let hypothesesUtilisateur = null;
 
-/** Petite icône de courbe, pour le bouton d'aperçu. */
-const ICONE_COURBE =
-  '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" ' +
-  'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
-  '<path d="M1.5 11.5 5 7l3 2.5 5.5-6"/><path d="M1.5 14.5h13"/></svg>';
-
-function ligneScenario(cle, nom, periode, actif) {
-  const date = periode ? `<span class="scenario__periode">${periode}</span>` : '';
-  return (
-    '<div class="scenario__ligne">' +
-    `<button type="button" class="scenario__option${actif ? ' scenario__option--actif' : ''}" ` +
-      `data-scenario="${cle}" role="radio" aria-checked="${actif}">` +
-      `<span class="scenario__nom">${nom}</span>${date}</button>` +
-    `<button type="button" class="scenario__apercu" data-apercu="${cle}" ` +
-      `aria-label="Voir les courbes — ${nom}" title="Voir les courbes">${ICONE_COURBE}</button>` +
-    '</div>'
-  );
-}
-
 /*
- * La carte ne porte que les noms : sept options ne tiennent dans le rail qu'à
- * cette condition. Le résumé et les sources de chaque scénario vivent dans son
- * aperçu, qui a la place de les porter.
+ * Le choix d'un scénario vit dans UNE fenêtre à deux colonnes : la liste à
+ * gauche, l'aperçu du scénario regardé à droite. Empiler deux fenêtres
+ * obligerait à fermer l'une pour revenir à l'autre, alors que comparer deux
+ * décennies est exactement ce qu'on vient y faire.
+ *
+ * Regarder et appliquer restent deux gestes : on explore librement, puis on
+ * valide. Tant qu'on n'a pas cliqué « Appliquer », rien ne bouge derrière.
  */
+
+/** Scénario actuellement REGARDÉ dans la fenêtre — pas celui qui est appliqué. */
+let scenarioVu = null;
+
+const choixOuvert = () => !$('#choix').hidden;
+
 function construireScenarios() {
-  const morceaux = [ligneScenario('', 'Mes hypothèses', null, true)];
+  const morceaux = [
+    '<p class="choix__famille">Votre hypothèse</p>',
+    optionChoix({ cle: '', nom: 'Mes hypothèses', periode: null }),
+  ];
   for (const famille of FAMILLES) {
     const liste = scenariosParFamille(famille.cle);
     if (!liste.length) continue;
-    morceaux.push(`<p class="scenario__famille">${famille.nom}</p>`);
-    for (const sc of liste) morceaux.push(ligneScenario(sc.cle, sc.nom, sc.periode, false));
+    morceaux.push(`<p class="choix__famille">${famille.nom}</p>`);
+    for (const sc of liste) morceaux.push(optionChoix(sc));
   }
-  $('#scenarioChoix').innerHTML = morceaux.join('');
+  $('#choixListe').innerHTML = morceaux.join('');
 
-  for (const b of document.querySelectorAll('.scenario__option')) {
-    b.addEventListener('click', () => appliquerScenario(b.dataset.scenario));
+  for (const b of document.querySelectorAll('.choix__option')) {
+    b.addEventListener('click', () => regarderScenario(b.dataset.scenario));
   }
-  for (const b of document.querySelectorAll('.scenario__apercu')) {
-    b.addEventListener('click', () => ouvrirApercu(b.dataset.apercu));
-  }
-  $('#apercuFermer').addEventListener('click', fermerApercu);
+  $('#scenarioOuvrir').addEventListener('click', ouvrirChoix);
+  $('#choixFermer').addEventListener('click', fermerChoix);
+  $('#choixAnnuler').addEventListener('click', fermerChoix);
+  $('#choixAppliquer').addEventListener('click', () => {
+    appliquerScenario(scenarioVu ? scenarioVu.cle : '');
+    fermerChoix();
+  });
 }
 
-/* --- Aperçu des courbes d'un scénario ---------------------------------- */
+function optionChoix(sc) {
+  const continu = sc.famille === 'continu' ? ' choix__option--continu' : '';
+  const date = sc.periode ? `<span class="choix__periode">${sc.periode}</span>` : '';
+  return (
+    `<button type="button" class="choix__option${continu}" data-scenario="${sc.cle}" ` +
+    'role="radio" aria-checked="false">' +
+    `<span class="choix__nom-option">${sc.nom}</span>${date}</button>`
+  );
+}
 
-/*
- * Montrer la séquence AVANT de l'appliquer : c'est ce qui fait comprendre en
- * un coup d'œil ce qu'est « une décennie difficile », là où trois taux moyens
- * ne disent rien. On trace l'horizon complet (25 ans), donc la répétition de
- * la série y est visible — c'est une propriété du modèle, pas un détail à
- * cacher.
- */
+/** Affiche un scénario dans la colonne de droite. N'applique rien. */
+function regarderScenario(cle) {
+  scenarioVu = cle ? scenarioParCle(cle) : null;
+
+  for (const b of document.querySelectorAll('.choix__option')) {
+    const vu = b.dataset.scenario === (cle || '');
+    b.classList.toggle('choix__option--vu', vu);
+    b.setAttribute('aria-checked', String(vu));
+  }
+
+  const applique = (scenarioActif ? scenarioActif.cle : '') === (cle || '');
+  $('#choixEtat').textContent = applique ? 'Déjà appliqué.' : '';
+  $('#choixAppliquer').disabled = applique;
+
+  dessinerApercu(scenarioVu);
+}
+
+function ouvrirChoix() {
+  $('#choix').hidden = false;
+  $('#voile').hidden = false;
+  regarderScenario(scenarioActif ? scenarioActif.cle : '');
+  // Un canevas dimensionné dans un conteneur masqué reste à zéro.
+  if (graphApercu) graphApercu.resize();
+}
+
+function fermerChoix() {
+  $('#choix').hidden = true;
+  if (bulleZoomee === null) $('#voile').hidden = true;
+}
+
+/* --- L'aperçu : courbes en base 100, taux annuels, sources ------------- */
+
 let graphApercu = null;
-
-const apercuOuvert = () => !$('#apercu').hidden;
 
 /** « +6 », « −18 », « 0 » — un taux annuel, signe compris, sans le %. */
 const tauxSigne = new Intl.NumberFormat('fr-FR', {
@@ -881,8 +909,7 @@ const tauxSigne = new Intl.NumberFormat('fr-FR', {
   signDisplay: 'exceptZero',
 });
 
-function ouvrirApercu(cle) {
-  const sc = cle ? scenarioParCle(cle) : null;
+function dessinerApercu(sc) {
   const horizon = dernierResultat ? dernierResultat.annees.length : 25;
 
   // « Mes hypothèses » n'a pas de série : on lit les champs, ce qui donne trois
@@ -915,15 +942,12 @@ function ouvrirApercu(cle) {
   $('#apercuTitre').textContent = sc ? sc.nom : 'Mes hypothèses';
   $('#apercuResume').textContent = sc
     ? sc.resume
-    : 'Vos taux, appliqués tels quels chaque année.';
+    : 'Vos taux, appliqués tels quels chaque année. Aucune donnée de marché.';
 
-  // Les taux année par année, sous la courbe : la base 100 dit où l'on
-  // arrive, la suite dit par quoi on y passe. Ces lignes tiennent aussi lieu
-  // de légende — les couleurs seules ne portent jamais l'identité.
   // On n'affiche que les années OBSERVÉES, suivies du taux qui prolonge. Lister
   // vingt-cinq valeurs dont quatorze identiques ferait passer un prolongement
   // pour une donnée.
-  const reel = sc ? sc.reel : 0;
+  const reel = sc ? Math.min(sc.reel, horizon) : 0;
   $('#apercuSuites').innerHTML = series
     .map((serie) => {
       let valeurs;
@@ -934,7 +958,7 @@ function ouvrirApercu(cle) {
           .slice(0, reel)
           .map((t) => tauxSigne.format(t * 100))
           .join(' · ');
-        if (reel < serie.taux.length) {
+        if (reel < horizon) {
           valeurs += ` <b>puis ${tauxSigne.format(serie.taux[reel] * 100)} par an</b>`;
         }
       }
@@ -951,27 +975,23 @@ function ouvrirApercu(cle) {
     `Taux annuels en %. Base 100 au départ : après ${horizon} ans, ` +
     series.map((x) => `${arrivee(x.taux)} pour « ${x.nom} »`).join(', ') +
     '.' +
-    (sc && sc.reel < horizon
-      ? ` Les ${sc.reel} premières années sont observées ; au-delà, le trait vertical ` +
-        'marque le début du prolongement, au rythme moyen de la période.'
+    (sc && reel < horizon
+      ? ` Les ${reel} premières années sont observées ; au-delà, le trait vertical marque le ` +
+        'début du prolongement, au rythme moyen de la période.'
       : sc
       ? ' Toutes les années affichées sont observées : aucun prolongement.'
       : '');
 
-  // La provenance est une exigence du pilier : un scénario « historique » sans
-  // source n'est qu'une opinion.
+  // La provenance est une exigence du pilier : un scénario historique sans
+  // source n'est qu'une opinion. Les réserves passent devant les sources —
+  // une réserve dit ce qu'on sait de faux, elle ne se range pas en bas de page.
   $('#apercuSources').innerHTML = sc
-    ? (sc.reserves || [])
-        .map((r) => `<li class="apercu__reserve">${r}</li>`)
-        .join('') +
+    ? (sc.reserves || []).map((r) => `<li class="apercu__reserve">${r}</li>`).join('') +
       series
         .filter((x) => sc.sources && sc.sources[x.champ])
         .map((x) => `<li>${x.nom} : ${sc.sources[x.champ]}</li>`)
         .join('')
     : '';
-
-  $('#apercu').hidden = false;
-  $('#voile').hidden = false;
 
   if (typeof Chart === 'undefined') return;
 
@@ -986,14 +1006,9 @@ function ouvrirApercu(cle) {
     const variation = t === null ? '' : ` (${tauxSigne.format(t * 100)} %)`;
     return ` ${ctx.dataset.label} : ${Math.round(ctx.parsed.y)}${variation}`;
   };
-
-  /*
-   * Ce qui est observé et ce qui est prolongé ne doivent pas se confondre à
-   * l'écran. Greffon local, comme le trait du point d'équilibre.
-   */
   // Ici l'axe commence à l'année 0 : l'indice du dernier point réel vaut donc
   // exactement le nombre d'années observées.
-  o.frontiere = sc && sc.reel < horizon ? sc.reel : 0;
+  o.frontiere = sc && reel < horizon ? reel : 0;
 
   graphApercu = poser(graphApercu, '#graphApercu', 'line', {
     labels: Array.from({ length: horizon + 1 }, (_, i) => i),
@@ -1022,14 +1037,9 @@ function ouvrirApercu(cle) {
     })),
   }, o, [traitFrontiere]);
 
-  // Un canevas dimensionné dans un conteneur masqué reste à zéro.
   graphApercu.resize();
 }
 
-function fermerApercu() {
-  $('#apercu').hidden = true;
-  if (bulleZoomee === null) $('#voile').hidden = true;
-}
 
 /**
  * Applique un scénario, ou rend la main à l'utilisateur quand `cle` est vide.
@@ -1064,22 +1074,10 @@ function appliquerScenario(cle) {
   }
   if (!scenario) hypothesesUtilisateur = null;
 
-  for (const b of document.querySelectorAll('.scenario__option')) {
-    const actif = b.dataset.scenario === (cle || '');
-    b.classList.toggle('scenario__option--actif', actif);
-    b.setAttribute('aria-checked', String(actif));
-  }
-
-  // Rejouer une décennie deux fois et demie amplifie son biais : une période
-  // exceptionnelle devient un demi-siècle exceptionnel. On le dit.
-  $('#scenarioNote').textContent = scenario
-    ? `${scenario.reel} années observées` +
-      (scenario.periode ? ` (${scenario.periode})` : '') +
-      (scenario.reel < 25
-        ? `, puis ${(scenario.suiteBourse * 100).toFixed(1)} % par an jusqu'à la 25e.`
-        : '.') +
-      ' Les taux de la bulle 4 en donnent la moyenne annuelle.'
-    : '';
+  // Ce qui tourne en ce moment, lisible sans ouvrir la fenêtre.
+  $('#scenarioActuel').textContent = scenario
+    ? scenario.nom + (scenario.periode ? ` · ${scenario.periode}` : '')
+    : 'Mes hypothèses';
 
   recalculer();
 }
@@ -1114,7 +1112,12 @@ function majAvertissement() {
 
 function majScenario() {
   const pret = profilValide && validees.size === BULLES.length;
-  $('#scenario').classList.toggle('scenario--bloque', !pret);
+  const carte = $('#scenarioOuvrir');
+  carte.classList.toggle('scenario--bloque', !pret);
+  carte.disabled = !pret;
+  $('#scenarioAccroche').textContent = pret
+    ? 'Rejouez une décennie réelle sur votre projet.'
+    : 'Disponible une fois votre simulation complète.';
 }
 
 /* ---------------------------------------------------------------- Orchestre */
@@ -1409,12 +1412,12 @@ function initialiserBulles() {
   // déjà une valeur, il n'y a rien à annuler.
   // Le voile sert deux fenêtres : l'aperçu de scénario et la bulle zoomée.
   $('#voile').addEventListener('click', () => {
-    if (apercuOuvert()) return fermerApercu();
+    if (choixOuvert()) return fermerChoix();
     if (bulleZoomee !== null) validerBulle(bulleZoomee);
   });
   document.addEventListener('keydown', (e) => {
     if (e.key !== 'Escape') return;
-    if (apercuOuvert()) return fermerApercu();
+    if (choixOuvert()) return fermerChoix();
     if (bulleZoomee !== null) validerBulle(bulleZoomee);
   });
 

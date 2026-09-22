@@ -163,8 +163,28 @@ réelles — en cours ; **(3)** la mise en location ultérieure — moteur fait,
   1991-2022), `prospectif` (deux trajectoires construites, explicitement non observées) et
   « Mes hypothèses », qui n'est pas dans le fichier — c'est l'absence de scénario, et elle lit les
   champs de la bulle 4. Les noms désignent l'ÉVÉNEMENT de marché, jamais l'issue pour l'acheteur.
-- **La carte ne porte que les noms.** Sept options ne tiennent dans le rail qu'à cette condition :
-  le résumé et les sources vivent dans l'aperçu, qui a la place. Ne pas y réintroduire de sous-titre.
+- **La carte du rail est FERMÉE.** Elle porte le titre, une accroche et le scénario actuellement
+  appliqué — rien d'autre. Afficher huit options dans le rail donnait tout à lire avant même
+  d'avoir une réponse à l'écran. Tant que les quatre bulles ne sont pas validées, elle est
+  verrouillée (`disabled`) et son accroche dit pourquoi.
+- **Le scénario appliqué est toujours lisible sans ouvrir la fenêtre** (`#scenarioActuel`) : il
+  faut savoir d'où viennent les chiffres affichés.
+- **Liste et aperçu dans UNE fenêtre à deux colonnes** (`#choix`). Empiler deux fenêtres
+  obligerait à fermer l'une pour revenir à l'autre, alors que comparer deux décennies est
+  exactement ce qu'on vient y faire. Sous 760 px, les colonnes s'empilent.
+- **Regarder et appliquer sont deux gestes.** Cliquer un scénario ne fait que le montrer à droite
+  (`regarderScenario`) ; rien ne bouge derrière tant qu'on n'a pas cliqué « Appliquer », qui ferme
+  la fenêtre pour rendre le résultat immédiatement visible. « Annuler » et Échap ne changent rien.
+  Le bouton est désactivé, avec la mention « Déjà appliqué », quand le scénario regardé est celui
+  qui tourne.
+- **Le texte d'accueil tient en deux paragraphes** : ce que fait le module, et pourquoi ces
+  décennies ne se reproduiront pas — l'immobilier français part d'un niveau de prix qui interdit
+  mécaniquement de refaire les hausses de 2000-2010. Les sources et réserves restent par scénario,
+  dans la colonne de droite. Ne pas remonter ce détail dans l'accueil : c'est précisément ce qui
+  surchargerait.
+- **Quatre groupes dans la liste** : « Votre hypothèse », « Décennies observées »,
+  « Sans aucune projection » (le seul scénario dont rien n'est projeté — d'où sa famille `continu`
+  et sa bordure pointillée), « Scénarios construits ».
 - **Trois séries sont tracées** — marchés, immobilier, loyers (IRL). `revalCharges` et
   `revalTaxeFonciere` sont dans `taux` parce que le moteur en a besoin, mais ne sont pas dessinées :
   elles suivent l'inflation générale et n'intéressent pas le lecteur au même titre.
@@ -193,7 +213,7 @@ réelles — en cours ; **(3)** la mise en location ultérieure — moteur fait,
   appliqué, jamais écrasées.
 - **L'avertissement de bas de page change avec le scénario** : « hypothèses constantes » devient
   faux dès qu'une série tourne.
-- **Chaque scénario a un aperçu**, ouvert par le bouton à droite de son choix : une fenêtre qui
+- **L'aperçu est la colonne droite de la fenêtre de choix** : une zone qui
   trace ses trois séries (marchés, immobilier, loyers) **en base 100**, sur l'horizon complet. On trace la
   VALEUR, pas le taux : une suite de pourcentages est une dérivée, on la lit mal et on ne voit pas
   où elle mène. En base 100, deux décennies de moyenne identique mais d'ordre différent se
@@ -206,10 +226,10 @@ réelles — en cours ; **(3)** la mise en location ultérieure — moteur fait,
 - **Un seul axe, même quand les échelles divergent** (marchés à 1 043 contre immobilier à 313 sur
   le scénario porteur). Deux axes Y mentiraient sur l'écart réel.
 - **Ouvrir un aperçu n'applique rien.** Regarder et choisir sont deux gestes distincts.
-- **La fenêtre d'aperçu vit hors du rail de gauche**, à côté du voile. Le rail est
+- **La fenêtre de choix vit hors du rail de gauche**, à côté du voile. Le rail est
   `position: sticky`, donc un contexte d'empilement : une fenêtre qui y resterait passerait sous
   le voile — même piège que les bulles 3 et 4 en leur temps.
-- **Le voile sert deux fenêtres** : l'aperçu et la bulle zoomée. Son écouteur et celui d'Échap
+- **Le voile sert deux fenêtres** : le choix de scénario et la bulle zoomée. Son écouteur et celui d'Échap
   traitent l'aperçu en premier, et `validerBulle` refuse désormais `n === null` — sans quoi un clic
   sur le voile sans bulle ouverte ajouterait `null` aux bulles validées et casserait.
 - **Les courbes de l'aperçu ont leurs propres jetons** : ce sont des indices de marché, pas des
