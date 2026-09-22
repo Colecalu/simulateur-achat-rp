@@ -135,6 +135,25 @@ les écarts assumés.
 - **Premier passage strictement séquentiel** : seule la bulle suivante est ouvrable, les autres
   sont grisées et leurs champs `disabled`. Un clic ouvre la bulle en grand au centre, avec ses
   libellés longs et ses textes d'aide.
+- **`.bulle--validee` décrit la carte REPLIÉE, `.bulle--zoom` la bulle OUVERTE : les deux ne
+  s'appliquent jamais ensemble.** Toute règle de la section « Validée » porte donc
+  `:not(.bulle--zoom)`. Sans cela, une bulle validée puis rouverte hérite d'un mélange des deux
+  mises en page — champs étroits, nombres centrés, colonnes de la vue repliée — au lieu de
+  retrouver exactement la vue du premier passage. Les règles repliées montent jusqu'à (0,3,0)
+  (`.bulle[data-colonnes="1"].bulle--validee …`) et écrasent les règles de zoom en (0,2,0) :
+  l'ordre dans le fichier ne suffit pas à les départager. Test de non-régression : photographier
+  les styles calculés d'une bulle au premier passage et à la réouverture, ils doivent être
+  identiques.
+- **Cliquer dans un champ de nombre en sélectionne le contenu** (`initialiserSaisie`) : on écrit
+  le nouveau montant par-dessus sans effacer l'ancien. C'est le geste central du simulateur. Un
+  second clic dans le champ replace le curseur, pour retoucher un chiffre. La sélection se fait au
+  `click`, pas au `focus` : le clic qui donne le focus replacerait le curseur juste après.
+  `.champ` est un `<label>` qui enveloppe son champ — le clic sur toute la case est donc transmis
+  nativement, il n'y a pas de gestionnaire à écrire pour ça.
+- **Pendant la saisie, rien ne se teinte à part le nombre.** Le seul surligneur est celui de la
+  sélection (`--surligneur`, `.champ input::selection`). Pas de fond sur toute la case au focus,
+  pas d'anneau de 3 px autour de la boîte : deux surlignages pour une seule action. Le survol,
+  lui, teinte la ligne repliée — c'est ce qui annonce qu'elle est modifiable sur place.
 - **Une fois validée, une bulle reste modifiable sur place.** Faire varier une hypothèse sans
   ouvrir de fenêtre est l'essence du simulateur — c'est non négociable. Les champs y sont
   dépouillés de tout habillage (bordure, fond, remplissage) pour se lire comme du texte : c'est

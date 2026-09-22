@@ -678,9 +678,47 @@ function initialiserBascule() {
   appliquer(choisi);
 }
 
+/* ------------------------------------------------------------ Saisie */
+
+/**
+ * Cliquer dans un champ de nombre en sélectionne le contenu : on écrit le
+ * nouveau montant par-dessus, sans avoir à effacer l'ancien. C'est le geste
+ * central du simulateur — on passe son temps à remplacer des valeurs, pas à
+ * les corriger caractère par caractère.
+ *
+ * Deux subtilités :
+ * - `.champ` est un `<label>` qui enveloppe son champ. Un clic n'importe où
+ *   sur la case est donc déjà transmis au champ par le navigateur ; il ne
+ *   reste qu'à sélectionner. C'est aussi pour cela qu'on ne sélectionne qu'au
+ *   `click`, après le `mouseup` : sélectionner au `focus` seul ne tiendrait
+ *   pas, le clic qui vient de donner le focus replace le curseur juste après.
+ * - Une fois dans le champ, un SECOND clic doit pouvoir placer le curseur pour
+ *   retoucher un chiffre. On ne sélectionne donc qu'à l'entrée dans le champ,
+ *   pas à chaque clic.
+ */
+function initialiserSaisie() {
+  let entrant = null;
+
+  document.addEventListener('focusin', (e) => {
+    if (!e.target.matches('.champ input[type="number"]')) return;
+    entrant = e.target;
+    e.target.select();          // suffit pour une arrivée au clavier (Tab)
+  });
+
+  // Arrivée à la souris : le clic a replacé le curseur, on resélectionne.
+  document.addEventListener('click', (e) => {
+    if (e.target !== entrant) return;
+    e.target.select();
+    entrant = null;
+  });
+
+  document.addEventListener('focusout', () => { entrant = null; });
+}
+
 function initialiser() {
   remplirFormulaire(DEFAUTS);
   remplirFormulaireMel();
+  initialiserSaisie();
   $('#formulaire').addEventListener('input', recalculer);
   // Le profil vit hors du plateau : sans son propre écouteur, l'éditer ne
   // recalculerait rien avant le clic sur « Valider mon profil ».

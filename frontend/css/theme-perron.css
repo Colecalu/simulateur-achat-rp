@@ -49,6 +49,8 @@
   --accent-doux:     var(--clay-50);
   --sur-accent:      var(--paper-50);
   --survol:          var(--paper-200);
+  /* Surligneur du nombre qu'on s'apprête à remplacer : il doit se voir. */
+  --surligneur:      var(--clay-200);
   --anneau:          0 0 0 3px rgba(184,125,81,.34);
 
   /*

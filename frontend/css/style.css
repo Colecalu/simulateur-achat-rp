@@ -372,9 +372,9 @@ h1, h2, h3 {
 .bulle--ouvrable .bulle__declencheur:hover { background: var(--achat-voile); }
 
 /* --- Validée : champs modifiables sur place, sans défilement ------------ */
-.bulle--validee .bulle__corps { display: flex; }
+.bulle--validee:not(.bulle--zoom) .bulle__corps { display: flex; }
 
-.bulle--validee .bulle__declencheur {
+.bulle--validee:not(.bulle--zoom) .bulle__declencheur {
   position: static;
   z-index: auto;
   flex-direction: row;
@@ -384,7 +384,7 @@ h1, h2, h3 {
   padding: 9px 12px 4px;
   text-align: left;
 }
-.bulle--validee .bulle__numero {
+.bulle--validee:not(.bulle--zoom) .bulle__numero {
   display: grid;
   place-items: center;
   width: 20px; height: 20px;
@@ -396,16 +396,16 @@ h1, h2, h3 {
   font-weight: 700;
   letter-spacing: 0;
 }
-.bulle--validee .bulle__titre {
+.bulle--validee:not(.bulle--zoom) .bulle__titre {
   font-size: .8125rem;
   color: var(--encre);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.bulle--validee .bulle__declencheur { cursor: pointer; }
-.bulle--validee:hover { border-color: var(--achat); }
-.bulle--validee:hover .bulle__declencheur { background: var(--surface-creuse); }
+.bulle--validee:not(.bulle--zoom) .bulle__declencheur { cursor: pointer; }
+.bulle--validee:not(.bulle--zoom):hover { border-color: var(--achat); }
+.bulle--validee:not(.bulle--zoom):hover .bulle__declencheur { background: var(--surface-creuse); }
 
 /*
  * Bulle validée : les champs restent MODIFIABLES sur place — faire varier une
@@ -418,20 +418,20 @@ h1, h2, h3 {
  * en deux ou trois rangées, et les rangées se partagent toute la hauteur
  * disponible — aucun espace mort en bas de bulle.
  */
-.bulle--validee .bulle__corps { flex: 1; min-height: 0; }
+.bulle--validee:not(.bulle--zoom) .bulle__corps { flex: 1; min-height: 0; }
 
-.bulle--validee .bulle__champs {
+.bulle--validee:not(.bulle--zoom) .bulle__champs {
   flex: 1;
   min-height: 0;
   grid-auto-rows: 1fr;
   align-content: stretch;
   gap: 0 18px;
 }
-.bulle[data-colonnes="1"].bulle--validee .bulle__champs { grid-template-columns: minmax(0, 1fr); }
-.bulle[data-colonnes="2"].bulle--validee .bulle__champs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-.bulle[data-colonnes="3"].bulle--validee .bulle__champs { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.bulle[data-colonnes="1"].bulle--validee:not(.bulle--zoom) .bulle__champs { grid-template-columns: minmax(0, 1fr); }
+.bulle[data-colonnes="2"].bulle--validee:not(.bulle--zoom) .bulle__champs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.bulle[data-colonnes="3"].bulle--validee:not(.bulle--zoom) .bulle__champs { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 
-.bulle--validee .champ {
+.bulle--validee:not(.bulle--zoom) .champ {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -442,8 +442,8 @@ h1, h2, h3 {
   border-bottom: 1px solid var(--trait);
 }
 /* Pas de trait sous la dernière ligne de chaque colonne. */
-.bulle--validee .champ:last-child,
-.bulle[data-colonnes="2"].bulle--validee .champ:nth-last-child(2):nth-child(odd) {
+.bulle--validee:not(.bulle--zoom) .champ:last-child,
+.bulle[data-colonnes="2"].bulle--validee:not(.bulle--zoom) .champ:nth-last-child(2):nth-child(odd) {
   border-bottom-color: transparent;
 }
 
@@ -455,8 +455,8 @@ h1, h2, h3 {
  */
 .bulle--validee:not(.bulle--zoom) .champ[data-role="reglage"] { display: none; }
 
-.bulle--validee .champ__libelle { display: none; }
-.bulle--validee .champ__court {
+.bulle--validee:not(.bulle--zoom) .champ__libelle { display: none; }
+.bulle--validee:not(.bulle--zoom) .champ__court {
   display: block;
   flex: 0 1 auto;
   min-width: 0;
@@ -467,7 +467,7 @@ h1, h2, h3 {
   white-space: nowrap;
 }
 
-.bulle--validee .champ__saisie {
+.bulle--validee:not(.bulle--zoom) .champ__saisie {
   flex: 0 0 auto;
   margin-left: auto;
   background: transparent;
@@ -475,13 +475,19 @@ h1, h2, h3 {
   border-radius: 0;
   box-shadow: none;
 }
-.bulle--validee .champ:hover .champ__court,
-.bulle--validee .champ:focus-within .champ__court { color: var(--encre-2); }
-.bulle--validee .champ:hover,
-.bulle--validee .champ:focus-within { background: var(--surface-creuse); }
+.bulle--validee:not(.bulle--zoom) .champ:hover .champ__court,
+.bulle--validee:not(.bulle--zoom) .champ:focus-within .champ__court { color: var(--encre-2); }
+/*
+ * Le survol teinte la ligne : c'est lui qui annonce qu'elle est modifiable sur
+ * place. La SAISIE, elle, ne teinte rien — le seul surligneur est celui qui
+ * couvre le nombre, posé par la sélection automatique (voir `initialiserSaisie`).
+ * Un fond sur toute la case en plus de la sélection ferait deux surlignages
+ * concurrents pour une seule action.
+ */
+.bulle--validee:not(.bulle--zoom) .champ:hover { background: var(--surface-creuse); }
 
-.bulle--validee .champ input,
-.bulle--validee .champ select {
+.bulle--validee:not(.bulle--zoom) .champ input,
+.bulle--validee:not(.bulle--zoom) .champ select {
   font-family: var(--police-chiffres);
   font-variant-numeric: tabular-nums;
   width: 6ch;
@@ -492,10 +498,10 @@ h1, h2, h3 {
   font-weight: 600;
   color: var(--encre);
 }
-.bulle--validee .champ select { width: auto; text-align: left; }
-.bulle[data-colonnes="1"].bulle--validee .champ input { width: 9ch; font-size: .9375rem; }
-.bulle[data-colonnes="1"].bulle--validee .champ__court { font-size: .8125rem; }
-.bulle--validee .champ__unite {
+.bulle--validee:not(.bulle--zoom) .champ select { width: auto; text-align: left; }
+.bulle[data-colonnes="1"].bulle--validee:not(.bulle--zoom) .champ input { width: 9ch; font-size: .9375rem; }
+.bulle[data-colonnes="1"].bulle--validee:not(.bulle--zoom) .champ__court { font-size: .8125rem; }
+.bulle--validee:not(.bulle--zoom) .champ__unite {
   padding: 0 0 0 3px;
   font-size: .625rem;
   color: var(--encre-3);
@@ -503,9 +509,9 @@ h1, h2, h3 {
 
 /* Écran court : un cran de moins, uniformément. */
 @media (max-height: 820px) {
-  .bulle--validee .champ input,
-  .bulle--validee .champ select { font-size: .8125rem; }
-  .bulle--validee .champ__court { font-size: .6875rem; }
+  .bulle--validee:not(.bulle--zoom) .champ input,
+  .bulle--validee:not(.bulle--zoom) .champ select { font-size: .8125rem; }
+  .bulle--validee:not(.bulle--zoom) .champ__court { font-size: .6875rem; }
 }
 
 /* --- Zoomée : plein centre, saisie confortable -------------------------- */
@@ -646,10 +652,15 @@ h1, h2, h3 {
   border: 1px solid var(--bord-champ);
   border-radius: var(--rayon);
 }
-.bulle--zoom .champ__saisie:focus-within {
-  border-color: var(--accent);
-  box-shadow: var(--anneau);
-}
+.bulle--zoom .champ__saisie:focus-within { border-color: var(--accent); }
+/*
+ * Le surligneur : cliquer dans un champ sélectionne son contenu, on écrit par
+ * dessus sans rien effacer. La sélection de la page est volontairement discrète
+ * (`::selection` dans le socle) ; sur un nombre qu'on va remplacer, il faut au
+ * contraire qu'elle saute aux yeux.
+ */
+.champ input::selection { background: var(--surligneur, var(--accent-doux)); color: var(--encre); }
+
 .bulle--zoom .champ input, .bulle--zoom .champ select {
   padding: 0;
   font-family: var(--police-chiffres);
