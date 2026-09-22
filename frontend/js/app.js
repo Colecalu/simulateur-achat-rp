@@ -820,86 +820,85 @@ let scenarioActif = null;
 let hypothesesUtilisateur = null;
 
 /*
- * Le choix d'un scénario vit dans UNE fenêtre à deux colonnes : la liste à
- * gauche, l'aperçu du scénario regardé à droite. Empiler deux fenêtres
- * obligerait à fermer l'une pour revenir à l'autre, alors que comparer deux
- * décennies est exactement ce qu'on vient y faire.
+ * Le choix se fait en DEUX TEMPS.
  *
- * Regarder et appliquer restent deux gestes : on explore librement, puis on
- * valide. Tant qu'on n'a pas cliqué « Appliquer », rien ne bouge derrière.
+ * 1. La carte du rail est un simple appel. Elle ouvre une fenêtre qui explique
+ *    ce qu'on cherche à faire — et rien d'autre : pas un seul nom de scénario.
+ *    Sept noms de décennies ne veulent rien dire tant qu'on n'a pas dit ce
+ *    qu'on en fait, ni prévenu que la seconde moitié des courbes est extrapolée.
+ * 2. Une fois l'explication lue, la carte laisse place à la liste, qui reste
+ *    en place. Chaque ligne porte son nom, sa période, et un bouton qui ouvre
+ *    l'aperçu des courbes.
+ *
+ * L'explication reste accessible par le « ? » à côté du titre : on doit
+ * pouvoir la relire sans réinitialiser la page.
  */
 
-/** Scénario actuellement REGARDÉ dans la fenêtre — pas celui qui est appliqué. */
-let scenarioVu = null;
+/** Petite icône de courbe, pour le bouton d'aperçu. */
+const ICONE_COURBE =
+  '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" ' +
+  'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+  '<path d="M1.5 11.5 5 7l3 2.5 5.5-6"/><path d="M1.5 14.5h13"/></svg>';
 
-const choixOuvert = () => !$('#choix').hidden;
+/** L'explication a-t-elle déjà été lue ? Tant que non, la liste reste cachée. */
+let scenariosDecouverts = false;
 
-function construireScenarios() {
-  const morceaux = [
-    '<p class="choix__famille">Votre hypothèse</p>',
-    optionChoix({ cle: '', nom: 'Mes hypothèses', periode: null }),
-  ];
-  for (const famille of FAMILLES) {
-    const liste = scenariosParFamille(famille.cle);
-    if (!liste.length) continue;
-    morceaux.push(`<p class="choix__famille">${famille.nom}</p>`);
-    for (const sc of liste) morceaux.push(optionChoix(sc));
-  }
-  $('#choixListe').innerHTML = morceaux.join('');
+const introOuverte = () => !$('#intro').hidden;
+const apercuOuvert = () => !$('#apercu').hidden;
 
-  for (const b of document.querySelectorAll('.choix__option')) {
-    b.addEventListener('click', () => regarderScenario(b.dataset.scenario));
-  }
-  $('#scenarioOuvrir').addEventListener('click', ouvrirChoix);
-  $('#choixFermer').addEventListener('click', fermerChoix);
-  $('#choixAnnuler').addEventListener('click', fermerChoix);
-  $('#choixAppliquer').addEventListener('click', () => {
-    appliquerScenario(scenarioVu ? scenarioVu.cle : '');
-    fermerChoix();
-  });
-}
-
-function optionChoix(sc) {
-  const continu = sc.famille === 'continu' ? ' choix__option--continu' : '';
-  const date = sc.periode ? `<span class="choix__periode">${sc.periode}</span>` : '';
+function ligneScenario(sc) {
+  const continu = sc.famille === 'continu' ? ' scenario__option--continu' : '';
+  const date = sc.periode ? `<span class="scenario__periode">${sc.periode}</span>` : '';
   return (
-    `<button type="button" class="choix__option${continu}" data-scenario="${sc.cle}" ` +
-    'role="radio" aria-checked="false">' +
-    `<span class="choix__nom-option">${sc.nom}</span>${date}</button>`
+    '<div class="scenario__ligne">' +
+    `<button type="button" class="scenario__option${continu}" data-scenario="${sc.cle}" ` +
+      'role="radio" aria-checked="false">' +
+      `<span class="scenario__nom">${sc.nom}</span>${date}</button>` +
+    `<button type="button" class="scenario__apercu" data-apercu="${sc.cle}" ` +
+      `aria-label="Voir les courbes — ${sc.nom}" title="Voir les courbes">${ICONE_COURBE}</button>` +
+    '</div>'
   );
 }
 
-/** Affiche un scénario dans la colonne de droite. N'applique rien. */
-function regarderScenario(cle) {
-  scenarioVu = cle ? scenarioParCle(cle) : null;
+function construireScenarios() {
+  const morceaux = [ligneScenario({ cle: '', nom: 'Mes hypothèses', periode: null })];
+  for (const famille of FAMILLES) {
+    const liste = scenariosParFamille(famille.cle);
+    if (!liste.length) continue;
+    morceaux.push(`<p class="scenario__famille">${famille.nom}</p>`);
+    for (const sc of liste) morceaux.push(ligneScenario(sc));
+  }
+  $('#scenarioChoix').innerHTML = morceaux.join('');
 
-  for (const b of document.querySelectorAll('.choix__option')) {
-    const vu = b.dataset.scenario === (cle || '');
-    b.classList.toggle('choix__option--vu', vu);
-    b.setAttribute('aria-checked', String(vu));
+  for (const b of document.querySelectorAll('.scenario__option')) {
+    b.addEventListener('click', () => appliquerScenario(b.dataset.scenario));
+  }
+  for (const b of document.querySelectorAll('.scenario__apercu')) {
+    b.addEventListener('click', () => ouvrirApercu(b.dataset.apercu));
   }
 
-  const applique = (scenarioActif ? scenarioActif.cle : '') === (cle || '');
-  $('#choixEtat').textContent = applique ? 'Déjà appliqué.' : '';
-  $('#choixAppliquer').disabled = applique;
-
-  dessinerApercu(scenarioVu);
+  $('#scenarioOuvrir').addEventListener('click', ouvrirIntro);
+  $('#scenarioAide').addEventListener('click', ouvrirIntro);
+  $('#introFermer').addEventListener('click', fermerIntro);
+  $('#introValider').addEventListener('click', () => {
+    scenariosDecouverts = true;
+    fermerIntro();
+    majScenario();
+  });
+  $('#apercuFermer').addEventListener('click', fermerApercu);
 }
 
-function ouvrirChoix() {
-  $('#choix').hidden = false;
+function ouvrirIntro() {
+  $('#intro').hidden = false;
   $('#voile').hidden = false;
-  regarderScenario(scenarioActif ? scenarioActif.cle : '');
-  // Un canevas dimensionné dans un conteneur masqué reste à zéro.
-  if (graphApercu) graphApercu.resize();
 }
 
-function fermerChoix() {
-  $('#choix').hidden = true;
-  if (bulleZoomee === null) $('#voile').hidden = true;
+function fermerIntro() {
+  $('#intro').hidden = true;
+  if (bulleZoomee === null && !apercuOuvert()) $('#voile').hidden = true;
 }
 
-/* --- L'aperçu : courbes en base 100, taux annuels, sources ------------- */
+/* --- L'aperçu d'un scénario : courbes en base 100, taux, sources -------- */
 
 let graphApercu = null;
 
@@ -909,7 +908,8 @@ const tauxSigne = new Intl.NumberFormat('fr-FR', {
   signDisplay: 'exceptZero',
 });
 
-function dessinerApercu(sc) {
+function ouvrirApercu(cle) {
+  const sc = cle ? scenarioParCle(cle) : null;
   const horizon = dernierResultat ? dernierResultat.annees.length : 25;
 
   // « Mes hypothèses » n'a pas de série : on lit les champs, ce qui donne trois
@@ -983,8 +983,8 @@ function dessinerApercu(sc) {
       : '');
 
   // La provenance est une exigence du pilier : un scénario historique sans
-  // source n'est qu'une opinion. Les réserves passent devant les sources —
-  // une réserve dit ce qu'on sait de faux, elle ne se range pas en bas de page.
+  // source n'est qu'une opinion. Les réserves passent devant — une réserve dit
+  // ce qu'on sait de faux, elle ne se range pas en bas de page.
   $('#apercuSources').innerHTML = sc
     ? (sc.reserves || []).map((r) => `<li class="apercu__reserve">${r}</li>`).join('') +
       series
@@ -992,6 +992,9 @@ function dessinerApercu(sc) {
         .map((x) => `<li>${x.nom} : ${sc.sources[x.champ]}</li>`)
         .join('')
     : '';
+
+  $('#apercu').hidden = false;
+  $('#voile').hidden = false;
 
   if (typeof Chart === 'undefined') return;
 
@@ -1037,9 +1040,14 @@ function dessinerApercu(sc) {
     })),
   }, o, [traitFrontiere]);
 
+  // Un canevas dimensionné dans un conteneur masqué reste à zéro.
   graphApercu.resize();
 }
 
+function fermerApercu() {
+  $('#apercu').hidden = true;
+  if (bulleZoomee === null && !introOuverte()) $('#voile').hidden = true;
+}
 
 /**
  * Applique un scénario, ou rend la main à l'utilisateur quand `cle` est vide.
@@ -1074,10 +1082,19 @@ function appliquerScenario(cle) {
   }
   if (!scenario) hypothesesUtilisateur = null;
 
-  // Ce qui tourne en ce moment, lisible sans ouvrir la fenêtre.
-  $('#scenarioActuel').textContent = scenario
-    ? scenario.nom + (scenario.periode ? ` · ${scenario.periode}` : '')
-    : 'Mes hypothèses';
+  for (const b of document.querySelectorAll('.scenario__option')) {
+    const actif = b.dataset.scenario === (cle || '');
+    b.classList.toggle('scenario__option--actif', actif);
+    b.setAttribute('aria-checked', String(actif));
+  }
+
+  $('#scenarioNote').textContent = scenario
+    ? `${scenario.reel} années observées` +
+      (scenario.periode ? ` (${scenario.periode})` : '') +
+      (scenario.reel < 25
+        ? `, puis ${(scenario.suiteBourse * 100).toFixed(1)} % par an — extrapolé.`
+        : ', soit tout l\u2019horizon. Rien n\u2019est extrapolé.')
+    : '';
 
   recalculer();
 }
@@ -1112,11 +1129,13 @@ function majAvertissement() {
 
 function majScenario() {
   const pret = profilValide && validees.size === BULLES.length;
-  const carte = $('#scenarioOuvrir');
-  carte.classList.toggle('scenario--bloque', !pret);
-  carte.disabled = !pret;
+  $('#scenario').dataset.etat = !pret
+    ? 'bloque'
+    : scenariosDecouverts
+    ? 'ouvert'
+    : 'ferme';
   $('#scenarioAccroche').textContent = pret
-    ? 'Rejouez une décennie réelle sur votre projet.'
+    ? 'Rejouez une décennie qui a vraiment eu lieu.'
     : 'Disponible une fois votre simulation complète.';
 }
 
@@ -1411,13 +1430,16 @@ function initialiserBulles() {
   // Fermer par le voile ou par Échap vaut validation : tous les champs ont
   // déjà une valeur, il n'y a rien à annuler.
   // Le voile sert deux fenêtres : l'aperçu de scénario et la bulle zoomée.
+  // Le voile sert trois vues : l'explication, l'aperçu et la bulle zoomée.
   $('#voile').addEventListener('click', () => {
-    if (choixOuvert()) return fermerChoix();
+    if (apercuOuvert()) return fermerApercu();
+    if (introOuverte()) return fermerIntro();
     if (bulleZoomee !== null) validerBulle(bulleZoomee);
   });
   document.addEventListener('keydown', (e) => {
     if (e.key !== 'Escape') return;
-    if (choixOuvert()) return fermerChoix();
+    if (apercuOuvert()) return fermerApercu();
+    if (introOuverte()) return fermerIntro();
     if (bulleZoomee !== null) validerBulle(bulleZoomee);
   });
 
@@ -1518,6 +1540,7 @@ function initialiser() {
     profilValide = false;
     scenarioActif = null;
     hypothesesUtilisateur = null;
+    scenariosDecouverts = false;
     appliquerScenario('');
     ouvrirProfil();
     majBulles();

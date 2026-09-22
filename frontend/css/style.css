@@ -989,102 +989,91 @@ input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; marg
 
 /*
  * Le filtre s'applique par-dessus les quatre bulles : ce n'est pas une
- * cinquième étape, d'où l'absence de numéro et d'anneau d'invite. Il reste
- * verrouillé tant que les quatre ne sont pas validées — un scénario n'a rien à
- * filtrer avant qu'il y ait un résultat, et le montrer ouvert donnerait huit
- * options à lire avant même d'avoir une réponse.
+ * cinquième étape, d'où l'absence de numéro et d'anneau d'invite.
+ *
+ * Trois états, portés par `data-etat` :
+ *   bloque — tant qu'il n'y a pas de résultat à filtrer ;
+ *   ferme  — un appel qui ouvre l'explication ;
+ *   ouvert — la liste des scénarios.
+ * La liste n'apparaît qu'après l'explication : sept noms de décennies ne
+ * veulent rien dire tant qu'on n'a pas dit ce qu'on en fait.
  */
 .scenario {
+  padding: 12px 14px;
+  background: var(--surface);
+  border: 1px solid var(--trait);
+  border-radius: var(--rayon-large);
+  box-shadow: var(--ombre);
+}
+.scenario[data-etat="bloque"] { opacity: .45; pointer-events: none; }
+.scenario[data-etat="ouvert"] .scenario__appel { display: none; }
+.scenario:not([data-etat="ouvert"]) .scenario__liste { display: none; }
+
+.scenario__appel {
   display: grid;
   gap: 3px;
   width: 100%;
   font: inherit;
   text-align: left;
-  padding: 13px 15px;
-  background: var(--surface);
-  border: 1px solid var(--trait);
-  border-radius: var(--rayon-large);
-  box-shadow: var(--ombre);
+  padding: 0;
+  background: transparent;
+  border: 0;
   cursor: pointer;
-  transition: border-color var(--duree-rapide) var(--aise),
-              box-shadow var(--duree-rapide) var(--aise);
 }
-.scenario:hover { border-color: var(--accent); box-shadow: var(--ombre-2); }
-.scenario--bloque { opacity: .45; pointer-events: none; }
+.scenario[data-etat="ferme"]:hover { border-color: var(--accent); box-shadow: var(--ombre-2); }
 
 .scenario__titre {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 8px;
   font-size: .625rem;
   font-weight: 600;
   letter-spacing: var(--interlettre-caps);
   text-transform: uppercase;
   color: var(--encre-3);
 }
+.scenario__appel .scenario__titre { margin-bottom: 3px; }
 .scenario__accroche { font-size: .75rem; color: var(--encre-2); line-height: 1.35; }
-/* Ce qui tourne en ce moment : on doit savoir d'où viennent les chiffres à
-   l'écran sans avoir à ouvrir la fenêtre. */
-.scenario__actuel {
-  margin-top: 4px;
-  font-size: .875rem;
-  font-weight: 600;
-  color: var(--accent-fort);
-}
 
-/* --- La fenêtre de choix : liste à gauche, aperçu à droite -------------- */
-
-.choix {
-  position: fixed;
-  z-index: 50;
-  top: 50%;
-  left: 50%;
-  translate: -50% -50%;
+/* Relire l'explication : discret, mais toujours accessible. */
+.scenario__aide {
+  margin-left: auto;
   display: grid;
-  gap: 14px;
-  width: min(960px, calc(100vw - 32px));
-  max-height: calc(100vh - 48px);
-  overflow-y: auto;
-  padding: 20px 24px 18px;
-  background: var(--surface);
-  border: 1px solid var(--accent);
-  border-radius: var(--rayon-large);
-  box-shadow: 0 24px 64px rgba(11, 11, 11, .28);
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  font: inherit;
+  font-size: .625rem;
+  font-weight: 700;
+  color: var(--encre-3);
+  background: transparent;
+  border: 1px solid var(--trait);
+  border-radius: 50%;
+  cursor: pointer;
 }
-.choix[hidden] { display: none; }
-.choix__entete { display: flex; align-items: start; justify-content: space-between; gap: 16px; }
+.scenario__aide:hover { color: var(--accent); border-color: var(--accent); }
 
-.choix__intro { display: grid; gap: 7px; max-width: 78ch; }
-.choix__intro p { margin: 0; font-size: .8125rem; color: var(--encre-2); line-height: 1.5; }
-.choix__intro strong { color: var(--encre); }
-
-/*
- * Deux colonnes : on compare en cliquant de l'une à l'autre, sans empiler de
- * fenêtres. Le détail n'apparaît que pour le scénario qu'on examine — c'est
- * ce qui évite de tout donner d'un coup.
- */
-.choix__corps {
-  display: grid;
-  grid-template-columns: 250px minmax(0, 1fr);
-  gap: 18px;
-  align-items: start;
-}
-@media (max-width: 760px) {
-  .choix__corps { grid-template-columns: minmax(0, 1fr); }
-}
-
-.choix__liste { display: grid; gap: 4px; align-content: start; }
-.choix__famille {
-  margin: 9px 0 2px;
+.scenario__choix { display: grid; gap: 4px; }
+.scenario__famille {
+  margin: 8px 0 2px;
   font-size: .5625rem;
   font-weight: 600;
   letter-spacing: var(--interlettre-caps);
   text-transform: uppercase;
   color: var(--encre-3);
 }
-.choix__famille:first-child { margin-top: 0; }
+.scenario__famille:first-child { margin-top: 0; }
 
-.choix__option {
+/* Le choix et son aperçu : deux actions distinctes sur la même ligne. */
+.scenario__ligne { display: flex; gap: 4px; align-items: stretch; }
+.scenario__option {
+  flex: 1;
+  min-width: 0;
   font: inherit;
   text-align: left;
-  padding: 7px 10px;
+  padding: 6px 9px;
   background: transparent;
   border: 1px solid var(--trait);
   border-radius: var(--rayon);
@@ -1092,29 +1081,91 @@ input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; marg
   transition: background var(--duree-rapide) var(--aise),
               border-color var(--duree-rapide) var(--aise);
 }
-.choix__option:hover { background: var(--survol); border-color: var(--bord-champ); }
-.choix__option--vu { background: var(--accent-doux); border-color: var(--accent); }
-.choix__nom-option { display: block; font-size: .8125rem; font-weight: 600; color: var(--encre); }
-.choix__option--vu .choix__nom-option { color: var(--accent-fort); }
-.choix__periode { display: block; font-size: .6875rem; color: var(--encre-3); }
-
+.scenario__option:hover { background: var(--survol); border-color: var(--bord-champ); }
+.scenario__option--actif { background: var(--accent-doux); border-color: var(--accent); }
+.scenario__nom { display: block; font-size: .8125rem; font-weight: 600; color: var(--encre); }
+.scenario__option--actif .scenario__nom { color: var(--accent-fort); }
+.scenario__periode { display: block; font-size: .6875rem; color: var(--encre-3); }
 /* Le scénario continu est d'une autre nature : rien n'y est projeté. */
-.choix__option--continu { border-color: var(--bord-champ); border-style: dashed; }
-.choix__option--continu.choix__option--vu { border-style: solid; }
+.scenario__option--continu { border-style: dashed; border-color: var(--bord-champ); }
+.scenario__option--continu.scenario__option--actif { border-style: solid; }
 
-.choix__apercu { min-width: 0; }
-.choix__nom { margin: 0 0 2px; font-family: var(--police-titre); font-size: 1.0625rem; }
-
-.choix__pied {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 10px;
-  padding-top: 4px;
-  border-top: 1px solid var(--trait);
+.scenario__apercu {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  padding: 0;
+  color: var(--encre-3);
+  background: transparent;
+  border: 1px solid var(--trait);
+  border-radius: var(--rayon);
+  cursor: pointer;
+  transition: background var(--duree-rapide) var(--aise), color var(--duree-rapide) var(--aise);
 }
-.choix__etat { margin: 0 auto 0 0; font-size: .75rem; color: var(--encre-3); }
+.scenario__apercu:hover { background: var(--survol); color: var(--accent); }
+.scenario__apercu svg { width: 15px; height: 15px; display: block; }
 
+.scenario__note {
+  margin: 9px 0 0;
+  font-size: .6875rem;
+  color: var(--encre-3);
+  line-height: 1.4;
+}
+.scenario__note:empty { display: none; }
+
+/* --- Premier temps : l'explication, et rien d'autre --------------------- */
+
+.intro,
+.apercu {
+  position: fixed;
+  z-index: 50;
+  top: 50%;
+  left: 50%;
+  translate: -50% -50%;
+  max-height: calc(100vh - 48px);
+  overflow-y: auto;
+  background: var(--surface);
+  border: 1px solid var(--accent);
+  border-radius: var(--rayon-large);
+  box-shadow: 0 24px 64px rgba(11, 11, 11, .28);
+}
+.intro[hidden],
+.apercu[hidden] { display: none; }
+
+.intro {
+  display: grid;
+  gap: 14px;
+  width: min(580px, calc(100vw - 32px));
+  padding: 22px 26px 20px;
+}
+.intro__entete { display: flex; align-items: start; justify-content: space-between; gap: 16px; }
+.intro__titre {
+  margin: 0;
+  font-family: var(--police-titre);
+  font-weight: var(--graisse-titre);
+  font-size: 1.1875rem;
+  line-height: 1.25;
+  letter-spacing: var(--interlettre-titre);
+}
+.intro__texte { display: grid; gap: 10px; }
+.intro__texte p { margin: 0; font-size: .875rem; color: var(--encre-2); line-height: 1.55; }
+.intro__texte strong { color: var(--encre); }
+.intro__pied { display: flex; justify-content: flex-end; }
+
+/* --- Second temps : l'aperçu d'un scénario ----------------------------- */
+
+.apercu {
+  width: min(760px, calc(100vw - 32px));
+  padding: 20px 24px 22px;
+}
+.apercu__entete {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 14px;
+}
 .apercu__note { margin: 10px 0 0; font-size: .75rem; color: var(--encre-3); line-height: 1.45; }
 .apercu__sources {
   margin: 8px 0 0;
