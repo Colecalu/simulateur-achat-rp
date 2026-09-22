@@ -96,10 +96,14 @@
    * Courbes de l'aperçu de scénario. Autre domaine que `--achat` / `--location` :
    * ce sont des indices de marché, pas des trajectoires patrimoniales — d'où
    * des jetons distincts plutôt qu'un emprunt qui sèmerait la confusion.
-   * Paire validée : ΔE 18,3 en vision normale, 18,2 en deutéranopie.
+   * Triplet validé : ΔE 20,7 en vision normale, 13,9 en protanopie — la seule
+   * combinaison de trois teintes de Perron qui passe les deux seuils. Le gris
+   * des loyers n'atteint pas 3:1 sur le fond : c'est la série la plus plate et
+   * la moins décisive, et les valeurs sont rappelées sous la courbe.
    */
-  --courbe-bourse: var(--ochre-500);
-  --courbe-immo:   var(--clay-600);
+  --courbe-marches: var(--clay-500);
+  --courbe-immo:    var(--olive-700);
+  --courbe-loyer:   var(--warm-200);
 
   --achat-voile:     var(--clay-50);
   --location-voile:  var(--olive-50);

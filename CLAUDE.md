@@ -106,6 +106,23 @@ réelles — en cours ; **(3)** la mise en location ultérieure — moteur fait,
 - **Les scénarios vivent dans `frontend/js/scenarios.js`**, séparés du moteur : ce sont des
   données, pas de la logique. Les valeurs actuelles sont des **placeholders** (`provisoire: true`)
   destinés à être remplacés par des décennies datées et sourcées.
+- **Deux familles, sept options** : `historique` (quatre décennies observées), `prospectif` (deux
+  trajectoires plausibles) et « Mes hypothèses », qui n'est pas dans le fichier — c'est l'absence
+  de scénario, et elle lit les champs de la bulle 4.
+- **La carte ne porte que les noms.** Sept options ne tiennent dans le rail qu'à cette condition :
+  le résumé et les sources vivent dans l'aperçu, qui a la place. Ne pas y réintroduire de sous-titre.
+- **Trois séries sont tracées** — marchés, immobilier, loyers (IRL). `revalCharges` et
+  `revalTaxeFonciere` sont dans `taux` parce que le moteur en a besoin, mais ne sont pas dessinées :
+  elles suivent l'inflation générale et n'intéressent pas le lecteur au même titre.
+- **Un scénario `historique` sans `sources` n'est qu'une opinion.** L'aperçu affiche la provenance
+  série par série, et un bandeau « valeurs provisoires » tant que `provisoire` est vrai. Remplir
+  `periode` et `sources` en même temps que `taux`, et retirer `provisoire`.
+- **Les trois courbes de l'aperçu** : `--courbe-marches` (clay-500), `--courbe-immo` (olive-700),
+  `--courbe-loyer` (warm-200). Seul triplet de Perron qui passe les deux seuils de séparation
+  (ΔE 20,7 normal, 13,9 protan) — toutes les combinaisons mêlant l'ochre à un vert échouent, les
+  deux teintes étant voisines en tonalité. Le gris des loyers n'atteint pas 3:1 sur le fond : il
+  est **pointillé**, ce qui lui donne une seconde marque, et ses valeurs sont rappelées sous la
+  courbe. C'est la série la plus plate et la moins décisive.
 - **Le filtre n'est pas une cinquième étape.** Il s'applique par-dessus les quatre bulles, d'où
   l'absence de numéro et d'anneau d'invite, et il reste inerte tant que les quatre ne sont pas
   validées — un scénario n'a rien à filtrer avant qu'il y ait un résultat.

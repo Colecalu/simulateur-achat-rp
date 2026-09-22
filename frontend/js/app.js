@@ -15,6 +15,8 @@
   const SCENARIOS = window.SimuRPScenarios.SCENARIOS;
   const tauxEquivalent = window.SimuRPScenarios.tauxEquivalent;
   const scenarioParCle = window.SimuRPScenarios.parCle;
+  const FAMILLES = window.SimuRPScenarios.FAMILLES;
+  const scenariosParFamille = window.SimuRPScenarios.parFamille;
   const tauxAnnee = window.SimuRP.tauxAnnee;
   const fraisIrrecuperables = window.SimuRP.fraisIrrecuperables;
   const DEFAUTS_LOCATION = window.SimuRPLocation.DEFAUTS_LOCATION;
@@ -751,27 +753,33 @@ const ICONE_COURBE =
   'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
   '<path d="M1.5 11.5 5 7l3 2.5 5.5-6"/><path d="M1.5 14.5h13"/></svg>';
 
-function ligneScenario(cle, nom, resume, actif) {
+function ligneScenario(cle, nom, periode, actif) {
+  const date = periode ? `<span class="scenario__periode">${periode}</span>` : '';
   return (
     '<div class="scenario__ligne">' +
     `<button type="button" class="scenario__option${actif ? ' scenario__option--actif' : ''}" ` +
       `data-scenario="${cle}" role="radio" aria-checked="${actif}">` +
-      `<span class="scenario__nom">${nom}</span>` +
-      `<span class="scenario__resume">${resume}</span></button>` +
+      `<span class="scenario__nom">${nom}</span>${date}</button>` +
     `<button type="button" class="scenario__apercu" data-apercu="${cle}" ` +
       `aria-label="Voir les courbes — ${nom}" title="Voir les courbes">${ICONE_COURBE}</button>` +
     '</div>'
   );
 }
 
+/*
+ * La carte ne porte que les noms : sept options ne tiennent dans le rail qu'à
+ * cette condition. Le résumé et les sources de chaque scénario vivent dans son
+ * aperçu, qui a la place de les porter.
+ */
 function construireScenarios() {
-  const choix = [
-    ligneScenario('', 'Mes hypothèses', 'Les taux que vous avez saisis.', true),
-  ];
-  for (const sc of SCENARIOS) {
-    choix.push(ligneScenario(sc.cle, sc.nom, sc.resume, false));
+  const morceaux = [ligneScenario('', 'Mes hypothèses', null, true)];
+  for (const famille of FAMILLES) {
+    const liste = scenariosParFamille(famille.cle);
+    if (!liste.length) continue;
+    morceaux.push(`<p class="scenario__famille">${famille.nom}</p>`);
+    for (const sc of liste) morceaux.push(ligneScenario(sc.cle, sc.nom, sc.periode, false));
   }
-  $('#scenarioChoix').innerHTML = choix.join('');
+  $('#scenarioChoix').innerHTML = morceaux.join('');
 
   for (const b of document.querySelectorAll('.scenario__option')) {
     b.addEventListener('click', () => appliquerScenario(b.dataset.scenario));
@@ -805,18 +813,13 @@ function ouvrirApercu(cle) {
   const sc = cle ? scenarioParCle(cle) : null;
   const horizon = dernierResultat ? dernierResultat.annees.length : 25;
 
-  // « Mes hypothèses » n'a pas de série : on lit les champs, ce qui donne deux
+  // « Mes hypothèses » n'a pas de série : on lit les champs, ce qui donne trois
   // droites. La comparaison avec une décennie réelle est tout l'argument.
   const lire = (champ) => {
     if (sc) return sc.taux[champ];
     const v = parseFloat(document.getElementById(champ).value);
     return (Number.isFinite(v) ? v : DEFAUTS[champ] * 100) / 100;
   };
-  const bourse = lire('rendementBourse');
-  const immo = lire('revalBien');
-
-  const cBourse = jeton('--courbe-bourse');
-  const cImmo = jeton('--courbe-immo');
 
   /*
    * Base 100 : on trace la VALEUR, pas le taux. Une suite de pourcentages est
@@ -826,11 +829,16 @@ function ouvrirApercu(cle) {
    */
   const base100 = (taux) => {
     const suite = [100];
-    for (let a = 1; a <= horizon; a++) {
-      suite.push(suite[a - 1] * (1 + tauxAnnee(taux, a)));
-    }
+    for (let a = 1; a <= horizon; a++) suite.push(suite[a - 1] * (1 + tauxAnnee(taux, a)));
     return suite;
   };
+
+  const series = [
+    { champ: 'rendementBourse', nom: 'Marchés actions', couleur: jeton('--courbe-marches') },
+    { champ: 'revalBien', nom: "Prix de l'immobilier", couleur: jeton('--courbe-immo') },
+    { champ: 'revalLoyer', nom: 'Loyers (IRL)', couleur: jeton('--courbe-loyer'), pointille: true },
+  ];
+  for (const serie of series) serie.taux = lire(serie.champ);
 
   $('#apercuTitre').textContent = sc ? sc.nom : 'Mes hypothèses';
   $('#apercuResume').textContent = sc
@@ -838,49 +846,47 @@ function ouvrirApercu(cle) {
     : 'Vos taux, appliqués tels quels chaque année.';
 
   // Les taux année par année, sous la courbe : la base 100 dit où l'on
-  // arrive, la suite dit par quoi on y passe.
-  const ligneSuite = (nom, couleur, taux) => {
-    const valeurs = Array.isArray(taux)
-      ? taux.map((t) => tauxSigne.format(t * 100)).join(' · ')
-      : `${tauxSigne.format(taux * 100)} chaque année`;
-    return (
-      '<div class="suite">' +
-      `<span class="suite__mot"><span class="pastille" style="background:${couleur}"></span>` +
-      `${nom}</span>` +
-      `<span class="suite__valeurs">${valeurs}</span></div>`
-    );
-  };
-  $('#apercuSuites').innerHTML =
-    ligneSuite('Rendement des marchés', cBourse, bourse) +
-    ligneSuite("Prix de l'immobilier", cImmo, immo);
+  // arrive, la suite dit par quoi on y passe. Ces lignes tiennent aussi lieu
+  // de légende — les couleurs seules ne portent jamais l'identité.
+  $('#apercuSuites').innerHTML = series
+    .map((serie) => {
+      const valeurs = Array.isArray(serie.taux)
+        ? serie.taux.map((t) => tauxSigne.format(t * 100)).join(' · ')
+        : `${tauxSigne.format(serie.taux * 100)} chaque année`;
+      return (
+        '<div class="suite">' +
+        `<span class="suite__mot"><span class="pastille" style="background:${serie.couleur}"></span>` +
+        `${serie.nom}</span><span class="suite__valeurs">${valeurs}</span></div>`
+      );
+    })
+    .join('');
 
-  const arrivee = (taux) => base100(taux)[horizon];
+  const arrivee = (taux) => Math.round(base100(taux)[horizon]);
   $('#apercuNote').textContent =
     `Taux annuels en %. Base 100 au départ : après ${horizon} ans, ` +
-    `${Math.round(arrivee(bourse))} pour les marchés et ${Math.round(arrivee(immo))} ` +
-    'pour l\u2019immobilier.' +
+    series.map((x) => `${arrivee(x.taux)} pour « ${x.nom} »`).join(', ') +
+    '.' +
     (sc
-      ? ` La séquence de ${sc.taux.rendementBourse.length} ans est rejouée en boucle.` +
-        (sc.provisoire ? ' Valeurs provisoires.' : '')
+      ? ` La séquence de ${sc.taux.rendementBourse.length} ans est rejouée en boucle.`
       : '');
+
+  // La provenance est une exigence du pilier : un scénario « historique » sans
+  // source n'est qu'une opinion.
+  $('#apercuSources').innerHTML =
+    sc && sc.sources
+      ? (sc.provisoire
+          ? '<li><strong>Valeurs provisoires — aucune donnée réelle.</strong></li>'
+          : '') +
+        series
+          .filter((x) => sc.sources[x.champ])
+          .map((x) => `<li>${x.nom} : ${sc.sources[x.champ]}</li>`)
+          .join('')
+      : '';
 
   $('#apercu').hidden = false;
   $('#voile').hidden = false;
 
   if (typeof Chart === 'undefined') return;
-
-  const courbe = (label, taux, couleur) => ({
-    label,
-    data: base100(taux),
-    tauxAnnuels: Array.from({ length: horizon + 1 }, (_, i) =>
-      i === 0 ? null : tauxAnnee(taux, i)),
-    borderColor: couleur,
-    backgroundColor: couleur,
-    borderWidth: 2,
-    pointRadius: 0,
-    pointHoverRadius: 5,
-    tension: 0.2,
-  });
 
   const o = optionsCommunes();
   o.scales.y.ticks.callback = (v) => Math.round(v);
@@ -896,10 +902,21 @@ function ouvrirApercu(cle) {
 
   graphApercu = poser(graphApercu, '#graphApercu', 'line', {
     labels: Array.from({ length: horizon + 1 }, (_, i) => i),
-    datasets: [
-      courbe('Rendement des marchés', bourse, cBourse),
-      courbe("Prix de l'immobilier", immo, cImmo),
-    ],
+    datasets: series.map((serie) => ({
+      label: serie.nom,
+      data: base100(serie.taux),
+      tauxAnnuels: Array.from({ length: horizon + 1 }, (_, i) =>
+        i === 0 ? null : tauxAnnee(serie.taux, i)),
+      borderColor: serie.couleur,
+      backgroundColor: serie.couleur,
+      // La courbe des loyers est la plus pâle : le pointillé lui donne une
+      // seconde marque, pour qu'elle ne repose pas sur la seule couleur.
+      borderWidth: serie.pointille ? 2.5 : 2,
+      borderDash: serie.pointille ? [5, 3] : undefined,
+      pointRadius: 0,
+      pointHoverRadius: 5,
+      tension: 0.2,
+    })),
   }, o);
 
   // Un canevas dimensionné dans un conteneur masqué reste à zéro.

@@ -243,9 +243,9 @@ h1, h2, h3 {
   display: grid;
   grid-template-rows: repeat(2, minmax(0, 1fr));
   gap: 14px;
-  height: calc(100vh - 470px);
-  min-height: 280px;
-  max-height: 400px;
+  height: calc(100vh - 560px);
+  min-height: 260px;
+  max-height: 360px;
 }
 
 .case { min-height: 0; min-width: 0; }
@@ -1009,7 +1009,21 @@ input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; marg
   text-transform: uppercase;
   color: var(--encre-3);
 }
-.scenario__choix { display: grid; gap: 5px; }
+.scenario__choix { display: grid; gap: 4px; }
+/*
+ * Sept options tiennent dans le rail parce que chaque ligne se réduit à un nom :
+ * le résumé du scénario vit dans son aperçu, qui a la place de le porter.
+ */
+.scenario__famille {
+  margin: 8px 0 2px;
+  font-size: .5625rem;
+  font-weight: 600;
+  letter-spacing: var(--interlettre-caps);
+  text-transform: uppercase;
+  color: var(--encre-3);
+}
+.scenario__famille:first-child { margin-top: 0; }
+.scenario__periode { font-size: .6875rem; color: var(--encre-3); margin-left: 5px; }
 /* Le choix et son aperçu : deux actions distinctes sur la même ligne. */
 .scenario__ligne { display: flex; gap: 5px; align-items: stretch; }
 .scenario__ligne .scenario__option { flex: 1; min-width: 0; }
@@ -1031,7 +1045,7 @@ input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; marg
 .scenario__option {
   font: inherit;
   text-align: left;
-  padding: 7px 10px;
+  padding: 6px 10px;
   background: transparent;
   border: 1px solid var(--trait);
   border-radius: var(--rayon);
@@ -1051,12 +1065,7 @@ input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; marg
   color: var(--encre);
 }
 .scenario__option--actif .scenario__nom { color: var(--accent-fort); }
-.scenario__resume {
-  display: block;
-  font-size: .6875rem;
-  color: var(--encre-3);
-  line-height: 1.35;
-}
+.scenario__apercu { width: 30px; }
 .scenario__note {
   margin: 9px 0 0;
   font-size: .6875rem;
@@ -1095,6 +1104,15 @@ input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; marg
   gap: 16px;
   margin-bottom: 14px;
 }
+.apercu__sources {
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: .6875rem;
+  color: var(--encre-3);
+  line-height: 1.5;
+}
+.apercu__sources:empty { display: none; }
 .apercu__note { margin: 10px 0 0; font-size: .75rem; color: var(--encre-3); line-height: 1.45; }
 
 /*
