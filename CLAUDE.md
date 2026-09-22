@@ -100,9 +100,28 @@ réelles — en cours ; **(3)** la mise en location ultérieure — moteur fait,
   de 5 % tous les ans. L'ORDRE des années compte — encaisser un krach la première année n'a pas le
   même effet que de l'encaisser la dixième. Un test verrouille le fait qu'une série alternée ne se
   confond pas avec sa moyenne.
-- **Une série plus courte que l'horizon se répète.** Rejouer la séquence se raconte (« et si cette
-  décennie recommençait ») ; figer la dernière valeur connue choisirait silencieusement une année
-  au hasard comme régime permanent.
+- **PAS DE BOUCLE.** Une série plus courte que l'horizon n'est jamais rejouée. Sur 25 ans, une
+  séquence de 11 ans tournait deux fois et demie, et les 14 années répétées pesaient **plus** que
+  les 11 vraies — le portefeuille étant au plus gros à la fin. Mesuré : la boucle inversait le
+  signe du verdict sur deux scénarios sur quatre, avec jusqu'à 1,2 M€ d'écart. Elle ne montrait
+  donc pas « et si j'achetais juste avant 2008 » mais « et si 2008-2018 était le régime permanent
+  du siècle » — l'affirmation la plus faible qu'on puisse tirer des données.
+- **Le prolongement est une décision de scénario, pas du moteur.** Chaque scénario est ramené à la
+  longueur de l'horizon dans `scenarios.js` : ses années réelles, puis un taux qu'il assume. Une
+  décennie observée est prolongée par la **moyenne longue 1991-2022** (8,21 % marchés, 3,76 %
+  immobilier) — le seul chiffre que les données autorisent pour ce qu'on ne sait pas. Un scénario
+  construit est prolongé par **sa propre** moyenne : le prolonger au rythme historique
+  contredirait son postulat. `reel` retient le nombre d'années observées.
+- **La frontière est tracée à l'écran** (`traitFrontiere`, trait vertical pointillé + « prolongement »)
+  et les suites sous la courbe ne listent que les années observées, suivies de « puis X % par an ».
+  Lister vingt-cinq valeurs dont quatorze identiques ferait passer un prolongement pour une donnée.
+- **`tauxAnnee` tient la dernière valeur** au-delà de la série : c'est un filet, jamais atteint en
+  pratique puisque les scénarios font déjà la longueur de l'horizon.
+- **On ne peut pas tirer quatre scénarios de 25 ans distincts de 32 ans de données.** Mesuré : les
+  huit fenêtres de 25 ans possibles dans 1991-2022 partagent 24 années sur 25 et donnent toutes
+  entre +565 k€ et +775 k€ — le même scénario huit fois. La variété est dans les décennies
+  (−770 k€ à +2 289 k€) et disparaît dès qu'on allonge la fenêtre, tous les régimes se moyennant.
+  Pour deux fenêtres de 25 ans réellement disjointes, il faut environ **50 ans de record**.
 - **Les scénarios vivent dans `frontend/js/scenarios.js`**, séparés du moteur : ce sont des
   données, pas de la logique. Les quatre décennies observées sont sourcées (MSCI World pour les
   marchés, INSEE Notaires-INSEE pour l'immobilier, IPC 04.1.1.0 pour les loyers, IPC ensemble pour
@@ -114,17 +133,18 @@ réelles — en cours ; **(3)** la mise en location ultérieure — moteur fait,
 - **`revalTaxeFonciere` n'a pas de série propre** : elle recopie `revalCharges` (l'inflation
   générale). C'est une **sous-estimation connue** — la taxe foncière a dérivé plus vite que
   l'inflation. À remplacer par une vraie série dès qu'on en a une.
-- **Rejouer une décennie amplifie son biais.** Sur 25 ans, une séquence de 11 ans tourne deux fois
-  et demie : une période exceptionnelle devient un demi-siècle exceptionnel. « Bulle immobilière »
-  (2000-2010) donne ainsi +2,3 M€ d'écart à 20 ans. Ce n'est pas un bug, c'est la conséquence
-  assumée de la règle de répétition — mais ne pas présenter ces chiffres comme une prévision.
+- **Les décennies sont chaînables** : elles se chevauchent et concordent, ce sont quatre fenêtres
+  sur une série continue de 1991 à 2022. Recollée (32 ans), elle donne le scénario « Trente ans
+  réels », le seul qui couvre tout l'horizon sans prolonger ni rejouer quoi que ce soit. À la
+  couture 2000-2001, on garde l'INSEE plutôt que la reconstruction Friggit.
 - **Chaque scénario porte ses `reserves`**, affichées en tête de l'aperçu avec un pictogramme
   d'alerte : elles disent ce qu'on sait de faux ou d'incertain dans ses propres données. Une
   réserve n'est pas une source, elle doit se remarquer.
-- **Deux familles, sept options** : `historique` (quatre décennies observées — 1991-2001,
-  2000-2010, 2008-2018, 2012-2022), `prospectif` (deux trajectoires construites, explicitement non
-  observées) et « Mes hypothèses », qui n'est pas dans le fichier — c'est l'absence de scénario, et
-  elle lit les champs de la bulle 4.
+- **Deux familles, huit options** : `historique` (Krach immobilier 1991-2001, Internet et
+  subprimes 2000-2010, Krach de 2008 2008-2018, Taux bas puis inflation 2012-2022, Trente ans réels
+  1991-2022), `prospectif` (deux trajectoires construites, explicitement non observées) et
+  « Mes hypothèses », qui n'est pas dans le fichier — c'est l'absence de scénario, et elle lit les
+  champs de la bulle 4. Les noms désignent l'ÉVÉNEMENT de marché, jamais l'issue pour l'acheteur.
 - **La carte ne porte que les noms.** Sept options ne tiennent dans le rail qu'à cette condition :
   le résumé et les sources vivent dans l'aperçu, qui a la place. Ne pas y réintroduire de sous-titre.
 - **Trois séries sont tracées** — marchés, immobilier, loyers (IRL). `revalCharges` et

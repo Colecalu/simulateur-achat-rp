@@ -17,13 +17,15 @@ test('un nombre reste un nombre, quelle que soit l\'année', () => {
   for (const a of [1, 7, 25]) assert.equal(tauxAnnee(0.05, a), 0.05);
 });
 
-test('une série se répète au-delà de sa longueur', () => {
-  // Choix assumé : rejouer la séquence se raconte (« et si cette décennie
-  // recommençait »), figer la dernière valeur choisirait une année au hasard
-  // comme régime permanent.
+test('une série NE se répète PAS : elle tient sa dernière valeur', () => {
+  // La boucle laissait la répétition décider du résultat : sur 25 ans, une
+  // séquence de 11 ans tournait deux fois et demie, et les années rejouées
+  // pesaient plus que les vraies. Elle inversait le signe du verdict sur deux
+  // scénarios sur quatre. Le prolongement est désormais une décision de
+  // scénario, explicite et affichée.
   const serie = [0.1, -0.2, 0.3];
   assert.deepEqual([1, 2, 3, 4, 5, 6].map((a) => tauxAnnee(serie, a)),
-    [0.1, -0.2, 0.3, 0.1, -0.2, 0.3]);
+    [0.1, -0.2, 0.3, 0.3, 0.3, 0.3]);
 });
 
 test('une série vide ne fait rien exploser', () => {

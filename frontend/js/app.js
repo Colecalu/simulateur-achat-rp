@@ -493,15 +493,53 @@ function camembert(existant, selecteur, parts) {
 }
 
 /** Crée le graphique s'il n'existe pas, le met à jour sinon. */
-function poser(graphique, selecteur, type, data, options) {
+function poser(graphique, selecteur, type, data, options, greffons) {
   if (graphique) {
     graphique.data = data;
     graphique.options = options;
     graphique.update('none');
     return graphique;
   }
-  return new Chart($(selecteur), { type: type, data: data, options: options });
+  return new Chart($(selecteur), {
+    type: type,
+    data: data,
+    options: options,
+    plugins: greffons || [],
+  });
 }
+
+/**
+ * Trait vertical à la dernière année observée d'un scénario : au-delà, la
+ * courbe n'est plus une donnée mais un prolongement au rythme moyen.
+ */
+const traitFrontiere = {
+  id: 'traitFrontiere',
+  afterDatasetsDraw(chart) {
+    const annee = chart.options.frontiere;
+    if (!annee) return;
+    const x = chart.scales.x.getPixelForValue(annee);
+    const { top, bottom, right } = chart.chartArea;
+    const ctx = chart.ctx;
+
+    ctx.save();
+    ctx.setLineDash([3, 3]);
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = jeton('--encre-3');
+    ctx.beginPath();
+    ctx.moveTo(x, top);
+    ctx.lineTo(x, bottom);
+    ctx.stroke();
+
+    ctx.setLineDash([]);
+    ctx.fillStyle = jeton('--encre-3');
+    ctx.font = '600 10px ' + jeton('--police');
+    // Le libellé se place du côté où il reste de la place.
+    const aDroite = right - x > 90;
+    ctx.textAlign = aDroite ? 'left' : 'right';
+    ctx.fillText('prolongement', x + (aDroite ? 5 : -5), top + 11);
+    ctx.restore();
+  },
+};
 
 /**
  * Vocabulaire des postes : un nom complet pour les infobulles, un nom court
@@ -848,11 +886,24 @@ function ouvrirApercu(cle) {
   // Les taux année par année, sous la courbe : la base 100 dit où l'on
   // arrive, la suite dit par quoi on y passe. Ces lignes tiennent aussi lieu
   // de légende — les couleurs seules ne portent jamais l'identité.
+  // On n'affiche que les années OBSERVÉES, suivies du taux qui prolonge. Lister
+  // vingt-cinq valeurs dont quatorze identiques ferait passer un prolongement
+  // pour une donnée.
+  const reel = sc ? sc.reel : 0;
   $('#apercuSuites').innerHTML = series
     .map((serie) => {
-      const valeurs = Array.isArray(serie.taux)
-        ? serie.taux.map((t) => tauxSigne.format(t * 100)).join(' · ')
-        : `${tauxSigne.format(serie.taux * 100)} chaque année`;
+      let valeurs;
+      if (!Array.isArray(serie.taux)) {
+        valeurs = `${tauxSigne.format(serie.taux * 100)} chaque année`;
+      } else {
+        valeurs = serie.taux
+          .slice(0, reel)
+          .map((t) => tauxSigne.format(t * 100))
+          .join(' · ');
+        if (reel < serie.taux.length) {
+          valeurs += ` <b>puis ${tauxSigne.format(serie.taux[reel] * 100)} par an</b>`;
+        }
+      }
       return (
         '<div class="suite">' +
         `<span class="suite__mot"><span class="pastille" style="background:${serie.couleur}"></span>` +
@@ -866,8 +917,11 @@ function ouvrirApercu(cle) {
     `Taux annuels en %. Base 100 au départ : après ${horizon} ans, ` +
     series.map((x) => `${arrivee(x.taux)} pour « ${x.nom} »`).join(', ') +
     '.' +
-    (sc
-      ? ` La séquence de ${sc.taux.rendementBourse.length} ans est rejouée en boucle.`
+    (sc && sc.reel < horizon
+      ? ` Les ${sc.reel} premières années sont observées ; au-delà, le trait vertical ` +
+        'marque le début du prolongement, au rythme moyen de la période.'
+      : sc
+      ? ' Toutes les années affichées sont observées : aucun prolongement.'
       : '');
 
   // La provenance est une exigence du pilier : un scénario « historique » sans
@@ -899,6 +953,12 @@ function ouvrirApercu(cle) {
     return ` ${ctx.dataset.label} : ${Math.round(ctx.parsed.y)}${variation}`;
   };
 
+  /*
+   * Ce qui est observé et ce qui est prolongé ne doivent pas se confondre à
+   * l'écran. Greffon local, comme le trait du point d'équilibre.
+   */
+  o.frontiere = sc && sc.reel < horizon ? sc.reel : 0;
+
   graphApercu = poser(graphApercu, '#graphApercu', 'line', {
     labels: Array.from({ length: horizon + 1 }, (_, i) => i),
     datasets: series.map((serie) => ({
@@ -916,7 +976,7 @@ function ouvrirApercu(cle) {
       pointHoverRadius: 5,
       tension: 0.2,
     })),
-  }, o);
+  }, o, [traitFrontiere]);
 
   // Un canevas dimensionné dans un conteneur masqué reste à zéro.
   graphApercu.resize();
@@ -969,10 +1029,12 @@ function appliquerScenario(cle) {
   // Rejouer une décennie deux fois et demie amplifie son biais : une période
   // exceptionnelle devient un demi-siècle exceptionnel. On le dit.
   $('#scenarioNote').textContent = scenario
-    ? `${scenario.taux.rendementBourse.length} années` +
+    ? `${scenario.reel} années observées` +
       (scenario.periode ? ` (${scenario.periode})` : '') +
-      ' rejouées en boucle sur tout l’horizon. Les taux de la bulle 4 en donnent la ' +
-      'moyenne annuelle.'
+      (scenario.reel < 25
+        ? `, puis ${(scenario.suiteBourse * 100).toFixed(1)} % par an jusqu'à la 25e.`
+        : '.') +
+      ' Les taux de la bulle 4 en donnent la moyenne annuelle.'
     : '';
 
   recalculer();

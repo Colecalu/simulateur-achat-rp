@@ -8,8 +8,16 @@
  * n'a pas le même effet que de l'encaisser la dixième.
  *
  * Chaque scénario porte donc des SÉRIES année par année. Le moteur sait les
- * consommer : voir `tauxAnnee` et `facteur` dans calc.js. Une série plus courte
- * que l'horizon se répète.
+ * consommer : voir `tauxAnnee` et `facteur` dans calc.js.
+ *
+ * PAS DE BOUCLE. Une série plus courte que l'horizon n'est jamais rejouée :
+ * sur 25 ans, une séquence de 11 ans tournait deux fois et demie, et les
+ * 14 années répétées pesaient PLUS que les 11 vraies — le portefeuille étant au
+ * plus gros à la fin. Mesuré : la boucle inversait le signe du verdict sur deux
+ * scénarios sur quatre, avec jusqu'à 1,2 M€ d'écart. Chaque scénario est donc
+ * ramené à la longueur de l'horizon à la fin de ce fichier, en prolongeant ses
+ * années réelles par un taux qu'il assume. `reel` retient combien d'années sont
+ * observées, et l'aperçu trace la frontière.
  *
  * DEUX FAMILLES :
  *   - `historique` : une décennie réellement observée, datée et sourcée ;
@@ -90,7 +98,7 @@
     },
     {
       cle: 'bulle-immobiliere',
-      nom: 'Bulle immobilière',
+      nom: 'Internet et subprimes',
       famille: 'historique',
       periode: '2000–2010',
       resume:
@@ -108,7 +116,7 @@
     },
     {
       cle: 'decennie-perdue',
-      nom: 'Décennie perdue',
+      nom: 'Krach de 2008',
       famille: 'historique',
       periode: '2008–2018',
       resume:
@@ -130,7 +138,7 @@
     },
     {
       cle: 'choc-inflationniste',
-      nom: 'Choc inflationniste',
+      nom: 'Taux bas puis inflation',
       famille: 'historique',
       periode: '2012–2022',
       resume:
@@ -196,16 +204,22 @@
     },
   ];
 
-  /** Les familles, dans l'ordre d'affichage. */
-  var FAMILLES = [
-    { cle: 'historique', nom: 'Décennies observées' },
-    { cle: 'prospectif', nom: 'Scénarios construits' },
+  /* ------------------------------------------------------------------ *
+   * Chaînage, prolongement, normalisation
+   * ------------------------------------------------------------------ */
+
+  var HORIZON = 25;
+  var CLES = [
+    'rendementBourse',
+    'revalBien',
+    'revalLoyer',
+    'revalCharges',
+    'revalTaxeFonciere',
   ];
 
   /**
    * Taux annuel équivalent d'une série : la moyenne GÉOMÉTRIQUE, pas
    * l'arithmétique. -20 % puis +30 % ne fait pas +5 % par an, il fait +1,98 %.
-   * C'est ce chiffre-là qu'on affiche dans les champs pilotés par un scénario.
    */
   function tauxEquivalent(serie) {
     if (!Array.isArray(serie) || !serie.length) return serie || 0;
@@ -213,6 +227,85 @@
     for (var i = 0; i < serie.length; i++) produit *= 1 + serie[i];
     return Math.pow(produit, 1 / serie.length) - 1;
   }
+
+  function brut(cle) {
+    for (var i = 0; i < SCENARIOS.length; i++) {
+      if (SCENARIOS[i].cle === cle) return SCENARIOS[i].taux;
+    }
+    return null;
+  }
+
+  /*
+   * Les quatre décennies ne sont pas quatre séries indépendantes : elles se
+   * chevauchent et concordent, ce sont quatre fenêtres sur UNE série continue
+   * de 1991 à 2022. Recollée, elle fait 32 ans — assez pour couvrir l'horizon
+   * sans prolonger quoi que ce soit. À la couture 2000-2001, on garde l'INSEE
+   * (scénario B) plutôt que la reconstruction Friggit (scénario A).
+   */
+  var A9 = brut('krach-immobilier');
+  var B11 = brut('bulle-immobiliere');
+  var C11 = brut('decennie-perdue');
+  var D11 = brut('choc-inflationniste');
+  var CONTINU = {};
+  for (var i = 0; i < CLES.length; i++) {
+    var k = CLES[i];
+    CONTINU[k] = A9[k].slice(0, 9).concat(B11[k], [C11[k][3]], D11[k]);
+  }
+
+  SCENARIOS.push({
+    cle: 'histoire-continue',
+    nom: 'Trente ans réels',
+    famille: 'historique',
+    periode: '1991–2022',
+    resume:
+      'Les quatre décennies bout à bout, sans coupure : trente-deux années ' +
+      "réellement observées, assez pour couvrir tout l'horizon sans prolonger " +
+      "ni rejouer une seule année. C'est le seul scénario sans hypothèse.",
+    sources: SRC_INSEE,
+    reserves: [DOUTE_DEVISE],
+    taux: CONTINU,
+  });
+
+  /**
+   * Le taux qui prolonge un scénario au-delà de ses années réelles.
+   *
+   * Une décennie observée est prolongée par la moyenne longue 1991-2022 : c'est
+   * le seul chiffre que les données autorisent pour « ce qu'on ne sait pas ».
+   * Un scénario construit est prolongé par SA propre moyenne — le prolonger au
+   * rythme historique contredirait son postulat.
+   */
+  var MOYENNE_LONGUE = {};
+  for (var j = 0; j < CLES.length; j++) {
+    MOYENNE_LONGUE[CLES[j]] = tauxEquivalent(CONTINU[CLES[j]]);
+  }
+
+  /*
+   * Chaque scénario est ramené à la longueur de l'horizon. Le moteur ne
+   * prolonge donc jamais de lui-même : ce qui dépasse les données est une
+   * décision de scénario, tracée par `reel` et affichée à l'écran.
+   */
+  for (var n = 0; n < SCENARIOS.length; n++) {
+    var sc = SCENARIOS[n];
+    sc.reel = sc.taux.rendementBourse.length;
+    sc.prolongePar =
+      sc.famille === 'historique' ? MOYENNE_LONGUE : null; // null = sa propre moyenne
+
+    for (var m = 0; m < CLES.length; m++) {
+      var c = CLES[m];
+      var serie = sc.taux[c].slice(0, HORIZON);
+      var suite = sc.prolongePar ? sc.prolongePar[c] : tauxEquivalent(sc.taux[c]);
+      while (serie.length < HORIZON) serie.push(suite);
+      sc.taux[c] = serie;
+      if (c === 'rendementBourse') sc.suiteBourse = suite;
+      if (c === 'revalBien') sc.suiteImmo = suite;
+    }
+  }
+
+  /** Les familles, dans l'ordre d'affichage. */
+  var FAMILLES = [
+    { cle: 'historique', nom: 'Décennies observées' },
+    { cle: 'prospectif', nom: 'Scénarios construits' },
+  ];
 
   function parCle(cle) {
     for (var i = 0; i < SCENARIOS.length; i++) {
