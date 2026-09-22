@@ -417,7 +417,8 @@ let graphPossession = null;
 let graphEnvAchat = null;
 let graphEnvLocation = null;
 let graphPerdu = null;
-let graphAnnuel = null;
+let graphAnnuelAchat = null;
+let graphAnnuelLocation = null;
 
 const pourcentEntier = new Intl.NumberFormat('fr-FR', {
   style: 'percent',
@@ -426,22 +427,10 @@ const pourcentEntier = new Intl.NumberFormat('fr-FR', {
 
 const detailOuvert = () => !$('#detailPanneau').hidden;
 
-/** Une ligne de légende : pastille, nom du poste, et son montant. */
-function legendeChiffree(cible, postes) {
-  $(cible).innerHTML = postes
-    .filter((p) => p.valeur > 0)
-    .map(
-      (p) =>
-        `<span class="legende__item"><span class="pastille" style="background:${p.couleur}"></span>` +
-        `${p.nom}<span class="legende__valeur">${euros.format(p.valeur)}</span></span>`
-    )
-    .join('');
-}
-
 /**
- * Légende sans montant : quand deux graphiques partagent une légende, les
- * mêmes postes y valent deux choses différentes. Le montant vit alors dans
- * l'infobulle de chaque part.
+ * Légende : pastille et nom, jamais de montant. Les graphiques qui la portent
+ * sont partagés par deux trajectoires, où les mêmes postes valent deux choses
+ * différentes. Les montants vivent dans les infobulles.
  */
 function legendeSimple(cible, postes) {
   $(cible).innerHTML = postes
@@ -522,10 +511,11 @@ function dessinerDetail(resultat, horizon) {
       `avant l'année ${horizon}.`;
   }
 
-  // Mensualité et charges ne se recouvrent pas : leur somme est le coût réel
-  // de propriétaire, à comparer au loyer.
+  // Le coût mensuel réel CONTIENT la mensualité : c'est voulu. On montre ce
+  // que le propriétaire sort chaque mois, tout compris, face au loyer — pas
+  // une décomposition dont il faudrait faire la somme.
   $('#kpiMensualite').textContent = euros.format(resultat.mensualiteTotale);
-  $('#kpiCharges').textContent = euros.format(resultat.chargesMensuelles);
+  $('#kpiCoutReel').textContent = euros.format(resultat.coutMensuelProprio);
   $('#kpiLoyer').textContent = euros.format(resultat.entrees.loyer);
 
   // --- Couleurs des postes ---------------------------------------------
@@ -556,14 +546,6 @@ function dessinerDetail(resultat, horizon) {
   $('#totalEnvAchat').textContent = euros.format(rep.achat.total);
   $('#totalEnvLocation').textContent = euros.format(rep.location.total);
 
-  legendeSimple('#legendeEnveloppe', [
-    { nom: 'Intérêts et assurance', couleur: cCredit },
-    { nom: 'Capital remboursé', couleur: cCapital },
-    { nom: 'Taxe foncière et charges', couleur: cPossession },
-    { nom: 'Loyers', couleur: cLoyers },
-    { nom: 'Épargne investie', couleur: cEpargne },
-  ]);
-
   // --- Frais irrécupérables --------------------------------------------
   const irr = fraisIrrecuperables(resultat, horizon);
   const partsPerdu = [
@@ -573,7 +555,6 @@ function dessinerDetail(resultat, horizon) {
   ];
   graphPerdu = camembert(graphPerdu, '#graphPerdu', partsPerdu);
   $('#totalPerdu').textContent = euros.format(irr.achat.total);
-  legendeChiffree('#legendePerdu', partsPerdu);
 
   // --- Année par année : deux piles par année, jamais cumulées ----------
   //
@@ -582,39 +563,59 @@ function dessinerDetail(resultat, horizon) {
   // sur le même axe de temps.
   //
   const annuel = repartitionAnnuelle(resultat);
-  const pile = (label, valeurs, couleur, groupe, arrondi) => ({
+
+  const pile = (label, valeurs, couleur, arrondi) => ({
     label,
     data: valeurs,
     backgroundColor: couleur,
-    stack: groupe,
     borderColor: jeton('--surface'),
     borderWidth: { top: 1, right: 0, bottom: 0, left: 0 },
     borderSkipped: false,
     borderRadius: arrondi ? { topLeft: 3, topRight: 3 } : 0,
   });
 
-  const optionsAnnuel = optionsCommunes();
-  optionsAnnuel.scales.x.stacked = true;
-  optionsAnnuel.scales.y.stacked = true;
-  optionsAnnuel.scales.y.beginAtZero = true;
-  // Une part à la fois, pas toute la colonne.
-  optionsAnnuel.interaction = { mode: 'nearest', intersect: true };
-  optionsAnnuel.plugins.tooltip.callbacks.title = (items) =>
-    `Année ${items[0].label} · ${items[0].dataset.stack === 'achat' ? 'Achat' : 'Location'}`;
-  optionsAnnuel.plugins.tooltip.callbacks.label = (ctx) =>
-    ` ${ctx.dataset.label} : ${euros.format(ctx.parsed.y)}`;
+  // Même plafond des deux côtés : à échelles différentes, deux histogrammes
+  // côte à côte suggèrent des écarts qui n'existent pas. Le plafond est
+  // l'enveloppe annuelle — sauf quand elle ne suffit pas et que l'achat la
+  // dépasse, auquel cas on suit le dépassement.
+  const hauteurMax = Math.max(
+    ...annuel.map((l) => l.achat.credit + l.achat.capital + l.achat.possession + l.achat.epargne),
+    ...annuel.map((l) => l.location.loyers + l.location.epargne)
+  );
 
-  graphAnnuel = poser(graphAnnuel, '#graphAnnuel', 'bar', {
-    labels: annuel.map((l) => l.annee),
+  const optionsAnnuelles = () => {
+    const o = optionsCommunes();
+    o.scales.x.stacked = true;
+    o.scales.y.stacked = true;
+    o.scales.y.beginAtZero = true;
+    o.scales.y.max = Math.ceil(hauteurMax / 5000) * 5000;
+    // Une part à la fois, pas toute la colonne.
+    o.interaction = { mode: 'nearest', intersect: true };
+    o.plugins.tooltip.callbacks.title = (items) => `Année ${items[0].label}`;
+    o.plugins.tooltip.callbacks.label = (ctx) =>
+      ` ${ctx.dataset.label} : ${euros.format(ctx.parsed.y)}`;
+    return o;
+  };
+
+  const annees = annuel.map((l) => l.annee);
+
+  graphAnnuelAchat = poser(graphAnnuelAchat, '#graphAnnuelAchat', 'bar', {
+    labels: annees,
     datasets: [
-      pile('Intérêts et assurance', annuel.map((l) => l.achat.credit), cCredit, 'achat', false),
-      pile('Capital remboursé', annuel.map((l) => l.achat.capital), cCapital, 'achat', false),
-      pile('Taxe foncière et charges', annuel.map((l) => l.achat.possession), cPossession, 'achat', false),
-      pile('Épargne investie', annuel.map((l) => l.achat.epargne), cEpargne, 'achat', true),
-      pile('Loyers', annuel.map((l) => l.location.loyers), cLoyers, 'location', false),
-      pile('Épargne investie', annuel.map((l) => l.location.epargne), cEpargne, 'location', true),
+      pile('Intérêts et assurance', annuel.map((l) => l.achat.credit), cCredit, false),
+      pile('Capital remboursé', annuel.map((l) => l.achat.capital), cCapital, false),
+      pile('Taxe foncière et charges', annuel.map((l) => l.achat.possession), cPossession, false),
+      pile('Épargne investie', annuel.map((l) => l.achat.epargne), cEpargne, true),
     ],
-  }, optionsAnnuel);
+  }, optionsAnnuelles());
+
+  graphAnnuelLocation = poser(graphAnnuelLocation, '#graphAnnuelLocation', 'bar', {
+    labels: annees,
+    datasets: [
+      pile('Loyers', annuel.map((l) => l.location.loyers), cLoyers, false),
+      pile('Épargne investie', annuel.map((l) => l.location.epargne), cEpargne, true),
+    ],
+  }, optionsAnnuelles());
 
   legendeSimple('#legendeAnnuel', [
     { nom: 'Intérêts et assurance', couleur: cCredit },
@@ -669,8 +670,9 @@ function initialiserDetail() {
     // crée les graphiques qu'une fois la zone visible, et on redimensionne
     // ceux qui existaient déjà.
     rafraichir();
-    for (const g of [graphPossession, graphEnvAchat, graphEnvLocation, graphPerdu, graphAnnuel])
-      if (g) g.resize();
+    const tous = [graphPossession, graphEnvAchat, graphEnvLocation, graphPerdu,
+                graphAnnuelAchat, graphAnnuelLocation];
+    for (const g of tous) if (g) g.resize();
   });
 }
 

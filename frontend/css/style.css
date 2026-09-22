@@ -1129,6 +1129,12 @@ input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; marg
 .paire--seule { grid-template-columns: minmax(0, 1fr); }
 .paire__part { min-width: 0; }
 .graphique--rond { height: 170px; }
+
+/* Deux histogrammes l'un au-dessus de l'autre, à la même échelle. */
+.empilement { display: grid; gap: 14px; }
+.empilement__part { min-width: 0; }
+.empilement .part__mot { text-align: left; margin: 0 0 4px; }
+.graphique--bande { height: 150px; }
 .part__mot {
   margin: 8px 0 0;
   text-align: center;

@@ -389,8 +389,8 @@
             <p class="kpi__chiffre tabulaire" id="kpiMensualite">—</p>
           </div>
           <div class="kpi">
-            <p class="kpi__mot">Charges mensualisées</p>
-            <p class="kpi__chiffre tabulaire" id="kpiCharges">—</p>
+            <p class="kpi__mot">Coût mensuel réel</p>
+            <p class="kpi__chiffre tabulaire" id="kpiCoutReel">—</p>
           </div>
           <div class="kpi">
             <p class="kpi__mot">Loyer versé</p>
@@ -412,9 +412,8 @@
         <div class="detail__duo">
           <figure class="carte carte--graphique">
             <figcaption class="carte__entete carte__entete--centre">
-              <h3 class="carte__titre">À quoi sert votre argent</h3>
+              <h3 class="carte__titre">La même somme, deux destinations</h3>
             </figcaption>
-            <div class="legende legende--centre" id="legendeEnveloppe"></div>
             <div class="paire">
               <div class="paire__part">
                 <div class="graphique graphique--rond"><canvas id="graphEnvAchat"></canvas></div>
@@ -433,7 +432,6 @@
             <figcaption class="carte__entete carte__entete--centre">
               <h3 class="carte__titre">Frais irrécupérables</h3>
             </figcaption>
-            <div class="legende legende--centre" id="legendePerdu"></div>
             <div class="paire paire--seule">
               <div class="paire__part">
                 <div class="graphique graphique--rond"><canvas id="graphPerdu"></canvas></div>
@@ -446,10 +444,22 @@
 
         <figure class="carte carte--graphique">
           <figcaption class="carte__entete carte__entete--centre">
-            <h3 class="carte__titre">Année par année, où part votre enveloppe</h3>
+            <h3 class="carte__titre">Année par année</h3>
           </figcaption>
           <div class="legende legende--centre" id="legendeAnnuel"></div>
-          <div class="graphique graphique--court"><canvas id="graphAnnuel"></canvas></div>
+          <!-- Deux histogrammes séparés plutôt qu'un seul à deux piles : à
+               cinquante barres, on ne lisait plus rien. Même échelle des deux
+               côtés, sinon la comparaison serait fausse. -->
+          <div class="empilement">
+            <div class="empilement__part">
+              <p class="part__mot">Achat</p>
+              <div class="graphique graphique--bande"><canvas id="graphAnnuelAchat"></canvas></div>
+            </div>
+            <div class="empilement__part">
+              <p class="part__mot">Location</p>
+              <div class="graphique graphique--bande"><canvas id="graphAnnuelLocation"></canvas></div>
+            </div>
+          </div>
         </figure>
 
         <figure class="carte carte--graphique">

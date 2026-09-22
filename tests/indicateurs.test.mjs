@@ -140,8 +140,9 @@ test("le cumul des années redonne la répartition cumulée", () => {
   proche(annuel.reduce((t, l) => t + l.location.loyers, 0), cumule.location.loyers);
 });
 
-test("les charges mensualisées et la mensualité ne se recouvrent pas", () => {
-  // Les deux chiffres sont affichés côte à côte : ils doivent s'additionner.
+test("le coût mensuel réel est bien la mensualité plus les charges", () => {
+  // C'est le chiffre affiché sous « Coût mensuel réel » : il doit contenir la
+  // mensualité ET les charges de possession, sinon le libellé ment.
   //
   // À l'euro près seulement : `mensualiteTotale` porte l'assurance du PREMIER
   // MOIS, calculée sur le capital entier, tandis que `coutMensuelProprio`
