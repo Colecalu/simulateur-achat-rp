@@ -795,6 +795,12 @@ let graphApercu = null;
 
 const apercuOuvert = () => !$('#apercu').hidden;
 
+/** « +6 », « −18 », « 0 » — un taux annuel, signe compris, sans le %. */
+const tauxSigne = new Intl.NumberFormat('fr-FR', {
+  maximumFractionDigits: 1,
+  signDisplay: 'exceptZero',
+});
+
 function ouvrirApercu(cle) {
   const sc = cle ? scenarioParCle(cle) : null;
   const horizon = dernierResultat ? dernierResultat.annees.length : 25;
@@ -809,41 +815,65 @@ function ouvrirApercu(cle) {
   const bourse = lire('rendementBourse');
   const immo = lire('revalBien');
 
-  const suite = (taux) =>
-    Array.from({ length: horizon }, (_, i) => tauxAnnee(taux, i + 1) * 100);
+  const cBourse = jeton('--courbe-bourse');
+  const cImmo = jeton('--courbe-immo');
+
+  /*
+   * Base 100 : on trace la VALEUR, pas le taux. Une suite de pourcentages est
+   * une dérivée — on la lit mal, et surtout on ne voit pas où elle mène. Avec
+   * une base 100, deux décennies de moyenne identique mais d'ordre différent
+   * se séparent à l'œil, ce qui est précisément le propos du pilier.
+   */
+  const base100 = (taux) => {
+    const suite = [100];
+    for (let a = 1; a <= horizon; a++) {
+      suite.push(suite[a - 1] * (1 + tauxAnnee(taux, a)));
+    }
+    return suite;
+  };
 
   $('#apercuTitre').textContent = sc ? sc.nom : 'Mes hypothèses';
   $('#apercuResume').textContent = sc
     ? sc.resume
-    : 'Vos taux, appliqués tels quels chaque année : deux droites.';
+    : 'Vos taux, appliqués tels quels chaque année.';
 
-  const cBourse = jeton('--courbe-bourse');
-  const cImmo = jeton('--courbe-immo');
-  $('#apercuLegende').innerHTML =
-    `<span class="legende__item"><span class="pastille" style="background:${cBourse}"></span>` +
-    'Rendement des marchés</span>' +
-    `<span class="legende__item"><span class="pastille" style="background:${cImmo}"></span>` +
-    'Prix de l\u2019immobilier</span>';
+  // Les taux année par année, sous la courbe : la base 100 dit où l'on
+  // arrive, la suite dit par quoi on y passe.
+  const ligneSuite = (nom, couleur, taux) => {
+    const valeurs = Array.isArray(taux)
+      ? taux.map((t) => tauxSigne.format(t * 100)).join(' · ')
+      : `${tauxSigne.format(taux * 100)} chaque année`;
+    return (
+      '<div class="suite">' +
+      `<span class="suite__mot"><span class="pastille" style="background:${couleur}"></span>` +
+      `${nom}</span>` +
+      `<span class="suite__valeurs">${valeurs}</span></div>`
+    );
+  };
+  $('#apercuSuites').innerHTML =
+    ligneSuite('Rendement des marchés', cBourse, bourse) +
+    ligneSuite("Prix de l'immobilier", cImmo, immo);
 
-  const longueur = Array.isArray(sc && sc.taux.rendementBourse)
-    ? sc.taux.rendementBourse.length
-    : 0;
-  $('#apercuNote').textContent = sc
-    ? `${longueur} années de marché, rejouées en boucle jusqu'à ${horizon} ans. ` +
-      `Soit ${(tauxEquivalent(bourse) * 100).toFixed(1)} % par an en moyenne pour les marchés ` +
-      `et ${(tauxEquivalent(immo) * 100).toFixed(1)} % pour l'immobilier — mais c'est l'ordre ` +
-      'des années qui change le résultat, pas la moyenne.' +
-      (sc.provisoire ? ' Valeurs provisoires.' : '')
-    : '';
+  const arrivee = (taux) => base100(taux)[horizon];
+  $('#apercuNote').textContent =
+    `Taux annuels en %. Base 100 au départ : après ${horizon} ans, ` +
+    `${Math.round(arrivee(bourse))} pour les marchés et ${Math.round(arrivee(immo))} ` +
+    'pour l\u2019immobilier.' +
+    (sc
+      ? ` La séquence de ${sc.taux.rendementBourse.length} ans est rejouée en boucle.` +
+        (sc.provisoire ? ' Valeurs provisoires.' : '')
+      : '');
 
   $('#apercu').hidden = false;
   $('#voile').hidden = false;
 
   if (typeof Chart === 'undefined') return;
 
-  const courbe = (label, donnees, couleur) => ({
+  const courbe = (label, taux, couleur) => ({
     label,
-    data: donnees,
+    data: base100(taux),
+    tauxAnnuels: Array.from({ length: horizon + 1 }, (_, i) =>
+      i === 0 ? null : tauxAnnee(taux, i)),
     borderColor: couleur,
     backgroundColor: couleur,
     borderWidth: 2,
@@ -853,18 +883,22 @@ function ouvrirApercu(cle) {
   });
 
   const o = optionsCommunes();
-  o.scales.y.ticks.callback = (v) => `${v} %`;
-  // Le zéro doit se voir : une année négative et une année molle ne se
-  // confondent pas.
-  o.scales.y.grid.color = (ctx) => (ctx.tick.value === 0 ? jeton('--axe') : jeton('--grille'));
-  o.plugins.tooltip.callbacks.label = (ctx) =>
-    ` ${ctx.dataset.label} : ${ctx.parsed.y > 0 ? '+' : ''}${ctx.parsed.y.toFixed(1)} %`;
+  o.scales.y.ticks.callback = (v) => Math.round(v);
+  // Le trait des 100 est la référence : au-dessous, on a perdu de la valeur.
+  o.scales.y.grid.color = (ctx) => (ctx.tick.value === 100 ? jeton('--axe') : jeton('--grille'));
+  o.plugins.tooltip.callbacks.title = (items) =>
+    items[0].label === '0' ? 'Départ' : `Année ${items[0].label}`;
+  o.plugins.tooltip.callbacks.label = (ctx) => {
+    const t = ctx.dataset.tauxAnnuels[ctx.dataIndex];
+    const variation = t === null ? '' : ` (${tauxSigne.format(t * 100)} %)`;
+    return ` ${ctx.dataset.label} : ${Math.round(ctx.parsed.y)}${variation}`;
+  };
 
   graphApercu = poser(graphApercu, '#graphApercu', 'line', {
-    labels: Array.from({ length: horizon }, (_, i) => i + 1),
+    labels: Array.from({ length: horizon + 1 }, (_, i) => i),
     datasets: [
-      courbe('Rendement des marchés', suite(bourse), cBourse),
-      courbe("Prix de l'immobilier", suite(immo), cImmo),
+      courbe('Rendement des marchés', bourse, cBourse),
+      courbe("Prix de l'immobilier", immo, cImmo),
     ],
   }, o);
 

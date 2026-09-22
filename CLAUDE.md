@@ -119,11 +119,17 @@ réelles — en cours ; **(3)** la mise en location ultérieure — moteur fait,
 - **L'avertissement de bas de page change avec le scénario** : « hypothèses constantes » devient
   faux dès qu'une série tourne.
 - **Chaque scénario a un aperçu**, ouvert par le bouton à droite de son choix : une fenêtre qui
-  trace ses deux séries (marchés, immobilier) en % par année, sur l'horizon complet. C'est ce qui
-  fait comprendre « une décennie difficile » en un coup d'œil, là où trois taux moyens ne disent
-  rien. La répétition de la série y est **visible** : c'est une propriété du modèle, pas un détail
-  à cacher. « Mes hypothèses » a le sien aussi — deux droites, et la comparaison avec une décennie
-  réelle est tout l'argument du pilier.
+  trace ses deux séries (marchés, immobilier) **en base 100**, sur l'horizon complet. On trace la
+  VALEUR, pas le taux : une suite de pourcentages est une dérivée, on la lit mal et on ne voit pas
+  où elle mène. En base 100, deux décennies de moyenne identique mais d'ordre différent se
+  séparent à l'œil — ce qui est précisément le propos du pilier. Les taux année par année sont
+  rappelés sous la courbe (`.suites`) : la courbe dit où l'on arrive, la suite par quoi on y
+  passe. Ces deux lignes tiennent lieu de légende, il n'y en a pas d'autre.
+- La répétition de la série est **visible** sur la courbe : c'est une propriété du modèle, pas un
+  détail à cacher. « Mes hypothèses » a son aperçu aussi — deux courbes lisses et « +5 chaque
+  année » sous le graphique ; la comparaison avec une décennie réelle est tout l'argument.
+- **Un seul axe, même quand les échelles divergent** (marchés à 1 043 contre immobilier à 313 sur
+  le scénario porteur). Deux axes Y mentiraient sur l'écart réel.
 - **Ouvrir un aperçu n'applique rien.** Regarder et choisir sont deux gestes distincts.
 - **La fenêtre d'aperçu vit hors du rail de gauche**, à côté du voile. Le rail est
   `position: sticky`, donc un contexte d'empilement : une fenêtre qui y resterait passerait sous

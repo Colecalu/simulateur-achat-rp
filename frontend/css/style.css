@@ -1095,7 +1095,33 @@ input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; marg
   gap: 16px;
   margin-bottom: 14px;
 }
-.apercu__note { margin: 12px 0 0; font-size: .75rem; color: var(--encre-3); line-height: 1.45; }
+.apercu__note { margin: 10px 0 0; font-size: .75rem; color: var(--encre-3); line-height: 1.45; }
+
+/*
+ * Les taux année par année, sous la courbe. La base 100 dit où l'on arrive ;
+ * cette suite dit par quoi on y passe. Une ligne par série, pastille comprise :
+ * elle tient lieu de légende, il n'y en a donc pas d'autre.
+ */
+.suites { display: grid; gap: 6px; margin-top: 12px; }
+.suite { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.suite__mot {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: none;
+  font-size: .75rem;
+  color: var(--encre-2);
+  min-width: 170px;
+}
+.suite__valeurs {
+  font-family: var(--police-chiffres);
+  font-variant-numeric: tabular-nums;
+  font-size: .6875rem;
+  color: var(--encre-3);
+  min-width: 0;
+}
+.suite__valeurs b { font-weight: 600; color: var(--encre-2); }
+@media (max-width: 560px) { .suite__mot { min-width: 0; } }
 
 /* ------------------------------------------- D'où vient cet écart ? */
 
