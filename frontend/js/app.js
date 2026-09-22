@@ -576,6 +576,19 @@ function majBulles() {
   }
 }
 
+/**
+ * Alvéole d'origine de la bulle actuellement zoomée, le temps du zoom.
+ *
+ * Le rail de gauche est en `position: sticky`, ce qui crée un contexte
+ * d'empilement — toujours, même sans `z-index`. Une bulle qui y reste ne peut
+ * donc pas passer au-dessus du voile, quel que soit son `z-index` : les bulles
+ * 3 et 4 s'ouvraient bien au centre mais sous l'écran grisé, hors d'atteinte.
+ * On les sort donc du rail pendant le zoom, et on les y remet après. Le FLIP
+ * absorbe le déplacement sans qu'on ait à le lui dire : il mesure la position
+ * avant et après, quel que soit le parent.
+ */
+let alveole = null;
+
 function ouvrirBulle(n) {
   if (bulleZoomee !== null) return;
   const el = bulle(n);
@@ -585,6 +598,8 @@ function ouvrirBulle(n) {
   volerVers(el, () => {
     el.classList.add('bulle--zoom');
     el.classList.remove('bulle--ouvrable', 'bulle--verrouillee');
+    alveole = el.parentElement;
+    document.body.append(el);
   });
 
   majBulles();
@@ -600,7 +615,10 @@ function validerBulle(n) {
   bulleZoomee = null;
   $('#voile').hidden = true;
 
-  volerVers(el, () => el.classList.remove('bulle--zoom'));
+  volerVers(el, () => {
+    if (alveole) { alveole.append(el); alveole = null; }
+    el.classList.remove('bulle--zoom');
+  });
   majBulles();
   recalculer();
 

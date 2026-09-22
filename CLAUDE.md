@@ -58,9 +58,10 @@ contient les valeurs réellement calculées par Excel sur 25 ans.
 
 ## Design (branche design-v2)
 
-Deux designs Claude Design cohabitent, interchangeables à chaud — voir
-[docs/design/README.md](docs/design/README.md) pour les sources, ce qui est repris et les
-écarts assumés.
+**Le thème de référence est Perron.** C'est le seul sur lequel on travaille. `theme-foret.css`
+est **gelé** : conservé tel quel comme point de comparaison, jamais mis à jour, jamais à vérifier.
+Ne pas y passer de temps. Voir [docs/design/README.md](docs/design/README.md) pour les sources et
+les écarts assumés.
 
 - **`frontend/css/style.css` ne contient que de la structure.** Aucun `#hex`, aucun nom de pas
   de rampe (`--clay-500`, `--green-700`), aucune police, aucun rayon, aucune ombre : uniquement
@@ -68,8 +69,9 @@ Deux designs Claude Design cohabitent, interchangeables à chaud — voir
 - **`frontend/css/theme-perron.css` (défaut) et `theme-foret.css` ne contiennent que des
   valeurs** : les rampes du design recopiées, ses polices importées, puis les noms sémantiques
   qui pointent dessus. Aucune règle de mise en page.
-- Si un rôle manque, l'ajouter **aux deux thèmes** plutôt que d'écrire une couleur dans
-  `style.css`. Une seule fuite casse la bascule.
+- Si un rôle manque, l'ajouter à **`theme-perron.css`** plutôt que d'écrire une couleur dans
+  `style.css`. Forêt étant gelé, il peut manquer le rôle et retomber en valeur par défaut : c'est
+  accepté, on ne le rattrape pas.
 - C'est cette indirection qui permet au JavaScript, qui lit `--achat` et `--location` pour
   colorer les courbes, de rester inchangé quel que soit le thème.
 - **Thème clair uniquement** : aucun des deux designs ne fournit de palette sombre, et les
@@ -164,6 +166,15 @@ Deux designs Claude Design cohabitent, interchangeables à chaud — voir
   filet — sur un écran de 768 px de haut, la bulle 5 l'utilise, ce qui est le comportement voulu.
 - Dans les règles de densité, **l'ordre compte** : `.champ input` et `.champ--cle input` ont la
   même spécificité, donc la règle générique doit toujours précéder celle du champ dominant.
+- **La bulle zoomée sort de son alvéole et va sous `<body>`** le temps du zoom, puis y retourne.
+  Le rail de gauche est en `position: sticky`, et sticky crée **toujours** un contexte
+  d'empilement, même sans `z-index`. Une bulle qui y reste ne peut donc pas passer au-dessus du
+  voile quel que soit son `z-index` : les bulles 3 et 4 s'ouvraient bien au centre, mais sous
+  l'écran grisé, bouton « Valider » hors d'atteinte. Les bulles 1 et 2, qui vivent dans
+  `.plateau__haut` (non sticky), n'étaient pas touchées — d'où un bug qui n'apparaissait qu'à
+  mi-parcours. Le symptôme se reproduit en mesurant
+  `document.elementFromPoint()` au centre du bouton : il doit renvoyer le bouton, pas `.voile`.
+  Ne pas « corriger » cela en remontant le `z-index`, cela ne peut pas marcher.
 - Le zoom au centre est une animation **FLIP** (`volerVers()`) : on mesure avant, on applique la
   classe, on mesure après, on joue l'écart à l'envers. Toute animation en cours sur l'élément est
   annulée avant d'en lancer une nouvelle. Le contenu n'apparaît qu'après le voyage, sinon la mise
