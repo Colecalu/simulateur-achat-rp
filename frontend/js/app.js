@@ -15,6 +15,7 @@
   const SCENARIOS = window.SimuRPScenarios.SCENARIOS;
   const tauxEquivalent = window.SimuRPScenarios.tauxEquivalent;
   const scenarioParCle = window.SimuRPScenarios.parCle;
+  const tauxAnnee = window.SimuRP.tauxAnnee;
   const fraisIrrecuperables = window.SimuRP.fraisIrrecuperables;
   const DEFAUTS_LOCATION = window.SimuRPLocation.DEFAUTS_LOCATION;
   const simulerMiseEnLocation = window.SimuRPLocation.simulerMiseEnLocation;
@@ -744,26 +745,136 @@ let scenarioActif = null;
 /** Les taux saisis à la main, mis de côté le temps qu'un scénario s'applique. */
 let hypothesesUtilisateur = null;
 
+/** Petite icône de courbe, pour le bouton d'aperçu. */
+const ICONE_COURBE =
+  '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" ' +
+  'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+  '<path d="M1.5 11.5 5 7l3 2.5 5.5-6"/><path d="M1.5 14.5h13"/></svg>';
+
+function ligneScenario(cle, nom, resume, actif) {
+  return (
+    '<div class="scenario__ligne">' +
+    `<button type="button" class="scenario__option${actif ? ' scenario__option--actif' : ''}" ` +
+      `data-scenario="${cle}" role="radio" aria-checked="${actif}">` +
+      `<span class="scenario__nom">${nom}</span>` +
+      `<span class="scenario__resume">${resume}</span></button>` +
+    `<button type="button" class="scenario__apercu" data-apercu="${cle}" ` +
+      `aria-label="Voir les courbes — ${nom}" title="Voir les courbes">${ICONE_COURBE}</button>` +
+    '</div>'
+  );
+}
+
 function construireScenarios() {
   const choix = [
-    '<button type="button" class="scenario__option scenario__option--actif" ' +
-      'data-scenario="" role="radio" aria-checked="true">' +
-      '<span class="scenario__nom">Mes hypothèses</span>' +
-      '<span class="scenario__resume">Les taux que vous avez saisis.</span></button>',
+    ligneScenario('', 'Mes hypothèses', 'Les taux que vous avez saisis.', true),
   ];
   for (const sc of SCENARIOS) {
-    choix.push(
-      `<button type="button" class="scenario__option" data-scenario="${sc.cle}" ` +
-        'role="radio" aria-checked="false">' +
-        `<span class="scenario__nom">${sc.nom}</span>` +
-        `<span class="scenario__resume">${sc.resume}</span></button>`
-    );
+    choix.push(ligneScenario(sc.cle, sc.nom, sc.resume, false));
   }
   $('#scenarioChoix').innerHTML = choix.join('');
 
   for (const b of document.querySelectorAll('.scenario__option')) {
     b.addEventListener('click', () => appliquerScenario(b.dataset.scenario));
   }
+  for (const b of document.querySelectorAll('.scenario__apercu')) {
+    b.addEventListener('click', () => ouvrirApercu(b.dataset.apercu));
+  }
+  $('#apercuFermer').addEventListener('click', fermerApercu);
+}
+
+/* --- Aperçu des courbes d'un scénario ---------------------------------- */
+
+/*
+ * Montrer la séquence AVANT de l'appliquer : c'est ce qui fait comprendre en
+ * un coup d'œil ce qu'est « une décennie difficile », là où trois taux moyens
+ * ne disent rien. On trace l'horizon complet (25 ans), donc la répétition de
+ * la série y est visible — c'est une propriété du modèle, pas un détail à
+ * cacher.
+ */
+let graphApercu = null;
+
+const apercuOuvert = () => !$('#apercu').hidden;
+
+function ouvrirApercu(cle) {
+  const sc = cle ? scenarioParCle(cle) : null;
+  const horizon = dernierResultat ? dernierResultat.annees.length : 25;
+
+  // « Mes hypothèses » n'a pas de série : on lit les champs, ce qui donne deux
+  // droites. La comparaison avec une décennie réelle est tout l'argument.
+  const lire = (champ) => {
+    if (sc) return sc.taux[champ];
+    const v = parseFloat(document.getElementById(champ).value);
+    return (Number.isFinite(v) ? v : DEFAUTS[champ] * 100) / 100;
+  };
+  const bourse = lire('rendementBourse');
+  const immo = lire('revalBien');
+
+  const suite = (taux) =>
+    Array.from({ length: horizon }, (_, i) => tauxAnnee(taux, i + 1) * 100);
+
+  $('#apercuTitre').textContent = sc ? sc.nom : 'Mes hypothèses';
+  $('#apercuResume').textContent = sc
+    ? sc.resume
+    : 'Vos taux, appliqués tels quels chaque année : deux droites.';
+
+  const cBourse = jeton('--courbe-bourse');
+  const cImmo = jeton('--courbe-immo');
+  $('#apercuLegende').innerHTML =
+    `<span class="legende__item"><span class="pastille" style="background:${cBourse}"></span>` +
+    'Rendement des marchés</span>' +
+    `<span class="legende__item"><span class="pastille" style="background:${cImmo}"></span>` +
+    'Prix de l\u2019immobilier</span>';
+
+  const longueur = Array.isArray(sc && sc.taux.rendementBourse)
+    ? sc.taux.rendementBourse.length
+    : 0;
+  $('#apercuNote').textContent = sc
+    ? `${longueur} années de marché, rejouées en boucle jusqu'à ${horizon} ans. ` +
+      `Soit ${(tauxEquivalent(bourse) * 100).toFixed(1)} % par an en moyenne pour les marchés ` +
+      `et ${(tauxEquivalent(immo) * 100).toFixed(1)} % pour l'immobilier — mais c'est l'ordre ` +
+      'des années qui change le résultat, pas la moyenne.' +
+      (sc.provisoire ? ' Valeurs provisoires.' : '')
+    : '';
+
+  $('#apercu').hidden = false;
+  $('#voile').hidden = false;
+
+  if (typeof Chart === 'undefined') return;
+
+  const courbe = (label, donnees, couleur) => ({
+    label,
+    data: donnees,
+    borderColor: couleur,
+    backgroundColor: couleur,
+    borderWidth: 2,
+    pointRadius: 0,
+    pointHoverRadius: 5,
+    tension: 0.2,
+  });
+
+  const o = optionsCommunes();
+  o.scales.y.ticks.callback = (v) => `${v} %`;
+  // Le zéro doit se voir : une année négative et une année molle ne se
+  // confondent pas.
+  o.scales.y.grid.color = (ctx) => (ctx.tick.value === 0 ? jeton('--axe') : jeton('--grille'));
+  o.plugins.tooltip.callbacks.label = (ctx) =>
+    ` ${ctx.dataset.label} : ${ctx.parsed.y > 0 ? '+' : ''}${ctx.parsed.y.toFixed(1)} %`;
+
+  graphApercu = poser(graphApercu, '#graphApercu', 'line', {
+    labels: Array.from({ length: horizon }, (_, i) => i + 1),
+    datasets: [
+      courbe('Rendement des marchés', suite(bourse), cBourse),
+      courbe("Prix de l'immobilier", suite(immo), cImmo),
+    ],
+  }, o);
+
+  // Un canevas dimensionné dans un conteneur masqué reste à zéro.
+  graphApercu.resize();
+}
+
+function fermerApercu() {
+  $('#apercu').hidden = true;
+  if (bulleZoomee === null) $('#voile').hidden = true;
 }
 
 /**
@@ -1093,7 +1204,9 @@ function ouvrirBulle(n) {
 }
 
 function validerBulle(n) {
-  if (bulleZoomee !== n) return;
+  // `n === null` arriverait si le voile était cliqué sans bulle ouverte : on
+  // ajouterait `null` aux bulles validées et `bulle(null)` casserait.
+  if (n === null || bulleZoomee !== n) return;
   const el = bulle(n);
 
   validees.add(n);
@@ -1122,9 +1235,15 @@ function initialiserBulles() {
 
   // Fermer par le voile ou par Échap vaut validation : tous les champs ont
   // déjà une valeur, il n'y a rien à annuler.
-  $('#voile').addEventListener('click', () => validerBulle(bulleZoomee));
+  // Le voile sert deux fenêtres : l'aperçu de scénario et la bulle zoomée.
+  $('#voile').addEventListener('click', () => {
+    if (apercuOuvert()) return fermerApercu();
+    if (bulleZoomee !== null) validerBulle(bulleZoomee);
+  });
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && bulleZoomee !== null) validerBulle(bulleZoomee);
+    if (e.key !== 'Escape') return;
+    if (apercuOuvert()) return fermerApercu();
+    if (bulleZoomee !== null) validerBulle(bulleZoomee);
   });
 
   majBulles();

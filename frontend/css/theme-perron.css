@@ -92,6 +92,15 @@
   --poste-epargne:    var(--ochre-500);  /* ce qui part en bourse */
   --poste-acquisition: var(--clay-300);  /* notaire + agence + frais bancaires */
 
+  /*
+   * Courbes de l'aperçu de scénario. Autre domaine que `--achat` / `--location` :
+   * ce sont des indices de marché, pas des trajectoires patrimoniales — d'où
+   * des jetons distincts plutôt qu'un emprunt qui sèmerait la confusion.
+   * Paire validée : ΔE 18,3 en vision normale, 18,2 en deutéranopie.
+   */
+  --courbe-bourse: var(--ochre-500);
+  --courbe-immo:   var(--clay-600);
+
   --achat-voile:     var(--clay-50);
   --location-voile:  var(--olive-50);
 

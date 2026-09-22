@@ -73,6 +73,10 @@
   --poste-epargne:     var(--amber-500);
   --poste-acquisition: var(--green-500);
 
+  /* Courbes de l'aperçu de scénario. Non validée : Forêt est gelé. */
+  --courbe-bourse: var(--amber-500);
+  --courbe-immo:   var(--terracotta-700);
+
   --achat-voile:     var(--green-50);
   --location-voile:  var(--terracotta-50);
 

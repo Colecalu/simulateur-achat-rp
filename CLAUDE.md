@@ -118,6 +118,22 @@ réelles — en cours ; **(3)** la mise en location ultérieure — moteur fait,
   appliqué, jamais écrasées.
 - **L'avertissement de bas de page change avec le scénario** : « hypothèses constantes » devient
   faux dès qu'une série tourne.
+- **Chaque scénario a un aperçu**, ouvert par le bouton à droite de son choix : une fenêtre qui
+  trace ses deux séries (marchés, immobilier) en % par année, sur l'horizon complet. C'est ce qui
+  fait comprendre « une décennie difficile » en un coup d'œil, là où trois taux moyens ne disent
+  rien. La répétition de la série y est **visible** : c'est une propriété du modèle, pas un détail
+  à cacher. « Mes hypothèses » a le sien aussi — deux droites, et la comparaison avec une décennie
+  réelle est tout l'argument du pilier.
+- **Ouvrir un aperçu n'applique rien.** Regarder et choisir sont deux gestes distincts.
+- **La fenêtre d'aperçu vit hors du rail de gauche**, à côté du voile. Le rail est
+  `position: sticky`, donc un contexte d'empilement : une fenêtre qui y resterait passerait sous
+  le voile — même piège que les bulles 3 et 4 en leur temps.
+- **Le voile sert deux fenêtres** : l'aperçu et la bulle zoomée. Son écouteur et celui d'Échap
+  traitent l'aperçu en premier, et `validerBulle` refuse désormais `n === null` — sans quoi un clic
+  sur le voile sans bulle ouverte ajouterait `null` aux bulles validées et casserait.
+- **Les courbes de l'aperçu ont leurs propres jetons** (`--courbe-bourse`, `--courbe-immo`) : ce
+  sont des indices de marché, pas des trajectoires patrimoniales. Emprunter `--achat` /
+  `--location` sèmerait la confusion. Paire validée à ΔE 18,3 en vision normale.
 - **Nommer les scénarios par le MARCHÉ, pas par l'issue.** Une décennie boursière difficile est
   *favorable* à l'achat : elle pénalise surtout le locataire, dont l'épargne est plus grosse. Avec
   les placeholders actuels, « Décennie difficile » donne +141 858 € contre +84 640 € au scénario
