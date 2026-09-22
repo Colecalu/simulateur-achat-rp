@@ -112,9 +112,27 @@ réelles — en cours ; **(3)** la mise en location ultérieure — moteur fait,
   immobilier) — le seul chiffre que les données autorisent pour ce qu'on ne sait pas. Un scénario
   construit est prolongé par **sa propre** moyenne : le prolonger au rythme historique
   contredirait son postulat. `reel` retient le nombre d'années observées.
-- **La frontière est tracée à l'écran** (`traitFrontiere`, trait vertical pointillé + « prolongement »)
-  et les suites sous la courbe ne listent que les années observées, suivies de « puis X % par an ».
-  Lister vingt-cinq valeurs dont quatorze identiques ferait passer un prolongement pour une donnée.
+- **La frontière est tracée sur les DEUX graphiques** (`traitFrontiere`, trait vertical pointillé
+  + « prolongement ») : l'aperçu du scénario et le graphique de patrimoine. Au-delà, les courbes
+  passent en **pointillé et en couleur atténuée** (`segment` de Chart.js, `attenue()` à 45 %) :
+  même teinte, donc même série, mais visiblement plus une donnée. Sans cela le graphique laisse
+  croire que vingt-cinq années sont documentées quand onze le sont.
+- **`frontiere` est un INDICE de point, pas une année** : les deux graphiques n'ont pas la même
+  origine (l'aperçu commence à l'année 0, le patrimoine à l'année 1). Passer une année à l'un des
+  deux décale le trait d'un cran.
+- Les suites sous la courbe d'aperçu ne listent que les années observées, suivies de « puis X % par
+  an ». Lister vingt-cinq valeurs dont quatorze identiques ferait passer un prolongement pour une
+  donnée.
+- **L'avertissement de bas de page dit où s'arrêtent les données** : « 11 années observées
+  (2008-2018), puis une projection au rythme moyen ». Pour « Trente ans réels », il dit au
+  contraire que rien n'est projeté. Le vérifier après tout changement de la règle de prolongement —
+  ce texte a déjà survécu une version de trop en parlant d'une boucle supprimée.
+- **Pas d'option de fenêtre d'affichage sur le graphique de patrimoine.** L'idée de le forcer à
+  10 ans quand un scénario s'applique a été mesurée et écartée : à 10 ans l'achat gagne dans
+  2 scénarios sur 7, à 20 ans dans 4 sur 7, et deux scénarios changent de signe. Un réglage
+  d'affichage aurait décidé de la réponse, toujours dans le même sens (contre l'achat, l'acheteur
+  n'ayant à 10 ans amorti ni les frais d'acquisition ni grand-chose du capital). Le curseur
+  d'horizon fait déjà ce travail, et il n'y a qu'une notion de temps à l'écran.
 - **`tauxAnnee` tient la dernière valeur** au-delà de la série : c'est un filet, jamais atteint en
   pratique puisque les scénarios font déjà la longueur de l'horizon.
 - **On ne peut pas tirer quatre scénarios de 25 ans distincts de 32 ans de données.** Mesuré : les

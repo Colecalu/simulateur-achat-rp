@@ -52,6 +52,18 @@ const signe = (v) => (v >= 0 ? '+' : '−') + euros.format(Math.abs(v)).replace(
 /** Lit une variable CSS pour que Chart.js suive le thème clair/sombre. */
 const jeton = (nom) => getComputedStyle(document.body).getPropertyValue(nom).trim();
 
+/**
+ * La même couleur, atténuée sur le fond de page. Sert à distinguer ce qui est
+ * projeté de ce qui est calculé sur données réelles, sans changer de teinte :
+ * c'est la même série, pas une autre.
+ */
+function attenue(couleur, part) {
+  const m = /^#([0-9a-f]{6})$/i.exec(couleur);
+  if (!m) return couleur;
+  const n = parseInt(m[1], 16);
+  return `rgba(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}, ${part})`;
+}
+
 /* ------------------------------------------------------- Lecture du formulaire */
 
 function lireFormulaire() {
@@ -322,6 +334,24 @@ function dessinerGraphiques(resultat, horizon, mel) {
   const cAchat = jeton('--achat');
   const cLocation = jeton('--location');
 
+  /*
+   * Au-delà des années réellement observées, un scénario n'est plus une donnée
+   * mais une projection au taux moyen. Elle doit se voir : trait de frontière,
+   * puis courbes pointillées et atténuées. Sans quoi le graphique laisse croire
+   * que vingt-cinq années sont documentées quand onze le sont.
+   *
+   * `iFrontiere` est l'INDICE du dernier point réel — les années vont de 1 à 25
+   * sur l'indice 0 à 24, d'où le décalage d'un cran.
+   */
+  const iFrontiere =
+    scenarioActif && scenarioActif.reel < resultat.annees.length
+      ? scenarioActif.reel - 1
+      : 0;
+  const projection = (couleur) => ({
+    borderDash: (ctx) => (ctx.p0DataIndex >= iFrontiere ? [5, 4] : undefined),
+    borderColor: (ctx) => (ctx.p0DataIndex >= iFrontiere ? attenue(couleur, 0.45) : undefined),
+  });
+
   // Le point de l'horizon choisi est grossi : le curseur et le graphique
   // désignent la même date.
   const rayons = (i) => (i === horizon - 1 ? 6 : 0);
@@ -331,6 +361,7 @@ function dessinerGraphiques(resultat, horizon, mel) {
     data: donnees,
     borderColor: couleur,
     backgroundColor: couleur,
+    segment: iFrontiere ? projection(couleur) : undefined,
     borderWidth: 2,
     pointRadius: (ctx) => rayons(ctx.dataIndex),
     pointHoverRadius: 6,
@@ -358,8 +389,9 @@ function dessinerGraphiques(resultat, horizon, mel) {
 
   const optionsPatrimoine = optionsCommunes();
   Object.assign(optionsPatrimoine.scales.y, bornes);
-  // Lu par le greffon `traitPointMort`, qui matérialise le croisement.
+  // Lus par les greffons `traitPointMort` et `traitFrontiere`.
   optionsPatrimoine.pointMort = resultat.premiereAnneeFavorable;
+  optionsPatrimoine.frontiere = iFrontiere;
 
   if (graphPatrimoine) {
     graphPatrimoine.data = donneesLignes;
@@ -370,7 +402,7 @@ function dessinerGraphiques(resultat, horizon, mel) {
       type: 'line',
       data: donneesLignes,
       options: optionsPatrimoine,
-      plugins: [traitPointMort],
+      plugins: [traitPointMort, traitFrontiere],
     });
   }
 
@@ -515,9 +547,11 @@ function poser(graphique, selecteur, type, data, options, greffons) {
 const traitFrontiere = {
   id: 'traitFrontiere',
   afterDatasetsDraw(chart) {
-    const annee = chart.options.frontiere;
-    if (!annee) return;
-    const x = chart.scales.x.getPixelForValue(annee);
+    // Un INDICE de point, pas une année : les deux graphiques qui portent ce
+    // trait n'ont pas la même origine (l'aperçu commence à l'année 0).
+    const i = chart.options.frontiere;
+    if (!i) return;
+    const x = chart.scales.x.getPixelForValue(i);
     const { top, bottom, right } = chart.chartArea;
     const ctx = chart.ctx;
 
@@ -957,6 +991,8 @@ function ouvrirApercu(cle) {
    * Ce qui est observé et ce qui est prolongé ne doivent pas se confondre à
    * l'écran. Greffon local, comme le trait du point d'équilibre.
    */
+  // Ici l'axe commence à l'année 0 : l'indice du dernier point réel vaut donc
+  // exactement le nombre d'années observées.
   o.frontiere = sc && sc.reel < horizon ? sc.reel : 0;
 
   graphApercu = poser(graphApercu, '#graphApercu', 'line', {
@@ -968,6 +1004,14 @@ function ouvrirApercu(cle) {
         i === 0 ? null : tauxAnnee(serie.taux, i)),
       borderColor: serie.couleur,
       backgroundColor: serie.couleur,
+      // Au-delà des années observées, la courbe s'atténue : c'est une
+      // projection au taux moyen, pas une donnée.
+      segment: o.frontiere
+        ? {
+            borderColor: (ctx) =>
+              ctx.p0DataIndex >= o.frontiere ? attenue(serie.couleur, 0.45) : undefined,
+          }
+        : undefined,
       // La courbe des loyers est la plus pâle : le pointillé lui donne une
       // seconde marque, pour qu'elle ne repose pas sur la seule couleur.
       borderWidth: serie.pointille ? 2.5 : 2,
@@ -1048,11 +1092,24 @@ function majAvertissement() {
   const commun =
     'Ni inflation générale, ni changement de situation, ni revente anticipée subie. ' +
     "Un résultat serré (moins de quelques milliers d'euros d'écart) doit se lire comme une égalité.";
-  $('#avertissement').textContent = scenarioActif
-    ? `Scénario « ${scenarioActif.nom} » appliqué : les taux varient d'une année sur l'autre, ` +
-      'et la séquence se répète au-delà de sa durée. ' + commun
-    : 'Simulation à hypothèses constantes : le rendement boursier est supposé régulier, ' +
+  if (!scenarioActif) {
+    $('#avertissement').textContent =
+      'Simulation à hypothèses constantes : le rendement boursier est supposé régulier, ' +
       "ce qu'aucun marché ne fait. " + commun;
+    return;
+  }
+  // Le texte doit dire où s'arrêtent les données, pas seulement que des taux
+  // varient : c'est la frontière qui décide comment lire la fin du graphique.
+  const sc = scenarioActif;
+  const observe = sc.periode ? `${sc.reel} années observées (${sc.periode})` : `${sc.reel} années`;
+  $('#avertissement').textContent =
+    `Scénario « ${sc.nom} » : ${observe}, ` +
+    (sc.reel >= 25
+      ? "assez pour couvrir tout l'horizon — rien n'est projeté. "
+      : `puis une projection au rythme moyen de la période (${(sc.suiteBourse * 100).toFixed(1)} % ` +
+        "par an en bourse). Au-delà du trait, les courbes sont pointillées : ce n'est plus une " +
+        'donnée. ') +
+    commun;
 }
 
 function majScenario() {
