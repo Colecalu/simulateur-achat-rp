@@ -11,6 +11,7 @@
   const DEFAUTS = window.SimuRP.DEFAUTS;
   const simuler = window.SimuRP.simuler;
   const repartitionEnveloppe = window.SimuRP.repartitionEnveloppe;
+  const repartitionAnnuelle = window.SimuRP.repartitionAnnuelle;
   const fraisIrrecuperables = window.SimuRP.fraisIrrecuperables;
   const DEFAUTS_LOCATION = window.SimuRPLocation.DEFAUTS_LOCATION;
   const simulerMiseEnLocation = window.SimuRPLocation.simulerMiseEnLocation;
@@ -413,8 +414,10 @@ function dessinerGraphiques(resultat, horizon, mel) {
  * qu'on finit par comparer deux dates différentes sans s'en apercevoir.
  */
 let graphPossession = null;
-let graphEnveloppe = null;
+let graphEnvAchat = null;
+let graphEnvLocation = null;
 let graphPerdu = null;
+let graphAnnuel = null;
 
 const pourcentEntier = new Intl.NumberFormat('fr-FR', {
   style: 'percent',
@@ -436,39 +439,49 @@ function legendeChiffree(cible, postes) {
 }
 
 /**
- * Options communes aux deux histogrammes empilés.
- *
- * Un trait de 2 px couleur fond sépare les segments : sans lui, deux postes
- * voisins de teintes proches se lisent comme un seul bloc.
+ * Légende sans montant : quand deux graphiques partagent une légende, les
+ * mêmes postes y valent deux choses différentes. Le montant vit alors dans
+ * l'infobulle de chaque part.
  */
-function optionsEmpilees() {
-  const o = optionsCommunes();
-  o.interaction = { mode: 'index', intersect: false };
-  o.scales.x.stacked = true;
-  o.scales.y.stacked = true;
-  o.scales.y.beginAtZero = true;
-  o.plugins.tooltip.callbacks.title = (items) => items[0].label;
-  o.plugins.tooltip.callbacks.label = (ctx) =>
-    ctx.parsed.y > 0 ? ` ${ctx.dataset.label} : ${euros.format(ctx.parsed.y)}` : null;
-  o.plugins.tooltip.callbacks.footer = (items) => {
-    const total = items.reduce((t, i) => t + i.parsed.y, 0);
-    return `Total : ${euros.format(total)}`;
-  };
-  o.plugins.tooltip.footerColor = jeton('--encre-2');
-  return o;
+function legendeSimple(cible, postes) {
+  $(cible).innerHTML = postes
+    .map(
+      (p) =>
+        `<span class="legende__item"><span class="pastille" style="background:${p.couleur}"></span>` +
+        `${p.nom}</span>`
+    )
+    .join('');
 }
 
-function posteEmpile(label, valeurs, couleur, arrondi) {
-  return {
-    label,
-    data: valeurs,
-    backgroundColor: couleur,
-    borderColor: jeton('--surface'),
-    borderWidth: { top: 2, right: 0, bottom: 0, left: 0 },
-    borderSkipped: false,
-    borderRadius: arrondi ? { topLeft: 4, topRight: 4 } : 0,
-    maxBarThickness: 150,
-  };
+/**
+ * Camembert d'une répartition. Trois à cinq parts au plus : au-delà, les
+ * secteurs deviennent trop fins et un histogramme reprend l'avantage.
+ *
+ * L'infobulle est réglée sur la part SURVOLÉE et non sur l'ensemble : lire
+ * quatre postes d'un coup quand on en pointe un seul est illisible.
+ */
+function camembert(existant, selecteur, parts) {
+  const total = parts.reduce((t, x) => t + x.valeur, 0);
+  const o = optionsCommunes();
+  delete o.scales;
+  o.cutout = '58%';
+  o.interaction = { mode: 'nearest', intersect: true };
+  o.plugins.tooltip.callbacks.title = (items) => items[0].label;
+  o.plugins.tooltip.callbacks.label = (ctx) =>
+    ` ${euros.format(ctx.parsed)} · ${pourcentEntier.format(total ? ctx.parsed / total : 0)}`;
+  delete o.plugins.tooltip.callbacks.footer;
+
+  return poser(existant, selecteur, 'doughnut', {
+    labels: parts.map((x) => x.nom),
+    datasets: [
+      {
+        data: parts.map((x) => x.valeur),
+        backgroundColor: parts.map((x) => x.couleur),
+        borderColor: jeton('--surface'),
+        borderWidth: 2,
+      },
+    ],
+  }, o);
 }
 
 /** Crée le graphique s'il n'existe pas, le met à jour sinon. */
@@ -485,14 +498,12 @@ function poser(graphique, selecteur, type, data, options) {
 function dessinerDetail(resultat, horizon) {
   if (!detailOuvert() || typeof Chart === 'undefined') return;
 
-  // --- Les deux repères chiffrés ---------------------------------------
+  // --- Les quatre chiffres ---------------------------------------------
   //
-  // Attention : `premiereAnneeFavorable` est le PREMIER croisement, pas un
-  // acquis. Les deux courbes peuvent se recroiser — un rendement boursier
-  // élevé fait repasser le locataire devant après quelques années. Annoncer
-  // « point mort : 3 ans » pendant que le gros chiffre affiche −153 000 €
-  // serait une contradiction à l'écran. On vérifie donc que l'avantage tient
-  // encore à l'horizon choisi, et on le dit quand ce n'est pas le cas.
+  // `premiereAnneeFavorable` est le PREMIER croisement, pas un acquis : les
+  // deux courbes peuvent se recroiser quand le rendement boursier est élevé.
+  // On ne commente pas le cas normal — le libellé du chiffre suffit — mais on
+  // avertit quand l'avantage ne tient plus, sinon l'écran se contredit.
   //
   const pointMort = resultat.premiereAnneeFavorable;
   const tientEncore = resultat.annees[horizon - 1].ecart >= 0;
@@ -504,19 +515,116 @@ function dessinerDetail(resultat, horizon) {
     $('#pointMortMesure').textContent =
       `Sur ${resultat.annees.length} ans simulés, l'achat ne repasse jamais devant la location.`;
   } else if (tientEncore) {
-    $('#pointMortMesure').textContent = "Année où l'achat repasse devant la location.";
+    $('#pointMortMesure').textContent = '';
   } else {
     $('#pointMortMesure').textContent =
       `L'achat passe devant à l'année ${pointMort}, mais la location reprend l'avantage ` +
       `avant l'année ${horizon}.`;
   }
 
-  $('#duoMensualite').textContent = euros.format(resultat.mensualiteTotale);
-  $('#duoProprio').textContent = euros.format(resultat.coutMensuelProprio);
-  $('#duoLoyer').textContent = euros.format(resultat.entrees.loyer);
+  // Mensualité et charges ne se recouvrent pas : leur somme est le coût réel
+  // de propriétaire, à comparer au loyer.
+  $('#kpiMensualite').textContent = euros.format(resultat.mensualiteTotale);
+  $('#kpiCharges').textContent = euros.format(resultat.chargesMensuelles);
+  $('#kpiLoyer').textContent = euros.format(resultat.entrees.loyer);
+
+  // --- Couleurs des postes ---------------------------------------------
+  const cCredit = jeton('--poste-credit');
+  const cCapital = jeton('--poste-capital');
+  const cPossession = jeton('--poste-possession');
+  const cEpargne = jeton('--poste-epargne');
+  const cAcquisition = jeton('--poste-acquisition');
+  const cLoyers = jeton('--location');
+
+  // --- À quoi sert votre argent : deux camemberts cumulés ---------------
+  const rep = repartitionEnveloppe(resultat, horizon);
+
+  graphEnvAchat = camembert(graphEnvAchat, '#graphEnvAchat', [
+    { nom: 'Intérêts et assurance', valeur: rep.achat.credit, couleur: cCredit },
+    { nom: 'Capital remboursé', valeur: rep.achat.capital, couleur: cCapital },
+    { nom: 'Taxe foncière et charges', valeur: rep.achat.possession, couleur: cPossession },
+    { nom: 'Épargne investie', valeur: rep.achat.epargne, couleur: cEpargne },
+  ]);
+
+  graphEnvLocation = camembert(graphEnvLocation, '#graphEnvLocation', [
+    { nom: 'Loyers', valeur: rep.location.loyers, couleur: cLoyers },
+    { nom: 'Épargne investie', valeur: rep.location.epargne, couleur: cEpargne },
+  ]);
+
+  // Les deux totaux sont égaux : c'est la prémisse du simulateur, et c'est ce
+  // que la hauteur commune des barres disait avant.
+  $('#totalEnvAchat').textContent = euros.format(rep.achat.total);
+  $('#totalEnvLocation').textContent = euros.format(rep.location.total);
+
+  legendeSimple('#legendeEnveloppe', [
+    { nom: 'Intérêts et assurance', couleur: cCredit },
+    { nom: 'Capital remboursé', couleur: cCapital },
+    { nom: 'Taxe foncière et charges', couleur: cPossession },
+    { nom: 'Loyers', couleur: cLoyers },
+    { nom: 'Épargne investie', couleur: cEpargne },
+  ]);
+
+  // --- Frais irrécupérables --------------------------------------------
+  const irr = fraisIrrecuperables(resultat, horizon);
+  const partsPerdu = [
+    { nom: "Frais d'acquisition", valeur: irr.achat.acquisition, couleur: cAcquisition },
+    { nom: 'Intérêts et assurance', valeur: irr.achat.credit, couleur: cCredit },
+    { nom: 'Taxe foncière et charges', valeur: irr.achat.possession, couleur: cPossession },
+  ];
+  graphPerdu = camembert(graphPerdu, '#graphPerdu', partsPerdu);
+  $('#totalPerdu').textContent = euros.format(irr.achat.total);
+  legendeChiffree('#legendePerdu', partsPerdu);
+
+  // --- Année par année : deux piles par année, jamais cumulées ----------
+  //
+  // Ce graphique ignore volontairement le curseur : il montre toute la durée
+  // simulée, comme la part possédée juste en dessous. Les deux se lisent donc
+  // sur le même axe de temps.
+  //
+  const annuel = repartitionAnnuelle(resultat);
+  const pile = (label, valeurs, couleur, groupe, arrondi) => ({
+    label,
+    data: valeurs,
+    backgroundColor: couleur,
+    stack: groupe,
+    borderColor: jeton('--surface'),
+    borderWidth: { top: 1, right: 0, bottom: 0, left: 0 },
+    borderSkipped: false,
+    borderRadius: arrondi ? { topLeft: 3, topRight: 3 } : 0,
+  });
+
+  const optionsAnnuel = optionsCommunes();
+  optionsAnnuel.scales.x.stacked = true;
+  optionsAnnuel.scales.y.stacked = true;
+  optionsAnnuel.scales.y.beginAtZero = true;
+  // Une part à la fois, pas toute la colonne.
+  optionsAnnuel.interaction = { mode: 'nearest', intersect: true };
+  optionsAnnuel.plugins.tooltip.callbacks.title = (items) =>
+    `Année ${items[0].label} · ${items[0].dataset.stack === 'achat' ? 'Achat' : 'Location'}`;
+  optionsAnnuel.plugins.tooltip.callbacks.label = (ctx) =>
+    ` ${ctx.dataset.label} : ${euros.format(ctx.parsed.y)}`;
+
+  graphAnnuel = poser(graphAnnuel, '#graphAnnuel', 'bar', {
+    labels: annuel.map((l) => l.annee),
+    datasets: [
+      pile('Intérêts et assurance', annuel.map((l) => l.achat.credit), cCredit, 'achat', false),
+      pile('Capital remboursé', annuel.map((l) => l.achat.capital), cCapital, 'achat', false),
+      pile('Taxe foncière et charges', annuel.map((l) => l.achat.possession), cPossession, 'achat', false),
+      pile('Épargne investie', annuel.map((l) => l.achat.epargne), cEpargne, 'achat', true),
+      pile('Loyers', annuel.map((l) => l.location.loyers), cLoyers, 'location', false),
+      pile('Épargne investie', annuel.map((l) => l.location.epargne), cEpargne, 'location', true),
+    ],
+  }, optionsAnnuel);
+
+  legendeSimple('#legendeAnnuel', [
+    { nom: 'Intérêts et assurance', couleur: cCredit },
+    { nom: 'Capital remboursé', couleur: cCapital },
+    { nom: 'Taxe foncière et charges', couleur: cPossession },
+    { nom: 'Loyers', couleur: cLoyers },
+    { nom: 'Épargne investie', couleur: cEpargne },
+  ]);
 
   // --- Part du bien réellement possédée --------------------------------
-  const etiquettes = resultat.annees.map((a) => a.annee);
   const cAchat = jeton('--achat');
   const optionsPossession = optionsCommunes();
   optionsPossession.scales.y.min = 0;
@@ -525,106 +633,25 @@ function dessinerDetail(resultat, horizon) {
   optionsPossession.plugins.tooltip.callbacks.label = (ctx) =>
     ` Part possédée : ${pourcentEntier.format(ctx.parsed.y)}`;
 
-  graphPossession = poser(
-    graphPossession,
-    '#graphPossession',
-    'line',
-    {
-      labels: etiquettes,
-      datasets: [
-        {
-          label: 'Part possédée',
-          data: resultat.annees.map((a) => a.partPossedee),
-          borderColor: cAchat,
-          backgroundColor: `color-mix(in srgb, ${cAchat} 12%, transparent)`,
-          borderWidth: 2,
-          fill: true,
-          tension: 0.25,
-          pointRadius: (ctx) => (ctx.dataIndex === horizon - 1 ? 6 : 0),
-          pointHoverRadius: 6,
-          pointBackgroundColor: cAchat,
-          pointBorderColor: jeton('--surface'),
-          pointBorderWidth: 2,
-        },
-      ],
-    },
-    optionsPossession
-  );
-
-  // --- Où va l'enveloppe ------------------------------------------------
-  const rep = repartitionEnveloppe(resultat, horizon);
-  const cCredit = jeton('--poste-credit');
-  const cCapital = jeton('--poste-capital');
-  const cPossession = jeton('--poste-possession');
-  const cEpargne = jeton('--poste-epargne');
-  const cLoyers = jeton('--location');
-
-  graphEnveloppe = poser(
-    graphEnveloppe,
-    '#graphEnveloppe',
-    'bar',
-    {
-      labels: ['Achat', 'Location'],
-      datasets: [
-        posteEmpile('Intérêts et assurance', [rep.achat.credit, 0], cCredit, false),
-        posteEmpile('Capital remboursé', [rep.achat.capital, 0], cCapital, false),
-        posteEmpile('Taxe foncière et charges', [rep.achat.possession, 0], cPossession, false),
-        posteEmpile('Loyers', [0, rep.location.loyers], cLoyers, false),
-        posteEmpile('Épargne investie', [rep.achat.epargne, rep.location.epargne], cEpargne, true),
-      ],
-    },
-    optionsEmpilees()
-  );
-
-  legendeChiffree('#legendeEnveloppe', [
-    { nom: 'Intérêts et assurance', valeur: rep.achat.credit, couleur: cCredit },
-    { nom: 'Capital remboursé', valeur: rep.achat.capital, couleur: cCapital },
-    { nom: 'Taxe foncière et charges', valeur: rep.achat.possession, couleur: cPossession },
-    { nom: 'Loyers', valeur: rep.location.loyers, couleur: cLoyers },
-    { nom: 'Épargne investie', valeur: rep.achat.epargne, couleur: cEpargne },
-  ]);
-
-  // --- Ce qui ne revient jamais ----------------------------------------
-  const irr = fraisIrrecuperables(resultat, horizon);
-  const cAcquisition = jeton('--poste-acquisition');
-  // Camembert : ici on ne compare plus, on répartit. Trois parts seulement —
-  // au-delà un camembert devient illisible et l'histogramme reprend l'avantage.
-  const partsPerdu = [
-    { nom: "Frais d'acquisition", valeur: irr.achat.acquisition, couleur: cAcquisition },
-    { nom: 'Intérêts et assurance', valeur: irr.achat.credit, couleur: cCredit },
-    { nom: 'Taxe foncière et charges', valeur: irr.achat.possession, couleur: cPossession },
-  ];
-
-  const optionsPerdu = optionsCommunes();
-  delete optionsPerdu.scales;
-  optionsPerdu.cutout = '58%';
-  optionsPerdu.interaction = { mode: 'nearest', intersect: true };
-  optionsPerdu.plugins.tooltip.callbacks.title = (items) => items[0].label;
-  optionsPerdu.plugins.tooltip.callbacks.label = (ctx) =>
-    ` ${euros.format(ctx.parsed)} · ${pourcentEntier.format(ctx.parsed / irr.achat.total)}`;
-  delete optionsPerdu.plugins.tooltip.callbacks.footer;
-
-  graphPerdu = poser(graphPerdu, '#graphPerdu', 'doughnut', {
-    labels: partsPerdu.map((x) => x.nom),
+  graphPossession = poser(graphPossession, '#graphPossession', 'line', {
+    labels: resultat.annees.map((a) => a.annee),
     datasets: [
       {
-        data: partsPerdu.map((x) => x.valeur),
-        backgroundColor: partsPerdu.map((x) => x.couleur),
-        borderColor: jeton('--surface'),
+        label: 'Part possédée',
+        data: resultat.annees.map((a) => a.partPossedee),
+        borderColor: cAchat,
+        backgroundColor: `color-mix(in srgb, ${cAchat} 12%, transparent)`,
         borderWidth: 2,
+        fill: true,
+        tension: 0.25,
+        pointRadius: (ctx) => (ctx.dataIndex === horizon - 1 ? 6 : 0),
+        pointHoverRadius: 6,
+        pointBackgroundColor: cAchat,
+        pointBorderColor: jeton('--surface'),
+        pointBorderWidth: 2,
       },
     ],
-  }, optionsPerdu);
-
-  legendeChiffree('#legendePerdu', partsPerdu);
-
-  // Le camembert ne compare plus rien : sans repère on ne sait pas si ce total
-  // est gros ou petit. Une ligne suffit, et elle reste honnête — le loyer, lui,
-  // est perdu en totalité.
-  $('#perduRepere').textContent =
-    `Soit ${euros.format(irr.achat.total)} en ${horizon} an${horizon > 1 ? 's' : ''}. ` +
-    `Sur la même durée, le locataire aura versé ${euros.format(irr.location.loyers)} ` +
-    'de loyers, perdus en totalité.';
+  }, optionsPossession);
 }
 
 function initialiserDetail() {
@@ -642,7 +669,8 @@ function initialiserDetail() {
     // crée les graphiques qu'une fois la zone visible, et on redimensionne
     // ceux qui existaient déjà.
     rafraichir();
-    for (const g of [graphPossession, graphEnveloppe, graphPerdu]) if (g) g.resize();
+    for (const g of [graphPossession, graphEnvAchat, graphEnvLocation, graphPerdu, graphAnnuel])
+      if (g) g.resize();
   });
 }
 

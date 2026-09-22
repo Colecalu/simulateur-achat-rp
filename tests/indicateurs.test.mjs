@@ -116,3 +116,37 @@ test("les cumuls sont bornés à l'horizon simulé", () => {
   proche(repartitionEnveloppe(r, 99).achat.total, fin.achat.total);
   proche(repartitionEnveloppe(r, 0).achat.total, repartitionEnveloppe(r, 1).achat.total);
 });
+
+test("la répartition annuelle somme l'enveloppe de chaque année", () => {
+  const annuel = calc.repartitionAnnuelle(r);
+  const enveloppe = DEFAUTS.enveloppeMensuelle * 12;
+  assert.equal(annuel.length, r.annees.length);
+  for (const ligne of annuel) {
+    const a = ligne.achat;
+    proche(a.credit + a.capital + a.possession + a.epargne, enveloppe);
+    proche(ligne.location.loyers + ligne.location.epargne, enveloppe);
+  }
+});
+
+test("le cumul des années redonne la répartition cumulée", () => {
+  // Les deux lectures composent les mêmes postes : si elles divergent, deux
+  // graphiques nommant « intérêts et assurance » montreraient des choses
+  // différentes.
+  const annuel = calc.repartitionAnnuelle(r).slice(0, 12);
+  const cumule = repartitionEnveloppe(r, 12);
+  for (const poste of ['credit', 'capital', 'possession', 'epargne']) {
+    proche(annuel.reduce((t, l) => t + l.achat[poste], 0), cumule.achat[poste]);
+  }
+  proche(annuel.reduce((t, l) => t + l.location.loyers, 0), cumule.location.loyers);
+});
+
+test("les charges mensualisées et la mensualité ne se recouvrent pas", () => {
+  // Les deux chiffres sont affichés côte à côte : ils doivent s'additionner.
+  //
+  // À l'euro près seulement : `mensualiteTotale` porte l'assurance du PREMIER
+  // MOIS, calculée sur le capital entier, tandis que `coutMensuelProprio`
+  // moyenne la première année, où l'assurance décroît à mesure que le capital
+  // s'amortit. L'écart (0,81 € ici) est la moitié d'une année d'amortissement
+  // d'assurance — c'est le comportement voulu, pas un arrondi.
+  proche(r.mensualiteTotale + r.chargesMensuelles, r.coutMensuelProprio, 2);
+});

@@ -113,19 +113,38 @@ les écarts assumés.
   de vérité, et `afficherVerdict` réécrit les deux libellés. Ne jamais leur donner deux valeurs
   indépendantes : deux dates à l'écran, c'est la garantie qu'on finit par comparer deux instants
   différents sans s'en apercevoir.
-- **Quatre chiffres sur une ligne** (`.kpis`) : point mort, crédit et assurance, coût tout
-  compris, loyer. Pas de carte par chiffre — un filet vertical suffit. Une carte par KPI prenait
-  toute la largeur pour un nombre.
-- **« Ce qui ne revient jamais » est un camembert, pas une comparaison.** Trois parts seulement
-  (acquisition, crédit, possession) ; au-delà un camembert devient illisible. Comme il ne compare
-  plus rien, une ligne sous le graphique donne le repère locatif — le loyer est perdu à 100 %.
-  Sans elle, on ne sait pas si le total affiché est gros ou petit.
-- **Le graphique « Où va votre enveloppe » a deux colonnes de hauteur identique.** C'est la
-  prémisse du simulateur rendue visible : même enveloppe, répartition différente. Opposer
-  « charges de l'acheteur » (633 k€ à 20 ans) à « loyers du locataire » (423 k€) sans les épargnes
-  ferait conclure que l'achat coûte 210 k€ de plus, alors que cet écart n'est pas dépensé mais
-  investi. `repartitionEnveloppe()` porte cette lecture et un test verrouille l'égalité des deux
-  totaux. Quand l'enveloppe est insuffisante, le côté achat dépasse : c'est voulu, on le montre.
+- **Quatre chiffres sur une ligne** (`.kpis`), centrés : point d'équilibre, mensualité du crédit,
+  charges mensualisées, loyer versé. Pas de carte par chiffre — un filet vertical suffit.
+  **Ils ne se recouvrent pas** : mensualité (2 385 €, assurance comprise, jamais mentionnée) +
+  charges mensualisées (250 €) = le coût réel de propriétaire, à comparer au loyer. L'ancien
+  « tout compris » contenait déjà la mensualité, donc deux des quatre chiffres disaient la même
+  chose. `chargesMensuelles` et `coutMensuelProprio` sont deux sorties distinctes du moteur ; un
+  test vérifie qu'elles s'additionnent (à l'euro près : `mensualiteTotale` porte l'assurance du
+  premier mois, `coutMensuelProprio` la moyenne de la première année).
+- **Aucun commentaire sous les chiffres dans le cas normal.** `#pointMortMesure` reste vide —
+  le libellé du chiffre se suffit. Il ne sert qu'à l'avertissement quand l'avantage ne tient plus
+  à l'horizon choisi. Ne pas y remettre de glose.
+- **« Frais irrécupérables » ne compare rien** : trois parts (acquisition, crédit, possession),
+  côté achat seulement. Au-delà de cinq parts un camembert devient illisible.
+- **Trois camemberts pour les cumuls, un histogramme pour le temps.** « À quoi sert votre
+  argent » est une paire de camemberts (achat, location) ; « Frais irrécupérables » en est un
+  troisième. Chacun porte **son total en dessous** : c'est ce total, et non la hauteur des barres
+  d'autrefois, qui montre maintenant que les deux enveloppes sont égales (816 000 € à 20 ans).
+  Ne jamais opposer « charges de l'acheteur » à « loyers du locataire » sans les épargnes : on
+  conclurait que l'achat coûte 210 k€ de plus, alors que cet écart n'est pas dépensé mais investi.
+  `repartitionEnveloppe()` porte cette lecture et un test verrouille l'égalité des totaux. Quand
+  l'enveloppe est insuffisante, le côté achat dépasse : c'est voulu, on le montre.
+- **« Année par année, où part votre enveloppe » ignore volontairement le curseur** : il couvre
+  toute la durée simulée, comme la part possédée juste en dessous, pour que les deux se lisent sur
+  le même axe de temps. Deux piles par année (`stack: 'achat'` / `'location'`), jamais cumulées.
+  `repartitionAnnuelle()` compose les mêmes postes que `repartitionEnveloppe()` — un test vérifie
+  que le cumul des années redonne la version cumulée, sans quoi deux graphiques nommant
+  « intérêts et assurance » montreraient des choses différentes.
+- **Les infobulles portent sur une part, pas sur l'ensemble** (`mode: 'nearest', intersect: true`).
+  Lire quatre postes d'un coup quand on en pointe un seul est illisible.
+- **Une légende sans montants quand deux graphiques la partagent** (`legendeSimple`) : les mêmes
+  postes y valent deux choses différentes. Le montant vit alors dans l'infobulle. Le camembert
+  seul des frais irrécupérables garde, lui, sa légende chiffrée (`legendeChiffree`).
 - **Les travaux ne sont pas des frais irrécupérables.** Le modèle les fond dans la valeur du bien
   (« valeur estimée du bien après travaux ») : ils reviennent par le prix de revente. Le capital
   remboursé non plus. En revanche les frais d'acquisition (notaire, agence, banque), les intérêts

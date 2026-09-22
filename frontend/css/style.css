@@ -1040,6 +1040,7 @@ input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; marg
 .kpi:first-child { border-left: 0; padding-left: 0; }
 .kpi__mot {
   margin: 0;
+  text-align: center;
   font-size: .625rem;
   font-weight: 600;
   letter-spacing: var(--interlettre-caps);
@@ -1052,6 +1053,7 @@ input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; marg
 .kpi__mot em { font-style: normal; font-weight: 400; text-transform: none; letter-spacing: 0; }
 .kpi__chiffre {
   margin: 4px 0 0;
+  text-align: center;
   font-size: 1.375rem;
   font-weight: 600;
   color: var(--encre);
@@ -1107,6 +1109,41 @@ input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; marg
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 16px;
+  align-items: start;
+}
+
+/* Titres et légendes centrés sur les cartes du détail. */
+.carte__entete--centre { text-align: center; }
+.legende--centre { justify-content: center; }
+
+/*
+ * Deux camemberts côte à côte pour l'enveloppe (achat, location), un seul pour
+ * les frais irrécupérables. Le total sous chaque camembert porte l'information
+ * que la hauteur des barres donnait avant : les deux enveloppes sont égales.
+ */
+.paire {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.paire--seule { grid-template-columns: minmax(0, 1fr); }
+.paire__part { min-width: 0; }
+.graphique--rond { height: 170px; }
+.part__mot {
+  margin: 8px 0 0;
+  text-align: center;
+  font-size: .625rem;
+  font-weight: 600;
+  letter-spacing: var(--interlettre-caps);
+  text-transform: uppercase;
+  color: var(--encre-3);
+}
+.part__total {
+  margin: 2px 0 0;
+  text-align: center;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--encre);
 }
 @media (max-width: 900px) {
   .detail__duo { grid-template-columns: minmax(0, 1fr); }

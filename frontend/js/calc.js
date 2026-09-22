@@ -249,6 +249,10 @@
       mensualiteCredit: pret.mensualite,
       mensualiteTotale: mensualiteTotale, // crédit + assurance, premier mois
       coutMensuelProprio: annees.length ? annees[0].totalDebourseAnnuel / 12 : 0,
+      // Taxe foncière + charges de copropriété de la première année, ramenées
+      // au mois. Distinct de `coutMensuelProprio`, qui inclut la mensualité :
+      // affichés côte à côte, les deux doivent s'additionner, pas se recouvrir.
+      chargesMensuelles: annees.length ? (annees[0].taxeFonciere + annees[0].charges) / 12 : 0,
 
       // Indicateurs de faisabilité, seulement si le salaire est renseigné.
       // Le taux d'endettement se calcule sur la mensualité assurance comprise,
@@ -323,6 +327,29 @@
   }
 
   /**
+   * La même répartition que `repartitionEnveloppe`, mais année par année et
+   * non cumulée : une ligne par année, chacune sommant l'enveloppe annuelle.
+   *
+   * Les regroupements (crédit = intérêts + assurance, possession = taxe +
+   * charges) vivent ici et pas dans l'interface : deux graphiques qui nomment
+   * les mêmes postes doivent les composer de la même façon.
+   */
+  function repartitionAnnuelle(res) {
+    return res.annees.map(function (x) {
+      return {
+        annee: x.annee,
+        achat: {
+          credit: x.interets + x.assurance,
+          capital: x.capitalAmorti,
+          possession: x.taxeFonciere + x.charges,
+          epargne: x.surplusProprio,
+        },
+        location: { loyers: x.loyerAnnuel, epargne: x.surplusLocataire },
+      };
+    });
+  }
+
+  /**
    * Ce que chaque trajectoire ne récupère jamais, cumulé jusqu'à `annee`.
    *
    * Deux exclusions délibérées côté achat :
@@ -374,6 +401,7 @@
     tableauAmortissement: tableauAmortissement,
     simuler: simuler,
     repartitionEnveloppe: repartitionEnveloppe,
+    repartitionAnnuelle: repartitionAnnuelle,
     fraisIrrecuperables: fraisIrrecuperables,
   };
 
