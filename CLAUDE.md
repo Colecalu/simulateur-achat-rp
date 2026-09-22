@@ -104,19 +104,39 @@ réelles — en cours ; **(3)** la mise en location ultérieure — moteur fait,
   décennie recommençait ») ; figer la dernière valeur connue choisirait silencieusement une année
   au hasard comme régime permanent.
 - **Les scénarios vivent dans `frontend/js/scenarios.js`**, séparés du moteur : ce sont des
-  données, pas de la logique. Les valeurs actuelles sont des **placeholders** (`provisoire: true`)
-  destinés à être remplacés par des décennies datées et sourcées.
-- **Deux familles, sept options** : `historique` (quatre décennies observées), `prospectif` (deux
-  trajectoires plausibles) et « Mes hypothèses », qui n'est pas dans le fichier — c'est l'absence
-  de scénario, et elle lit les champs de la bulle 4.
+  données, pas de la logique. Les quatre décennies observées sont sourcées (MSCI World pour les
+  marchés, INSEE Notaires-INSEE pour l'immobilier, IPC 04.1.1.0 pour les loyers, IPC ensemble pour
+  l'inflation), en euros courants, sur les quatre séries.
+- **Les décennies se chevauchent et concordent** : B/C partagent trois ans, C/D en partagent sept,
+  et les douze valeurs communes sont identiques au chiffre près. Seule exception, deux points
+  d'immobilier en 2000-2001 qui diffèrent de 0,1 pt entre A et B : c'est la jointure entre la
+  reconstruction Friggit et la série INSEE. Refaire ce contrôle croisé à chaque nouvelle décennie.
+- **`revalTaxeFonciere` n'a pas de série propre** : elle recopie `revalCharges` (l'inflation
+  générale). C'est une **sous-estimation connue** — la taxe foncière a dérivé plus vite que
+  l'inflation. À remplacer par une vraie série dès qu'on en a une.
+- **Rejouer une décennie amplifie son biais.** Sur 25 ans, une séquence de 11 ans tourne deux fois
+  et demie : une période exceptionnelle devient un demi-siècle exceptionnel. « Bulle immobilière »
+  (2000-2010) donne ainsi +2,3 M€ d'écart à 20 ans. Ce n'est pas un bug, c'est la conséquence
+  assumée de la règle de répétition — mais ne pas présenter ces chiffres comme une prévision.
+- **Chaque scénario porte ses `reserves`**, affichées en tête de l'aperçu avec un pictogramme
+  d'alerte : elles disent ce qu'on sait de faux ou d'incertain dans ses propres données. Une
+  réserve n'est pas une source, elle doit se remarquer.
+- **Deux familles, sept options** : `historique` (quatre décennies observées — 1991-2001,
+  2000-2010, 2008-2018, 2012-2022), `prospectif` (deux trajectoires construites, explicitement non
+  observées) et « Mes hypothèses », qui n'est pas dans le fichier — c'est l'absence de scénario, et
+  elle lit les champs de la bulle 4.
 - **La carte ne porte que les noms.** Sept options ne tiennent dans le rail qu'à cette condition :
   le résumé et les sources vivent dans l'aperçu, qui a la place. Ne pas y réintroduire de sous-titre.
 - **Trois séries sont tracées** — marchés, immobilier, loyers (IRL). `revalCharges` et
   `revalTaxeFonciere` sont dans `taux` parce que le moteur en a besoin, mais ne sont pas dessinées :
   elles suivent l'inflation générale et n'intéressent pas le lecteur au même titre.
 - **Un scénario `historique` sans `sources` n'est qu'une opinion.** L'aperçu affiche la provenance
-  série par série, et un bandeau « valeurs provisoires » tant que `provisoire` est vrai. Remplir
-  `periode` et `sources` en même temps que `taux`, et retirer `provisoire`.
+  série par série. Remplir `periode`, `sources` et `reserves` en même temps que `taux`.
+- **Réserve ouverte sur la devise des rendements boursiers** : ils sont annoncés en euros, mais
+  2019 (+27,7), 2021 (+21,8) et 2022 (−18,1) sont au centième les valeurs publiées en dollars — or
+  ces années-là ont connu de forts mouvements de change, et 2014-2015 ressemblent davantage à de
+  l'euro. La série est donc peut-être panachée. Le doute est porté à l'écran ; le lever demande de
+  retourner à la source.
 - **Les trois courbes de l'aperçu** : `--courbe-marches` (clay-500), `--courbe-immo` (olive-700),
   `--courbe-loyer` (warm-200). Seul triplet de Perron qui passe les deux seuils de séparation
   (ΔE 20,7 normal, 13,9 protan) — toutes les combinaisons mêlant l'ochre à un vert échouent, les
@@ -136,7 +156,7 @@ réelles — en cours ; **(3)** la mise en location ultérieure — moteur fait,
 - **L'avertissement de bas de page change avec le scénario** : « hypothèses constantes » devient
   faux dès qu'une série tourne.
 - **Chaque scénario a un aperçu**, ouvert par le bouton à droite de son choix : une fenêtre qui
-  trace ses deux séries (marchés, immobilier) **en base 100**, sur l'horizon complet. On trace la
+  trace ses trois séries (marchés, immobilier, loyers) **en base 100**, sur l'horizon complet. On trace la
   VALEUR, pas le taux : une suite de pourcentages est une dérivée, on la lit mal et on ne voit pas
   où elle mène. En base 100, deux décennies de moyenne identique mais d'ordre différent se
   séparent à l'œil — ce qui est précisément le propos du pilier. Les taux année par année sont
@@ -154,13 +174,13 @@ réelles — en cours ; **(3)** la mise en location ultérieure — moteur fait,
 - **Le voile sert deux fenêtres** : l'aperçu et la bulle zoomée. Son écouteur et celui d'Échap
   traitent l'aperçu en premier, et `validerBulle` refuse désormais `n === null` — sans quoi un clic
   sur le voile sans bulle ouverte ajouterait `null` aux bulles validées et casserait.
-- **Les courbes de l'aperçu ont leurs propres jetons** (`--courbe-bourse`, `--courbe-immo`) : ce
-  sont des indices de marché, pas des trajectoires patrimoniales. Emprunter `--achat` /
-  `--location` sèmerait la confusion. Paire validée à ΔE 18,3 en vision normale.
+- **Les courbes de l'aperçu ont leurs propres jetons** : ce sont des indices de marché, pas des
+  trajectoires patrimoniales. Emprunter `--achat` / `--location` sèmerait la confusion.
 - **Nommer les scénarios par le MARCHÉ, pas par l'issue.** Une décennie boursière difficile est
-  *favorable* à l'achat : elle pénalise surtout le locataire, dont l'épargne est plus grosse. Avec
-  les placeholders actuels, « Décennie difficile » donne +141 858 € contre +84 640 € au scénario
-  de base. Un scénario baptisé « pessimiste » qui améliore le résultat serait incompréhensible.
+  *favorable* à l'achat : elle pénalise surtout le locataire, dont l'épargne est plus grosse. Les
+  données réelles le confirment brutalement — « Bulle immobilière » donne +2 288 650 € et « Choc
+  inflationniste » −770 077 €, alors que la seconde est la décennie aux meilleurs marchés (11,6 %
+  par an). Un scénario baptisé « pessimiste » qui améliore le résultat serait incompréhensible.
 
 ## Conventions
 

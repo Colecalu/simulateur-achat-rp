@@ -872,16 +872,15 @@ function ouvrirApercu(cle) {
 
   // La provenance est une exigence du pilier : un scénario « historique » sans
   // source n'est qu'une opinion.
-  $('#apercuSources').innerHTML =
-    sc && sc.sources
-      ? (sc.provisoire
-          ? '<li><strong>Valeurs provisoires — aucune donnée réelle.</strong></li>'
-          : '') +
-        series
-          .filter((x) => sc.sources[x.champ])
-          .map((x) => `<li>${x.nom} : ${sc.sources[x.champ]}</li>`)
-          .join('')
-      : '';
+  $('#apercuSources').innerHTML = sc
+    ? (sc.reserves || [])
+        .map((r) => `<li class="apercu__reserve">${r}</li>`)
+        .join('') +
+      series
+        .filter((x) => sc.sources && sc.sources[x.champ])
+        .map((x) => `<li>${x.nom} : ${sc.sources[x.champ]}</li>`)
+        .join('')
+    : '';
 
   $('#apercu').hidden = false;
   $('#voile').hidden = false;
@@ -967,10 +966,13 @@ function appliquerScenario(cle) {
     b.setAttribute('aria-checked', String(actif));
   }
 
+  // Rejouer une décennie deux fois et demie amplifie son biais : une période
+  // exceptionnelle devient un demi-siècle exceptionnel. On le dit.
   $('#scenarioNote').textContent = scenario
-    ? `${scenario.taux.rendementBourse.length} années de marché rejouées en boucle. ` +
-      'Les taux de la bulle 4 en donnent la moyenne annuelle.' +
-      (scenario.provisoire ? ' Valeurs provisoires.' : '')
+    ? `${scenario.taux.rendementBourse.length} années` +
+      (scenario.periode ? ` (${scenario.periode})` : '') +
+      ' rejouées en boucle sur tout l’horizon. Les taux de la bulle 4 en donnent la ' +
+      'moyenne annuelle.'
     : '';
 
   recalculer();

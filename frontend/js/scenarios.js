@@ -13,7 +13,7 @@
  *
  * DEUX FAMILLES :
  *   - `historique` : une décennie réellement observée, datée et sourcée ;
- *   - `prospectif` : une trajectoire plausible pour les années à venir.
+ *   - `prospectif` : une trajectoire construite, explicitement non observée.
  * La troisième option, « Mes hypothèses », n'est pas dans ce fichier : c'est
  * l'absence de scénario, et elle lit les champs de la bulle 4.
  *
@@ -22,123 +22,176 @@
  * dessinées : elles suivent l'inflation générale et n'intéressent pas le
  * lecteur au même titre.
  *
- * ┌─ ATTENTION ─────────────────────────────────────────────────────────────┐
- * │ Les valeurs ci-dessous sont des PLACEHOLDERS (`provisoire: true`). Elles │
- * │ éprouvent la mécanique, elles ne décrivent aucun marché réel. Elles      │
- * │ seront remplacées par des séries datées et sourcées :                    │
- * │   - marchés    : MSCI World, dividendes réinvestis, en euros             │
- * │   - immobilier : INSEE, prix des logements anciens                       │
- * │   - loyers     : INSEE, indice de référence des loyers (IRL)             │
- * │ Remplir alors `periode` et `sources` en même temps que `taux`, et        │
- * │ retirer `provisoire`.                                                    │
- * └─────────────────────────────────────────────────────────────────────────┘
+ * COHÉRENCE VÉRIFIÉE : les décennies se chevauchent (B/C sur trois ans, C/D sur
+ * sept) et les valeurs communes concordent exactement. Seule exception, deux
+ * points d'immobilier en 2000-2001 qui diffèrent de 0,1 pt entre A et B : c'est
+ * la jointure entre la reconstruction Friggit et la série INSEE, pas une erreur.
+ *
+ * RÉSERVE À LEVER : les rendements boursiers sont annoncés en EUR, mais 2019
+ * (+27,7), 2021 (+21,8) et 2022 (−18,1) sont au centième les valeurs publiées
+ * en USD — or ces années-là ont connu de forts mouvements de change. Les séries
+ * 2014-2015, elles, ressemblent davantage à de l'EUR. À faire retrancher à la
+ * source avant de considérer ces chiffres comme définitifs. Le doute est porté
+ * à l'écran dans les réserves de chaque scénario concerné.
  *
  * Script classique, comme calc.js : window.SimuRPScenarios côté navigateur.
  */
 (function (global) {
   'use strict';
 
-  var SOURCES_A_DEFINIR = {
-    rendementBourse: 'MSCI World — source à renseigner',
-    revalBien: 'INSEE, logements anciens — source à renseigner',
-    revalLoyer: 'INSEE, IRL — source à renseigner',
+  // Sources communes à toutes les décennies observées.
+  var SRC_INSEE = {
+    rendementBourse:
+      'MSCI World, dividendes nets réinvestis — valeurs arrondies (±0,5 pt), non brutes',
+    revalBien:
+      'INSEE, indice Notaires-INSEE 010567059, France métropolitaine, maisons + appartements',
+    revalLoyer:
+      'INSEE, IPC 04.1.1.0 « loyers effectivement payés », série 001763982, déc./déc.',
+    revalCharges: 'INSEE, IPC ensemble, série 001759970, déc./déc.',
+    revalTaxeFonciere:
+      "Alignée sur l'inflation générale, faute de série dédiée — minore la dérive réelle",
   };
+
+  var SRC_CONSTRUIT = {
+    rendementBourse: 'Hypothèse construite, non observée',
+    revalBien: 'Hypothèse construite, non observée',
+    revalLoyer: 'Hypothèse construite, non observée',
+    revalCharges: 'Hypothèse construite, non observée',
+    revalTaxeFonciere: 'Hypothèse construite, non observée',
+  };
+
+  // Réserve commune à toutes les séries boursières, tant qu'elle n'est pas levée.
+  var DOUTE_DEVISE =
+    'Rendements annoncés en euros, mais plusieurs années coïncident au centième ' +
+    'avec les valeurs publiées en dollars. À vérifier avant usage sérieux.';
 
   var SCENARIOS = [
     {
-      cle: 'difficile',
-      nom: 'Décennie difficile',
+      cle: 'krach-immobilier',
+      nom: 'Krach immobilier',
       famille: 'historique',
-      periode: null, // à renseigner avec les données réelles
-      resume: "Marchés en dents de scie, immobilier qui recule.",
-      provisoire: true,
-      sources: SOURCES_A_DEFINIR,
+      periode: '1991–2001',
+      resume:
+        "L'immobilier français sort de la bulle de 1990 et recule cinq ans durant, " +
+        'pendant que les actions mondiales enchaînent une décennie haussière — ' +
+        "jusqu'à l'éclatement de la bulle internet, en toute fin de période.",
+      sources: SRC_INSEE,
+      reserves: [
+        DOUTE_DEVISE,
+        'Immobilier 1991-1995 : reconstruction Friggit/IGEDD, moins fiable que la série INSEE.',
+      ],
       taux: {
-        rendementBourse: [-0.18, 0.06, -0.04, 0.11, -0.09, 0.03, 0.08, -0.12, 0.05, 0.02],
-        revalBien: [-0.03, -0.02, 0.0, 0.01, -0.01, 0.0, 0.01, -0.02, 0.0, 0.01],
-        revalLoyer: [0.005, 0.005, 0.0, 0.01, 0.005, 0.0, 0.005, 0.01, 0.005, 0.0],
-        revalCharges: [0.02, 0.025, 0.02, 0.015, 0.02, 0.025, 0.02, 0.015, 0.02, 0.02],
-        revalTaxeFonciere: [0.03, 0.03, 0.02, 0.025, 0.03, 0.02, 0.025, 0.03, 0.02, 0.025],
+        rendementBourse: [0.183, -0.052, 0.225, 0.051, 0.207, 0.135, 0.158, 0.243, 0.253, -0.132, -0.165],
+        revalBien: [0.051, -0.023, -0.015, -0.001, -0.009, 0.008, 0.018, 0.012, 0.071, 0.088, 0.078],
+        revalLoyer: [0.054, 0.051, 0.033, 0.027, 0.026, 0.016, 0.017, 0.021, 0.014, -0.003, 0.008],
+        revalCharges: [0.03, 0.019, 0.021, 0.016, 0.021, 0.017, 0.011, 0.002, 0.013, 0.016, 0.014],
+        revalTaxeFonciere: [0.03, 0.019, 0.021, 0.016, 0.021, 0.017, 0.011, 0.002, 0.013, 0.016, 0.014],
       },
     },
     {
-      cle: 'ordinaire',
-      nom: 'Décennie ordinaire',
+      cle: 'bulle-immobiliere',
+      nom: 'Bulle immobilière',
       famille: 'historique',
-      periode: null, // à renseigner avec les données réelles
-      resume: "Une croissance sans drame ni euphorie.",
-      provisoire: true,
-      sources: SOURCES_A_DEFINIR,
+      periode: '2000–2010',
+      resume:
+        "Deux krachs boursiers — la bulle internet puis la crise financière — " +
+        "pendant que l'immobilier français fait plus que doubler.",
+      sources: SRC_INSEE,
+      reserves: [DOUTE_DEVISE],
       taux: {
-        rendementBourse: [0.07, -0.03, 0.12, 0.05, 0.09, -0.06, 0.11, 0.04, 0.08, 0.02],
-        revalBien: [0.02, 0.01, 0.03, 0.02, 0.01, 0.0, 0.02, 0.03, 0.01, 0.02],
-        revalLoyer: [0.015, 0.01, 0.02, 0.015, 0.01, 0.015, 0.02, 0.015, 0.01, 0.015],
-        revalCharges: [0.02, 0.025, 0.02, 0.015, 0.02, 0.025, 0.02, 0.015, 0.02, 0.02],
-        revalTaxeFonciere: [0.03, 0.03, 0.02, 0.025, 0.03, 0.02, 0.025, 0.03, 0.02, 0.025],
+        rendementBourse: [-0.132, -0.165, -0.199, 0.331, 0.147, 0.095, 0.207, 0.09, -0.403, 0.3, 0.118],
+        revalBien: [0.087, 0.079, 0.086, 0.119, 0.15, 0.155, 0.12, 0.065, 0.009, -0.071, 0.051],
+        revalLoyer: [-0.003, 0.008, 0.03, 0.027, 0.034, 0.035, 0.032, 0.032, 0.017, 0.02, 0.013],
+        revalCharges: [0.016, 0.014, 0.023, 0.022, 0.021, 0.016, 0.015, 0.026, 0.01, 0.009, 0.018],
+        revalTaxeFonciere: [0.016, 0.014, 0.023, 0.022, 0.021, 0.016, 0.015, 0.026, 0.01, 0.009, 0.018],
       },
     },
     {
-      cle: 'porteuse',
-      nom: 'Décennie porteuse',
+      cle: 'decennie-perdue',
+      nom: 'Décennie perdue',
       famille: 'historique',
-      periode: null, // à renseigner avec les données réelles
-      resume: "Marchés bien orientés, immobilier qui suit.",
-      provisoire: true,
-      sources: SOURCES_A_DEFINIR,
+      periode: '2008–2018',
+      resume:
+        "Le krach de 2008 tombe la première année — le pire moment pour qui vient " +
+        "d'emprunter. Les marchés se reprennent longuement ; l'immobilier français, " +
+        'lui, stagne puis recule de 2012 à 2016.',
+      sources: SRC_INSEE,
+      reserves: [
+        DOUTE_DEVISE,
+        'Loyers 2018 : le −0,8 % est une rupture de méthode de l’INSEE, pas une baisse réelle.',
+      ],
       taux: {
-        rendementBourse: [0.14, 0.06, 0.18, -0.02, 0.12, 0.16, 0.04, 0.11, 0.09, 0.13],
-        revalBien: [0.05, 0.04, 0.06, 0.03, 0.05, 0.04, 0.06, 0.05, 0.04, 0.05],
-        revalLoyer: [0.03, 0.025, 0.03, 0.02, 0.03, 0.025, 0.03, 0.03, 0.025, 0.03],
-        revalCharges: [0.02, 0.025, 0.02, 0.015, 0.02, 0.025, 0.02, 0.015, 0.02, 0.02],
-        revalTaxeFonciere: [0.03, 0.03, 0.02, 0.025, 0.03, 0.02, 0.025, 0.03, 0.02, 0.025],
+        rendementBourse: [-0.403, 0.3, 0.118, -0.055, 0.158, 0.267, 0.187, 0.083, 0.075, 0.224, -0.087],
+        revalBien: [0.009, -0.071, 0.051, 0.059, -0.005, -0.021, -0.018, -0.019, 0.009, 0.03, 0.03],
+        revalLoyer: [0.017, 0.02, 0.013, 0.012, 0.017, 0.013, 0.01, 0.005, 0.003, 0.002, -0.008],
+        revalCharges: [0.01, 0.009, 0.018, 0.025, 0.013, 0.007, 0.001, 0.002, 0.006, 0.012, 0.016],
+        revalTaxeFonciere: [0.01, 0.009, 0.018, 0.025, 0.013, 0.007, 0.001, 0.002, 0.006, 0.012, 0.016],
       },
     },
     {
-      cle: 'inflationniste',
-      nom: 'Décennie inflationniste',
+      cle: 'choc-inflationniste',
+      nom: 'Choc inflationniste',
       famille: 'historique',
-      periode: null, // à renseigner avec les données réelles
-      resume: "L'inflation ronge tout : loyers et charges s'envolent.",
-      provisoire: true,
-      sources: SOURCES_A_DEFINIR,
+      periode: '2012–2022',
+      resume:
+        "Taux bas et actions bien orientées sur l'essentiel de la période, puis le " +
+        "choc inflationniste de 2021-2022, qui percute les charges bien plus que les " +
+        "loyers ou l'immobilier — encore en hausse en 2022.",
+      sources: SRC_INSEE,
+      reserves: [
+        DOUTE_DEVISE,
+        'Loyers 2018 : le −0,8 % est une rupture de méthode de l’INSEE, pas une baisse réelle.',
+      ],
       taux: {
-        rendementBourse: [0.04, -0.11, 0.09, 0.02, -0.07, 0.13, 0.01, 0.06, -0.04, 0.08],
-        revalBien: [0.04, 0.03, 0.05, 0.02, 0.03, 0.04, 0.02, 0.03, 0.04, 0.03],
-        revalLoyer: [0.035, 0.045, 0.05, 0.04, 0.03, 0.035, 0.04, 0.045, 0.03, 0.035],
-        revalCharges: [0.04, 0.05, 0.055, 0.045, 0.035, 0.04, 0.045, 0.05, 0.035, 0.04],
-        revalTaxeFonciere: [0.045, 0.05, 0.06, 0.05, 0.04, 0.045, 0.05, 0.055, 0.04, 0.045],
+        rendementBourse: [0.158, 0.267, 0.187, 0.083, 0.075, 0.224, -0.087, 0.277, 0.159, 0.218, -0.181],
+        revalBien: [-0.005, -0.021, -0.018, -0.019, 0.009, 0.03, 0.03, 0.033, 0.055, 0.067, 0.063],
+        revalLoyer: [0.017, 0.013, 0.01, 0.005, 0.003, 0.002, -0.008, 0.011, 0.002, 0.008, 0.012],
+        revalCharges: [0.013, 0.007, 0.001, 0.002, 0.006, 0.012, 0.016, 0.015, -0.0002, 0.028, 0.059],
+        revalTaxeFonciere: [0.013, 0.007, 0.001, 0.002, 0.006, 0.012, 0.016, 0.015, -0.0002, 0.028, 0.059],
       },
     },
     {
-      cle: 'desinflation',
-      nom: 'Désinflation lente',
+      cle: 'inflation-ancree',
+      nom: 'Inflation ancrée',
       famille: 'prospectif',
-      periode: null, // à renseigner avec les données réelles
-      resume: "L'inflation reflue, les marchés restent tièdes.",
-      provisoire: true,
-      sources: SOURCES_A_DEFINIR,
+      periode: null,
+      resume:
+        "Dette publique élevée, banque centrale contrainte de garder des taux hauts " +
+        'longtemps, crédit immobilier sélectif et valorisations actions tendues qui se ' +
+        "dégonflent en partie. L'immobilier stagne en nominal — donc recule en réel — " +
+        'pendant que loyers et charges continuent de courir.',
+      sources: SRC_CONSTRUIT,
+      reserves: [
+        "Hypothèse construite en 2026, pas une observation. Aucune prétention de précision.",
+      ],
       taux: {
-        rendementBourse: [0.05, 0.06, 0.04, 0.07, 0.05, 0.06, 0.05, 0.06, 0.05, 0.06],
-        revalBien: [0.0, 0.01, 0.015, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02],
-        revalLoyer: [0.03, 0.025, 0.02, 0.018, 0.015, 0.015, 0.015, 0.015, 0.015, 0.015],
-        revalCharges: [0.03, 0.025, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02],
-        revalTaxeFonciere: [0.035, 0.03, 0.025, 0.025, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02],
+        rendementBourse: [0.04, -0.08, 0.06, 0.09, 0.05, 0.07, -0.05, 0.11, 0.08, 0.06],
+        revalBien: [0.0, -0.02, 0.01, 0.02, 0.01, 0.02, 0.01, 0.02, 0.02, 0.02],
+        revalLoyer: [0.025, 0.03, 0.03, 0.025, 0.02, 0.02, 0.025, 0.02, 0.02, 0.02],
+        revalCharges: [0.03, 0.035, 0.03, 0.025, 0.02, 0.02, 0.025, 0.02, 0.02, 0.02],
+        revalTaxeFonciere: [0.03, 0.035, 0.03, 0.025, 0.02, 0.02, 0.025, 0.02, 0.02, 0.02],
       },
     },
     {
-      cle: 'choc-taux',
-      nom: 'Choc de taux',
+      cle: 'productivite-ia',
+      nom: 'Productivité IA',
       famille: 'prospectif',
-      periode: null, // à renseigner avec les données réelles
-      resume: "Les taux montent, l'immobilier corrige, les marchés encaissent.",
-      provisoire: true,
-      sources: SOURCES_A_DEFINIR,
+      periode: null,
+      resume:
+        "Les gains de productivité liés à l'IA se diffusent dans l'économie réelle et " +
+        'gonflent les marges des entreprises cotées ; la désinflation permet une détente ' +
+        "monétaire. Effet quasi nul sur le logement — l'IA ne construit pas de logements " +
+        "et ne résout pas la pénurie foncière. L'écart marchés / immobilier se creuse.",
+      sources: SRC_CONSTRUIT,
+      reserves: [
+        "Hypothèse construite en 2026, pas une observation. Aucune prétention de précision.",
+      ],
       taux: {
-        rendementBourse: [-0.15, -0.08, 0.14, 0.09, 0.07, 0.06, 0.08, 0.05, 0.07, 0.06],
-        revalBien: [-0.06, -0.05, -0.02, 0.01, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02],
-        revalLoyer: [0.025, 0.03, 0.025, 0.02, 0.015, 0.015, 0.015, 0.015, 0.015, 0.015],
-        revalCharges: [0.03, 0.035, 0.03, 0.025, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02],
-        revalTaxeFonciere: [0.035, 0.04, 0.035, 0.03, 0.025, 0.025, 0.02, 0.02, 0.02, 0.02],
+        rendementBourse: [0.14, 0.18, 0.1, 0.22, -0.06, 0.16, 0.19, 0.09, 0.15, 0.12],
+        revalBien: [0.01, 0.015, 0.02, 0.015, 0.01, 0.015, 0.02, 0.015, 0.02, 0.015],
+        revalLoyer: [0.015, 0.015, 0.01, 0.015, 0.01, 0.01, 0.015, 0.01, 0.015, 0.01],
+        revalCharges: [0.015, 0.01, 0.01, 0.01, 0.005, 0.01, 0.01, 0.01, 0.01, 0.01],
+        revalTaxeFonciere: [0.015, 0.01, 0.01, 0.01, 0.005, 0.01, 0.01, 0.01, 0.01, 0.01],
       },
     },
   ];
@@ -146,7 +199,7 @@
   /** Les familles, dans l'ordre d'affichage. */
   var FAMILLES = [
     { cle: 'historique', nom: 'Décennies observées' },
-    { cle: 'prospectif', nom: 'Scénarios prospectifs' },
+    { cle: 'prospectif', nom: 'Scénarios construits' },
   ];
 
   /**
