@@ -976,6 +976,77 @@ input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; marg
 
 #melNote { margin-top: 12px; }
 
+/* ------------------------------------------- D'où vient cet écart ? */
+
+/*
+ * Même motif de divulgation progressive que la mise en location : un bouton
+ * texte discret (`.mel__declencheur`, réutilisé tel quel), tout replié par
+ * défaut. La vue principale garde une seule visualisation.
+ */
+.detail { display: grid; gap: 12px; }
+.detail__panneau { display: grid; gap: 16px; }
+.detail__panneau[hidden] { display: none; }
+
+/* Deux repères chiffrés, côte à côte, avant les graphiques. */
+.reperes {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+}
+.repere {
+  min-width: 0;
+  padding: 16px 18px;
+  background: var(--surface);
+  border: 1px solid var(--trait);
+  border-radius: var(--rayon-large);
+  box-shadow: var(--ombre);
+}
+.repere__mot {
+  margin: 0;
+  font-size: .625rem;
+  font-weight: 600;
+  letter-spacing: var(--interlettre-caps);
+  text-transform: uppercase;
+  color: var(--encre-3);
+}
+.repere__chiffre {
+  margin: 6px 0 2px;
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: var(--achat);
+  line-height: 1.1;
+}
+.repere__mesure { margin: 0; font-size: .8125rem; color: var(--encre-2); }
+
+/* Mensualité contre loyer : un tableau de trois lignes, pas un graphique. */
+.duo { margin: 8px 0 0; padding: 0; list-style: none; }
+.duo li {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 5px 0;
+  border-bottom: 1px solid var(--trait);
+}
+.duo li:last-child { border-bottom: 0; }
+.duo__mot { font-size: .8125rem; color: var(--encre-2); min-width: 0; }
+.duo__mot em { font-style: normal; color: var(--encre-3); }
+.duo__valeur { font-size: .9375rem; font-weight: 600; color: var(--encre); }
+
+/*
+ * Les trois graphiques du détail sont plus courts que la visualisation
+ * principale : ils l'expliquent, ils ne la concurrencent pas.
+ */
+.graphique--court { height: 240px; }
+@media (max-width: 560px) { .graphique--court { height: 200px; } }
+
+/*
+ * Les segments empilés de clay-200 et d'ochre-500 n'atteignent pas 3:1 sur le
+ * fond : la légende chiffrée est ce qui les rend lisibles, elle n'est pas
+ * décorative. D'où la valeur à côté de chaque poste.
+ */
+.legende__valeur { font-variant-numeric: tabular-nums; color: var(--encre-3); }
+
 /* ------------------------------------------------- Comparateur de thèmes */
 
 /*

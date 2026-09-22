@@ -216,6 +216,9 @@
         taxeFonciere: taxe,
         totalDebourseAnnuel: totalDebourseAnnuel,
         patrimoineNetImmo: patrimoineNetImmo,
+        // Part du bien réellement possédée : ce qui resterait si on vendait et
+        // qu'on soldait le prêt, rapporté à la valeur du bien.
+        partPossedee: valeurBien > 0 ? patrimoineNetImmo / valeurBien : 0,
         cumulDecaisse: cumulDecaisse,
         gainCashPur: patrimoineNetImmo - cumulDecaisse,
         surplusProprio: surplusProprio,
@@ -260,12 +263,118 @@
     };
   }
 
+  /** Somme d'une colonne annuelle, de l'année 1 à `annee` incluse. */
+  function cumul(annees, annee, cle) {
+    var n = Math.max(1, Math.min(Math.round(annee), annees.length));
+    var total = 0;
+    for (var i = 0; i < n; i++) total += annees[i][cle];
+    return total;
+  }
+
+  /**
+   * Répartition de l'enveloppe cumulée jusqu'à `annee`, des deux côtés.
+   *
+   * Les deux trajectoires dépensent la MÊME enveloppe : ce qui ne part pas
+   * dans le logement part en bourse. Les deux totaux sont donc égaux — c'est
+   * la prémisse du simulateur, et c'est ce que le graphique doit montrer.
+   * Comparer « charges de l'acheteur » à « loyers du locataire » sans les
+   * épargnes ferait conclure que l'achat coûte plus cher, alors que l'écart
+   * n'est pas dépensé : il est investi.
+   *
+   * Seule exception : quand l'enveloppe ne couvre pas le coût de possession,
+   * le moteur plafonne le surplus à zéro et le côté achat dépasse l'enveloppe.
+   * Ce dépassement est une information, pas une anomalie — on le laisse voir.
+   */
+  function repartitionEnveloppe(res, annee) {
+    var a = res.annees;
+    var n = Math.max(1, Math.min(Math.round(annee), a.length));
+    var c = function (cle) {
+      return cumul(a, n, cle);
+    };
+
+    var interets = c('interets');
+    var assurance = c('assurance');
+    var taxeFonciere = c('taxeFonciere');
+    var charges = c('charges');
+
+    var achat = {
+      credit: interets + assurance,
+      capital: c('capitalAmorti'),
+      possession: taxeFonciere + charges,
+      epargne: c('surplusProprio'),
+      detail: {
+        interets: interets,
+        assurance: assurance,
+        taxeFonciere: taxeFonciere,
+        charges: charges,
+      },
+    };
+    achat.total = achat.credit + achat.capital + achat.possession + achat.epargne;
+
+    var location = { loyers: c('loyerAnnuel'), epargne: c('surplusLocataire') };
+    location.total = location.loyers + location.epargne;
+
+    return {
+      annee: n,
+      enveloppeCumulee: res.entrees.enveloppeMensuelle * 12 * n,
+      achat: achat,
+      location: location,
+    };
+  }
+
+  /**
+   * Ce que chaque trajectoire ne récupère jamais, cumulé jusqu'à `annee`.
+   *
+   * Deux exclusions délibérées côté achat :
+   * - le CAPITAL remboursé, qui revient dans le patrimoine à la revente ;
+   * - les TRAVAUX, parce que le modèle les fond dans la valeur du bien (le
+   *   champ s'appelle « valeur estimée du bien après travaux »). Ils reviennent
+   *   donc par le prix de revente ; les compter ici les perdrait deux fois.
+   *
+   * Les frais d'acquisition, eux, sont bien perdus : notaire, agence, banque.
+   * Côté location, la totalité du loyer est irrécupérable — c'est ce qui rend
+   * la comparaison honnête, au lieu de n'exposer que les frais de l'acheteur.
+   */
+  function fraisIrrecuperables(res, annee) {
+    var a = res.annees;
+    var n = Math.max(1, Math.min(Math.round(annee), a.length));
+    var e = res.entrees;
+
+    var interets = cumul(a, n, 'interets');
+    var assurance = cumul(a, n, 'assurance');
+    var taxeFonciere = cumul(a, n, 'taxeFonciere');
+    var charges = cumul(a, n, 'charges');
+
+    var achat = {
+      acquisition: res.fraisNotaire + e.fraisAgence + e.fraisBancaires,
+      credit: interets + assurance,
+      possession: taxeFonciere + charges,
+      detail: {
+        notaire: res.fraisNotaire,
+        agence: e.fraisAgence,
+        bancaires: e.fraisBancaires,
+        interets: interets,
+        assurance: assurance,
+        taxeFonciere: taxeFonciere,
+        charges: charges,
+      },
+    };
+    achat.total = achat.acquisition + achat.credit + achat.possession;
+
+    var location = { loyers: cumul(a, n, 'loyerAnnuel') };
+    location.total = location.loyers;
+
+    return { annee: n, achat: achat, location: location };
+  }
+
   var api = {
     DEFAUTS: DEFAUTS,
     fraisDeNotaire: fraisDeNotaire,
     mensualiteCredit: mensualiteCredit,
     tableauAmortissement: tableauAmortissement,
     simuler: simuler,
+    repartitionEnveloppe: repartitionEnveloppe,
+    fraisIrrecuperables: fraisIrrecuperables,
   };
 
   if (typeof module !== 'undefined' && module.exports) {

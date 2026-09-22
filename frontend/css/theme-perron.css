@@ -69,6 +69,29 @@
   --location:        var(--olive-700);
   --achat-location:  var(--ochre-500);   /* 3e série : ΔE 29,5 contre l'olive */
 
+  /*
+   * Postes des graphiques empilés. Cinq entités, pas six : « taxe foncière » et
+   * « charges de copropriété » sont fondues en un seul poste. À six, la paire la
+   * plus proche tombe à ΔE 13,9 en vision normale, sous le plancher de 15 — la
+   * palette Perron, volontairement terreuse et sourde, n'offre pas six teintes
+   * séparables. À cinq, la pire paire voisine remonte à 20,8 en vision normale
+   * et 18,8 en protanopie. Le détail taxe/charges reste lisible dans l'infobulle.
+   *
+   * Une entité garde sa couleur d'un graphique à l'autre : les intérêts sont
+   * toujours clay-600, les charges toujours warm-500, les loyers toujours olive.
+   *
+   * Écarts assumés, mêmes que pour les courbes : plusieurs de ces pas passent
+   * sous le plancher de chroma (ils « lisent gris ») et l'olive sort de la bande
+   * de clarté. C'est le parti pris du design. Le contraste faible de clay-200 et
+   * d'ochre-500 sur le fond oblige en revanche à étiqueter les segments — ce que
+   * fait la légende chiffrée, elle n'est pas optionnelle.
+   */
+  --poste-credit:     var(--clay-600);   /* intérêts + assurance emprunteur */
+  --poste-capital:    var(--clay-200);   /* capital remboursé — il revient */
+  --poste-possession: var(--warm-500);   /* taxe foncière + charges de copro */
+  --poste-epargne:    var(--ochre-500);  /* ce qui part en bourse */
+  --poste-acquisition: var(--clay-300);  /* notaire + agence + frais bancaires */
+
   --achat-voile:     var(--clay-50);
   --location-voile:  var(--olive-50);
 

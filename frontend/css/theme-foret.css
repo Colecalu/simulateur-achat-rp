@@ -62,6 +62,17 @@
   --location:        var(--terracotta-600);
   --achat-location:  var(--blue-600);
 
+  /*
+   * Postes des graphiques empilés. Transposition mécanique des rôles de Perron
+   * dans les rampes de Forêt, pour que les graphiques ne soient pas vides ici.
+   * Non validée : Forêt est gelé, c'est Perron qui est le thème de référence.
+   */
+  --poste-credit:      var(--green-800);
+  --poste-capital:     var(--green-200);
+  --poste-possession:  var(--ink-500);
+  --poste-epargne:     var(--amber-500);
+  --poste-acquisition: var(--green-500);
+
   --achat-voile:     var(--green-50);
   --location-voile:  var(--terracotta-50);
 

@@ -10,6 +10,8 @@
 
   const DEFAUTS = window.SimuRP.DEFAUTS;
   const simuler = window.SimuRP.simuler;
+  const repartitionEnveloppe = window.SimuRP.repartitionEnveloppe;
+  const fraisIrrecuperables = window.SimuRP.fraisIrrecuperables;
   const DEFAUTS_LOCATION = window.SimuRPLocation.DEFAUTS_LOCATION;
   const simulerMiseEnLocation = window.SimuRPLocation.simulerMiseEnLocation;
 
@@ -245,6 +247,43 @@ function optionsCommunes() {
   };
 }
 
+/**
+ * Matérialise le point mort sur le graphique de patrimoine : un trait vertical
+ * à l'année où l'achat repasse devant la location.
+ *
+ * Greffon écrit à la main plutôt que chartjs-plugin-annotation : une seule
+ * balise <script> de plus au CDN pour un trait de vingt lignes ne se justifie
+ * pas, et chaque dépendance externe est un point de panne hors ligne.
+ */
+const traitPointMort = {
+  id: 'traitPointMort',
+  afterDatasetsDraw(chart) {
+    const annee = chart.options.pointMort;
+    // L'année 1 n'a pas besoin d'un trait : la courbe part déjà devant.
+    if (!annee || annee <= 1) return;
+
+    const x = chart.scales.x.getPixelForValue(annee - 1);
+    const { top, bottom } = chart.chartArea;
+    const ctx = chart.ctx;
+
+    ctx.save();
+    ctx.setLineDash([4, 4]);
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = jeton('--encre-3');
+    ctx.beginPath();
+    ctx.moveTo(x, top);
+    ctx.lineTo(x, bottom);
+    ctx.stroke();
+
+    ctx.setLineDash([]);
+    ctx.fillStyle = jeton('--encre-2');
+    ctx.font = '600 11px ' + jeton('--police');
+    ctx.textAlign = x > (chart.chartArea.left + chart.chartArea.right) / 2 ? 'right' : 'left';
+    ctx.fillText('point mort', x + (ctx.textAlign === 'right' ? -6 : 6), top + 12);
+    ctx.restore();
+  },
+};
+
 function dessinerGraphiques(resultat, horizon, mel) {
   // Chart.js vient d'un CDN : hors ligne, il manque. Les chiffres et le tableau
   // restent justes, on se contente de le dire au lieu de casser la page.
@@ -302,6 +341,8 @@ function dessinerGraphiques(resultat, horizon, mel) {
 
   const optionsPatrimoine = optionsCommunes();
   Object.assign(optionsPatrimoine.scales.y, bornes);
+  // Lu par le greffon `traitPointMort`, qui matérialise le croisement.
+  optionsPatrimoine.pointMort = resultat.premiereAnneeFavorable;
 
   if (graphPatrimoine) {
     graphPatrimoine.data = donneesLignes;
@@ -312,6 +353,7 @@ function dessinerGraphiques(resultat, horizon, mel) {
       type: 'line',
       data: donneesLignes,
       options: optionsPatrimoine,
+      plugins: [traitPointMort],
     });
   }
 
@@ -353,6 +395,239 @@ function dessinerGraphiques(resultat, horizon, mel) {
     <span class="legende__item"><span class="pastille pastille--achat"></span>Achat</span>
     <span class="legende__item"><span class="pastille pastille--location"></span>Location</span>
   `;
+}
+
+/* ------------------------------------------- D'où vient cet écart ? */
+
+/*
+ * Section dépliable sous le graphique principal. Elle explique le chiffre
+ * affiché ; elle ne le concurrence pas — d'où le repli par défaut et des
+ * graphiques plus courts.
+ *
+ * Les trois graphiques lisent le MÊME curseur d'horizon que le gros chiffre.
+ * Aucun second curseur : deux réglages de temps à l'écran, c'est la garantie
+ * qu'on finit par comparer deux dates différentes sans s'en apercevoir.
+ */
+let graphPossession = null;
+let graphEnveloppe = null;
+let graphPerdu = null;
+
+const pourcentEntier = new Intl.NumberFormat('fr-FR', {
+  style: 'percent',
+  maximumFractionDigits: 0,
+});
+
+const detailOuvert = () => !$('#detailPanneau').hidden;
+
+/** Une ligne de légende : pastille, nom du poste, et son montant. */
+function legendeChiffree(cible, postes) {
+  $(cible).innerHTML = postes
+    .filter((p) => p.valeur > 0)
+    .map(
+      (p) =>
+        `<span class="legende__item"><span class="pastille" style="background:${p.couleur}"></span>` +
+        `${p.nom}<span class="legende__valeur">${euros.format(p.valeur)}</span></span>`
+    )
+    .join('');
+}
+
+/**
+ * Options communes aux deux histogrammes empilés.
+ *
+ * Un trait de 2 px couleur fond sépare les segments : sans lui, deux postes
+ * voisins de teintes proches se lisent comme un seul bloc.
+ */
+function optionsEmpilees() {
+  const o = optionsCommunes();
+  o.interaction = { mode: 'index', intersect: false };
+  o.scales.x.stacked = true;
+  o.scales.y.stacked = true;
+  o.scales.y.beginAtZero = true;
+  o.plugins.tooltip.callbacks.title = (items) => items[0].label;
+  o.plugins.tooltip.callbacks.label = (ctx) =>
+    ctx.parsed.y > 0 ? ` ${ctx.dataset.label} : ${euros.format(ctx.parsed.y)}` : null;
+  o.plugins.tooltip.callbacks.footer = (items) => {
+    const total = items.reduce((t, i) => t + i.parsed.y, 0);
+    return `Total : ${euros.format(total)}`;
+  };
+  o.plugins.tooltip.footerColor = jeton('--encre-2');
+  return o;
+}
+
+function posteEmpile(label, valeurs, couleur, arrondi) {
+  return {
+    label,
+    data: valeurs,
+    backgroundColor: couleur,
+    borderColor: jeton('--surface'),
+    borderWidth: { top: 2, right: 0, bottom: 0, left: 0 },
+    borderSkipped: false,
+    borderRadius: arrondi ? { topLeft: 4, topRight: 4 } : 0,
+    maxBarThickness: 150,
+  };
+}
+
+/** Crée le graphique s'il n'existe pas, le met à jour sinon. */
+function poser(graphique, selecteur, type, data, options) {
+  if (graphique) {
+    graphique.data = data;
+    graphique.options = options;
+    graphique.update('none');
+    return graphique;
+  }
+  return new Chart($(selecteur), { type: type, data: data, options: options });
+}
+
+function dessinerDetail(resultat, horizon) {
+  if (!detailOuvert() || typeof Chart === 'undefined') return;
+
+  // --- Les deux repères chiffrés ---------------------------------------
+  //
+  // Attention : `premiereAnneeFavorable` est le PREMIER croisement, pas un
+  // acquis. Les deux courbes peuvent se recroiser — un rendement boursier
+  // élevé fait repasser le locataire devant après quelques années. Annoncer
+  // « point mort : 3 ans » pendant que le gros chiffre affiche −153 000 €
+  // serait une contradiction à l'écran. On vérifie donc que l'avantage tient
+  // encore à l'horizon choisi, et on le dit quand ce n'est pas le cas.
+  //
+  const pointMort = resultat.premiereAnneeFavorable;
+  const tientEncore = resultat.annees[horizon - 1].ecart >= 0;
+
+  $('#pointMort').textContent =
+    pointMort === null ? 'Jamais' : pointMort === 1 ? 'Dès la 1re année' : `${pointMort} ans`;
+
+  if (pointMort === null) {
+    $('#pointMortMesure').textContent =
+      `Sur ${resultat.annees.length} ans simulés, l'achat ne repasse jamais devant la location.`;
+  } else if (tientEncore) {
+    $('#pointMortMesure').textContent = "Année où l'achat repasse devant la location.";
+  } else {
+    $('#pointMortMesure').textContent =
+      `L'achat passe devant à l'année ${pointMort}, mais la location reprend l'avantage ` +
+      `avant l'année ${horizon}.`;
+  }
+
+  $('#duoMensualite').textContent = euros.format(resultat.mensualiteTotale);
+  $('#duoProprio').textContent = euros.format(resultat.coutMensuelProprio);
+  $('#duoLoyer').textContent = euros.format(resultat.entrees.loyer);
+
+  // --- Part du bien réellement possédée --------------------------------
+  const etiquettes = resultat.annees.map((a) => a.annee);
+  const cAchat = jeton('--achat');
+  const optionsPossession = optionsCommunes();
+  optionsPossession.scales.y.min = 0;
+  optionsPossession.scales.y.max = 1;
+  optionsPossession.scales.y.ticks.callback = (v) => pourcentEntier.format(v);
+  optionsPossession.plugins.tooltip.callbacks.label = (ctx) =>
+    ` Part possédée : ${pourcentEntier.format(ctx.parsed.y)}`;
+
+  graphPossession = poser(
+    graphPossession,
+    '#graphPossession',
+    'line',
+    {
+      labels: etiquettes,
+      datasets: [
+        {
+          label: 'Part possédée',
+          data: resultat.annees.map((a) => a.partPossedee),
+          borderColor: cAchat,
+          backgroundColor: `color-mix(in srgb, ${cAchat} 12%, transparent)`,
+          borderWidth: 2,
+          fill: true,
+          tension: 0.25,
+          pointRadius: (ctx) => (ctx.dataIndex === horizon - 1 ? 6 : 0),
+          pointHoverRadius: 6,
+          pointBackgroundColor: cAchat,
+          pointBorderColor: jeton('--surface'),
+          pointBorderWidth: 2,
+        },
+      ],
+    },
+    optionsPossession
+  );
+
+  // --- Où va l'enveloppe ------------------------------------------------
+  const rep = repartitionEnveloppe(resultat, horizon);
+  const cCredit = jeton('--poste-credit');
+  const cCapital = jeton('--poste-capital');
+  const cPossession = jeton('--poste-possession');
+  const cEpargne = jeton('--poste-epargne');
+  const cLoyers = jeton('--location');
+
+  $('#titreEnveloppe').textContent = horizon === 1 ? 'la 1re année' : `sur ${horizon} ans`;
+
+  graphEnveloppe = poser(
+    graphEnveloppe,
+    '#graphEnveloppe',
+    'bar',
+    {
+      labels: ['Achat', 'Location'],
+      datasets: [
+        posteEmpile('Intérêts et assurance', [rep.achat.credit, 0], cCredit, false),
+        posteEmpile('Capital remboursé', [rep.achat.capital, 0], cCapital, false),
+        posteEmpile('Taxe foncière et charges', [rep.achat.possession, 0], cPossession, false),
+        posteEmpile('Loyers', [0, rep.location.loyers], cLoyers, false),
+        posteEmpile('Épargne investie', [rep.achat.epargne, rep.location.epargne], cEpargne, true),
+      ],
+    },
+    optionsEmpilees()
+  );
+
+  legendeChiffree('#legendeEnveloppe', [
+    { nom: 'Intérêts et assurance', valeur: rep.achat.credit, couleur: cCredit },
+    { nom: 'Capital remboursé', valeur: rep.achat.capital, couleur: cCapital },
+    { nom: 'Taxe foncière et charges', valeur: rep.achat.possession, couleur: cPossession },
+    { nom: 'Loyers', valeur: rep.location.loyers, couleur: cLoyers },
+    { nom: 'Épargne investie', valeur: rep.achat.epargne, couleur: cEpargne },
+  ]);
+
+  // --- Ce qui ne revient jamais ----------------------------------------
+  const irr = fraisIrrecuperables(resultat, horizon);
+  const cAcquisition = jeton('--poste-acquisition');
+  $('#titrePerdu').textContent = horizon === 1 ? 'la 1re année' : `sur ${horizon} ans`;
+
+  graphPerdu = poser(
+    graphPerdu,
+    '#graphPerdu',
+    'bar',
+    {
+      labels: ['Achat', 'Location'],
+      datasets: [
+        posteEmpile('Intérêts et assurance', [irr.achat.credit, 0], cCredit, false),
+        posteEmpile('Frais d’acquisition', [irr.achat.acquisition, 0], cAcquisition, false),
+        posteEmpile('Taxe foncière et charges', [irr.achat.possession, 0], cPossession, true),
+        posteEmpile('Loyers', [0, irr.location.loyers], cLoyers, true),
+      ],
+    },
+    optionsEmpilees()
+  );
+
+  legendeChiffree('#legendePerdu', [
+    { nom: 'Intérêts et assurance', valeur: irr.achat.credit, couleur: cCredit },
+    { nom: 'Frais d’acquisition', valeur: irr.achat.acquisition, couleur: cAcquisition },
+    { nom: 'Taxe foncière et charges', valeur: irr.achat.possession, couleur: cPossession },
+    { nom: 'Loyers', valeur: irr.location.loyers, couleur: cLoyers },
+  ]);
+}
+
+function initialiserDetail() {
+  const bouton = $('#detailOuvrir');
+  const panneau = $('#detailPanneau');
+
+  bouton.addEventListener('click', () => {
+    const ouvrir = panneau.hidden;
+    panneau.hidden = !ouvrir;
+    bouton.setAttribute('aria-expanded', String(ouvrir));
+    bouton.textContent = ouvrir ? 'Masquer le détail' : "D'où vient cet écart ?";
+    if (!ouvrir) return;
+
+    // Un canevas dimensionné dans un conteneur masqué reste à zéro : on ne
+    // crée les graphiques qu'une fois la zone visible, et on redimensionne
+    // ceux qui existaient déjà.
+    rafraichir();
+    for (const g of [graphPossession, graphEnveloppe, graphPerdu]) if (g) g.resize();
+  });
 }
 
 /* ---------------------------------------------------------------- Orchestre */
@@ -401,6 +676,7 @@ function rafraichir() {
   afficherAlerte(dernierResultat);
   afficherVerdict(dernierResultat, horizon);
   dessinerGraphiques(dernierResultat, horizon, mel);
+  dessinerDetail(dernierResultat, horizon);
   if (mel) afficherTexteMel(mel, horizon);
 }
 
@@ -719,6 +995,7 @@ function initialiser() {
   remplirFormulaire(DEFAUTS);
   remplirFormulaireMel();
   initialiserSaisie();
+  initialiserDetail();
   $('#formulaire').addEventListener('input', recalculer);
   // Le profil vit hors du plateau : sans son propre écouteur, l'éditer ne
   // recalculerait rien avant le clic sur « Valider mon profil ».

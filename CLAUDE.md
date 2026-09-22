@@ -101,9 +101,35 @@ les écarts assumés.
 - Les taux se saisissent en pourcentage à l'écran et se stockent en fraction dans le modèle
   (conversion dans `app.js`, jamais dans `calc.js`).
 - **Une seule visualisation par défaut** : le graphique du patrimoine net d'impôt et l'encadré
-  « si vous revendez dans… ». Le module de mise en location reste masqué jusqu'à un clic. Cette
-  sobriété est un choix assumé — ne pas rajouter d'indicateurs ou de graphiques sans demande
-  explicite.
+  « si vous revendez dans… ». Les modules « D'où vient cet écart ? » et « mise en location »
+  restent masqués jusqu'à un clic. Cette sobriété est un choix assumé — ne pas rajouter
+  d'indicateurs ou de graphiques sans demande explicite.
+- **La section « D'où vient cet écart ? »** (repliée) porte quatre indicateurs, tous pilotés par
+  le curseur d'horizon **déjà en place** : point mort, mensualité contre loyer, part du bien
+  possédée, répartition de l'enveloppe, frais irrécupérables. Jamais de second curseur de temps :
+  deux réglages de date à l'écran, c'est la garantie qu'on finit par comparer deux dates
+  différentes sans s'en apercevoir.
+- **Le graphique « Où va votre enveloppe » a deux colonnes de hauteur identique.** C'est la
+  prémisse du simulateur rendue visible : même enveloppe, répartition différente. Opposer
+  « charges de l'acheteur » (633 k€ à 20 ans) à « loyers du locataire » (423 k€) sans les épargnes
+  ferait conclure que l'achat coûte 210 k€ de plus, alors que cet écart n'est pas dépensé mais
+  investi. `repartitionEnveloppe()` porte cette lecture et un test verrouille l'égalité des deux
+  totaux. Quand l'enveloppe est insuffisante, le côté achat dépasse : c'est voulu, on le montre.
+- **Les travaux ne sont pas des frais irrécupérables.** Le modèle les fond dans la valeur du bien
+  (« valeur estimée du bien après travaux ») : ils reviennent par le prix de revente. Le capital
+  remboursé non plus. En revanche les frais d'acquisition (notaire, agence, banque), les intérêts
+  et l'assurance le sont — et côté location, la totalité du loyer. Un test verrouille chaque
+  exclusion, à emprunt constant : des travaux *empruntés* coûtent des intérêts, eux bien perdus.
+- **Le point mort n'est pas un acquis.** `premiereAnneeFavorable` est le PREMIER croisement ; les
+  courbes peuvent se recroiser (un rendement boursier élevé fait repasser le locataire devant).
+  Vérifier que l'avantage tient encore à l'horizon choisi avant d'annoncer un point mort, sinon
+  l'écran se contredit : « point mort : 3 ans » au-dessus d'un verdict à −153 111 €.
+- **Les postes empilés sont cinq, pas six.** « Taxe foncière » et « charges de copropriété » sont
+  fondues : à six entités, la paire voisine la plus proche tombe à ΔE 13,9 en vision normale, sous
+  le plancher de 15. À cinq, la pire paire remonte à 20,8. La palette Perron, volontairement
+  terreuse, n'offre pas six teintes séparables — le détail reste dans l'infobulle. Une entité garde
+  sa couleur d'un graphique à l'autre. La légende **chiffrée** n'est pas décorative : clay-200 et
+  ochre-500 n'atteignent pas 3:1 sur le fond, l'étiquette est ce qui les rend lisibles.
 - L'encadré de verdict est réduit au strict nécessaire : le curseur d'horizon, le chiffre, et une
   seule ligne qui dit ce que ce chiffre mesure. Ne pas y réintroduire de commentaire.
 - **Aucun résultat n'est affiché tant que le profil et les quatre bulles ne sont pas validés.** Tous les champs
