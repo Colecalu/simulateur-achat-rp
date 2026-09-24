@@ -1,0 +1,111 @@
+/* =========================================================================
+   Thème « Forêt » — vert profond, terracotta et crème.
+   Source : docs/design/bundle-claude-design.html (bloc __bundler/template).
+
+   Ce fichier ne contient QUE des valeurs. Aucune règle de mise en page :
+   la structure vit dans style.css et ne connaît que les noms sémantiques
+   définis en fin de fichier.
+   ========================================================================= */
+
+@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500&display=swap");
+
+:root {
+  color-scheme: light;
+
+  /* ---------- Rampes du design, recopiées ---------- */
+  --ink-900:#14211d; --ink-800:#1c2b27; --ink-700:#24382f; --ink-600:#354c42;
+  --ink-500:#4a5f56; --ink-400:#6b7f76; --ink-300:#8a9a92; --ink-200:#b4c0ba;
+  --ink-100:#d6ded9; --ink-50:#e8ede9;
+
+  --cream-50:#fdfbf7; --cream-100:#f7f1e8; --cream-200:#efe6d9; --cream-300:#e3d7c5;
+
+  --green-800:#163a2e; --green-700:#1f4d3d; --green-600:#2a6650; --green-500:#3d8168;
+  --green-200:#bcd8c9; --green-100:#dceae2; --green-50:#eef5f1;
+
+  --terracotta-700:#a34e2d; --terracotta-600:#c0603a; --terracotta-500:#d3805e;
+  --terracotta-200:#eec9b6; --terracotta-100:#f6e3d9; --terracotta-50:#fbf1eb;
+
+  --amber-600:#a2740f; --amber-500:#c08a1e; --amber-100:#f7ebd2;
+  --red-700:#8c2d20; --red-600:#a83a2a; --red-100:#f6ded9; --red-50:#fbeeeb;
+  --blue-700:#2c5169; --blue-600:#3a6684; --blue-100:#dde8ef;
+  --white:#ffffff;
+
+  /* ---------- Surfaces et encre ---------- */
+  --plan:            var(--cream-50);
+  --surface:         var(--white);
+  --surface-creuse:  var(--cream-100);
+
+  --encre:           var(--ink-900);
+  --encre-2:         var(--ink-500);
+  --encre-3:         var(--ink-400);
+
+  --trait:           var(--ink-50);
+  --bord-champ:      var(--ink-100);
+  --grille:          var(--ink-50);
+  --axe:             var(--ink-100);
+
+  /* ---------- Accent : vert profond ---------- */
+  --accent:          var(--green-600);
+  --accent-fort:     var(--green-800);
+  --accent-doux:     var(--green-50);
+  --sur-accent:      var(--cream-50);
+  --survol:          var(--cream-100);
+  --anneau:          0 0 0 3px rgba(42,102,80,.22);
+
+  /*
+   * Séries de données, reprises des jetons `--data-1` et `--data-2` du design.
+   * Le vert est très peu saturé (chroma 0,058) : il ne passe pas le plancher
+   * d'une palette catégorielle. C'est le parti pris du design, et la séparation
+   * qui compte reste bonne — ΔE 14,8 en protanopie, 27,6 en vision normale.
+   */
+  --achat:           var(--green-700);
+  --location:        var(--terracotta-600);
+  --achat-location:  var(--blue-600);
+
+  /*
+   * Postes des graphiques empilés. Transposition mécanique des rôles de Perron
+   * dans les rampes de Forêt, pour que les graphiques ne soient pas vides ici.
+   * Non validée : Forêt est gelé, c'est Perron qui est le thème de référence.
+   */
+  --poste-credit:      var(--green-800);
+  --poste-capital:     var(--green-200);
+  --poste-possession:  var(--ink-500);
+  --poste-epargne:     var(--amber-500);
+  --poste-acquisition: var(--green-500);
+
+  /* Courbes de l'aperçu de scénario. Non validée : Forêt est gelé. */
+  --courbe-marches: var(--terracotta-600);
+  --courbe-immo:    var(--green-700);
+  --courbe-loyer:   var(--ink-200);
+
+  --achat-voile:     var(--green-50);
+  --location-voile:  var(--terracotta-50);
+
+  --succes:          var(--green-600);
+  --alerte:          var(--red-600);
+  --alerte-fond:     var(--red-50);
+
+  /* ---------- Formes ---------- */
+  --rayon:           6px;
+  --rayon-large:     16px;
+  --rayon-feuille:   24px;
+
+  --ombre:    0 1px 2px rgba(20,33,29,.06);
+  --ombre-2:  0 2px 6px rgba(20,33,29,.07), 0 1px 2px rgba(20,33,29,.05);
+  --ombre-3:  0 8px 24px rgba(20,33,29,.09), 0 2px 6px rgba(20,33,29,.05);
+  --ombre-creux: inset 0 1px 2px rgba(20,33,29,.06);
+
+  /* ---------- Mouvement ---------- */
+  --duree-rapide: 140ms;
+  --duree-base:   200ms;
+  --aise:         cubic-bezier(.2,.8,.2,1);
+
+  /* ---------- Typographie ---------- */
+  --police-titre: "Newsreader", Georgia, "Times New Roman", serif;
+  --police: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --police-chiffres: "IBM Plex Mono", ui-monospace, "SFMono-Regular", monospace;
+
+  --graisse-titre: 500;
+  --interlettre-titre: -0.02em;
+  --interlettre-caps: 0.09em;
+}

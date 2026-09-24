@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Acheter ou louer ma résidence principale ?</title>
+  <meta name="description" content="Comparez l'achat de votre résidence principale et la location, à enveloppe budgétaire identique.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <!-- Le thème porte toutes les valeurs : couleurs, polices, rayons, ombres.
+       style.css, lui, ne contient que la structure. -->
+  <link rel="stylesheet" href="css/theme-perron.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="entete">
+  <div class="entete__contenu">
+    <h1>Dois-je acheter ma résidence principale&nbsp;?</h1>
+    <p class="entete__sous-titre">
+      À budget mensuel identique, on compare deux trajectoires patrimoniales&nbsp;: rester
+      locataire, ou devenir propriétaire.
+    </p>
+  </div>
+</header>
+
+<main class="page">
+
+  <!-- ========================= MON PROFIL ============================ -->
+  <section class="profil" id="profil" data-etat="saisie">
+    <div class="profil__ligne">
+      <span class="profil__pastille" aria-hidden="true"></span>
+      <h2 class="profil__titre">Mon profil</h2>
+      <p class="profil__resume" id="profilResume"></p>
+      <button type="button" class="bouton bouton--discret" id="profilModifier">Modifier</button>
+    </div>
+
+    <div class="profil__saisie" id="profilSaisie">
+      <p class="profil__intro">
+        Tout part de votre situation d'aujourd'hui. Elle est propre à vous, elle ne change pas
+        d'une simulation à l'autre&nbsp;: c'est le socle commun sur lequel les deux trajectoires
+        sont comparées.
+      </p>
+      <div class="profil__champs">
+          <label class="champ">
+          <span class="champ__libelle">Patrimoine financier aujourd'hui</span>
+            <span class="champ__court">Patrimoine</span>
+          <span class="champ__saisie">
+            <input type="number" id="capitalInitial" step="1000" min="0">
+            <span class="champ__unite">€</span>
+          </span>
+          <span class="champ__aide">Épargne, placements, liquidités&nbsp;: ce qui pourra servir d'apport, ou rester investi si vous n'achetez pas.</span>
+        </label>
+          <label class="champ">
+          <span class="champ__libelle">Effort mensuel&nbsp;: logement + épargne</span>
+            <span class="champ__court">Effort mensuel</span>
+          <span class="champ__saisie">
+            <input type="number" id="enveloppeMensuelle" step="50" min="0">
+            <span class="champ__unite">€/mois</span>
+          </span>
+          <span class="champ__aide">Ce que vous sortez chaque mois pour vous loger et pour investir. Le même montant des deux côtés&nbsp;: c'est ce qui rend la comparaison honnête.</span>
+        </label>
+          <label class="champ">
+            <span class="champ__libelle">Salaire net avant impôt&nbsp;<em>(facultatif)</em></span>
+            <span class="champ__court">Salaire</span>
+            <span class="champ__saisie">
+              <input type="number" id="salaireNet" step="100" min="0" placeholder="—">
+              <span class="champ__unite">€/mois</span>
+            </span>
+            <span class="champ__aide">Sert à calculer votre taux d'endettement et la part de votre salaire que représente l'effort mensuel. N'entre dans aucun calcul de patrimoine.</span>
+          </label>
+      </div>
+      <div class="profil__pied">
+        <button type="button" class="bouton bouton--primaire" id="profilValider">
+          Valider mon profil
+        </button>
+      </div>
+    </div>
+
+    <p class="profil__ratios" id="profilRatios" hidden></p>
+  </section>
+
+  <div class="plateau" id="formulaire">
+
+    <div class="plateau__coin">
+      <button type="button" class="bouton bouton--discret" id="reinitialiser">Réinitialiser</button>
+    </div>
+
+    <div class="plateau__haut">
+      <div class="case" data-case="1">
+        <article class="bulle" data-bulle="1" data-colonnes="2">
+          <button type="button" class="bulle__declencheur" data-ouvrir="1">
+            <span class="bulle__numero">1</span>
+            <span class="bulle__titre">L'opération</span>
+            <span class="bulle__cadenas" aria-hidden="true"></span>
+          </button>
+          <div class="bulle__corps">
+            <p class="bulle__intro">Ce que vous achetez, et ce que l'opération coûte une fois tous les frais comptés.</p>
+            <div class="bulle__champs">
+            <label class="champ">
+          <span class="champ__libelle">Prix net vendeur</span>
+            <span class="champ__court">Prix</span>
+          <span class="champ__saisie">
+            <input type="number" id="prixNetVendeur" step="5000" min="0">
+            <span class="champ__unite">€</span>
+          </span>
+        </label>
+            <label class="champ">
+          <span class="champ__libelle">Type de bien</span>
+            <span class="champ__court">Type</span>
+          <span class="champ__saisie">
+            <select id="typeBien">
+              <option value="ancien">Ancien</option>
+              <option value="neuf">Neuf</option>
+            </select>
+            <span class="champ__unite"></span>
+          </span>
+          <span class="champ__aide">Détermine les droits de mutation dans les frais de notaire.</span>
+        </label>
+            <label class="champ" data-role="reglage">
+          <span class="champ__libelle">Frais d'agence</span>
+            <span class="champ__court">Agence</span>
+          <span class="champ__saisie">
+            <input type="number" id="fraisAgence" step="1000" min="0">
+            <span class="champ__unite">€</span>
+          </span>
+        </label>
+            <label class="champ">
+          <span class="champ__libelle">Travaux</span>
+            <span class="champ__court">Travaux</span>
+          <span class="champ__saisie">
+            <input type="number" id="travaux" step="1000" min="0">
+            <span class="champ__unite">€</span>
+          </span>
+        </label>
+            <label class="champ" data-role="reglage">
+          <span class="champ__libelle">Frais bancaires&nbsp;<em>(dossier + hypothèque)</em></span>
+            <span class="champ__court">Banque</span>
+          <span class="champ__saisie">
+            <input type="number" id="fraisBancaires" step="100" min="0">
+            <span class="champ__unite">€</span>
+          </span>
+        </label>
+            <label class="champ">
+          <span class="champ__libelle">Valeur estimée du bien après travaux</span>
+            <span class="champ__court">Valeur</span>
+          <span class="champ__saisie">
+            <input type="number" id="valeurEstimee" step="5000" min="0">
+            <span class="champ__unite">€</span>
+          </span>
+          <span class="champ__aide">Ce que vous en tireriez à la revente en année 0. Souvent inférieure au total dépensé&nbsp;: les frais de notaire ne se récupèrent pas.</span>
+        </label>
+            </div>
+            <div class="bulle__pied">
+              <button type="button" class="bouton bouton--primaire" data-valider="1">Valider</button>
+            </div>
+          </div>
+        </article>
+      </div>
+      <div class="case" data-case="2">
+        <article class="bulle" data-bulle="2" data-colonnes="1">
+          <button type="button" class="bulle__declencheur" data-ouvrir="2">
+            <span class="bulle__numero">2</span>
+            <span class="bulle__titre">Le financement</span>
+            <span class="bulle__cadenas" aria-hidden="true"></span>
+          </button>
+          <div class="bulle__corps">
+            <p class="bulle__intro">Ce que vous empruntez, et à quel prix. Ce que l'apport n'immobilise pas continue de travailler en bourse.</p>
+            <div class="bulle__champs">
+            <label class="champ">
+          <span class="champ__libelle">Apport</span>
+            <span class="champ__court">Apport</span>
+          <span class="champ__saisie">
+            <input type="number" id="apport" step="5000" min="0">
+            <span class="champ__unite">€</span>
+          </span>
+        </label>
+            <label class="champ">
+          <span class="champ__libelle">Durée</span>
+            <span class="champ__court">Durée</span>
+          <span class="champ__saisie">
+            <input type="number" id="dureeAnnees" step="1" min="1" max="30">
+            <span class="champ__unite">ans</span>
+          </span>
+        </label>
+            <label class="champ">
+          <span class="champ__libelle">Taux du crédit</span>
+            <span class="champ__court">Taux du crédit</span>
+          <span class="champ__saisie">
+            <input type="number" id="tauxCredit" step="0.05" min="0" data-pourcentage>
+            <span class="champ__unite">%</span>
+          </span>
+        </label>
+            <label class="champ" data-role="reglage">
+          <span class="champ__libelle">Taux d'assurance emprunteur</span>
+            <span class="champ__court">Assur.</span>
+          <span class="champ__saisie">
+            <input type="number" id="tauxAssurance" step="0.01" min="0" data-pourcentage>
+            <span class="champ__unite">%</span>
+          </span>
+          <span class="champ__aide">Calculée sur le capital restant dû&nbsp;: elle décroît avec le remboursement.</span>
+        </label>
+            </div>
+            <div class="bulle__pied">
+              <button type="button" class="bouton bouton--primaire" data-valider="2">Valider</button>
+            </div>
+          </div>
+        </article>
+      </div>
+    </div>
+
+    <div class="plateau__gauche">
+      <div class="rail">
+        <div class="case" data-case="3">
+          <article class="bulle" data-bulle="3" data-colonnes="1">
+            <button type="button" class="bulle__declencheur" data-ouvrir="3">
+              <span class="bulle__numero">3</span>
+              <span class="bulle__titre">Les dépenses annuelles</span>
+              <span class="bulle__cadenas" aria-hidden="true"></span>
+            </button>
+            <div class="bulle__corps">
+              <p class="bulle__intro">Ce que chaque trajectoire vous coûte chaque année&nbsp;: les charges du propriétaire d'un côté, le loyer du locataire de l'autre. C'est l'écart entre ces deux sorties qui alimente l'épargne de chaque scénario.</p>
+              <div class="bulle__champs">
+              <label class="champ">
+            <span class="champ__libelle">Charges de copropriété</span>
+              <span class="champ__court">Charges de copro</span>
+            <span class="champ__saisie">
+              <input type="number" id="chargesCopro" step="100" min="0">
+              <span class="champ__unite">€/an</span>
+            </span>
+          </label>
+              <label class="champ">
+            <span class="champ__libelle">Taxe foncière</span>
+              <span class="champ__court">Taxe foncière</span>
+            <span class="champ__saisie">
+              <input type="number" id="taxeFonciere" step="100" min="0">
+              <span class="champ__unite">€/an</span>
+            </span>
+          </label>
+              <label class="champ">
+            <span class="champ__libelle">Loyer (charges comprises)</span>
+              <span class="champ__court">Loyer (locataire)</span>
+            <span class="champ__saisie">
+              <input type="number" id="loyer" step="50" min="0">
+              <span class="champ__unite">€/mois</span>
+            </span>
+          </label>
+              </div>
+              <div class="bulle__pied">
+                <button type="button" class="bouton bouton--primaire" data-valider="3">Valider</button>
+              </div>
+            </div>
+          </article>
+        </div>
+        <div class="case" data-case="4">
+          <article class="bulle" data-bulle="4" data-colonnes="1">
+            <button type="button" class="bulle__declencheur" data-ouvrir="4">
+              <span class="bulle__numero">4</span>
+              <span class="bulle__titre">Le scénario de marché</span>
+              <span class="bulle__cadenas" aria-hidden="true"></span>
+            </button>
+            <div class="bulle__corps">
+              <p class="bulle__intro">Les hypothèses qui font évoluer le monde autour de vous&nbsp;: bourse, immobilier, loyers, fiscalité. Ce sont elles qu'on fera varier pour construire des scénarios optimiste, moyen ou pessimiste.</p>
+              <div class="bulle__champs">
+              <label class="champ">
+            <span class="champ__libelle">Rendement de la bourse</span>
+              <span class="champ__court">Rendement bourse</span>
+            <span class="champ__saisie">
+              <input type="number" id="rendementBourse" step="0.25" data-pourcentage>
+              <span class="champ__unite">%/an</span>
+            </span>
+            <span class="champ__aide">À saisir en <strong>brut</strong>, avant impôt.</span>
+          </label>
+              <label class="champ">
+            <span class="champ__libelle">Revalorisation du bien</span>
+              <span class="champ__court">Valeur du bien</span>
+            <span class="champ__saisie">
+              <input type="number" id="revalBien" step="0.25" data-pourcentage>
+              <span class="champ__unite">%/an</span>
+            </span>
+          </label>
+              <label class="champ">
+            <span class="champ__libelle">Revalorisation du loyer</span>
+              <span class="champ__court">Loyer (IRL)</span>
+            <span class="champ__saisie">
+              <input type="number" id="revalLoyer" step="0.25" data-pourcentage>
+              <span class="champ__unite">%/an</span>
+            </span>
+          </label>
+              <label class="champ" data-role="reglage">
+            <span class="champ__libelle">Revalorisation des charges</span>
+              <span class="champ__court">Charges</span>
+            <span class="champ__saisie">
+              <input type="number" id="revalCharges" step="0.25" data-pourcentage>
+              <span class="champ__unite">%/an</span>
+            </span>
+          </label>
+              <label class="champ" data-role="reglage">
+            <span class="champ__libelle">Revalorisation de la taxe foncière</span>
+              <span class="champ__court">Taxe</span>
+            <span class="champ__saisie">
+              <input type="number" id="revalTaxeFonciere" step="0.25" data-pourcentage>
+              <span class="champ__unite">%/an</span>
+            </span>
+          </label>
+              <label class="champ" data-role="reglage">
+            <span class="champ__libelle">Fiscalité sur les plus-values</span>
+              <span class="champ__court">Impôt</span>
+            <span class="champ__saisie">
+              <input type="number" id="fiscalitePlusValues" step="0.1" min="0" max="100" data-pourcentage>
+              <span class="champ__unite">%</span>
+            </span>
+            <span class="champ__aide">31,4&nbsp;% = flat tax sur compte-titres. Un PEA ou une assurance-vie sont moins taxés.</span>
+          </label>
+              </div>
+              <div class="bulle__pied">
+                <button type="button" class="bouton bouton--primaire" data-valider="4">Valider</button>
+              </div>
+            </div>
+          </article>
+        </div>
+      </div>
+
+      <!-- Filtre de scénarios : il s'applique PAR-DESSUS les quatre bulles,
+           ce n'est pas une cinquième étape. D'où l'absence de numéro. -->
+      <!-- Le filtre de scénarios s'applique PAR-DESSUS les quatre bulles : ce
+           n'est pas une cinquième étape, d'où l'absence de numéro.
+           Trois états : verrouillé tant qu'il n'y a pas de résultat à filtrer,
+           fermé (un appel qui ouvre l'explication), puis ouvert (la liste). La
+           liste n'apparaît qu'après l'explication : sept noms de décennies ne
+           veulent rien dire tant qu'on n'a pas dit ce qu'on en fait. -->
+      <div class="scenario" id="scenario" data-etat="bloque">
+        <button type="button" class="scenario__appel" id="scenarioOuvrir"
+                aria-haspopup="dialog" aria-controls="intro">
+          <span class="scenario__titre">Scénarios de marché</span>
+          <span class="scenario__accroche" id="scenarioAccroche">
+            Disponible une fois votre simulation complète.
+          </span>
+        </button>
+
+        <div class="scenario__liste">
+          <p class="scenario__titre">
+            Scénarios de marché
+            <button type="button" class="scenario__aide" id="scenarioAide"
+                    aria-label="Comment lire ces scénarios ?"
+                    title="Comment lire ces scénarios ?">?</button>
+          </p>
+          <div class="scenario__choix" id="scenarioChoix" role="radiogroup"
+               aria-label="Scénario de marché"></div>
+          <p class="scenario__note" id="scenarioNote"></p>
+        </div>
+      </div>
+    </div>
+
+    <section class="plateau__visu" id="visu" data-etat="attente" aria-live="polite">
+
+      <div class="attente" id="attente">
+        <p class="attente__titre">Votre réponse s'affichera ici</p>
+        <p class="attente__texte">
+          Renseignez votre profil puis les quatre bulles. Rien n'est calculé tant qu'il manque une
+          donnée&nbsp;: pas de chiffre inventé à partir de valeurs par défaut.
+        </p>
+        <div class="attente__jauge" id="attenteJauge" role="progressbar"
+             aria-valuemin="0" aria-valuemax="4" aria-valuenow="0"></div>
+        <p class="attente__compte" id="attenteCompte"></p>
+      </div>
+
+      <p class="alerte" id="alerteEnveloppe" hidden>
+        Votre enveloppe mensuelle ne couvre pas le coût de propriétaire
+        (<strong id="alerteCout"></strong>). Augmentez-la, ou revoyez le prix du bien&nbsp;:
+        en l'état, le scénario d'achat n'est pas finançable.
+      </p>
+
+      <div class="verdict" id="verdict">
+        <div class="verdict__entete">
+          <h2 class="verdict__question">Si vous revendez dans</h2>
+          <div class="verdict__horizon">
+            <input type="range" id="horizon" min="1" max="25" step="1" value="20"
+                   aria-label="Horizon de revente en années">
+            <output class="verdict__annees" id="horizonLabel">20 ans</output>
+          </div>
+        </div>
+        <p class="verdict__chiffre" id="verdictChiffre">—</p>
+        <p class="verdict__mesure" id="verdictMesure"></p>
+      </div>
+
+      <figure class="carte carte--graphique">
+        <figcaption class="carte__entete">
+          <h3 class="carte__titre">Patrimoine net d'impôt, année par année</h3>
+          <p class="carte__legende">
+            Bien immobilier net de dette + portefeuille boursier, après impôt sur les plus-values.
+          </p>
+        </figcaption>
+        <div class="legende" id="legendePatrimoine"></div>
+        <div class="graphique"><canvas id="graphPatrimoine"></canvas></div>
+      </figure>
+
+    <!-- ========== D'OÙ VIENT CET ÉCART ? (divulgation progressive) ==========
+         Un vrai bouton d'appel, centré : le lien discret passait inaperçu.
+         Tout reste replié par défaut, la vue principale garde une seule
+         visualisation. -->
+    <div class="detail">
+      <button type="button" class="cta" id="detailOuvrir"
+              aria-expanded="false" aria-controls="detailPanneau">
+        D'où vient cet écart&nbsp;?
+      </button>
+
+      <div class="detail__panneau" id="detailPanneau" hidden>
+
+        <!-- Quatre chiffres sur une ligne. Ils ne se recouvrent pas :
+             mensualité + charges = le coût réel de propriétaire, à comparer
+             au loyer. -->
+        <div class="kpis">
+          <div class="kpi">
+            <p class="kpi__mot">Point d'équilibre</p>
+            <p class="kpi__chiffre tabulaire" id="pointMort">—</p>
+          </div>
+          <div class="kpi">
+            <p class="kpi__mot">Mensualité du crédit</p>
+            <p class="kpi__chiffre tabulaire" id="kpiMensualite">—</p>
+          </div>
+          <div class="kpi">
+            <p class="kpi__mot">Coût mensuel réel</p>
+            <p class="kpi__chiffre tabulaire" id="kpiCoutReel">—</p>
+          </div>
+          <div class="kpi">
+            <p class="kpi__mot">Loyer versé</p>
+            <p class="kpi__chiffre tabulaire" id="kpiLoyer">—</p>
+          </div>
+        </div>
+        <p class="kpi__note" id="pointMortMesure"></p>
+
+        <!-- Rappel du curseur : les cumuls ci-dessous le suivent, et remonter
+             en haut de page pour le régler était pénible. Même valeur que le
+             curseur principal, jamais une seconde date. -->
+        <div class="rappel">
+          <label class="rappel__mot" for="horizonBis">Cumulé sur</label>
+          <input type="range" id="horizonBis" min="1" max="25" step="1" value="20"
+                 aria-label="Horizon de revente en années">
+          <output class="rappel__annees" id="horizonBisLabel">20 ans</output>
+        </div>
+
+        <div class="detail__duo">
+          <figure class="carte carte--graphique">
+            <figcaption class="carte__entete carte__entete--centre">
+              <!-- « Versé » et non « dépensé » : l'épargne investie reste à vous. -->
+              <h3 class="carte__titre">Total versé <span id="periodeVerse">sur 20 ans</span></h3>
+            </figcaption>
+            <div class="legende legende--centre legende--compacte" id="legendeEnveloppe"></div>
+            <div class="paire">
+              <div class="paire__part">
+                <div class="graphique graphique--rond"><canvas id="graphEnvAchat"></canvas></div>
+                <p class="part__mot">Achat</p>
+                <p class="part__total tabulaire" id="totalEnvAchat">—</p>
+              </div>
+              <div class="paire__part">
+                <div class="graphique graphique--rond"><canvas id="graphEnvLocation"></canvas></div>
+                <p class="part__mot">Location</p>
+                <p class="part__total tabulaire" id="totalEnvLocation">—</p>
+              </div>
+            </div>
+          </figure>
+
+          <figure class="carte carte--graphique">
+            <figcaption class="carte__entete carte__entete--centre">
+              <h3 class="carte__titre">Frais irrécupérables <span id="periodePerdu">sur 20 ans</span></h3>
+            </figcaption>
+            <div class="legende legende--centre legende--compacte" id="legendePerdu"></div>
+            <div class="paire paire--seule">
+              <div class="paire__part">
+                <div class="graphique graphique--rond"><canvas id="graphPerdu"></canvas></div>
+                <p class="part__mot">Achat</p>
+                <p class="part__total tabulaire" id="totalPerdu">—</p>
+              </div>
+            </div>
+          </figure>
+        </div>
+
+        <figure class="carte carte--graphique">
+          <figcaption class="carte__entete carte__entete--centre">
+            <h3 class="carte__titre">Ce que devient votre enveloppe, année après année</h3>
+          </figcaption>
+          <div class="legende legende--centre" id="legendeAnnuel"></div>
+          <!-- Deux histogrammes séparés plutôt qu'un seul à deux piles : à
+               cinquante barres, on ne lisait plus rien. Même échelle des deux
+               côtés, sinon la comparaison serait fausse. -->
+          <div class="empilement">
+            <div class="empilement__part">
+              <p class="part__mot">Achat</p>
+              <div class="graphique graphique--bande"><canvas id="graphAnnuelAchat"></canvas></div>
+            </div>
+            <div class="empilement__part">
+              <p class="part__mot">Location</p>
+              <div class="graphique graphique--bande"><canvas id="graphAnnuelLocation"></canvas></div>
+            </div>
+          </div>
+        </figure>
+
+        <figure class="carte carte--graphique">
+          <figcaption class="carte__entete carte__entete--centre">
+            <h3 class="carte__titre">Pourcentage de détention du bien</h3>
+          </figcaption>
+          <div class="graphique graphique--court"><canvas id="graphPossession"></canvas></div>
+        </figure>
+
+      </div>
+    </div>
+
+    <!-- ========== MISE EN LOCATION (divulgation progressive) ========== -->
+    <div class="mel">
+      <button type="button" class="mel__declencheur" id="melOuvrir"
+              aria-expanded="false" aria-controls="melPanneau">
+        Et si vous mettiez ce bien en location plus tard&nbsp;?
+      </button>
+
+      <div class="mel__panneau" id="melPanneau" hidden>
+        <div class="mel__entete">
+          <h3 class="carte__titre">Mise en location à partir d'une certaine année</h3>
+          <button type="button" class="mel__fermer" id="melFermer"
+                  aria-label="Fermer le module de mise en location">×</button>
+        </div>
+        <p class="carte__legende">
+          Au lieu de revendre, vous gardez le bien, vous le louez, et vous vous logez ailleurs.
+          Le loyer encaissé (net d'impôt et de charges) et ce qui reste de votre enveloppe
+          alimentent le portefeuille.
+        </p>
+
+        <form class="mel__champs" id="melFormulaire" autocomplete="off">
+          <label class="champ">
+            <span class="champ__libelle">Année de mise en location</span>
+            <span class="champ__saisie">
+              <input type="number" id="melAnneeBascule" min="1" max="25" step="1"
+                     placeholder="ex. 10">
+              <span class="champ__unite">e année</span>
+            </span>
+          </label>
+          <label class="champ">
+            <span class="champ__libelle">Loyer que vous percevrez</span>
+            <span class="champ__saisie">
+              <input type="number" id="melLoyerPercu" min="0" step="50" placeholder="ex. 1800">
+              <span class="champ__unite">€/mois</span>
+            </span>
+            <span class="champ__aide">Montant au moment de la bascule, indexé à l'IRL ensuite.</span>
+          </label>
+          <label class="champ">
+            <span class="champ__libelle">Loyer que vous paierez pour vous loger</span>
+            <span class="champ__saisie">
+              <input type="number" id="melLoyerFutur" min="0" step="50" placeholder="ex. 1600">
+              <span class="champ__unite">€/mois</span>
+            </span>
+            <span class="champ__aide">Idem&nbsp;: montant à la bascule. Il peut être plus bas que votre loyer actuel si vous prévoyez de déménager moins cher.</span>
+          </label>
+
+          <details class="mel__avance">
+            <summary class="groupe__titre">Paramètres avancés</summary>
+            <div class="mel__avance-corps">
+              <label class="champ">
+                <span class="champ__libelle">Régime fiscal</span>
+                <span class="champ__saisie">
+                  <select id="melRegime">
+                    <option value="meuble">Meublé — LMNP réel</option>
+                    <option value="nu">Nu — foncier réel</option>
+                  </select>
+                </span>
+                <span class="champ__aide">Le meublé amortit le bien&nbsp;; le nu peut créer du déficit foncier.</span>
+              </label>
+              <label class="champ">
+                <span class="champ__libelle">Tranche marginale d'imposition</span>
+                <span class="champ__saisie">
+                  <input type="number" id="melTmi" min="0" max="60" step="1" data-pourcentage>
+                  <span class="champ__unite">%</span>
+                </span>
+              </label>
+              <label class="champ">
+                <span class="champ__libelle">Frais annexes</span>
+                <span class="champ__saisie">
+                  <input type="number" id="melFraisAnnexes" min="0" step="50">
+                  <span class="champ__unite">€/an</span>
+                </span>
+                <span class="champ__aide">Forfait&nbsp;: gestion locative, assurance PNO, comptable.</span>
+              </label>
+              <label class="champ">
+                <span class="champ__libelle">Achat de meubles</span>
+                <span class="champ__saisie">
+                  <input type="number" id="melAchatMeubles" min="0" step="500">
+                  <span class="champ__unite">€</span>
+                </span>
+                <span class="champ__aide">Dépensé une fois, à la mise en location. Obligatoire en meublé&nbsp;: amorti sur 7&nbsp;ans et ponctionné sur le portefeuille.</span>
+              </label>
+              <label class="champ">
+                <span class="champ__libelle">Vacance locative</span>
+                <span class="champ__saisie">
+                  <input type="number" id="melTauxVacance" min="0" max="100" step="1" data-pourcentage>
+                  <span class="champ__unite">%</span>
+                </span>
+              </label>
+              <label class="champ">
+                <span class="champ__libelle">Prélèvements sociaux</span>
+                <span class="champ__saisie">
+                  <input type="number" id="melPrelevementsSociaux" min="0" max="100" step="0.1" data-pourcentage>
+                  <span class="champ__unite">%</span>
+                </span>
+                <span class="champ__aide">18,6&nbsp;% à compter de 2026.</span>
+              </label>
+            </div>
+          </details>
+        </form>
+
+        <p class="mel__incomplet" id="melIncomplet">
+          Renseignez les trois champs ci-dessus pour afficher la comparaison.
+        </p>
+      </div>
+    </div>
+
+    <figure class="carte carte--graphique" id="carteMel" hidden>
+      <figcaption class="carte__entete">
+        <h3 class="carte__titre">Si vous mettez le bien en location au lieu de le revendre</h3>
+        <p class="carte__legende" id="melLegendeTexte"></p>
+      </figcaption>
+      <div class="legende" id="legendeMel"></div>
+      <div class="graphique"><canvas id="graphMiseEnLocation"></canvas></div>
+      <p class="carte__legende" id="melNote"></p>
+    </figure>
+
+      <!-- Le texte change selon qu'un scénario est appliqué ou non : « hypothèses
+           constantes » devient faux dès qu'une série année par année tourne. -->
+      <p class="avertissement" id="avertissement"></p>
+    </section>
+
+  </div>
+
+  <div class="voile" id="voile" hidden></div>
+
+      <!-- Aperçu d'un scénario : il vit ici, hors du rail de gauche, et non
+           dans la carte scénario. Le rail est `position: sticky`, donc un
+           contexte d'empilement : une fenêtre qui y resterait passerait sous
+           le voile. -->
+      <!-- Premier temps : ce qu'on cherche à faire, et comment lire le
+           résultat. Rien d'autre — pas un seul nom de scénario. Elles vivent
+           ici, hors du rail : le rail est `position: sticky`, donc un contexte
+           d'empilement, et une fenêtre qui y resterait passerait sous le voile. -->
+      <div class="intro" id="intro" role="dialog" aria-modal="true"
+           aria-labelledby="introTitre" hidden>
+        <div class="intro__entete">
+          <h3 class="intro__titre" id="introTitre">
+            Et si vous rejouiez une décennie qui a vraiment eu lieu&nbsp;?
+          </h3>
+          <button type="button" class="mel__fermer" id="introFermer"
+                  aria-label="Fermer">×</button>
+        </div>
+
+        <div class="intro__texte">
+          <p>
+            Plutôt qu'un rendement moyen inventé, ces scénarios appliquent à votre projet ce que
+            les marchés, l'immobilier et les loyers ont <strong>réellement fait</strong> pendant
+            une décennie datée&nbsp;: le krach de 2008, la bulle internet, le choc inflationniste
+            de 2022.
+          </p>
+          <p>
+            <strong>Chaque décennie ne fournit qu'une dizaine d'années de données.</strong>
+            Au-delà, la courbe passe en pointillé&nbsp;: ce n'est plus une observation mais la
+            moyenne de la période, prolongée faute de mieux. Cette partie-là ne se lit pas comme
+            une prévision.
+          </p>
+          <p>
+            Et une décennie ne se rejoue pas à l'identique. L'immobilier français part aujourd'hui
+            d'un niveau de prix qui interdit mécaniquement de refaire les hausses des années
+            2000&nbsp;: il faudrait que les ménages y consacrent une part de revenu qu'ils n'ont
+            pas. C'est un terrain d'essai, pas une boule de cristal.
+          </p>
+        </div>
+
+        <div class="intro__pied">
+          <button type="button" class="bouton bouton--primaire" id="introValider">
+            Voir les scénarios
+          </button>
+        </div>
+      </div>
+
+      <!-- Second temps : l'aperçu d'un scénario, ouvert depuis sa ligne. -->
+      <div class="apercu" id="apercu" role="dialog" aria-modal="true"
+           aria-labelledby="apercuTitre" hidden>
+        <div class="apercu__entete">
+          <div>
+            <h3 class="carte__titre" id="apercuTitre"></h3>
+            <p class="carte__legende" id="apercuResume"></p>
+          </div>
+          <button type="button" class="mel__fermer" id="apercuFermer"
+                  aria-label="Fermer l'aperçu">×</button>
+        </div>
+        <div class="graphique graphique--court"><canvas id="graphApercu"></canvas></div>
+        <!-- Les taux annuels sous la courbe : la base 100 montre où l'on
+             arrive, la suite montre par quoi on y passe. -->
+        <div class="suites" id="apercuSuites"></div>
+        <p class="apercu__note" id="apercuNote"></p>
+        <ul class="apercu__sources" id="apercuSources"></ul>
+      </div>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="js/calc.js"></script>
+<script src="js/calc-location.js"></script>
+  <script src="js/scenarios.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

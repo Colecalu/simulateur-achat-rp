@@ -1,6 +1,7 @@
 # Secrets / configuration locale
 .env
 .env.*
+backend/config.php
 backend/config.local.php
 backend/config/*.local.php
 
@@ -12,6 +13,8 @@ node_modules/
 *.sql
 *.sql.gz
 *.dump
+# ...mais les migrations SONT du code : elles doivent être commitées.
+!migrations/*.sql
 
 # Logs
 *.log
@@ -30,3 +33,6 @@ desktop.ini
 
 # Déploiement
 .ftp-deploy-sync-state.json
+
+# Aperçu local
+.claude/launch.json
