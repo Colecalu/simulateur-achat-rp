@@ -125,6 +125,7 @@ frontend/                    servi tel quel, racine web en production
   js/   calc.js              moteur PUR : window.SimuRP / module.exports
         calc-location.js     pilier 3 — CONSOMME calc.js, ne le modifie jamais
         scenarios.js         pilier 2 — données de marché, pas de logique
+        sauvegarde.js        brouillon local + migration de schéma (testé)
         app.js               tout le DOM, toute l'interface
 backend/                     vide aujourd'hui — voir docs/backend-spec.md
 docs/                        modèle, conventions UI, spec backend, design, Excel
@@ -146,6 +147,31 @@ migrations/                  à créer : SQL numéroté, appliqué à la main
   (et il y en a beaucoup ici) doivent porter leur justification.
 - **Aucune dépendance inutile.** Chaque ajout doit survivre à un déploiement FTP sans Composer
   ni npm côté serveur.
+
+---
+
+### Sauvegarde locale et versions de schéma
+
+La saisie en cours est écrite dans le `localStorage` (`simurp.brouillon`), en différé d'une
+demi-seconde. Fermer l'onglet ne fait rien perdre, sans compte ni réseau.
+
+- **`params` décrit un PROJET** — les champs du moteur, ceux de la mise en location, le scénario
+  appliqué et l'horizon. C'est ce qui partira tel quel vers le compte. **Aucun état d'interface
+  dedans.**
+- **`avancement` décrit CETTE session dans CE navigateur** — profil validé, bulles validées. Il
+  vit dans l'enveloppe du brouillon, jamais dans `params`, et ne partira jamais en base. Sans
+  lui, rouvrir l'onglet afficherait un résultat complet alors que l'utilisateur n'a rempli
+  qu'une bulle — ce qu'on s'interdit.
+- **Tout le reste se déduit** : l'ouverture du module de mise en location se lit dans la présence
+  d'une année de bascule. Ne pas stocker ce qui se déduit.
+- **`SCHEMA_VERSION` ne s'incrémente que si une ancienne sauvegarde ne se relit plus à
+  l'identique.** Ajouter un champ ne casse rien : `normaliser()` lui donne son défaut.
+- **`migrer()` ne lève jamais.** Sauvegarde corrompue, version future, migration qui plante :
+  elle rend `null` et le front repart d'un brouillon vide. Le simulateur doit marcher même quand
+  la sauvegarde ne marche pas.
+- **Piège vérifié** : un champ dont le défaut est `null` (`anneeBascule`) ne dit rien de son type.
+  Se fier au type du défaut pour valider fait perdre la valeur au rechargement — silencieusement.
+  Deux tests le verrouillent, dont un aller-retour sur tous les champs.
 
 ---
 
