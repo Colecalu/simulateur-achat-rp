@@ -232,7 +232,39 @@ vérifiés pendant quelques semaines. L'adresse d'expédition doit être sur le 
 
 ---
 
-## 8. Reporté, mais suivi
+## 8. Dette bloquante pour la mise en ligne
+
+### 🔴 Devise des rendements MSCI World — PRIORITÉ HAUTE, BLOQUANT
+
+**Le site ne doit pas être mis en ligne tant que ce point n'est pas tranché.**
+
+Les séries de `frontend/js/scenarios.js` sont annoncées en **euros**, mais plusieurs années
+coïncident **au centième** avec les valeurs publiées en **dollars** :
+
+| Année | Valeur dans le code | Correspond à |
+|---|---|---|
+| 2019 | +27,7 % | MSCI World **USD** net |
+| 2021 | +21,8 % | MSCI World **USD** net |
+| 2022 | −18,1 % | MSCI World **USD** net |
+| 2014 | +18,7 % | ressemble davantage à de l'**EUR** |
+| 2015 | +8,3 % | ressemble davantage à de l'**EUR** |
+
+Or 2021 et 2022 ont connu de forts mouvements de change : l'écart euro/dollar sur ces deux
+années seules se chiffre en dizaines de milliers d'euros sur le verdict. **La série est donc
+peut-être panachée**, ce qui serait pire qu'une erreur systématique — une erreur systématique se
+corrige d'un coefficient, un panachage se corrige année par année.
+
+**À traiter dans une session dédiée**, avec des **sources MSCI officielles en EUR**, en précisant
+**net ou gross** (dividendes nets de retenue à la source, ou bruts) et en s'y tenant sur toute la
+période. Refaire ensuite le contrôle croisé des recouvrements entre décennies.
+
+La réserve est déjà affichée à l'écran dans l'aperçu de chaque scénario concerné — c'est un
+palliatif, pas une solution : on ne publie pas un simulateur financier en signalant que ses
+données sont peut-être fausses.
+
+---
+
+## 9. Reporté, mais suivi
 
 | Fonctionnalité | État |
 |---|---|
@@ -242,11 +274,3 @@ vérifiés pendant quelques semaines. L'adresse d'expédition doit être sur le 
 | Export PDF | non commencé |
 | Point mort | **déjà fait** — « point d'équilibre », avec garde-fou sur les recroisements |
 | Scénarios historiques | **déjà fait** — pilier 2, données à consolider |
-
-Deux dettes connues, à traiter avant la mise en ligne :
-
-- **Le comparateur de thèmes** (`.bascule`, `initialiserBascule()`) est un outil de travail, pas
-  une fonctionnalité. À retirer une fois le design arrêté.
-- **La devise des rendements MSCI World** est incertaine : plusieurs années coïncident au
-  centième avec les valeurs publiées en dollars alors que la série est annoncée en euros. La
-  réserve est affichée à l'écran ; la lever demande de retourner à la source.

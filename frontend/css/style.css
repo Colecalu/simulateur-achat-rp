@@ -862,6 +862,20 @@ h1, h2, h3 {
 .pastille--achat { background: var(--achat); }
 .pastille--location { background: var(--location); }
 .pastille--achat-location { background: var(--achat-location); }
+/*
+ * Une classe par poste, plutôt qu'un `style="background:…"` injecté par le
+ * JavaScript : une Content-Security-Policy stricte interdit les styles en ligne,
+ * et on ne veut pas l'affaiblir avec 'unsafe-inline' pour deux pastilles.
+ * La couleur reste lue dans le thème — le JavaScript ne fait que nommer.
+ */
+.pastille--credit      { background: var(--poste-credit); }
+.pastille--capital     { background: var(--poste-capital); }
+.pastille--possession  { background: var(--poste-possession); }
+.pastille--epargne     { background: var(--poste-epargne); }
+.pastille--acquisition { background: var(--poste-acquisition); }
+.pastille--marches     { background: var(--courbe-marches); }
+.pastille--immo        { background: var(--courbe-immo); }
+.pastille--loyer-irl   { background: var(--courbe-loyer); }
 
 /* Cartes graphiques */
 .carte {
@@ -1410,46 +1424,3 @@ input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; marg
  */
 .legende__valeur { font-variant-numeric: tabular-nums; color: var(--encre-3); }
 
-/* ------------------------------------------------- Comparateur de thèmes */
-
-/*
- * Outil de travail, pas une fonctionnalité : il sert à comparer deux designs
- * sur les mêmes chiffres. À retirer une fois le choix arrêté.
- */
-.bascule {
-  position: fixed;
-  right: 16px;
-  bottom: 16px;
-  z-index: 60;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 8px;
-  background: var(--surface);
-  border: 1px solid var(--trait);
-  border-radius: var(--rayon-feuille);
-  box-shadow: var(--ombre-3);
-}
-.bascule__mot {
-  font-size: .625rem;
-  font-weight: 600;
-  letter-spacing: var(--interlettre-caps);
-  text-transform: uppercase;
-  color: var(--encre-3);
-  padding-left: 4px;
-}
-.bascule__choix {
-  font: inherit;
-  font-size: .75rem;
-  padding: 5px 10px;
-  border: 0;
-  border-radius: var(--rayon);
-  background: transparent;
-  color: var(--encre-2);
-  cursor: pointer;
-  transition: background var(--duree-rapide) var(--aise), color var(--duree-rapide) var(--aise);
-}
-.bascule__choix:hover { background: var(--survol); }
-.bascule__choix--actif { background: var(--accent); color: var(--sur-accent); }
-
-@media print { .bascule { display: none; } }

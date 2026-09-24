@@ -251,9 +251,18 @@ au chargement de chaque page.
 - En-têtes via `.htaccess` :
   - `Content-Security-Policy` — `default-src 'self'`, avec `https://cdnjs.cloudflare.com` pour
     Chart.js et `https://fonts.googleapis.com` / `https://fonts.gstatic.com` pour les polices.
-    ⚠️ Le code actuel utilise des styles en ligne (`style="background:…"` sur les pastilles de
-    légende) : soit on les remplace par des classes, soit la CSP doit tolérer `'unsafe-inline'`
-    pour les styles. **Préférer le remplacement.**
+    **Pas de `'unsafe-inline'`.**
+
+    Les styles en ligne que le JavaScript injectait (`style="background:…"` sur les pastilles de
+    légende) ont été remplacés par des classes `.pastille--<poste>`, alimentées par les mêmes
+    jetons de thème. Le JavaScript nomme, il ne peint plus.
+
+    ⚠️ **Reste huit attributs `style` dans le DOM : les canevas, dimensionnés par Chart.js.**
+    Chart.js passe par le CSSOM (`canvas.style.height = …`), que `style-src` ne gouverne pas
+    d'après la spécification — contrairement aux attributs `style` présents dans le balisage.
+    **À vérifier dans un environnement réel avant de livrer la CSP**, pas à supposer : si les
+    graphiques se dimensionnent mal sous CSP stricte, le repli est
+    `style-src 'self' 'unsafe-hashes'` ciblé, jamais `'unsafe-inline'` global.
   - `X-Content-Type-Options: nosniff`
   - `Referrer-Policy: strict-origin-when-cross-origin`
   - `X-Frame-Options: DENY`
@@ -363,9 +372,69 @@ frontend/mentions-legales.html
 frontend/confidentialite.html
 ```
 
-**Si l'offre OVH ne permet pas de placer `backend/` hors de `www/`** (certaines formules imposent
-tout dans `www/`), repli : `www/backend/` protégé par un `.htaccess` `Require all denied`, et
-`config.php` au-dessus de la racine web dans tous les cas. À vérifier à la souscription.
+### Correspondance exacte dépôt → serveur OVH
+
+Chez OVH mutualisé, le compte FTP arrive sur un répertoire racine qui **contient** `www/`.
+`www/` est la racine web ; **tout ce qui est à côté est hors d'atteinte du navigateur.**
+
+```
+racine du compte FTP
+├── www/                          ← RACINE WEB — seul contenu servi par HTTP
+│   ├── index.html                    ← depuis frontend/index.html
+│   ├── mentions-legales.html
+│   ├── confidentialite.html
+│   ├── css/  js/                     ← depuis frontend/css/ et frontend/js/
+│   ├── api/
+│   │   └── index.php                 ← depuis backend/public/api/index.php
+│   └── .htaccess                     ← HTTPS, en-têtes, routage /api/*
+│
+└── prive/                        ← HORS RACINE WEB — inatteignable par URL
+    ├── config.php                    ← créé À LA MAIN, jamais déployé
+    ├── db.php auth.php simulations.php mailer.php reponse.php limites.php
+    ├── lib/PHPMailer/
+    └── logs/
+        ├── php-errors.log
+        └── emails.log                ← en développement uniquement
+```
+
+| Dépôt | Serveur | Servi par HTTP ? |
+|---|---|---|
+| `frontend/**` | `www/**` | **oui** |
+| `backend/public/api/index.php` | `www/api/index.php` | **oui — seul point d'entrée PHP** |
+| `backend/*.php` (hors `public/`) | `prive/*.php` | non |
+| `backend/lib/**` | `prive/lib/**` | non |
+| — | `prive/config.php` | non — **créé à la main, jamais déployé** |
+| — | `prive/logs/**` | non |
+| `docs/`, `tests/`, `migrations/`, `.github/` | *non déployés* | — |
+
+**Il ne doit exister aucun moyen d'atteindre `config.php` ou `logs/` depuis une URL.** Trois
+garanties, cumulées — la première suffit, les deux autres sont des filets :
+
+1. **Ils sont hors de `www/`.** Aucune URL ne peut sortir de la racine web : c'est une propriété
+   du serveur, pas une configuration à maintenir.
+2. Le point d'entrée les atteint par chemin relatif remontant :
+   `require dirname(__DIR__, 3) . '/prive/config.php'`. Ce chemin fonctionne parce que le
+   système de fichiers ignore la racine web ; le navigateur, lui, ne peut pas l'emprunter.
+3. `prive/.htaccess` contient `Require all denied` **au cas où** une reconfiguration future
+   placerait ce dossier sous `www/`. Ceinture et bretelles, pour trois lignes.
+
+**Vérification obligatoire après le premier déploiement** — les quatre URL doivent répondre 403
+ou 404, jamais du contenu :
+
+```
+https://<domaine>/../prive/config.php
+https://<domaine>/prive/config.php
+https://<domaine>/config.php
+https://<domaine>/logs/emails.log
+```
+
+Et `curl -I https://<domaine>/api/` doit répondre du JSON, pas du PHP en clair — si le module PHP
+n'est pas actif, le code source part en clair au premier appel.
+
+**Si l'offre souscrite impose de tout placer sous `www/`** (certaines formules d'entrée de gamme
+le font), repli : `www/prive/` avec `.htaccess` `Require all denied`, **et `config.php` remonté
+au-dessus de `www/` quoi qu'il arrive** — c'est le seul fichier dont la fuite donnerait les
+identifiants de la base. À vérifier à la souscription, avant le premier déploiement.
 
 ---
 

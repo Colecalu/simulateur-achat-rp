@@ -487,7 +487,7 @@ function legendeSimple(cible, postes) {
   $(cible).innerHTML = postes
     .map(
       (p) =>
-        `<span class="legende__item"><span class="pastille" style="background:${p.couleur}"></span>` +
+        `<span class="legende__item"><span class="pastille pastille--${p.classe}"></span>` +
         `${p.court || p.nom}</span>`
     )
     .join('');
@@ -581,12 +581,12 @@ const traitFrontiere = {
  * poste doivent le nommer pareil.
  */
 const POSTES = {
-  credit: { nom: 'Intérêts et assurance', court: 'Intérêts' },
-  capital: { nom: 'Capital remboursé', court: 'Capital' },
-  possession: { nom: 'Taxe foncière et charges', court: 'Charges' },
-  epargne: { nom: 'Épargne investie', court: 'Épargne' },
-  loyers: { nom: 'Loyers', court: 'Loyer' },
-  acquisition: { nom: "Frais d'acquisition", court: 'Acquisition' },
+  credit: { nom: 'Intérêts et assurance', court: 'Intérêts', classe: 'credit' },
+  capital: { nom: 'Capital remboursé', court: 'Capital', classe: 'capital' },
+  possession: { nom: 'Taxe foncière et charges', court: 'Charges', classe: 'possession' },
+  epargne: { nom: 'Épargne investie', court: 'Épargne', classe: 'epargne' },
+  loyers: { nom: 'Loyers', court: 'Loyer', classe: 'location' },
+  acquisition: { nom: "Frais d'acquisition", court: 'Acquisition', classe: 'acquisition' },
 };
 
 /** Un poste prêt à être dessiné : vocabulaire + couleur (+ montant). */
@@ -932,10 +932,15 @@ function ouvrirApercu(cle) {
     return suite;
   };
 
+  // `couleur` sert au canevas (Chart.js peint, pas de CSP en jeu) ; `classe`
+  // sert aux pastilles HTML, qui ne peuvent pas porter de style en ligne.
   const series = [
-    { champ: 'rendementBourse', nom: 'Marchés actions', couleur: jeton('--courbe-marches') },
-    { champ: 'revalBien', nom: "Prix de l'immobilier", couleur: jeton('--courbe-immo') },
-    { champ: 'revalLoyer', nom: 'Loyers (IRL)', couleur: jeton('--courbe-loyer'), pointille: true },
+    { champ: 'rendementBourse', nom: 'Marchés actions',
+      couleur: jeton('--courbe-marches'), classe: 'marches' },
+    { champ: 'revalBien', nom: "Prix de l'immobilier",
+      couleur: jeton('--courbe-immo'), classe: 'immo' },
+    { champ: 'revalLoyer', nom: 'Loyers (IRL)',
+      couleur: jeton('--courbe-loyer'), classe: 'loyer-irl', pointille: true },
   ];
   for (const serie of series) serie.taux = lire(serie.champ);
 
@@ -964,7 +969,7 @@ function ouvrirApercu(cle) {
       }
       return (
         '<div class="suite">' +
-        `<span class="suite__mot"><span class="pastille" style="background:${serie.couleur}"></span>` +
+        `<span class="suite__mot"><span class="pastille pastille--${serie.classe}"></span>` +
         `${serie.nom}</span><span class="suite__valeurs">${valeurs}</span></div>`
       );
     })
@@ -1446,39 +1451,6 @@ function initialiserBulles() {
   majBulles();
 }
 
-/* ------------------------------------------------- Comparateur de thèmes */
-
-/**
- * Bascule entre les feuilles de thème. Outil de comparaison : il permet de
- * juger deux designs sur les mêmes chiffres, sans recharger ni changer de
- * branche. À retirer une fois le design arrêté.
- *
- * Les graphiques lisent leurs couleurs dans les variables CSS : il faut donc
- * les redessiner une fois la nouvelle feuille appliquée.
- */
-function initialiserBascule() {
-  const feuille = $('#theme');
-  const boutons = [...document.querySelectorAll('.bascule__choix')];
-
-  const appliquer = (nom) => {
-    feuille.href = `css/theme-${nom}.css`;
-    for (const b of boutons) {
-      b.classList.toggle('bascule__choix--actif', b.dataset.theme === nom);
-    }
-    try { localStorage.setItem('theme', nom); } catch (e) { /* navigation privée */ }
-
-    // La feuille se charge de façon asynchrone : on attend qu'elle soit prête
-    // avant de relire les jetons, sinon les courbes gardent l'ancienne palette.
-    feuille.addEventListener('load', rafraichir, { once: true });
-  };
-
-  for (const b of boutons) b.addEventListener('click', () => appliquer(b.dataset.theme));
-
-  let choisi = 'perron';
-  try { choisi = localStorage.getItem('theme') || choisi; } catch (e) { /* idem */ }
-  appliquer(choisi);
-}
-
 /* ------------------------------------------------------------ Saisie */
 
 /**
@@ -1568,7 +1540,6 @@ function initialiser() {
   });
   $('#melFormulaire').addEventListener('input', rafraichir);
 
-  initialiserBascule();
 
   recalculer();
 }
