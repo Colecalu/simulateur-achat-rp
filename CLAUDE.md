@@ -31,6 +31,54 @@ les modules ES dans ce projet.
 
 ---
 
+## 0. Plusieurs agents travaillent sur ce dépôt
+
+| Rôle | Qui | Périmètre |
+|---|---|---|
+| Développement principal, continuité du produit | **Claude Code** | `main` et ses branches de feature |
+| Laboratoire, contre-propositions, UI/UX alternatives | **Codex** | ses propres branches, jamais `main` |
+| Réflexion produit, audit, finance, coordination | **ChatGPT** | pas de code |
+| Décision finale | **Lucas** | — |
+
+**Git est la source de vérité.** Les décisions d'architecture, de moteur financier et de structure
+produit sont documentées ici et dans `docs/` — c'est ce qui permet à un autre agent de comprendre
+*pourquoi* un choix a été fait avant de proposer le contraire.
+
+### Règles de cohabitation
+
+- **Ne jamais supprimer, fusionner ni modifier une branche, un worktree ou un fichier
+  d'expérimentation** sans demande explicite. Toute branche qui n'est pas `main` ni une branche
+  de feature ouverte par Claude Code est à considérer comme une expérimentation en cours.
+- **Une expérimentation ne remplace jamais l'implémentation en place automatiquement.** Elle est
+  analysée sur demande, puis intégrée, adaptée ou écartée — décision de Lucas.
+- **Les 76 tests sont l'arbitre.** Une proposition qui les casse est rejetée, quelle que soit son
+  élégance. La fixture Excel compare 25 années × 15 grandeurs **au centime** : elle ne se
+  contourne pas, elle se respecte ou se discute explicitement.
+
+### Ce qu'une proposition ne peut pas enfreindre
+
+Ces invariants ne sont pas des préférences de style. Les enfreindre casse le produit ou son
+argument, et doit entraîner un refus même si le reste est bon :
+
+1. **L'enveloppe mensuelle identique** (§1) — le différenciateur du projet.
+2. **La fiscalité appliquée une seule fois, à la sortie** (§2) — jamais annuellement.
+3. **Pas d'étape de build, pas de modules ES** (§3) — contrainte d'hébergement, pas de goût.
+4. **`calc.js` reste pur** : aucune logique financière ailleurs, aucun accès au DOM dedans.
+5. **`params` reste séparé de l'état d'interface** (§4) — condition du backend à venir.
+6. **Aucun style en ligne, aucun `innerHTML` sur une donnée utilisateur** (§5).
+
+### La friction à anticiper
+
+`frontend/js/app.js` (1 578 lignes) et `frontend/css/style.css` (1 455 lignes) sont **deux gros
+fichiers uniques**. Deux agents qui les modifient en parallèle produisent des conflits où les deux
+versions sont correctes — le pire cas à résoudre.
+
+Conséquence pratique : **une expérimentation d'interface se juge sur l'idée, pas sur le
+diff.** Captures, description, prototype — puis réimplémentation dans la ligne du produit. Fusionner
+le code d'une branche d'expérimentation UI est possible mais coûteux, et rarement le bon réflexe.
+
+---
+
 ## 1. Le projet
 
 Site public, en français, pour les **primo-accédants en France** qui hésitent entre acheter
