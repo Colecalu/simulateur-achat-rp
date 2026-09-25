@@ -1196,13 +1196,33 @@ function avancementCourant() {
   return { profilValide: profilValide, bullesValidees: [...validees] };
 }
 
+const heure = new Intl.DateTimeFormat('fr-FR', { hour: '2-digit', minute: '2-digit' });
+
+/** Dit où en est la sauvegarde. Vide tant qu'il n'y a rien à dire. */
+function direBrouillon(texte, alerte) {
+  const el = $('#brouillonEtat');
+  el.textContent = texte;
+  el.classList.toggle('brouillon--alerte', alerte === true);
+}
+
+/** Écrit tout de suite, et met l'indicateur à jour. */
+function ecrireBrouillon() {
+  if (!Sauvegarde.ecrire(paramsCourants(), avancementCourant())) {
+    direBrouillon(
+      'Sauvegarde impossible : votre navigateur refuse le stockage local. ' +
+        'Votre saisie sera perdue en fermant l’onglet.',
+      true
+    );
+    return;
+  }
+  direBrouillon('Brouillon enregistré à ' + heure.format(new Date()) + '.');
+}
+
 /**
  * Écriture différée : on ne touche au `localStorage` qu'après une demi-seconde
  * sans frappe. Écrire à chaque caractère serait inutile et coûteux.
  */
-const enregistrerBrouillon = Sauvegarde.differer(() => {
-  Sauvegarde.ecrire(paramsCourants(), avancementCourant());
-}, 500);
+const enregistrerBrouillon = Sauvegarde.differer(ecrireBrouillon, 500);
 
 /**
  * Restaure un brouillon au chargement. Rend `true` si quelque chose a été
@@ -1253,7 +1273,44 @@ function restaurerBrouillon() {
     appliquerScenario(brouillon.params.scenario);
   }
 
+  direBrouillon('Simulation restaurée, telle que vous l’aviez laissée.');
   return true;
+}
+
+/**
+ * Branche la sauvegarde locale. Appelé en fin d'initialisation.
+ *
+ * Trois écouteurs plutôt qu'un :
+ * - `input` couvre la frappe ;
+ * - `change` couvre les listes déroulantes et les modes de saisie qui
+ *   n'émettent pas `input` à chaque étape ;
+ * - `pagehide` force l'écriture en attente. Sans lui, fermer l'onglet dans la
+ *   demi-seconde qui suit une frappe perdrait cette frappe — le différé aurait
+ *   mangé exactement ce qu'il devait protéger.
+ */
+function initialiserBrouillon() {
+  if (!Sauvegarde.disponible()) {
+    direBrouillon(
+      'Votre navigateur refuse le stockage local : cette simulation ne sera pas ' +
+        'conservée quand vous fermerez l’onglet.',
+      true
+    );
+    return;
+  }
+
+  for (const zone of ['#formulaire', '#profil', '#melFormulaire']) {
+    $(zone).addEventListener('input', enregistrerBrouillon);
+    $(zone).addEventListener('change', enregistrerBrouillon);
+  }
+  for (const id of ['#horizon', '#horizonBis']) {
+    $(id).addEventListener('input', enregistrerBrouillon);
+  }
+
+  // `pagehide` plutôt que `beforeunload` : c'est celui que les navigateurs
+  // modernes garantissent, y compris quand l'onglet est mis en cache arrière.
+  addEventListener('pagehide', ecrireBrouillon);
+
+  restaurerBrouillon();
 }
 
 /* ---------------------------------------------------------------- Orchestre */
@@ -1617,12 +1674,6 @@ function initialiser() {
   // recalculerait rien avant le clic sur « Valider mon profil ».
   $('#profil').addEventListener('input', recalculer);
 
-  // Toute saisie alimente le brouillon local, où qu'elle ait lieu.
-  for (const zone of ['#formulaire', '#profil', '#melFormulaire']) {
-    $(zone).addEventListener('input', enregistrerBrouillon);
-  }
-  $('#horizon').addEventListener('input', enregistrerBrouillon);
-  $('#horizonBis').addEventListener('input', enregistrerBrouillon);
   $('#horizon').addEventListener('input', rafraichir);
   // Deux contrôles, un seul état : le rappel écrit dans le curseur principal,
   // qui reste la source de vérité. Jamais deux dates à l'écran.
@@ -1643,6 +1694,7 @@ function initialiser() {
     majBulles();
     // Réinitialiser, c'est repartir de zéro : le brouillon part avec.
     Sauvegarde.effacer();
+    direBrouillon('');
     recalculer();
   });
 
@@ -1668,7 +1720,7 @@ function initialiser() {
   $('#melFormulaire').addEventListener('input', rafraichir);
 
   // En dernier : la restauration écrase les défauts et l'état du parcours.
-  restaurerBrouillon();
+  initialiserBrouillon();
 
   recalculer();
 }

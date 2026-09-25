@@ -262,6 +262,30 @@
     }
   }
 
+  /**
+   * Le stockage est-il utilisable ?
+   *
+   * `localStorage` peut exister et refuser d'écrire : navigation privée sur
+   * certains navigateurs, stockage désactivé par une politique d'entreprise,
+   * quota plein, cookies bloqués pour le site. Le seul test fiable est
+   * d'écrire pour de vrai — la présence de l'objet ne prouve rien.
+   *
+   * On le sait pour pouvoir le DIRE. Une sauvegarde qui échoue en silence est
+   * indiscernable d'une sauvegarde qui marche, jusqu'au moment où l'utilisateur
+   * perd son travail.
+   */
+  function disponible() {
+    try {
+      var temoin = CLE_BROUILLON + '.test';
+      global.localStorage.setItem(temoin, '1');
+      var relu = global.localStorage.getItem(temoin);
+      global.localStorage.removeItem(temoin);
+      return relu === '1';
+    } catch (e) {
+      return false;
+    }
+  }
+
   /** Enveloppe une fonction pour ne l'appeler qu'après une pause d'inactivité. */
   function differer(fn, delai) {
     var minuteur = null;
@@ -287,6 +311,7 @@
     lire: lire,
     ecrire: ecrire,
     effacer: effacer,
+    disponible: disponible,
     differer: differer,
   };
 

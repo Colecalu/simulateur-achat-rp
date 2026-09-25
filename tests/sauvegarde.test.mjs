@@ -193,3 +193,20 @@ test("un aller-retour complet ne perd aucune valeur", () => {
   const apres = migrer(paquet(avant));
   assert.deepEqual(apres, avant, 'aucun champ perdu ni altéré');
 });
+
+test('disponible() ne lève jamais, même sans localStorage du tout', () => {
+  // Sous Node il n'y a pas de localStorage : c'est exactement le cas d'un
+  // navigateur qui refuse le stockage. La fonction doit répondre « non »,
+  // pas exploser — c'est elle qui permet de PRÉVENIR l'utilisateur plutôt
+  // que de perdre son travail en silence.
+  assert.doesNotThrow(() => sauvegarde.disponible());
+  assert.equal(sauvegarde.disponible(), false);
+});
+
+test('lire et ecrire ne lèvent jamais sans localStorage', () => {
+  assert.doesNotThrow(() => sauvegarde.lire());
+  assert.equal(sauvegarde.lire(), null);
+  assert.doesNotThrow(() => sauvegarde.ecrire(vide(), {}));
+  assert.equal(sauvegarde.ecrire(vide(), {}), false);
+  assert.doesNotThrow(() => sauvegarde.effacer());
+});

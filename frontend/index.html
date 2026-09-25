@@ -84,6 +84,9 @@
 
     <div class="plateau__coin">
       <button type="button" class="bouton bouton--discret" id="reinitialiser">Réinitialiser</button>
+      <!-- État de la sauvegarde locale. Discret, mais présent : une sauvegarde
+           silencieuse qui échoue est indiscernable d'une sauvegarde qui marche. -->
+      <p class="brouillon" id="brouillonEtat" role="status" aria-live="polite"></p>
     </div>
 
     <div class="plateau__haut">

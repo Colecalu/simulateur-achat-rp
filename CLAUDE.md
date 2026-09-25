@@ -180,6 +180,17 @@ demi-seconde. Fermer l'onglet ne fait rien perdre, sans compte ni réseau.
 - **Piège vérifié** : un champ dont le défaut est `null` (`anneeBascule`) ne dit rien de son type.
   Se fier au type du défaut pour valider fait perdre la valeur au rechargement — silencieusement.
   Deux tests le verrouillent, dont un aller-retour sur tous les champs.
+- **L'état de la sauvegarde est VISIBLE** (`#brouillonEtat`, sous « Réinitialiser ») : « Brouillon
+  enregistré à 11:57 », « Simulation restaurée », ou l'avertissement franc quand le navigateur
+  refuse le stockage. Une sauvegarde silencieuse qui échoue est indiscernable d'une sauvegarde qui
+  marche — jusqu'au moment où l'utilisateur perd son travail. Ne pas la faire taire.
+- **`Sauvegarde.disponible()` écrit pour de vrai** avant de conclure. La présence de l'objet
+  `localStorage` ne prouve rien : navigation privée, politique d'entreprise, quota plein ou
+  cookies bloqués le laissent en place et font échouer l'écriture.
+- **Trois déclencheurs d'écriture** : `input` (la frappe), `change` (les listes déroulantes et les
+  modes de saisie qui n'émettent pas `input`), et `pagehide` qui force l'écriture en attente.
+  Sans ce dernier, fermer l'onglet dans la demi-seconde suivant une frappe perdrait exactement ce
+  que le différé devait protéger.
 
 ---
 
