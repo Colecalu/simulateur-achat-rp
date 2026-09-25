@@ -164,6 +164,40 @@ Honnêtement, les zones faibles du produit aujourd'hui :
 - **L'accessibilité clavier** des fenêtres modales : pas de piège de focus aujourd'hui.
 - **Le mobile.** Fonctionnel, vérifié à 420 px, mais jamais pensé pour.
 
+## 6 bis. Les décisions de modèle en cours — le contexte à connaître
+
+Refonte du pilier 2 en cours. Le raisonnement complet est en **sections 8 et 9 de
+[CLAUDE.md](CLAUDE.md)** ; voici ce qu'il faut savoir avant de proposer quoi que ce soit sur ce
+terrain.
+
+**Les valeurs par défaut sont devenues la vue de base sourcée.** Un scénario « normal » qu'il
+faudrait cliquer pour obtenir une réponse honnête est un scénario que personne ne clique : la
+plupart des utilisateurs ne toucheront jamais aux hypothèses, ce sont donc les défauts qui rendent
+le verdict. Chaque taux se décompose `nominal = (1 + réel) × (1 + inflation)`, inflation à 2 %
+(cible BCE), la composante réelle étant sourcée séparément.
+
+**Le paramétrage décide du verdict, pas le modèle.** Mesuré : un demi-point de rendement boursier
+renverse la réponse (bascule à +8,0 % nominal sur le profil type). C'est la raison d'être de
+l'exigence de sourçage — et la raison pour laquelle une proposition qui change un taux « parce que
+ça semble plus réaliste » sera refusée sans source.
+
+**Le vrai message du site est un seuil, pas une moyenne.** Le basculement se situe à **3,57 % de
+rendement locatif brut** : au-dessus acheter l'emporte, en dessous louer et investir l'emporte.
+Ce seuil sépare Paris (3,0-3,5 %) des grandes métropoles (4-5 %). Dire « ça se joue à peu de
+choses » est inexact pour un profil donné — l'écart s'y compte en centaines de milliers d'euros.
+Ce qui est vrai, c'est que **le rapport loyer/prix de la ville décide de quel côté on tombe**.
+
+**Quatre scénarios, deux groupes.** « Le passé » : deux fenêtres de 20 ans, sélectionnées hors
+ligne une seule fois et figées en dur. « Des futurs possibles » : deux stress tests symétriques,
+chacun testant **un seul** risque, l'autre marché restant sur la tendance longue.
+
+**Un scénario ne se nomme JAMAIS par son résultat.** Il se décrit par ce qui s'est passé sur les
+marchés — le résultat, lui, dépend du profil de l'utilisateur.
+
+**Aucun scénario n'utilise les taux de crédit de l'époque** : ils appliquent les évolutions de
+marché au projet de l'utilisateur, avec SON taux. Vérifié : les taux historiques déplacent les
+écarts de 60 à 130 k€ mais ne changent pas le classement d'une seule place.
+
 ## 7. Ce qui n'est pas ouvert
 
 - **Les six invariants** ci-dessus.

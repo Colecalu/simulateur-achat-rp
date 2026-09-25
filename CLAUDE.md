@@ -351,7 +351,131 @@ vérifiés pendant quelques semaines. L'adresse d'expédition doit être sur le 
 
 ---
 
-## 8. Dette bloquante pour la mise en ligne
+## 8. Les hypothèses par défaut, et pourquoi elles sont sourcées
+
+> **En cours de refonte.** Les valeurs ci-dessous marquées PROVISOIRE attendent des données.
+
+### Pourquoi les défauts ne sont pas un détail
+
+La plupart des utilisateurs ne toucheront pas aux hypothèses de marché. **Ce sont donc les valeurs
+par défaut qui rendent le verdict**, pour la majorité des visites. Elles ne peuvent pas être des
+chiffres ronds choisis au jugé : elles doivent être construites et sourcées au dixième de point.
+
+C'est pourquoi le scénario « Retour à la normale », d'abord envisagé comme une option parmi
+d'autres, a été **supprimé en tant que scénario** : il est devenu la **vue de base**. Un scénario
+qu'il faut cliquer pour obtenir une réponse honnête est un scénario que personne ne clique.
+
+### La construction
+
+Chaque taux nominal se décompose : `nominal = (1 + réel) × (1 + inflation) − 1`, avec une
+inflation de **2,0 %** — la cible de la BCE, seule référence prospective non arbitraire.
+
+| Paramètre | Valeur | Construction et source |
+|---|---|---|
+| Inflation | **2,0 %** | Cible d'inflation de la BCE. |
+| Loyers (IRL) | **2,0 %** | L'IRL **est** légalement la moyenne sur 12 mois de l'IPC hors tabac et loyers (loi du 8 février 2008). L'indexation des loyers est l'inflation, par construction — pas une hypothèse. Écart observé 1991-2022 : +0,21 pt. |
+| Charges de copropriété | **2,0 %** | Inflation. |
+| Taxe foncière | **2,5 %** | Depuis 2018 la revalorisation forfaitaire des valeurs locatives suit l'IPCH, mais les taux communaux dérivent en plus. Inflation + 0,5 pt corrige la sous-estimation connue. |
+| Immobilier | **PROVISOIRE 2,5 %** | 2 % + croissance **réelle** du revenu disponible brut par ménage (INSEE). Thèse de Friggit : sur longue période, les prix suivent le revenu. **En attente de la série INSEE.** |
+| Bourse | **PROVISOIRE 6,8 %** | 2 % + rendement **réel** de long terme des actions mondiales (Dimson-Marsh-Staunton, *UBS Global Investment Returns Yearbook*), **moins les frais de gestion d'un ETF monde**. **En attente du chiffre DMS de la dernière édition.** |
+
+**Ne PAS utiliser la moyenne MSCI 1991-2025 comme rendement de long terme** : elle est écrasée par
+la séquence haussière 2012-2025, qui vaut à elle seule +12,68 %/an. Une moyenne sur 35 ans reste
+une moyenne sur une seule histoire ; DMS couvre 125 ans et plusieurs dizaines de marchés.
+
+### Les frais d'ETF, et l'argument de symétrie
+
+Le modèle chiffre **tous** les coûts du côté achat — notaire, agence, dossier, assurance
+emprunteur, charges, taxe foncière. Il ne chiffre **aucun** coût du côté bourse. Déduire les frais
+de gestion d'un ETF monde (0,20 à 0,40 %/an) rétablit la symétrie.
+
+L'enjeu n'est pas cosmétique : **0,30 %/an déplace le verdict de 45 646 €** sur le profil par
+défaut à 25 ans. Ce n'est pas de la fiscalité — notre convention « rendement brut, impôt à la
+sortie » n'est pas en cause : un frais de gestion est un coût, au même titre qu'une taxe foncière.
+
+### ⚠️ Deux constats qui commandent tout le reste
+
+**1. Le paramétrage de la vue de base décide du verdict.** Mesuré sur le profil type :
+
+| Rendement boursier nominal | Écart à 25 ans |
+|---|---|
+| +6,0 % | +133 575 € |
+| +7,0 % | +71 438 € |
+| **+8,0 %** | **−3 639 €** ← bascule |
+| +8,5 % | −46 842 € |
+
+Un demi-point renverse la réponse. Même sensibilité côté immobilier : de 1,5 % à 3,0 %, l'écart
+passe de −32 329 € à +128 379 €. **Ce sont les hypothèses qui répondent, pas le modèle.** D'où
+l'exigence de sourcer.
+
+**2. Le vrai message du site est le rendement locatif d'équilibre.** Avec les hypothèses de long
+terme, sur le profil par défaut, le basculement se situe à **3,57 % de rendement locatif brut** :
+
+| | Rendement locatif brut | Verdict |
+|---|---|---|
+| Paris intra-muros | 3,0 à 3,5 % | **louer et investir l'emporte** |
+| Grandes métropoles | 4 à 5 % | acheter l'emporte |
+| Villes moyennes | 6 à 8 % | acheter l'emporte largement |
+
+La formule « en temps normal, ça se joue à peu de choses » est donc **inexacte pour un profil
+donné** : l'écart s'y compte en centaines de milliers d'euros. Ce qui est vrai, c'est que le
+**seuil est net et que le rapport loyer/prix de la ville décide de quel côté on tombe**. C'est ce
+qu'il faut dire, et c'est plus utile.
+
+Conséquence : le **profil par défaut** (420 000 €, loyer 1 600 €, soit 4,57 % brut) n'est pas
+neutre — il place l'utilisateur du côté « acheter gagne » avant toute saisie. À rediscuter.
+
+---
+
+## 9. Les quatre scénarios de marché
+
+Deux groupes, appliqués **par-dessus** la vue de base. Ils n'utilisent **jamais les taux de crédit
+de l'époque** : un scénario applique les évolutions de marché au projet de l'utilisateur, avec
+**son** taux. Vérifié — appliquer les taux historiques déplace les écarts de 60 à 130 k€ mais ne
+change pas le classement d'une seule place.
+
+### Groupe « Le passé » — étiquette *Historique*
+
+Deux fenêtres de **20 ans**, sélectionnées **une seule fois, hors ligne**, par
+`outils/fenetres-historiques.mjs`, puis figées en dur. Identiques pour tous les utilisateurs,
+jamais recalculées.
+
+- **H1** : la fenêtre la plus favorable à l'achat.
+- **H2** : la fenêtre la moins favorable à l'achat.
+- Années 21 à 25 : prolongées au rendement **annualisé géométrique** de la fenêtre — jamais
+  l'arithmétique, qui surestime toujours. Frontière observé/projeté tracée à l'écran.
+
+**La médiane a été abandonnée** : testée sur sept profils, elle se déplace de 1995 à 2000 selon le
+profil. Les extrêmes, eux, sont robustes — 1992 est la meilleure fenêtre pour les sept profils.
+
+**Aucune fenêtre de 20 ans ne favorise la location** dans les données 1991-2022 : l'écart va de
++145 k€ à +557 k€, toujours pour l'achat. Toute fenêtre de 20 ans englobe le boom immobilier
+français de 1998-2008. D'où l'étiquetage « la moins favorable à l'achat » et non « favorable à la
+location ».
+
+### Groupe « Des futurs possibles » — étiquette *Hypothèse*
+
+Deux stress tests **symétriques**, chacun sur **un seul risque**, l'autre marché restant sur la
+tendance longue. C'est ce qui les rend lisibles : on sait exactement ce qui est testé.
+
+- **« Correction immobilière »** — l'immobilier baisse dans les **premières années**, au moment où
+  l'acheteur est le plus endetté. Calibrage retenu : **−3, −3, −2, 0, +1 %** puis tendance longue,
+  soit −6,9 % nominal cumulé. Référence : l'épisode français de 1991-1997, qui fut **−0,9 %
+  nominal cumulé mais −10 % réel** — une stagnation longue érodée par l'inflation, pas un krach.
+  Le calibrage retenu est donc plus dur que 1991-1997 sans être une fiction. *À recaler sur
+  2023-2024 quand les données seront disponibles.*
+- **« Décennie perdue en bourse »** — les marchés stagnent une douzaine d'années puis repartent.
+  Calibré sur le MSCI World EUR Net 2000-2011. *Profil année par année en attente des données EUR.*
+
+### Ce qui ne figure JAMAIS dans une étiquette
+
+**Le résultat.** Un scénario se nomme et se décrit par **ce qui s'est passé sur les marchés** —
+jamais par « favorable à l'achat », puisque le résultat dépend du profil de l'utilisateur. Les
+historiques sont nommés par leur année de départ : « Acheter en 1992 ».
+
+---
+
+## 10. Dette bloquante pour la mise en ligne
 
 ### 🔴 Devise des rendements MSCI World — CONFIRMÉ, BLOQUANT
 
@@ -413,7 +537,7 @@ refaire après correction.
 
 ---
 
-## 9. Reporté, mais suivi
+## 11. Reporté, mais suivi
 
 | Fonctionnalité | État |
 |---|---|
