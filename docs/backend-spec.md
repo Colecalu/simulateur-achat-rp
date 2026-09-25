@@ -1,6 +1,18 @@
 # Spécification du backend — comptes et sauvegarde
 
-Statut : **spécification validée, non implémentée.** `backend/` est vide.
+> ## ⏸️ IMPLÉMENTATION EN PAUSE
+>
+> Les étapes 0 et 2 à 10 — Docker, socle PHP, MySQL, emails, comptes, RGPD, déploiement — sont
+> **gelées jusqu'à nouvel ordre. Ne pas les démarrer sans demande explicite.**
+>
+> **L'étape 1 fait exception : elle est faite et en service.** La sauvegarde locale
+> (`frontend/js/sauvegarde.js`) ne dépend d'aucun serveur, et son format de paramètres est déjà
+> celui que le backend attendra — c'est ce qui permettra de brancher l'API sans rien ressaisir.
+>
+> Ce document reste la référence. Les règles de la section « Parcours utilisateur » et le format
+> de `params` **continuent de s'appliquer** à tout ce qui se construit côté front.
+
+Statut : **spécification validée, implémentation en pause.** `backend/` est vide.
 
 ## Périmètre
 

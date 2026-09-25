@@ -12,6 +12,7 @@
   const simuler = window.SimuRP.simuler;
   const repartitionEnveloppe = window.SimuRP.repartitionEnveloppe;
   const repartitionAnnuelle = window.SimuRP.repartitionAnnuelle;
+  const Sauvegarde = window.SimuRPSauvegarde;
   const SCENARIOS = window.SimuRPScenarios.SCENARIOS;
   const tauxEquivalent = window.SimuRPScenarios.tauxEquivalent;
   const scenarioParCle = window.SimuRPScenarios.parCle;
@@ -1144,6 +1145,174 @@ function majScenario() {
     : 'Disponible une fois votre simulation complète.';
 }
 
+/* ------------------------------------------------------- Brouillon local */
+
+/*
+ * La saisie en cours est écrite dans le `localStorage` à chaque modification.
+ * Sans compte, sans réseau : fermer l'onglet ne fait plus rien perdre.
+ *
+ * Deux choses sont enregistrées, et leur séparation compte :
+ *   - `params`, qui décrit un PROJET. C'est ce qui partira tel quel vers le
+ *     compte le jour où il existera. Aucun état d'interface dedans.
+ *   - `avancement`, qui décrit où en est CETTE session dans CE navigateur.
+ *     Sans lui, rouvrir l'onglet afficherait un résultat complet alors que
+ *     l'utilisateur n'a rempli qu'une bulle — exactement ce qu'on s'interdit.
+ */
+
+/** Rassemble l'état courant sous la forme attendue par la sauvegarde. */
+function paramsCourants() {
+  const p = Sauvegarde.vide();
+  const saisie = lireFormulaire();
+  for (const champ of Object.keys(p.moteur)) {
+    if (champ in saisie) p.moteur[champ] = saisie[champ];
+  }
+
+  // Les champs de mise en location sont lus directement : `lireFormulaireMel`
+  // rend `null` tant que le palier 1 est incomplet, or on veut sauvegarder la
+  // saisie partielle aussi.
+  const nombre = (id) => {
+    const v = parseFloat(document.getElementById(id).value);
+    return Number.isFinite(v) ? v : null;
+  };
+  p.location.anneeBascule = nombre('melAnneeBascule');
+  p.location.loyerPercu = nombre('melLoyerPercu');
+  p.location.loyerFutur = nombre('melLoyerFutur');
+  for (const [id, def] of Object.entries(CHAMPS_MEL_AVANCES)) {
+    const el = document.getElementById(id);
+    if (el.tagName === 'SELECT') {
+      p.location[def.cle] = el.value;
+      continue;
+    }
+    const v = parseFloat(el.value);
+    if (Number.isFinite(v)) p.location[def.cle] = def.pourcentage ? v / 100 : v;
+  }
+
+  p.scenario = scenarioActif ? scenarioActif.cle : null;
+  p.horizon = parseInt($('#horizon').value, 10) || 20;
+  return p;
+}
+
+function avancementCourant() {
+  return { profilValide: profilValide, bullesValidees: [...validees] };
+}
+
+const heure = new Intl.DateTimeFormat('fr-FR', { hour: '2-digit', minute: '2-digit' });
+
+/** Dit où en est la sauvegarde. Vide tant qu'il n'y a rien à dire. */
+function direBrouillon(texte, alerte) {
+  const el = $('#brouillonEtat');
+  el.textContent = texte;
+  el.classList.toggle('brouillon--alerte', alerte === true);
+}
+
+/** Écrit tout de suite, et met l'indicateur à jour. */
+function ecrireBrouillon() {
+  if (!Sauvegarde.ecrire(paramsCourants(), avancementCourant())) {
+    direBrouillon(
+      'Sauvegarde impossible : votre navigateur refuse le stockage local. ' +
+        'Votre saisie sera perdue en fermant l’onglet.',
+      true
+    );
+    return;
+  }
+  direBrouillon('Brouillon enregistré à ' + heure.format(new Date()) + '.');
+}
+
+/**
+ * Écriture différée : on ne touche au `localStorage` qu'après une demi-seconde
+ * sans frappe. Écrire à chaque caractère serait inutile et coûteux.
+ */
+const enregistrerBrouillon = Sauvegarde.differer(ecrireBrouillon, 500);
+
+/**
+ * Restaure un brouillon au chargement. Rend `true` si quelque chose a été
+ * restauré, pour que l'appelant sache s'il doit recalculer.
+ *
+ * Les taux sont stockés en FRACTION et s'affichent en POURCENTAGE : c'est
+ * `remplirFormulaire` qui fait la conversion, comme pour les défauts. On lui
+ * passe donc les paramètres tels quels, sans les traduire ici.
+ */
+function restaurerBrouillon() {
+  const brouillon = Sauvegarde.lire();
+  if (!brouillon) return false;
+
+  remplirFormulaire(brouillon.params.moteur);
+
+  const champ = (id, v, pourcentage) => {
+    const el = document.getElementById(id);
+    if (!el || v === null || v === undefined) return;
+    el.value = el.tagName === 'SELECT' ? v : pourcentage ? +(v * 100).toFixed(4) : v;
+  };
+  champ('melAnneeBascule', brouillon.params.location.anneeBascule);
+  champ('melLoyerPercu', brouillon.params.location.loyerPercu);
+  champ('melLoyerFutur', brouillon.params.location.loyerFutur);
+  for (const [id, def] of Object.entries(CHAMPS_MEL_AVANCES)) {
+    champ(id, brouillon.params.location[def.cle], def.pourcentage);
+  }
+
+  $('#horizon').value = brouillon.params.horizon;
+
+  // Le module de mise en location se rouvre s'il portait une saisie : son état
+  // d'ouverture se DÉDUIT des paramètres, il n'a pas à être stocké.
+  if (brouillon.params.location.anneeBascule !== null) {
+    $('#melPanneau').hidden = false;
+    $('#melOuvrir').hidden = true;
+    $('#melOuvrir').setAttribute('aria-expanded', 'true');
+  }
+
+  // L'avancement est restauré AVANT le scénario : `appliquerScenario` appelle
+  // `recalculer`, qui lit `profilValide` et `validees` pour décider ce qui
+  // s'affiche.
+  profilValide = brouillon.avancement.profilValide;
+  validees.clear();
+  for (const n of brouillon.avancement.bullesValidees) validees.add(n);
+  if (profilValide) figerProfil(true);
+
+  if (brouillon.params.scenario && scenarioParCle(brouillon.params.scenario)) {
+    scenariosDecouverts = true;
+    appliquerScenario(brouillon.params.scenario);
+  }
+
+  direBrouillon('Simulation restaurée, telle que vous l’aviez laissée.');
+  return true;
+}
+
+/**
+ * Branche la sauvegarde locale. Appelé en fin d'initialisation.
+ *
+ * Trois écouteurs plutôt qu'un :
+ * - `input` couvre la frappe ;
+ * - `change` couvre les listes déroulantes et les modes de saisie qui
+ *   n'émettent pas `input` à chaque étape ;
+ * - `pagehide` force l'écriture en attente. Sans lui, fermer l'onglet dans la
+ *   demi-seconde qui suit une frappe perdrait cette frappe — le différé aurait
+ *   mangé exactement ce qu'il devait protéger.
+ */
+function initialiserBrouillon() {
+  if (!Sauvegarde.disponible()) {
+    direBrouillon(
+      'Votre navigateur refuse le stockage local : cette simulation ne sera pas ' +
+        'conservée quand vous fermerez l’onglet.',
+      true
+    );
+    return;
+  }
+
+  for (const zone of ['#formulaire', '#profil', '#melFormulaire']) {
+    $(zone).addEventListener('input', enregistrerBrouillon);
+    $(zone).addEventListener('change', enregistrerBrouillon);
+  }
+  for (const id of ['#horizon', '#horizonBis']) {
+    $(id).addEventListener('input', enregistrerBrouillon);
+  }
+
+  // `pagehide` plutôt que `beforeunload` : c'est celui que les navigateurs
+  // modernes garantissent, y compris quand l'onglet est mis en cache arrière.
+  addEventListener('pagehide', ecrireBrouillon);
+
+  restaurerBrouillon();
+}
+
 /* ---------------------------------------------------------------- Orchestre */
 
 let dernierResultat = null;
@@ -1220,11 +1389,17 @@ function ouvrirProfil() {
   $('#capitalInitial').focus();
 }
 
-function figerProfil() {
+/**
+ * @param {boolean} [discret] - au chargement d'un brouillon, on replie le
+ *   bandeau sans déplacer le focus : voler le curseur à quelqu'un qui vient
+ *   d'ouvrir la page, ce n'est pas une aide, c'est une surprise.
+ */
+function figerProfil(discret) {
   profilValide = true;
   $('#profil').dataset.etat = 'fige';
   majBulles();
   recalculer();
+  if (discret === true) return;
 
   const suivante = prochaineBulle();
   if (suivante !== null) bulle(suivante).querySelector('.bulle__declencheur').focus();
@@ -1498,6 +1673,7 @@ function initialiser() {
   // Le profil vit hors du plateau : sans son propre écouteur, l'éditer ne
   // recalculerait rien avant le clic sur « Valider mon profil ».
   $('#profil').addEventListener('input', recalculer);
+
   $('#horizon').addEventListener('input', rafraichir);
   // Deux contrôles, un seul état : le rappel écrit dans le curseur principal,
   // qui reste la source de vérité. Jamais deux dates à l'écran.
@@ -1516,6 +1692,9 @@ function initialiser() {
     appliquerScenario('');
     ouvrirProfil();
     majBulles();
+    // Réinitialiser, c'est repartir de zéro : le brouillon part avec.
+    Sauvegarde.effacer();
+    direBrouillon('');
     recalculer();
   });
 
@@ -1540,6 +1719,8 @@ function initialiser() {
   });
   $('#melFormulaire').addEventListener('input', rafraichir);
 
+  // En dernier : la restauration écrase les défauts et l'état du parcours.
+  initialiserBrouillon();
 
   recalculer();
 }

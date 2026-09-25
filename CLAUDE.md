@@ -6,20 +6,28 @@ Document de référence du projet. Court par nature : le détail vit dans `docs/
 |---|---|
 | Modèle de calcul, formules, écarts assumés | [docs/modele-de-calcul.md](docs/modele-de-calcul.md) |
 | Interface, design, visualisation | [docs/conventions-ui.md](docs/conventions-ui.md) |
-| Backend : comptes, sauvegarde, sécurité, RGPD | [docs/backend-spec.md](docs/backend-spec.md) |
+| Backend : comptes, sauvegarde, sécurité, RGPD | [docs/backend-spec.md](docs/backend-spec.md) — **en pause** |
 | Design system Perron | [docs/design/README.md](docs/design/README.md) |
 
 ## Commandes
 
 ```bash
-node --test "tests/*.test.mjs"   # 56 tests : moteur, mise en location, indicateurs, séries
+node --test "tests/*.test.mjs"   # 74 tests : moteur, location, indicateurs, séries, sauvegarde
 ```
 
 Le motif est entre guillemets : `node --test tests/` échoue sous Windows (Node tente de charger
 le dossier comme un module), et un glob non quoté n'est pas développé par tous les shells.
 
-Pas de build. `frontend/` est servi tel quel. Aperçu local : `npx http-server frontend -p 4173 -c-1`
-(configuration dans `.claude/launch.json`).
+Pas de build. `frontend/` est servi tel quel.
+
+**Pour lancer le site en local : double-cliquer sur `lancer-le-site.cmd`** à la racine. Il ouvre
+`http://localhost:4173`, toujours la même adresse, et prévient si la branche courante ne contient
+pas la sauvegarde locale. Équivalent en ligne de commande :
+`npx http-server frontend -p 4173 -c-1`.
+
+⚠️ **Ne jamais tester en ouvrant `index.html` par double-clic.** L'adresse devient `file://`, où
+le navigateur refuse une partie de ce dont le site a besoin — c'est la même raison qui interdit
+les modules ES dans ce projet.
 
 ---
 
@@ -125,6 +133,7 @@ frontend/                    servi tel quel, racine web en production
   js/   calc.js              moteur PUR : window.SimuRP / module.exports
         calc-location.js     pilier 3 — CONSOMME calc.js, ne le modifie jamais
         scenarios.js         pilier 2 — données de marché, pas de logique
+        sauvegarde.js        brouillon local + migration de schéma (testé)
         app.js               tout le DOM, toute l'interface
 backend/                     vide aujourd'hui — voir docs/backend-spec.md
 docs/                        modèle, conventions UI, spec backend, design, Excel
@@ -149,10 +158,67 @@ migrations/                  à créer : SQL numéroté, appliqué à la main
 
 ---
 
-## 5. Sécurité et RGPD — l'essentiel
+### Sauvegarde locale et versions de schéma
 
-Spécification complète dans [docs/backend-spec.md](docs/backend-spec.md). Les règles qui ne se
-négocient pas :
+La saisie en cours est écrite dans le `localStorage` (`simurp.brouillon`), en différé d'une
+demi-seconde. Fermer l'onglet ne fait rien perdre, sans compte ni réseau.
+
+- **`params` décrit un PROJET** — les champs du moteur, ceux de la mise en location, le scénario
+  appliqué et l'horizon. C'est ce qui partira tel quel vers le compte. **Aucun état d'interface
+  dedans.**
+- **`avancement` décrit CETTE session dans CE navigateur** — profil validé, bulles validées. Il
+  vit dans l'enveloppe du brouillon, jamais dans `params`, et ne partira jamais en base. Sans
+  lui, rouvrir l'onglet afficherait un résultat complet alors que l'utilisateur n'a rempli
+  qu'une bulle — ce qu'on s'interdit.
+- **Tout le reste se déduit** : l'ouverture du module de mise en location se lit dans la présence
+  d'une année de bascule. Ne pas stocker ce qui se déduit.
+- **`SCHEMA_VERSION` ne s'incrémente que si une ancienne sauvegarde ne se relit plus à
+  l'identique.** Ajouter un champ ne casse rien : `normaliser()` lui donne son défaut.
+- **`migrer()` ne lève jamais.** Sauvegarde corrompue, version future, migration qui plante :
+  elle rend `null` et le front repart d'un brouillon vide. Le simulateur doit marcher même quand
+  la sauvegarde ne marche pas.
+- **Piège vérifié** : un champ dont le défaut est `null` (`anneeBascule`) ne dit rien de son type.
+  Se fier au type du défaut pour valider fait perdre la valeur au rechargement — silencieusement.
+  Deux tests le verrouillent, dont un aller-retour sur tous les champs.
+- **L'état de la sauvegarde est VISIBLE** (`#brouillonEtat`, sous « Réinitialiser ») : « Brouillon
+  enregistré à 11:57 », « Simulation restaurée », ou l'avertissement franc quand le navigateur
+  refuse le stockage. Une sauvegarde silencieuse qui échoue est indiscernable d'une sauvegarde qui
+  marche — jusqu'au moment où l'utilisateur perd son travail. Ne pas la faire taire.
+- **`Sauvegarde.disponible()` écrit pour de vrai** avant de conclure. La présence de l'objet
+  `localStorage` ne prouve rien : navigation privée, politique d'entreprise, quota plein ou
+  cookies bloqués le laissent en place et font échouer l'écriture.
+- **Trois déclencheurs d'écriture** : `input` (la frappe), `change` (les listes déroulantes et les
+  modes de saisie qui n'émettent pas `input`), et `pagehide` qui force l'écriture en attente.
+  Sans ce dernier, fermer l'onglet dans la demi-seconde suivant une frappe perdrait exactement ce
+  que le différé devait protéger.
+
+---
+
+## 5. Backend — EN PAUSE
+
+> **Architecture spécifiée dans [docs/backend-spec.md](docs/backend-spec.md), implémentation en
+> pause. Ne pas démarrer sans demande explicite.**
+>
+> Les étapes 0 et 2 à 10 (Docker, socle PHP, MySQL, emails, comptes, RGPD, déploiement) sont
+> gelées. L'étape 1 — la sauvegarde locale — est faite et reste en service : elle ne dépend
+> d'aucun serveur.
+
+**La spécification continue de s'appliquer à ce qui se construit côté front**, parce que ce sont
+ces choix-là qui coûteront cher à défaire :
+
+- **Les paramètres restent séparés de l'état de l'interface.** `params` décrit un projet et
+  partira tel quel vers le compte ; tout le reste vit ailleurs.
+- **`SCHEMA_VERSION` et les migrations se mettent à jour à chaque nouveau champ.** Ajouter un
+  champ ne demande rien de plus que son défaut ; le renommer ou changer son unité demande une
+  migration et un incrément.
+- **Aucun style en ligne** — des classes, alimentées par les jetons de thème. Une CSP stricte
+  suivra.
+- **Jamais d'`innerHTML` sur une donnée utilisateur** — `textContent`. Le nom d'une simulation
+  sera saisi par l'utilisateur : c'est le vecteur évident.
+
+### Sécurité et RGPD — l'essentiel, pour le jour où
+
+Les règles qui ne se négocient pas :
 
 - **HTTPS partout**, redirection via `.htaccess`.
 - Mots de passe par `password_hash()` / `password_verify()`, 10 caractères minimum.
@@ -198,8 +264,8 @@ serveur, une fois.
 idempotent quand c'est possible (`CREATE TABLE IF NOT EXISTS`). Noter la dernière migration
 appliquée dans une table `schema_migrations`.
 
-> ⚠️ `.gitignore` ignore actuellement `*.sql` : il faut y ajouter `!migrations/*.sql`, sans quoi
-> les migrations ne seront jamais commitées.
+`.gitignore` ignore `*.sql` mais porte l'exception `!migrations/*.sql` — sans elle, les
+migrations n'auraient jamais été commitées. Ne pas la retirer.
 
 ### Git
 

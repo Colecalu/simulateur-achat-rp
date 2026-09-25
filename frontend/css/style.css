@@ -250,6 +250,23 @@ h1, h2, h3 {
 
 .case { min-height: 0; min-width: 0; }
 
+/*
+ * État de la sauvegarde locale.
+ *
+ * Une sauvegarde silencieuse qui échoue est indiscernable d'une sauvegarde qui
+ * marche : l'utilisateur ne découvre le problème qu'en perdant son travail.
+ * D'où cette ligne — discrète quand tout va bien, franche quand le stockage
+ * est indisponible.
+ */
+.brouillon {
+  margin: 6px 0 0;
+  font-size: .6875rem;
+  line-height: 1.35;
+  color: var(--encre-3);
+}
+.brouillon:empty { display: none; }
+.brouillon--alerte { color: var(--alerte); }
+
 
 @media (max-width: 1040px) {
   .plateau {
