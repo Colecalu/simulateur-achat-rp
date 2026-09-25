@@ -353,33 +353,63 @@ vérifiés pendant quelques semaines. L'adresse d'expédition doit être sur le 
 
 ## 8. Dette bloquante pour la mise en ligne
 
-### 🔴 Devise des rendements MSCI World — PRIORITÉ HAUTE, BLOQUANT
+### 🔴 Devise des rendements MSCI World — CONFIRMÉ, BLOQUANT
 
-**Le site ne doit pas être mis en ligne tant que ce point n'est pas tranché.**
+**Le site ne doit pas être mis en ligne tant que ce point n'est pas corrigé.**
 
-Les séries de `frontend/js/scenarios.js` sont annoncées en **euros**, mais plusieurs années
-coïncident **au centième** avec les valeurs publiées en **dollars** :
+Diagnostic **confirmé et précisé** (25/09/2026), par comparaison avec les rendements officiels
+MSCI World **EUR, dividendes nets réinvestis** fournis pour 2012-2025 :
 
-| Année | Valeur dans le code | Correspond à |
-|---|---|---|
-| 2019 | +27,7 % | MSCI World **USD** net |
-| 2021 | +21,8 % | MSCI World **USD** net |
-| 2022 | −18,1 % | MSCI World **USD** net |
-| 2014 | +18,7 % | ressemble davantage à de l'**EUR** |
-| 2015 | +8,3 % | ressemble davantage à de l'**EUR** |
+| | Résultat |
+|---|---|
+| Années du code identiques au MSCI World **USD net** (au centième) | **9 sur 11** |
+| Années du code identiques au MSCI World **EUR net** | **0 sur 11** |
+| Années ne correspondant **ni à l'un ni à l'autre** | **2** — 2014 et 2015 |
 
-Or 2021 et 2022 ont connu de forts mouvements de change : l'écart euro/dollar sur ces deux
-années seules se chiffre en dizaines de milliers d'euros sur le verdict. **La série est donc
-peut-être panachée**, ce qui serait pire qu'une erreur systématique — une erreur systématique se
-corrige d'un coefficient, un panachage se corrige année par année.
+Ce n'est donc **pas** un simple étiquetage à corriger par une substitution : la série est
+**panachée**, et deux années viennent d'une troisième source inconnue. Écart maximal : **14,9
+points** sur 2017 (+22,4 % dans le code, +7,51 % en réalité).
 
-**À traiter dans une session dédiée**, avec des **sources MSCI officielles en EUR**, en précisant
-**net ou gross** (dividendes nets de retenue à la source, ou bruts) et en s'y tenant sur toute la
-période. Refaire ensuite le contrôle croisé des recouvrements entre décennies.
+**Vérification indépendante des chiffres EUR fournis** : si deux séries décrivent le même indice
+en deux devises, leur écart doit s'expliquer entièrement par le change. Le rapport
+`(1 + EUR) / (1 + USD) − 1` a été calculé sur les onze années : **le signe correspond au mouvement
+euro/dollar réel 11 fois sur 11**, et les amplitudes concordent (2014 : +13,9 % impliqué contre
+~+12 % constatés ; 2017 : −12,2 % contre ~−14 %). Cela ne prouve pas que ce sont les chiffres de
+la fiche MSCI, mais prouve qu'ils se comportent comme la conversion en euros de la série dollar.
 
-La réserve est déjà affichée à l'écran dans l'aperçu de chaque scénario concerné — c'est un
-palliatif, pas une solution : on ne publie pas un simulateur financier en signalant que ses
-données sont peut-être fausses.
+**Impact mesuré, à ne pas surestimer** : sur « Taux bas puis inflation » (2012-2022), le verdict
+bouge de 9 k€ à 29 k€ selon l'horizon — soit 1 à 3 %. Les erreurs se compensent largement parce
+que le rendement moyen est presque identique (11,60 % contre 11,44 %). **Ce qui change beaucoup,
+c'est le CHEMIN**, et c'est précisément ce que le pilier 2 prétend montrer. La correction est une
+question d'exactitude et de crédibilité, pas de renversement du verdict.
+
+### Pourquoi la correction doit être faite d'un seul bloc
+
+Les décennies se chevauchent, et ces recouvrements **concordent aujourd'hui 7 fois sur 7** entre
+« Krach de 2008 » (2008-2018) et « Taux bas puis inflation » (2012-2022). C'est cette concordance
+qui rend le chaînage possible et qui a produit « Trente ans réels ».
+
+Corriger seulement 2012-2022 ferait **diverger les sept années communes** — 2017 passerait à
+7,51 % dans un scénario et resterait à 22,40 % dans l'autre. On aurait deux vérités dans le même
+produit. **Attendre la série complète 1991-2011 avant de toucher quoi que ce soit.**
+
+### Ce qui reste à obtenir
+
+- **1991 à 2011**, MSCI World **EUR, Net**, rendements annuels, source et date d'extraction.
+  Point de méthode à trancher : **l'euro n'existe pas avant 1999.** MSCI publie une série EUR
+  rétropolée (ECU puis devises héritées) — il faut savoir laquelle et le documenter.
+- **2023 à 2025 pour les trois autres séries** (immobilier INSEE, loyers IRL, inflation) si l'on
+  veut profiter des rendements boursiers déjà disponibles jusqu'en 2025. Les quatre séries d'un
+  scénario doivent couvrir la même période et avoir la même longueur.
+- **Aucune source secondaire.** Blogs et comparateurs publient massivement des chiffres USD
+  présentés comme des EUR — c'est exactement l'origine de la dette actuelle.
+
+### Ce que la correction n'affecte pas
+
+La fixture Excel (`tests/fixtures/excel-paris.json`) est calculée sur les **taux constants par
+défaut**, pas sur les scénarios : **aucun test ne référence `scenarios.js`**. Corriger les données
+ne demande donc aucune mise à jour de fixture. Le contrôle croisé des recouvrements, lui, est à
+refaire après correction.
 
 ---
 
