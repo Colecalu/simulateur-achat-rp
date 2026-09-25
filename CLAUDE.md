@@ -44,6 +44,11 @@ les modules ES dans ce projet.
 produit sont documentées ici et dans `docs/` — c'est ce qui permet à un autre agent de comprendre
 *pourquoi* un choix a été fait avant de proposer le contraire.
 
+Le protocole d'expérimentation est dans **[AGENTS.md](AGENTS.md)** : trois natures
+d'expérimentation et leur traitement, format attendu d'un livrable, zones où la contradiction est
+la plus utile. C'est le fichier que lisent les autres agents — le tenir à jour quand une décision
+structurante change.
+
 ### Règles de cohabitation
 
 - **Ne jamais supprimer, fusionner ni modifier une branche, un worktree ou un fichier
