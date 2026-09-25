@@ -6,20 +6,28 @@ Document de référence du projet. Court par nature : le détail vit dans `docs/
 |---|---|
 | Modèle de calcul, formules, écarts assumés | [docs/modele-de-calcul.md](docs/modele-de-calcul.md) |
 | Interface, design, visualisation | [docs/conventions-ui.md](docs/conventions-ui.md) |
-| Backend : comptes, sauvegarde, sécurité, RGPD | [docs/backend-spec.md](docs/backend-spec.md) |
+| Backend : comptes, sauvegarde, sécurité, RGPD | [docs/backend-spec.md](docs/backend-spec.md) — **en pause** |
 | Design system Perron | [docs/design/README.md](docs/design/README.md) |
 
 ## Commandes
 
 ```bash
-node --test "tests/*.test.mjs"   # 56 tests : moteur, mise en location, indicateurs, séries
+node --test "tests/*.test.mjs"   # 74 tests : moteur, location, indicateurs, séries, sauvegarde
 ```
 
 Le motif est entre guillemets : `node --test tests/` échoue sous Windows (Node tente de charger
 le dossier comme un module), et un glob non quoté n'est pas développé par tous les shells.
 
-Pas de build. `frontend/` est servi tel quel. Aperçu local : `npx http-server frontend -p 4173 -c-1`
-(configuration dans `.claude/launch.json`).
+Pas de build. `frontend/` est servi tel quel.
+
+**Pour lancer le site en local : double-cliquer sur `lancer-le-site.cmd`** à la racine. Il ouvre
+`http://localhost:4173`, toujours la même adresse, et prévient si la branche courante ne contient
+pas la sauvegarde locale. Équivalent en ligne de commande :
+`npx http-server frontend -p 4173 -c-1`.
+
+⚠️ **Ne jamais tester en ouvrant `index.html` par double-clic.** L'adresse devient `file://`, où
+le navigateur refuse une partie de ce dont le site a besoin — c'est la même raison qui interdit
+les modules ES dans ce projet.
 
 ---
 
@@ -175,10 +183,31 @@ demi-seconde. Fermer l'onglet ne fait rien perdre, sans compte ni réseau.
 
 ---
 
-## 5. Sécurité et RGPD — l'essentiel
+## 5. Backend — EN PAUSE
 
-Spécification complète dans [docs/backend-spec.md](docs/backend-spec.md). Les règles qui ne se
-négocient pas :
+> **Architecture spécifiée dans [docs/backend-spec.md](docs/backend-spec.md), implémentation en
+> pause. Ne pas démarrer sans demande explicite.**
+>
+> Les étapes 0 et 2 à 10 (Docker, socle PHP, MySQL, emails, comptes, RGPD, déploiement) sont
+> gelées. L'étape 1 — la sauvegarde locale — est faite et reste en service : elle ne dépend
+> d'aucun serveur.
+
+**La spécification continue de s'appliquer à ce qui se construit côté front**, parce que ce sont
+ces choix-là qui coûteront cher à défaire :
+
+- **Les paramètres restent séparés de l'état de l'interface.** `params` décrit un projet et
+  partira tel quel vers le compte ; tout le reste vit ailleurs.
+- **`SCHEMA_VERSION` et les migrations se mettent à jour à chaque nouveau champ.** Ajouter un
+  champ ne demande rien de plus que son défaut ; le renommer ou changer son unité demande une
+  migration et un incrément.
+- **Aucun style en ligne** — des classes, alimentées par les jetons de thème. Une CSP stricte
+  suivra.
+- **Jamais d'`innerHTML` sur une donnée utilisateur** — `textContent`. Le nom d'une simulation
+  sera saisi par l'utilisateur : c'est le vecteur évident.
+
+### Sécurité et RGPD — l'essentiel, pour le jour où
+
+Les règles qui ne se négocient pas :
 
 - **HTTPS partout**, redirection via `.htaccess`.
 - Mots de passe par `password_hash()` / `password_verify()`, 10 caractères minimum.
@@ -224,8 +253,8 @@ serveur, une fois.
 idempotent quand c'est possible (`CREATE TABLE IF NOT EXISTS`). Noter la dernière migration
 appliquée dans une table `schema_migrations`.
 
-> ⚠️ `.gitignore` ignore actuellement `*.sql` : il faut y ajouter `!migrations/*.sql`, sans quoi
-> les migrations ne seront jamais commitées.
+`.gitignore` ignore `*.sql` mais porte l'exception `!migrations/*.sql` — sans elle, les
+migrations n'auraient jamais été commitées. Ne pas la retirer.
 
 ### Git
 
