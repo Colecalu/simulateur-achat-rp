@@ -309,9 +309,10 @@ réelles — en cours ; **(3)** la mise en location ultérieure — moteur fait,
 - **Trois questions, et l'effort n'est jamais saisi.** « Ce que vous possédez » (patrimoine
   financier), « ce que vous sortez chaque mois » (loyer actuel + épargne mensuelle), « ce que vous
   gagnez » (revenus nets du **foyer**, facultatifs). Personne ne connaît son « effort mensuel » de
-  tête ; tout le monde connaît son loyer et ce qu'il met de côté. L'effort s'affiche comme un
-  **total calculé**, qui ne doit pas avoir l'air d'un champ. Il se stocke décomposé (groupe
-  `profil` de la sauvegarde) et se déduit à la lecture.
+  tête ; tout le monde connaît son loyer et ce qu'il met de côté. L'effort se stocke décomposé
+  (groupe `profil` de la sauvegarde) et se déduit à la lecture. Son total n'est **pas affiché**
+  dans le bandeau pour l'instant (décision de Lucas) : il reviendra ailleurs. Les trois groupes ont
+  la même hauteur, la plus faible possible — aides d'une ligne, champs de 38 px.
 - **« Ces montants ne font pas pencher la balance »** : dit explicitement. Avec l'enveloppe
   identique, c'est exact au centime, et c'est ce qui évite à l'utilisateur d'hésiter pendant dix
   minutes entre 3 000 et 3 400 € en croyant changer la réponse.
@@ -321,8 +322,8 @@ réelles — en cours ; **(3)** la mise en location ultérieure — moteur fait,
   actuel → ce que l'achat demande en année 1, le supplément, la phrase qui dit que le locataire
   place aussi ce supplément, **la bascule**, les périodes de l'enveloppe (« années 1 à 20 :
   l'enveloppe suit le coût du propriétaire »), la faisabilité (mensualité, taux d'endettement
-  contre les 35 % du HCSF, part des revenus, reste à vivre) et un petit graphique de l'enveloppe en
-  marches d'escalier. Les périodes plutôt qu'une ligne par année : les charges bougent chaque
+  contre les 35 % du HCSF, part des revenus, reste à vivre). **Pas de graphique**
+  de l'enveloppe : retiré à la relecture, les périodes écrites suffisent. Les périodes plutôt qu'une ligne par année : les charges bougent chaque
   année, une liste annuelle serait illisible.
 - **La bascule d'épargne forcée ne se laisse pas oublier.** Masquée quand l'effort couvre déjà
   l'achat (elle ne changerait rien, la montrer ferait croire à un réglage cassé). Son libellé

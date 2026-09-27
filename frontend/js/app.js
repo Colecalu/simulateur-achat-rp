@@ -1523,10 +1523,8 @@ function afficherProfil(resultat) {
   }
   $('#profilResume').replaceChildren(...resume);
 
-  // --- Total de l'effort, et retour immédiat -----------------------------
-  // Ni l'un ni l'autre ne dépend du projet : ils s'affichent dès la saisie.
-  $('#effortTotal').textContent = parMois(e.enveloppeMensuelle);
-
+  // --- Retour immédiat ---------------------------------------------------
+  // Ne dépend pas du projet : il s'affiche dès la saisie.
   const retour = $('#profilRetour');
   retour.hidden = !(e.revenusFoyer > 0);
   if (!retour.hidden) {
@@ -1560,8 +1558,6 @@ function afficherProfil(resultat) {
       `(${euros.format(e.capitalInitial)}) : le portefeuille de l'acheteur partirait en ` +
       'négatif. Réduisez l\'apport, ou corrigez votre patrimoine.';
   }
-
-  dessinerEnveloppe(resultat);
 }
 
 /** Effort actuel → ce que l'achat demande, la phrase qui l'explique, la bascule. */
@@ -1658,72 +1654,6 @@ function afficherFaisabilite(resultat) {
       noeud('p', 'face__vide',
         'Renseignez vos revenus pour voir votre taux d\'endettement et ce qui vous reste pour vivre.'));
   }
-}
-
-let graphEnveloppe = null;
-
-/**
- * L'enveloppe année par année, avec ce qui la fait monter : coût du
- * propriétaire et loyer en tirets, effort déclaré en pointillé. En marches
- * d'escalier, parce qu'elle change d'une année sur l'autre, pas en continu.
- */
-function dessinerEnveloppe(resultat) {
-  if (typeof Chart === 'undefined') return;
-  const A = resultat.annees;
-  const identique = resultat.entrees.locatairePlaceDifference;
-  const cAchat = jeton('--achat');
-  const cLocation = jeton('--location');
-
-  const courbe = (label, valeurs, couleur, options) => Object.assign({
-    label,
-    data: valeurs.map((v) => v / 12),
-    borderColor: couleur,
-    backgroundColor: couleur,
-    borderWidth: 1.5,
-    pointRadius: 0,
-    pointHoverRadius: 4,
-    fill: false,
-  }, options);
-
-  const datasets = [];
-  if (identique) {
-    datasets.push(courbe('Enveloppe, des deux côtés', A.map((x) => x.enveloppeAchat),
-      jeton('--encre'), { borderWidth: 3, stepped: 'before' }));
-  } else {
-    datasets.push(courbe('Enveloppe de l\'acheteur', A.map((x) => x.enveloppeAchat),
-      cAchat, { borderWidth: 3, stepped: 'before' }));
-    datasets.push(courbe('Enveloppe du locataire', A.map((x) => x.enveloppeLocation),
-      cLocation, { borderWidth: 3, stepped: 'before' }));
-  }
-  datasets.push(courbe('Coût du propriétaire', A.map((x) => x.totalDebourseAnnuel),
-    attenue(cAchat, 0.6), { borderDash: [5, 4] }));
-  datasets.push(courbe('Loyer', A.map((x) => x.loyerAnnuel),
-    attenue(cLocation, 0.6), { borderDash: [5, 4] }));
-  datasets.push(courbe('Effort déclaré', A.map(() => resultat.entrees.enveloppeMensuelle * 12),
-    jeton('--encre-3'), { borderDash: [2, 4] }));
-
-  const o = optionsCommunes();
-  o.scales.y.ticks.callback = (v) => euros.format(v);
-  o.scales.y.ticks.maxTicksLimit = 5;
-
-  graphEnveloppe = poser(graphEnveloppe, '#graphEnveloppe', 'line', {
-    labels: A.map((x) => x.annee),
-    datasets,
-  }, o);
-
-  const trait = (classe, texte) => {
-    const s = noeud('span', 'legende__item');
-    s.append(noeud('span', `trait trait--${classe}`), texte);
-    return s;
-  };
-  $('#legendeEnveloppeProfil').replaceChildren(
-    ...(identique
-      ? [trait('enveloppe', 'Enveloppe, des deux côtés')]
-      : [trait('achat', 'Enveloppe de l\'acheteur'), trait('location', 'Enveloppe du locataire')]),
-    trait('cout', 'Coût du propriétaire'),
-    trait('loyer', 'Loyer'),
-    trait('effort', 'Effort déclaré')
-  );
 }
 
 /** Toutes les bulles sont-elles renseignées ? Sans quoi rien n'est affiché. */

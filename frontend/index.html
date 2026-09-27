@@ -53,7 +53,7 @@
               <input type="number" id="capitalInitial" step="1000" min="0">
               <span class="champ__unite">€</span>
             </span>
-            <span class="champ__aide">Livrets, placements, épargne salariale. <b>Ni votre voiture, ni un bien immobilier.</b> C'est là que l'apport sera pris.</span>
+            <span class="champ__aide">Livrets, placements, épargne salariale. Pas d'immobilier.</span>
           </label>
         </div>
 
@@ -69,18 +69,16 @@
             </label>
             <span class="profil__signe" aria-hidden="true">+</span>
             <label class="champ">
-              <span class="champ__libelle">Épargne mensuelle</span>
+              <span class="champ__libelle">Épargne mensuelle actuelle</span>
               <span class="champ__saisie">
                 <input type="number" id="epargneActuelle" step="50" min="0">
                 <span class="champ__unite">€/mois</span>
               </span>
             </label>
           </div>
-          <span class="champ__aide">Loyer charges comprises. Épargne&nbsp;: ce que vous mettez de côté en moyenne, virements automatiques compris.</span>
-          <p class="profil__total" aria-live="polite">
-            <span class="profil__total-mot">Votre effort mensuel</span>
-            <output class="profil__total-valeur tabulaire" id="effortTotal">—</output>
-          </p>
+          <!-- Le total de l'effort n'est pas affiché ici pour l'instant : il
+               reviendra ailleurs. Le bandeau gagne en hauteur. -->
+          <span class="champ__aide">Loyer charges comprises. Épargne moyenne, virements automatiques compris.</span>
         </div>
 
         <div class="profil__groupe">
@@ -91,7 +89,7 @@
               <input type="number" id="revenusFoyer" step="100" min="0" placeholder="—">
               <span class="champ__unite">€/mois</span>
             </span>
-            <span class="champ__aide">Ligne <b>« Net à payer avant impôt »</b> de la fiche de paie. À deux, additionnez. Primes et 13ᵉ mois&nbsp;: total annuel ÷ 12.</span>
+            <span class="champ__aide">« Net à payer avant impôt » de la fiche de paie. À deux, additionnez.</span>
           </label>
         </div>
       </div>
@@ -149,15 +147,6 @@
         <dl class="face__faisabilite" id="faceFaisabilite"></dl>
       </div>
       <p class="alerte" id="alerteApport" hidden></p>
-
-      <figure class="face__graphe">
-        <figcaption>
-          <span class="face__graphe-titre">Votre enveloppe, année après année</span>
-          <span class="face__graphe-sous">Elle monte quand un logement l'exige, et ne redescend jamais.</span>
-        </figcaption>
-        <div class="graphique graphique--enveloppe"><canvas id="graphEnveloppe"></canvas></div>
-        <div class="legende legende--compacte" id="legendeEnveloppeProfil"></div>
-      </figure>
     </div>
   </section>
 

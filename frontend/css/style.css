@@ -159,10 +159,10 @@ h1, h2, h3 {
 .profil__groupe {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  padding: 14px;
+  gap: 6px;
+  padding: 10px 12px;
   border: 1px solid var(--trait);
-  border-radius: 16px;
+  border-radius: 14px;
   background: var(--plan);
 }
 .profil__groupe-titre,
@@ -179,15 +179,15 @@ h1, h2, h3 {
 
 /* Loyer + épargne : deux champs et le signe qui les relie. */
 .profil__somme { display: grid; grid-template-columns: 1fr auto 1fr; gap: 8px; align-items: end; }
-.profil__signe { padding-bottom: 12px; color: var(--encre-3); font-size: 1.1rem; }
+.profil__signe { padding-bottom: 9px; color: var(--encre-3); font-size: 1.1rem; }
 
 .profil__groupes .champ__libelle { font-size: .8125rem; font-weight: 500; }
 .champ__libelle em { font-style: normal; font-weight: 400; color: var(--encre-3); }
 .profil__groupes .champ__court { display: none; }
-.profil__groupes .champ__aide { display: block; }
+.profil__groupes .champ__aide { display: block; font-size: .6875rem; line-height: 1.35; }
 .profil__groupes .champ__aide b { font-weight: 600; color: var(--encre-2); }
 .profil__groupes .champ__saisie {
-  height: 44px;
+  height: 38px;
   padding: 0 12px;
   background: var(--surface);
   border: 1px solid var(--bord-champ);
@@ -202,23 +202,8 @@ h1, h2, h3 {
   min-width: 0;
   padding: 0;
   font-family: var(--police-chiffres);
-  font-size: 1rem;
+  font-size: .9375rem;
 }
-
-/* L'effort total est CALCULÉ : il ne doit pas avoir l'air d'un champ. */
-.profil__total {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 10px;
-  margin: 0;
-  padding: 10px 12px;
-  border-radius: var(--rayon);
-  background: var(--accent-doux);
-  border: 1px solid var(--trait);
-}
-.profil__total-mot { font-size: .8125rem; color: var(--encre-2); }
-.profil__total-valeur { font-size: 1.25rem; font-weight: 600; color: var(--accent-fort); }
 
 /* Retour immédiat : part de l'effort dans les revenus, reste à vivre. */
 .profil__retour {
@@ -307,22 +292,6 @@ h1, h2, h3 {
 
 #alerteApport { margin-top: 12px; }
 #alerteApport[hidden] { display: none; }
-
-.face__graphe { margin: 16px 0 0; }
-.face__graphe figcaption { display: grid; gap: 2px; margin-bottom: 6px; }
-.face__graphe-titre { font-size: .8125rem; font-weight: 600; color: var(--encre); }
-.face__graphe-sous { font-size: .75rem; color: var(--encre-3); }
-.graphique--enveloppe { height: 190px; }
-
-/* Traits de légende : le graphique d'enveloppe distingue des courbes pleines
-   (l'enveloppe) de courbes en tirets (ce qui la fait monter). */
-.trait { display: inline-block; width: 16px; height: 0; border-top: 2px solid; flex: none; }
-.trait--enveloppe { border-color: var(--encre); border-top-width: 3px; }
-.trait--achat { border-color: var(--achat); border-top-width: 3px; }
-.trait--location { border-color: var(--location); border-top-width: 3px; }
-.trait--cout { border-color: var(--achat); border-top-style: dashed; opacity: .6; }
-.trait--loyer { border-color: var(--location); border-top-style: dashed; opacity: .6; }
-.trait--effort { border-color: var(--encre-3); border-top-style: dotted; }
 
 /* --- La bascule « je place aussi la différence » -------------------------
    Une vraie case à cocher, habillée : le clavier, le lecteur d'écran et le
