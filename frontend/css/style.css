@@ -214,6 +214,7 @@ h1, h2, h3 {
   padding-top: 12px;
   border-top: 1px solid var(--trait);
 }
+.egal[hidden] { display: none; }
 
 /* Deux colonnes en miroir, un filet entre les deux. */
 .egal__miroir {

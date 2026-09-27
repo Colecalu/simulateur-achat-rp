@@ -1594,6 +1594,14 @@ function afficherProfil(resultat) {
  * résultat calculé sur des valeurs que l'utilisateur n'a pas posées.
  */
 function afficherEgal(resultat) {
+  // Rien avant la validation du profil : à la première saisie, il n'y a que
+  // les trois questions et leurs quatre champs.
+  $('#egal').hidden = !profilValide;
+  if (!profilValide) {
+    delete $('#visu').dataset.question;
+    if (questionOuverte()) fermerQuestion();
+    return;
+  }
   const e = resultat.entrees;
   const complet = parcoursComplet();
   const an1 = resultat.annees[0];
