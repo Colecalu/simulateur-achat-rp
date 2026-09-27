@@ -664,6 +664,13 @@ indicateur et un changement de défauts aurait rendu chaque effet impossible à 
 - **`scenarios.js` et `outils/fenetres-historiques.mjs` portent les mêmes tableaux.** Ils changent
   ensemble, sans quoi les fenêtres figées ne correspondent plus au classement qui les a choisies.
 
+### Valeurs pré-remplies de l'écran ≠ défauts du moteur
+
+Pour travailler, l'écran part de `VALEURS_DE_TRAVAIL` (`app.js`) : 550 000 €, sans travaux, 25 ans,
+2 000 € de charges de copro, 8 000 € de revenus du foyer. **Ne pas aligner `DEFAUTS` de `calc.js`
+dessus** : ce sont les valeurs du classeur Excel, que la fixture compare au centime. D'autres valeurs
+pré-remplies seront choisies pour la mise en ligne.
+
 ### Conflit des deux loyers — à traiter
 
 Le **loyer actuel** (profil) sert à l'effort déclaré ; le **loyer du locataire** (bulle 3) est celui

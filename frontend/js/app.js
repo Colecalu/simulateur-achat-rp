@@ -36,6 +36,29 @@ const POURCENTAGES = new Set([
 
 const CHAMPS = Object.keys(DEFAUTS).filter((c) => c !== 'horizon');
 
+/**
+ * Valeurs PRÉ-REMPLIES à l'écran, pendant le développement (choisies par
+ * Lucas pour travailler ; d'autres seront choisies pour la mise en ligne).
+ *
+ * Elles ne remplacent PAS `DEFAUTS` du moteur : ceux-ci sont le scénario
+ * « Paris » du classeur Excel de référence, et la fixture les compare au
+ * centime. Seul l'écran part d'ici ; le moteur, les tests et la sauvegarde
+ * (`normaliser`) gardent leurs défauts.
+ *
+ * Profil : patrimoine 200 000 €, loyer actuel 1 600 €, épargne 1 800 € (ceux
+ * de `Sauvegarde.DEFAUTS_PROFIL`), revenus du foyer 8 000 €.
+ */
+const VALEURS_DE_TRAVAIL = Object.assign({}, DEFAUTS, {
+  revenusFoyer: 8000,
+  prixNetVendeur: 550000,
+  fraisAgence: 0,
+  travaux: 0,
+  fraisBancaires: 2000,
+  valeurEstimee: 550000,
+  dureeAnnees: 25,
+  chargesCopro: 2000,
+});
+
 /** Champs facultatifs : laissés vides à l'écran plutôt qu'affichés à zéro. */
 const FACULTATIFS = new Set(['revenusFoyer']);
 
@@ -1998,7 +2021,7 @@ function initialiserSaisie() {
 }
 
 function initialiser() {
-  remplirFormulaire(DEFAUTS);
+  remplirFormulaire(VALEURS_DE_TRAVAIL);
   remplirProfil(Sauvegarde.DEFAUTS_PROFIL);
   remplirFormulaireMel();
   initialiserSaisie();
@@ -2017,7 +2040,7 @@ function initialiser() {
     rafraichir();
   });
   $('#reinitialiser').addEventListener('click', () => {
-    remplirFormulaire(DEFAUTS);
+    remplirFormulaire(VALEURS_DE_TRAVAIL);
     remplirProfil(Sauvegarde.DEFAUTS_PROFIL);
     $('#horizon').value = 20;
     validees.clear();
