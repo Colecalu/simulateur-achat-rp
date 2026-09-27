@@ -1654,11 +1654,10 @@ function afficherQuestion(resultat) {
   const place = resultat.entrees.locatairePlaceDifference;
 
   $('#egalChoix').hidden = !aPoser;
-  // Le verdict dépend de la réponse : tant qu'elle manque, il reste masqué.
-  $('#visu').dataset.question = aPoser && !epargneForceeRepondue ? 'attente' : 'repondue';
 
   if (!aPoser) {
     if (questionOuverte()) fermerQuestion();
+    $('#visu').dataset.question = 'repondue';
     return;
   }
 
@@ -1676,8 +1675,23 @@ function afficherQuestion(resultat) {
   $('#questionDemande').textContent =
     `En restant locataire, placeriez-vous aussi ces ${montant} chaque mois ?`;
 
-  // Une seule fois, et jamais par-dessus une bulle en cours de saisie.
-  if (!epargneForceeRepondue && !questionOuverte() && bulleZoomee === null) ouvrirQuestion(false);
+  // Une seule fois, jamais par-dessus une bulle zoomée, et jamais pendant
+  // qu'on tape : en remplaçant 25 par 20, on passe par « 2 » — une durée de
+  // 2 ans fait exploser la mensualité, et la question surgirait sur une valeur
+  // que personne n'a voulue. Elle attend la sortie du champ (voir
+  // `saisieEnCours` et l'écouteur `focusout`), puis tout est revérifié.
+  if (!epargneForceeRepondue && !questionOuverte() && bulleZoomee === null && !saisieEnCours()) {
+    ouvrirQuestion(false);
+  }
+  // Le verdict dépend de la réponse : masqué tant que la question est posée
+  // et sans réponse — pas pendant la frappe, où elle n'est pas encore posée.
+  $('#visu').dataset.question = !epargneForceeRepondue && questionOuverte() ? 'attente' : 'repondue';
+}
+
+/** Un champ numérique a le focus : l'utilisateur est en train de taper. */
+function saisieEnCours() {
+  const el = document.activeElement;
+  return !!el && el.tagName === 'INPUT' && el.type === 'number';
 }
 
 /**
@@ -1974,6 +1988,13 @@ function initialiserSaisie() {
   });
 
   document.addEventListener('focusout', () => { entrant = null; });
+  // Le focus a quitté un champ : si une question attendait la fin de la
+  // frappe, c'est le moment. Après coup (setTimeout), une fois le focus posé
+  // ailleurs — s'il passe dans un autre champ numérique, on attend encore.
+  document.addEventListener('focusout', (e) => {
+    if (e.target.tagName !== 'INPUT' || e.target.type !== 'number') return;
+    setTimeout(() => { if (!saisieEnCours()) recalculer(); }, 0);
+  });
 }
 
 function initialiser() {
@@ -1983,10 +2004,16 @@ function initialiser() {
   initialiserSaisie();
   initialiserDetail();
   construireScenarios();
-  $('#formulaire').addEventListener('input', recalculer);
+  // Taper « 20 » à la place de « 25 », c'est passer par « 2 » : recalculer à
+  // chaque touche ferait défiler une simulation absurde. Dans un champ
+  // numérique, on attend une courte pause de frappe ; ailleurs (listes, cases,
+  // réponses), on recalcule tout de suite.
+  const recalculerApresFrappe = Sauvegarde.differer(recalculer, 350);
+  const surSaisie = (e) => (e.target.type === 'number' ? recalculerApresFrappe() : recalculer());
+  $('#formulaire').addEventListener('input', surSaisie);
   // Le profil vit hors du plateau : sans son propre écouteur, l'éditer ne
   // recalculerait rien avant le clic sur « Valider mon profil ».
-  $('#profil').addEventListener('input', recalculer);
+  $('#profil').addEventListener('input', surSaisie);
 
   $('#horizon').addEventListener('input', rafraichir);
   // Deux contrôles, un seul état : le rappel écrit dans le curseur principal,
@@ -2053,7 +2080,7 @@ function initialiser() {
   });
   // `recalculer` et non plus `rafraichir` : le loyer payé après la bascule
   // peut relever l'enveloppe du moteur de base (voir `recalculer`).
-  $('#melFormulaire').addEventListener('input', recalculer);
+  $('#melFormulaire').addEventListener('input', surSaisie);
 
   // En dernier : la restauration écrase les défauts et l'état du parcours.
   initialiserBrouillon();

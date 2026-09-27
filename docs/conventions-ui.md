@@ -337,6 +337,14 @@ réelles — en cours ; **(3)** la mise en location ultérieure — moteur fait,
   « Pourquoi ? » rouvre la bulle, qui se ferme alors librement. Elle ne resurgit pas si le projet
   change ensuite : la petite ligne se met à jour. Les réponses décrivent un **comportement**, jamais
   un résultat.
+- **Rien ne réagit à une valeur en cours de frappe** (demande de Lucas). Remplacer 25 ans par 20,
+  c'est passer par « 2 » : une durée de 2 ans fait exploser la mensualité, et la simulation — pire,
+  la question de l'épargne forcée — partait sur une valeur que personne n'a voulue. Deux gardes :
+  1. dans un champ numérique, le recalcul attend **350 ms sans frappe** (`recalculerApresFrappe`) ;
+     listes, cases et réponses recalculent tout de suite ;
+  2. la question ne **surgit jamais tant qu'un champ numérique a le focus** (`saisieEnCours`) : elle
+     attend `focusout`, puis tout est revérifié sur la valeur définitive. Le verdict n'est masqué
+     que question posée, pas pendant la frappe.
 - **Qui retient quoi.** La RÉPONSE est un paramètre du projet (`locatairePlaceDifference`, case à
   cocher masquée, lue par le moteur). Le FAIT d'avoir répondu est un état de session
   (`avancement.epargneForceeRepondue`), comme « profil validé » : sans lui la bulle resurgirait à
