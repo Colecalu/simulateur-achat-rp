@@ -12,7 +12,7 @@ Document de référence du projet. Court par nature : le détail vit dans `docs/
 ## Commandes
 
 ```bash
-node --test "tests/*.test.mjs"   # 94 tests : moteur, location, indicateurs, séries, sauvegarde
+node --test "tests/*.test.mjs"   # 106 tests : moteur, location, indicateurs, séries, sauvegarde, scénarios
 ```
 
 Le motif est entre guillemets : `node --test tests/` échoue sous Windows (Node tente de charger
@@ -56,7 +56,7 @@ structurante change.
   de feature ouverte par Claude Code est à considérer comme une expérimentation en cours.
 - **Une expérimentation ne remplace jamais l'implémentation en place automatiquement.** Elle est
   analysée sur demande, puis intégrée, adaptée ou écartée — décision de Lucas.
-- **Les 94 tests sont l'arbitre.** Une proposition qui les casse est rejetée, quelle que soit son
+- **Les 106 tests sont l'arbitre.** Une proposition qui les casse est rejetée, quelle que soit son
   élégance. La fixture Excel compare 25 années × 15 grandeurs **au centime** : elle ne se
   contourne pas, elle se respecte ou se discute explicitement.
 
@@ -204,7 +204,7 @@ frontend/                    servi tel quel, racine web en production
         app.js               tout le DOM, toute l'interface
 backend/                     vide aujourd'hui — voir docs/backend-spec.md
 docs/                        modèle, conventions UI, spec backend, design, Excel
-tests/                       node --test, 94 tests
+tests/                       node --test, 106 tests
 migrations/                  à créer : SQL numéroté, appliqué à la main
 ```
 
@@ -477,13 +477,87 @@ Deux stress tests **symétriques**, chacun sur **un seul risque**, l'autre march
 tendance longue. C'est ce qui les rend lisibles : on sait exactement ce qui est testé.
 
 - **« Correction immobilière »** — l'immobilier baisse dans les **premières années**, au moment où
-  l'acheteur est le plus endetté. Calibrage retenu : **−3, −3, −2, 0, +1 %** puis tendance longue,
-  soit −6,9 % nominal cumulé. Référence : l'épisode français de 1991-1997, qui fut **−0,9 %
-  nominal cumulé mais −10 % réel** — une stagnation longue érodée par l'inflation, pas un krach.
-  Le calibrage retenu est donc plus dur que 1991-1997 sans être une fiction. *À recaler sur
-  2023-2024 quand les données seront disponibles.*
+  l'acheteur est le plus endetté et où le bien vaut le moins par rapport à sa dette. Calibrage
+  retenu : **−3, −3, −2, 0, +1 %** puis tendance longue.
+
+  **Ces cinq chiffres sont construits, pas observés** — et c'est un choix assumé, réexaminé le
+  27/09/2026 puis confirmé. Mesuré sur nos propres séries :
+
+  | | Cumul nominal | Cumul **réel** | Coût du choc à 25 ans |
+  |---|---|---|---|
+  | Épisode français observé, 1992-1997 | −2,2 % | −11,9 % | −145 521 € |
+  | **Calibrage retenu** (inflation 2 %) | **−6,9 %** | **−15,6 %** | **−163 948 €** |
+
+  ⚠️ **Le piège évité** : la justification précédente disait « plus dur que 1991-1997 sans être
+  une fiction », en comparant deux cumuls **nominaux** issus de deux mondes d'inflation
+  différents (11 % cumulé dans les années 90, 2 %/an aujourd'hui). En réel, le calibrage est **un
+  tiers plus sévère** que l'épisode observé. Ne jamais comparer des nominaux entre deux régimes
+  d'inflation.
+
+  **Pourquoi on garde un choc construit plutôt que la séquence observée** (qui rendrait le pilier 2
+  intégralement sourcé, et qui a donc été proposée) : 1992-1997 est le **seul** épisode de la série,
+  et c'est un affaissement **lent**. Une correction rapide — l'Espagne 2008-2013, la France
+  2023-2024 — est une autre forme de risque, qu'aucune de nos séries ne porte. Un stress test qui
+  ne saurait rejouer que la correction la plus douce jamais observée ne teste pas grand-chose.
+  *À recaler sur 2023-2024 quand les données seront disponibles — ce sera le deuxième épisode
+  observé, et probablement une meilleure base.*
+
+  ⚠️ Le chiffre « −0,9 % nominal / −10 % réel » qui figurait ici **ne se reproduit sur aucune
+  fenêtre de nos séries** (le plus proche est 1992-1998 : −1,1 % / −11,0 %). Il venait
+  probablement d'une lecture externe de Friggit. Remplaçé par les valeurs recalculées.
 - **« Décennie perdue en bourse »** — les marchés stagnent une douzaine d'années puis repartent.
-  Calibré sur le MSCI World EUR Net 2000-2011. *Profil année par année en attente des données EUR.*
+  La séquence 2000-2011 est reprise **telle quelle**, pas lissée : c'est le CHEMIN qui fait mal
+  (−42 % cumulé au creux de la 3ᵉ année, puis −40 % en 9ᵉ) alors que la moyenne ressort à
+  +0,4 %/an. Une stagnation plate au même rendement moyen serait un tout autre scénario.
+  ⚠️ *En place en dollars, faute de série EUR sur ces années.* **En euros l'épisode fut PLUS
+  dur** : le dollar s'est effondré de 2002 à 2008 (l'euro est passé de 0,85 à 1,60), donc les
+  rebonds de 2003-2007 vus d'Europe étaient bien plus faibles que ces chiffres.
+
+### Ce que le code porte aujourd'hui — structure définitive, données provisoires
+
+`frontend/js/scenarios.js` a été réécrit autour de cette structure, **avant** de disposer des
+données. Ce choix a une raison : la structure et les données sont deux décisions indépendantes, et
+les mêler obligerait à tout refaire deux fois. Les valeurs en place sont marquées PROVISOIRE dans
+le fichier, et `STATUT_DONNEES` vaut `'PROVISOIRE'` tant que rien n'est consolidé.
+
+**Une seule série observée, pas quatre décennies.** C'est le changement de fond. L'ancienne version
+portait quatre décennies qui se chevauchaient : deux scénarios pouvaient afficher deux valeurs
+différentes pour la même année — deux vérités dans le même produit, et c'est précisément ce qui
+rendait la correction MSCI si coûteuse (§10). Désormais `SERIES_OBSERVEES` couvre 1991-2022 d'un
+seul tenant et les fenêtres y sont **découpées**. Conséquence directe : **corriger la série corrige
+tous les scénarios d'un coup**, et l'incohérence entre deux fenêtres qui se recouvrent devient
+impossible par construction.
+
+**Ce qui reste à brancher** (un seul endroit chacun) :
+
+| À remplacer | Où | Valeur en place |
+|---|---|---|
+| Bourse 1991-2011 en EUR | `SERIES_OBSERVEES.rendementBourse` | valeurs USD |
+| Immobilier / loyers / inflation 2023-2025 | les trois autres séries | s'arrêtent en 2022 |
+| Années de départ des deux fenêtres | `FENETRES[].debut` | 1992 et 2002 |
+| Tendance longue bourse et immobilier | `TENDANCE_LONGUE` | 6,8 % et 2,5 % |
+
+⚠️ **Les mêmes tableaux existent dans `outils/fenetres-historiques.mjs`**, qui ne part jamais en
+production mais qui sert à choisir les fenêtres. Les deux fichiers changent **ensemble** : sans
+quoi les fenêtres figées ne correspondraient plus au classement qui les a désignées.
+
+⚠️ **`TENDANCE_LONGUE` et les défauts de `calc.js` doivent finir identiques** — la tendance longue
+EST la vue de base. Ils ne le sont pas aujourd'hui : les défauts du moteur portent encore les
+anciennes valeurs rondes, et on ne les bouge qu'une fois les sources reçues. Voir §11.
+
+**Douze tests verrouillent la structure, pas les valeurs** (`tests/scenarios.test.mjs`). C'est
+délibéré : un test qui figerait un rendement provisoire empêcherait exactement ce qu'on prépare.
+Ils vérifient qu'une fenêtre est bien découpée dans la série, que le prolongement est géométrique
+et non arithmétique, qu'un stress test ne choque **qu'un seul** marché et retombe ensuite sur la
+tendance longue, qu'aucun nom ne contient le résultat, et qu'aucune série ne produit de `NaN`.
+
+### Deux détails d'interface qui viennent de la structure
+
+- **Étiquette de groupe** : « Le passé · *Historique* » et « Des futurs possibles · *Hypothèse* ».
+  Sans elle, deux scénarios de nature opposée se ressemblent dans une liste.
+- **Pas de trait de frontière sur un stress test.** Le trait marque le passage de l'observé au
+  projeté ; un scénario construit n'a rien d'observé, il n'y a donc rien à quitter. C'est
+  l'étiquette qui porte l'avertissement, et le texte dit explicitement « aucune année observée ».
 
 ### Ce qui ne figure JAMAIS dans une étiquette
 
@@ -549,13 +623,47 @@ produit. **Attendre la série complète 1991-2011 avant de toucher quoi que ce s
 ### Ce que la correction n'affecte pas
 
 La fixture Excel (`tests/fixtures/excel-paris.json`) est calculée sur les **taux constants par
-défaut**, pas sur les scénarios : **aucun test ne référence `scenarios.js`**. Corriger les données
-ne demande donc aucune mise à jour de fixture. Le contrôle croisé des recouvrements, lui, est à
-refaire après correction.
+défaut**, pas sur les scénarios. Corriger les données ne demande donc **aucune mise à jour de
+fixture**.
+
+`tests/scenarios.test.mjs` référence bien `scenarios.js` depuis la refonte, mais ne vérifie **que
+la structure** — jamais une valeur de rendement. Il est conçu pour rester vert quand les séries
+seront remplacées ; si l'un de ces tests tombe après la correction, c'est la mécanique qui a
+bougé, pas les données.
+
+**Le contrôle croisé des recouvrements n'a plus lieu d'être** : depuis la refonte il n'existe
+qu'une seule série observée, dans laquelle les fenêtres sont découpées. Deux fenêtres qui se
+recouvrent lisent les mêmes cases du même tableau — diverger leur est devenu impossible. C'est
+aussi ce qui rend la correction **locale** : un seul tableau à remplacer, dans `scenarios.js` et
+dans `outils/fenetres-historiques.mjs`, et non plus quatre décennies à tenir cohérentes entre
+elles.
 
 ---
 
 ## 11. Reporté, mais suivi
+
+### Décidé pendant la refonte des scénarios, volontairement pas traité
+
+Ces trois points sont sortis de l'analyse du pilier 2 et sont **documentés pour ne pas être
+redécouverts**. Ils n'ont pas été implémentés : mélanger une refonte de scénarios avec un nouvel
+indicateur et un changement de défauts aurait rendu chaque effet impossible à isoler.
+
+| Sujet | Ce qu'on sait déjà | Pourquoi ça attend |
+|---|---|---|
+| **Loyer d'équilibre / rendement locatif** | Le basculement est à **3,57 % de rendement locatif brut** sur le profil courant — soit un loyer d'équilibre de 1 249 €/mois. Ce seuil sépare Paris (3,0-3,5 %) des grandes métropoles (4-5 %). C'est probablement **le vrai message du site** : ce n'est pas le marché qui répond, c'est le rapport loyer/prix de la ville. | Nouvel indicateur à part entière, avec sa visualisation. Mérite sa propre session. |
+| **Frais de gestion en bourse** | Le modèle chiffre **tous** les coûts côté achat et **aucun** côté bourse. Déduire 0,20 à 0,40 %/an (ETF monde) rétablit la symétrie. **0,30 %/an déplace le verdict de 45 646 €** à 25 ans. Ce n'est pas de la fiscalité : notre convention « rendement brut, impôt à la sortie » n'est pas en cause, un frais de gestion est un coût comme une taxe foncière. | Touche le moteur et les défauts. À faire avec la mise à jour de `TENDANCE_LONGUE`. |
+| **Profil d'exemple à revoir** | 420 000 € pour 1 600 € de loyer = **4,57 % brut** : l'utilisateur arrive déjà du côté « acheter gagne » avant toute saisie. Ce sont des **valeurs de test**, pas un profil choisi. | Si l'on source les taux au dixième de point, il faut être aussi rigoureux sur le profil. Décision produit, pas technique. |
+
+### Dettes de cohérence ouvertes par la refonte
+
+- **`TENDANCE_LONGUE` (scenarios.js) et `DEFAUTS` (calc.js) doivent devenir identiques** sur les
+  cinq taux de marché. La tendance longue EST la vue de base ; aujourd'hui les défauts du moteur
+  portent encore les anciennes valeurs rondes. À faire **d'un seul bloc**, à la réception des
+  sources, avec l'arbitrage sur les frais d'ETF.
+- **`scenarios.js` et `outils/fenetres-historiques.mjs` portent les mêmes tableaux.** Ils changent
+  ensemble, sans quoi les fenêtres figées ne correspondent plus au classement qui les a choisies.
+
+### Fonctionnalités
 
 | Fonctionnalité | État |
 |---|---|
@@ -564,4 +672,4 @@ refaire après correction.
 | Curseurs de sensibilité | non commencé |
 | Export PDF | non commencé |
 | Point mort | **déjà fait** — « point d'équilibre », avec garde-fou sur les recroisements |
-| Scénarios historiques | **déjà fait** — pilier 2, données à consolider |
+| Scénarios historiques | **structure faite**, données provisoires — voir §9 et §10 |

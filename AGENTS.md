@@ -87,7 +87,7 @@ le vecteur XSS évident.
 node --test "tests/*.test.mjs"
 ```
 
-**76 tests.** `tests/fixtures/excel-paris.json` compare 25 années × 15 grandeurs aux valeurs
+**88 tests.** `tests/fixtures/excel-paris.json` compare 25 années × 15 grandeurs aux valeurs
 calculées par le classeur de référence, **au centime près**.
 
 Une proposition qui casse ces tests est rejetée. Si l'écart est délibéré, il se discute et se
@@ -199,6 +199,36 @@ Ce qui est vrai, c'est que **le rapport loyer/prix de la ville décide de quel c
 **Quatre scénarios, deux groupes.** « Le passé » : deux fenêtres de 20 ans, sélectionnées hors
 ligne une seule fois et figées en dur. « Des futurs possibles » : deux stress tests symétriques,
 chacun testant **un seul** risque, l'autre marché restant sur la tendance longue.
+
+**La structure est en place, les données ne le sont pas.** `frontend/js/scenarios.js` a été
+réécrit avant réception des séries officielles, délibérément : structure et données sont deux
+décisions indépendantes, les mêler obligerait à tout refaire deux fois. `STATUT_DONNEES` vaut
+`'PROVISOIRE'`, chaque valeur temporaire est marquée dans le fichier, et l'écran porte la réserve.
+**Aucune valeur qui sort de ce fichier ne doit être citée ni servir à conclure.**
+
+**Une seule série observée, pas quatre décennies.** C'est le point de la refonte. Avant, quatre
+décennies se chevauchaient et deux scénarios pouvaient afficher deux valeurs pour la même année.
+Désormais `SERIES_OBSERVEES` couvre 1991-2022 d'un seul tenant et les fenêtres y sont **découpées**
+— diverger leur est impossible, et corriger la série corrige tout d'un coup. Une proposition qui
+réintroduirait des séries par scénario annulerait précisément ce gain.
+
+**`tests/scenarios.test.mjs` verrouille la structure, jamais les valeurs.** Douze tests qui doivent
+rester verts quand les données changeront : un test qui figerait un rendement provisoire
+empêcherait ce qu'on prépare. Si vous voulez contredire le modèle des scénarios, c'est là qu'un
+test qui échoue aura le plus de valeur.
+
+**Trois sujets sont en backlog explicite, pas oubliés** (CLAUDE.md §11) : le loyer d'équilibre /
+rendement locatif (le seuil à 3,57 %), les frais de gestion d'un ETF (45 646 € d'effet), et la
+révision du profil d'exemple (420 000 € / 1 600 € sont des valeurs de test). Les proposer comme
+découvertes n'apporte rien ; les traiter au fond, oui.
+
+**Le choc de « Correction immobilière » est construit, pas observé — et c'est volontaire.**
+−3, −3, −2, 0, +1 % vaut −15,6 % réel, contre −11,9 % pour le seul épisode français observé
+(1992-1997). Remplacer ce calibrage par la séquence observée a été proposé et **écarté** : 1992-1997
+est un affaissement lent, et un stress test qui ne rejouerait que la correction la plus douce
+jamais observée ne teste pas grand-chose. Détail et chiffres en §9 de CLAUDE.md.
+Piège associé, qui avait faussé la première justification : **ne jamais comparer deux cumuls
+nominaux issus de deux régimes d'inflation différents.**
 
 **Un scénario ne se nomme JAMAIS par son résultat.** Il se décrit par ce qui s'est passé sur les
 marchés — le résultat, lui, dépend du profil de l'utilisateur.

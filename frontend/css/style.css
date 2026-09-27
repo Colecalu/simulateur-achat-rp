@@ -1266,6 +1266,9 @@ input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; marg
 
 .scenario__choix { display: grid; gap: 4px; }
 .scenario__famille {
+  display: flex;
+  gap: 6px;
+  align-items: center;
   margin: 8px 0 2px;
   font-size: .5625rem;
   font-weight: 600;
@@ -1274,6 +1277,16 @@ input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; marg
   color: var(--encre-3);
 }
 .scenario__famille:first-child { margin-top: 0; }
+
+/* Observé ou construit : c'est la distinction qui compte pour lire le groupe.
+   Un cerné plutôt qu'une couleur — la couleur est réservée aux données. */
+.scenario__etiquette {
+  padding: 1px 5px;
+  border: 1px solid var(--trait);
+  border-radius: var(--rayon);
+  font-weight: 500;
+  color: var(--encre-3);
+}
 
 /* Le choix et son aperçu : deux actions distinctes sur la même ligne. */
 .scenario__ligne { display: flex; gap: 4px; align-items: stretch; }
@@ -1295,9 +1308,6 @@ input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; marg
 .scenario__nom { display: block; font-size: .8125rem; font-weight: 600; color: var(--encre); }
 .scenario__option--actif .scenario__nom { color: var(--accent-fort); }
 .scenario__periode { display: block; font-size: .6875rem; color: var(--encre-3); }
-/* Le scénario continu est d'une autre nature : rien n'y est projeté. */
-.scenario__option--continu { border-style: dashed; border-color: var(--bord-champ); }
-.scenario__option--continu.scenario__option--actif { border-style: solid; }
 
 .scenario__apercu {
   flex: none;
