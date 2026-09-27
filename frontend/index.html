@@ -104,6 +104,49 @@
         </button>
       </div>
     </div>
+
+    <!-- ===== L'effort, projet par projet =====
+         Dans le profil, sous la saisie, bandeau ouvert ou replié. Le projet
+         location se remplit dès le profil ; le projet achat attend la fin de
+         la simulation (des traits le disent), puis se remplit à son tour.
+         Avant la simulation, la location montre le loyer actuel et l'épargne
+         du profil ; après, les chiffres de la comparaison (loyer du logement
+         équivalent, investi réel). -->
+    <div class="egal" id="egal">
+      <div class="egal__miroir">
+        <dl class="egal__projet egal__projet--location">
+          <dt class="egal__projet-nom">Projet location <span class="egal__total tabulaire" id="egalTotalLocation"></span></dt>
+          <dd class="egal__ligne"><span>Loyer</span><span class="tabulaire" id="egalLoyer"></span></dd>
+          <dd class="egal__ligne egal__ligne--investi"><span>Investi</span><span class="tabulaire" id="egalInvestiLocation"></span></dd>
+        </dl>
+        <span class="egal__separateur" aria-hidden="true"></span>
+        <dl class="egal__projet egal__projet--achat" id="egalAchat" data-etat="attente">
+          <dt class="egal__projet-nom">Projet achat RP <span class="egal__total tabulaire" id="egalTotalAchat"></span></dt>
+          <dd class="egal__ligne"><span>Logement</span><span class="tabulaire" id="egalLogement"></span></dd>
+          <dd class="egal__ligne egal__ligne--investi"><span>Investi</span><span class="tabulaire" id="egalInvestiAchat"></span></dd>
+          <dd class="egal__attente">En attente de la simulation</dd>
+        </dl>
+      </div>
+
+      <!-- Le choix, en petit : la question elle-même est posée une fois dans
+           une bulle (#question). Il reste modifiable ici, et « Pourquoi ? »
+           rouvre la bulle. La case à cocher reste l'état (lu par le moteur,
+           sauvegardé) ; les boutons ne font que la régler. -->
+      <div class="egal__choix-ligne" id="egalChoix" hidden>
+        <span class="egal__choix-mot">
+          Achat : <b class="tabulaire" id="egalSupplement"></b>/mois. En restant locataire&nbsp;:
+        </span>
+        <div class="egal__choix" role="group" aria-label="En restant locataire, placeriez-vous aussi ce supplément ?">
+          <button type="button" class="egal__reponse" data-reponse="oui" aria-pressed="true">Je les place</button>
+          <button type="button" class="egal__reponse" data-reponse="non" aria-pressed="false">Je garde mes habitudes</button>
+        </div>
+        <button type="button" class="egal__pourquoi" id="questionRouvrir">Pourquoi&nbsp;?</button>
+        <input type="checkbox" class="egal__etat" id="locatairePlaceDifference" checked hidden>
+      </div>
+
+      <p class="egal__endettement" id="egalLigneEndettement" hidden>Taux d'endettement <strong class="tabulaire" id="egalEndettement"></strong></p>
+      <p class="alerte" id="alerteApport" hidden></p>
+    </div>
   </section>
 
   <div class="plateau" id="formulaire">
@@ -393,53 +436,6 @@
              aria-valuemin="0" aria-valuemax="4" aria-valuenow="0"></div>
         <p class="attente__compte" id="attenteCompte"></p>
       </div>
-
-      <!-- ===== À effort égal =====
-           Un résultat, donc dans la visualisation et jamais dans la saisie.
-           L'effort commun est posé UNE fois, au centre : l'égalité se voit sans
-           être dite. Dessous, les deux projets comparés en miroir — logement,
-           puis investi — pour comparer ligne à ligne. Ce sont les trajectoires
-           de la simulation, pas la situation d'aujourd'hui : on peut comparer
-           deux projets dans une ville où l'on n'habite pas encore. -->
-      <section class="egal" id="egal" aria-labelledby="egalTitre">
-        <h2 class="egal__titre" id="egalTitre">À effort égal</h2>
-        <p class="egal__effort">
-          <span class="egal__effort-mot">Votre effort chaque mois</span>
-          <strong class="egal__effort-valeur tabulaire" id="egalEffort"></strong>
-        </p>
-        <div class="egal__miroir">
-          <dl class="egal__projet egal__projet--location">
-            <dt class="egal__projet-nom">Projet location</dt>
-            <dd class="egal__ligne"><span>Loyer</span><span class="tabulaire" id="egalLoyer"></span></dd>
-            <dd class="egal__ligne egal__ligne--investi"><span>Investi</span><span class="tabulaire" id="egalInvestiLocation"></span></dd>
-          </dl>
-          <span class="egal__separateur" aria-hidden="true"></span>
-          <dl class="egal__projet egal__projet--achat">
-            <dt class="egal__projet-nom">Projet achat RP</dt>
-            <dd class="egal__ligne"><span>Logement</span><span class="tabulaire" id="egalLogement"></span></dd>
-            <dd class="egal__ligne egal__ligne--investi"><span>Investi</span><span class="tabulaire" id="egalInvestiAchat"></span></dd>
-          </dl>
-        </div>
-
-        <!-- Le choix, en petit : la question elle-même a été posée une fois dans
-             une bulle (#question). Il reste modifiable ici, et « Pourquoi ? »
-             rouvre la bulle. La case à cocher reste l'état (lu par le moteur,
-             sauvegardé) ; les boutons ne font que la régler. -->
-        <div class="egal__choix-ligne" id="egalChoix" hidden>
-          <span class="egal__choix-mot">
-            Achat : <b class="tabulaire" id="egalSupplement"></b>/mois. En restant locataire&nbsp;:
-          </span>
-          <div class="egal__choix" role="group" aria-label="En restant locataire, placeriez-vous aussi ce supplément ?">
-            <button type="button" class="egal__reponse" data-reponse="oui" aria-pressed="true">Je les place</button>
-            <button type="button" class="egal__reponse" data-reponse="non" aria-pressed="false">Je garde mes habitudes</button>
-          </div>
-          <button type="button" class="lien egal__pourquoi" id="questionRouvrir">Pourquoi&nbsp;?</button>
-          <input type="checkbox" class="egal__etat" id="locatairePlaceDifference" checked hidden>
-        </div>
-
-        <p class="egal__endettement">Taux d'endettement <strong class="tabulaire" id="egalEndettement"></strong></p>
-        <p class="alerte" id="alerteApport" hidden></p>
-      </section>
 
       <div class="verdict" id="verdict">
         <div class="verdict__entete">

@@ -206,40 +206,30 @@ h1, h2, h3 {
 
 .profil__pied { display: flex; justify-content: flex-end; margin-top: 14px; }
 
-/* --- À effort égal --------------------------------------------------------
-   Une carte de la visualisation, au-dessus du verdict. L'effort commun au
-   centre, les deux projets en miroir dessous, l'endettement en pied. */
+/* --- L'effort, projet par projet -----------------------------------------
+   Une section du profil, sous la saisie, visible bandeau ouvert ou replié. Deux
+   projets en miroir ; le projet achat attend la fin de la simulation. */
 .egal {
-  padding: 14px 22px 14px;
-  background: var(--surface);
-  border: 1px solid var(--trait);
-  border-radius: var(--rayon-large);
-  box-shadow: var(--ombre);
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--trait);
 }
-.egal__titre {
-  margin: 0;
-  text-align: center;
-  font-family: var(--police-titre);
-  font-weight: var(--graisse-titre);
-  font-size: 1.35rem;
-  letter-spacing: var(--interlettre-titre);
-  color: var(--encre);
-}
-.egal__effort { display: grid; justify-items: center; margin: 4px 0 12px; }
-.egal__effort-mot { font-size: .8125rem; color: var(--encre-2); }
-.egal__effort-valeur { font-size: 1.6rem; font-weight: 600; line-height: 1.1; color: var(--encre); }
 
 /* Deux colonnes en miroir, un filet entre les deux. */
 .egal__miroir {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 1px minmax(0, 1fr);
-  gap: 0 20px;
-  max-width: 620px;
+  gap: 0 24px;
+  max-width: 720px;
   margin: 0 auto;
 }
 .egal__separateur { background: var(--trait); }
 .egal__projet { margin: 0; }
 .egal__projet-nom {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
   margin: 0 0 4px;
   font-size: .75rem;
   font-weight: 600;
@@ -259,6 +249,19 @@ h1, h2, h3 {
 }
 .egal__ligne--investi { font-weight: 600; color: var(--encre); }
 .egal__ligne--investi span:last-child { color: var(--supplement); }
+.egal__total {
+  font-size: .8125rem;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--encre);
+}
+
+/* Le projet achat en attente de la simulation : des traits, une mention. */
+.egal__attente { display: none; margin: 4px 0 0; font-size: .75rem; font-style: italic; color: var(--encre-3); }
+.egal__projet[data-etat="attente"] .egal__attente { display: block; }
+.egal__projet[data-etat="attente"] .egal__ligne { color: var(--encre-3); font-weight: 400; border-bottom: 1px dashed var(--bord-champ); }
+.egal__projet[data-etat="attente"] .egal__ligne span:last-child { color: var(--encre-3); }
 
 /* Le choix, en petit, une fois la question posée dans sa bulle. */
 .egal__choix-ligne {
@@ -267,7 +270,7 @@ h1, h2, h3 {
   align-items: center;
   justify-content: center;
   gap: 6px 10px;
-  max-width: 620px;
+  max-width: 720px;
   margin: 12px auto 0;
   font-size: .8125rem;
   color: var(--encre-2);
@@ -306,8 +309,8 @@ h1, h2, h3 {
 }
 
 /* Tant que la question attend sa réponse, le résultat qui en dépend ne se
-   montre pas : seule la carte « À effort égal » reste lisible. */
-.plateau__visu[data-question="attente"] > :not(.egal):not(.attente) { visibility: hidden; }
+   montre pas. */
+.plateau__visu[data-question="attente"] > :not(.attente) { visibility: hidden; }
 
 /* --- La bulle de question -----------------------------------------------
    Même geste que les bulles 1 à 4 : elle grossit au centre, sur un voile. */
@@ -374,7 +377,7 @@ h1, h2, h3 {
 .egal__endettement { margin: 12px 0 0; text-align: center; font-size: .75rem; color: var(--encre-3); }
 .egal__endettement strong { font-size: .875rem; color: var(--encre); }
 
-#alerteApport { max-width: 620px; margin: 12px auto 0; }
+#alerteApport { max-width: 720px; margin: 12px auto 0; }
 #alerteApport[hidden] { display: none; }
 
 /* Rien n'est ouvrable tant que le profil n'est pas posé. */

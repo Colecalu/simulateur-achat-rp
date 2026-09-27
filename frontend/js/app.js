@@ -1491,7 +1491,6 @@ function rafraichir() {
   afficherProfil(dernierResultat);
   if (!majAttente()) return;
 
-  afficherEgal(dernierResultat);
   afficherVerdict(dernierResultat, horizon);
   dessinerGraphiques(dernierResultat, horizon, mel);
   dessinerDetail(dernierResultat, horizon);
@@ -1575,41 +1574,65 @@ function afficherProfil(resultat) {
   }
   $('#profilResume').replaceChildren(...resume);
 
+  // L'effort, projet par projet : sous la saisie, bandeau ouvert ou replié.
+  afficherEgal(resultat);
+
 }
 
 /**
- * « À effort égal », dans la visualisation, au-dessus du verdict. N'est appelé
- * qu'une fois le parcours complet : c'est un résultat, et la page n'affiche
- * aucun résultat sur des valeurs que l'utilisateur n'a pas posées.
+ * L'effort, projet par projet, dans le profil. Appelé à chaque rafraîchissement,
+ * parcours complet ou non — c'est ce qui le distingue d'un résultat de la
+ * visualisation.
  *
- * L'effort commun au centre, les deux projets comparés en miroir, première
- * année ramenée au mois. « Logement » côté achat : mensualité, assurance,
- * charges de copropriété et taxe foncière.
+ * Deux temps :
+ * - profil seul : la location montre ce que l'utilisateur a saisi (loyer
+ *   actuel, épargne) ; l'achat attend la simulation, des traits le disent ;
+ * - parcours complet : les deux projets de la COMPARAISON, première année
+ *   ramenée au mois. « Logement » côté achat : mensualité, assurance, charges
+ *   de copropriété et taxe foncière.
+ * Aucun chiffre d'achat avant la fin du parcours : la page n'affiche pas de
+ * résultat calculé sur des valeurs que l'utilisateur n'a pas posées.
  */
 function afficherEgal(resultat) {
   const e = resultat.entrees;
+  const complet = parcoursComplet();
   const an1 = resultat.annees[0];
-  const location = { logement: an1.loyerAnnuel / 12, investi: an1.surplusLocataire / 12, total: an1.enveloppeLocation / 12 };
-  const achat = { logement: an1.totalDebourseAnnuel / 12, investi: an1.surplusProprio / 12, total: an1.enveloppeAchat / 12 };
+  const profil = lireProfil();
 
-  // Un seul chiffre quand l'effort est commun ; deux, dits comme tels, quand
-  // l'utilisateur a déclaré que le locataire garderait ses habitudes.
-  $('#egalEffort').textContent = Math.round(location.total) === Math.round(achat.total)
-    ? euros.format(achat.total)
-    : `${euros.format(achat.total)} achat · ${euros.format(location.total)} location`;
-
+  const location = complet
+    ? { logement: an1.loyerAnnuel / 12, investi: an1.surplusLocataire / 12, total: an1.enveloppeLocation / 12 }
+    : { logement: profil.loyerActuel, investi: profil.epargneActuelle, total: e.enveloppeMensuelle };
+  $('#egalTotalLocation').textContent = parMois(location.total);
   $('#egalLoyer').textContent = euros.format(location.logement);
   $('#egalInvestiLocation').textContent = euros.format(Math.max(location.investi, 0));
-  $('#egalLogement').textContent = euros.format(achat.logement);
-  $('#egalInvestiAchat').textContent = euros.format(Math.max(achat.investi, 0));
 
-  // Un chiffre, sans commentaire. Sans revenus, aucun ratio n'est inventé.
-  $('#egalEndettement').textContent = e.revenusFoyer > 0 ? pourcent(resultat.tauxEndettement) : '—';
+  const blocAchat = $('#egalAchat');
+  blocAchat.dataset.etat = complet ? 'pret' : 'attente';
+  if (complet) {
+    $('#egalTotalAchat').textContent = parMois(an1.enveloppeAchat / 12);
+    $('#egalLogement').textContent = euros.format(an1.totalDebourseAnnuel / 12);
+    $('#egalInvestiAchat').textContent = euros.format(Math.max(an1.surplusProprio / 12, 0));
+  } else {
+    $('#egalTotalAchat').textContent = '';
+    $('#egalLogement').textContent = '—';
+    $('#egalInvestiAchat').textContent = '—';
+  }
 
-  afficherQuestion(resultat);
+  // Taux d'endettement : un chiffre, sans commentaire, une fois le prêt connu.
+  $('#egalLigneEndettement').hidden = !(complet && e.revenusFoyer > 0);
+  if (complet && e.revenusFoyer > 0) $('#egalEndettement').textContent = pourcent(resultat.tauxEndettement);
+
+  if (complet) {
+    afficherQuestion(resultat);
+  } else {
+    // Pas de simulation, pas de supplément à interroger.
+    $('#egalChoix').hidden = true;
+    delete $('#visu').dataset.question;
+    if (questionOuverte()) fermerQuestion();
+  }
 
   const alerte = $('#alerteApport');
-  alerte.hidden = e.apport <= e.capitalInitial;
+  alerte.hidden = !complet || e.apport <= e.capitalInitial;
   if (!alerte.hidden) {
     alerte.textContent =
       `L'apport (${euros.format(e.apport)}) dépasse votre patrimoine financier ` +

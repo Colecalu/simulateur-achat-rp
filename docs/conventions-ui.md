@@ -317,17 +317,20 @@ réelles — en cours ; **(3)** la mise en location ultérieure — moteur fait,
   qui s'affiche pendant qu'on tape — ni phrase d'explication sous les champs, ni part des
   revenus, ni reste à vivre. Ces ratios restent calculés par le moteur (`partEffortActuel`,
   `resteAVivreActuel`) pour de futurs indicateurs dans la visualisation.
-- **« À effort égal » est une carte de la VISUALISATION, pas du profil** (décision de Lucas) :
-  c'est un résultat. Juste **au-dessus du verdict**. L'effort commun est posé **une seule fois,
-  au centre** — l'égalité se voit sans être dite. Dessous, les deux projets **en miroir** :
-  « Projet location » (loyer, investi) et « Projet achat RP » (logement, investi), pour comparer
-  ligne à ligne. Ce sont les deux trajectoires **comparées**, pas la situation d'aujourd'hui : on
-  peut comparer deux projets dans une ville où l'on n'habite pas encore. « Logement » côté achat =
-  mensualité, assurance, charges de copropriété et taxe foncière, au mois, première année. Le taux
-  d'endettement passe en pied, un chiffre sans commentaire. Libellés provisoires.
-  Essayés puis écartés par Lucas, parce qu'ils compliquaient : KPI détaillés (effort / revenus,
-  reste à vivre — toujours calculés par le moteur), barres horizontales, barres verticales,
-  phrases-équations. Maquettes des variantes comparées : A (retenue), récit, tuiles, ticket.
+- **L'effort, projet par projet, vit dans le PROFIL, sous la saisie** (décision de Lucas, après
+  une carte dans la visualisation qu'il n'aimait pas à cet endroit). Visible bandeau ouvert ou
+  replié. Deux colonnes en miroir : **Projet location** (loyer, investi) et **Projet achat RP**
+  (logement, investi), chacune avec son total mensuel. Deux temps :
+  - **profil seul** : la location se remplit tout de suite avec ce que l'utilisateur a saisi
+    (loyer actuel, épargne) ; l'achat affiche des traits en pointillé et « En attente de la
+    simulation ». Aucun chiffre d'achat avant la fin du parcours ;
+  - **parcours complet** : les deux projets de la COMPARAISON, première année au mois — la
+    location passe au loyer du logement équivalent (bulle 3) et à l'investi réel, l'achat se
+    remplit (« logement » = mensualité, assurance, charges, taxe foncière). Le taux d'endettement
+    apparaît dessous, un chiffre sans commentaire. La visualisation garde sa forme habituelle.
+  Les chiffres de la location peuvent donc changer au passage du profil seul à la simulation :
+  à juger à l'usage. Essayés puis écartés : KPI détaillés, barres horizontales, barres
+  verticales, phrases-équations, carte « À effort égal » au-dessus du verdict.
 - **Le cas qui fait toute la différence : l'achat demande plus que l'effort d'aujourd'hui.**
   Une **bulle surgit une seule fois**, au centre, sur un voile, comme les bulles 1 à 4 : « Attention
   — L'achat vous demande **148 € de plus** par mois qu'aujourd'hui », une ligne qui explique
@@ -335,7 +338,7 @@ réelles — en cours ; **(3)** la mise en location ultérieure — moteur fait,
   réponses** : « Oui, je les place » / « Non, je garde mes habitudes ». **Choix obligatoire** : ni
   croix, ni voile, ni Échap ne la ferment. **Le résultat reste masqué** tant qu'on n'a pas répondu
   (`#visu[data-question="attente"]`) : il dépend de la réponse. Puis la bulle **redescend** vers
-  une petite ligne sous « À effort égal » — « Achat : +148 €/mois. En restant locataire : [Je les
+  une petite ligne du profil, sous les deux projets — « Achat : +148 €/mois. En restant locataire : [Je les
   place] [Je garde mes habitudes] Pourquoi ? » —, d'où le choix reste modifiable et d'où
   « Pourquoi ? » rouvre la bulle, qui se ferme alors librement. Elle ne resurgit pas si le projet
   change ensuite : la petite ligne se met à jour. Les réponses décrivent un **comportement**, jamais
