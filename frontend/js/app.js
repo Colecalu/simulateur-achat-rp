@@ -1581,8 +1581,9 @@ function afficherProfil(resultat) {
  * Les deux trajectoires COMPARÉES, première année, ramenées au mois : ce que
  * coûte le logement, et ce qui est investi. Pas la situation d'aujourd'hui —
  * on peut comparer deux projets dans une ville où l'on n'habite pas encore.
- * Deux barres verticales par projet, logement et investi, à la MÊME échelle
- * pour les deux projets : les hauteurs se comparent d'une tuile à l'autre.
+ * Une phrase-équation par projet : l'effort total = le logement + l'investi.
+ * Le « = » dit que l'effort est le même des deux côtés, le « + » dit où va ce
+ * que le logement ne consomme pas. Les barres essayées avant compliquaient.
  */
 function afficherBudget(resultat) {
   const e = resultat.entrees;
@@ -1593,15 +1594,8 @@ function afficherBudget(resultat) {
   const achat = { logement: an1.totalDebourseAnnuel / 12, investi: an1.surplusProprio / 12 };
   const totalLocation = an1.enveloppeLocation / 12;
   const totalAchat = an1.enveloppeAchat / 12;
-  // Une seule échelle pour les quatre barres : sans elle, deux barres de même
-  // hauteur dans deux tuiles pourraient valoir des montants différents.
-  const echelle = Math.max(location.logement, location.investi, achat.logement, achat.investi, 1);
-
-  $('#budgetLocation').textContent = parMois(totalLocation);
-  colonnes($('#colonnesLocation'), echelle, 'Loyer', location);
-
-  $('#budgetAchat').textContent = parMois(totalAchat);
-  colonnes($('#colonnesAchat'), echelle, 'Coût du logement', achat);
+  equation($('#equationLocation'), totalLocation, 'de loyer', location);
+  equation($('#equationAchat'), totalAchat, 'de logement', achat);
 
   const supplement = resultat.supplementAchat;
   const ecart = $('#budgetEcart');
@@ -1625,41 +1619,16 @@ function afficherBudget(resultat) {
 }
 
 /**
- * Deux barres verticales : le logement, puis ce qui est investi. Les mêmes
- * classes des deux côtés — le loyer EST le coût du logement du locataire. La
- * hauteur est un ATTRIBUT du SVG, pas un style : aucune règle de style en ligne.
- * Une barre à 0 € reste affichée : dans ce format, « rien d'investi » se lit.
+ * « 2 600 € = 1 250 € de loyer + 1 350 € investis ». Les montants en gras sont
+ * ceux qui se comparent d'un projet à l'autre : l'effort total, et l'investi.
+ * « 0 € investi » est écrit : dans une équation, l'absence se lit.
  */
-function colonnes(conteneur, echelle, motLogement, t) {
-  const NS = 'http://www.w3.org/2000/svg';
-  // Le SVG a la hauteur de SA barre (attribut `height`, en pixels) : le
-  // montant, posé juste au-dessus dans la colonne, suit ainsi le sommet de la
-  // barre au lieu de flotter en haut de la zone.
-  const HAUTEUR_MAX = 72;
-  const colonne = (mot, montant, poste) => {
-    const hauteur = Math.max((Math.max(montant, 0) / echelle) * HAUTEUR_MAX, 1);
-    const svg = document.createElementNS(NS, 'svg');
-    svg.setAttribute('class', 'budget__barre');
-    svg.setAttribute('width', 44);
-    svg.setAttribute('height', hauteur);
-    svg.setAttribute('viewBox', '0 0 10 10');
-    svg.setAttribute('preserveAspectRatio', 'none');
-    svg.setAttribute('aria-hidden', 'true');
-    const r = document.createElementNS(NS, 'rect');
-    r.setAttribute('x', 0);
-    r.setAttribute('y', 0);
-    r.setAttribute('width', 10);
-    r.setAttribute('height', 10);
-    r.setAttribute('class', `budget__segment budget__segment--${poste}`);
-    svg.append(r);
-    const c = noeud('div', 'budget__colonne');
-    c.append(noeud('span', 'budget__montant tabulaire', euros.format(Math.max(montant, 0))), svg,
-      noeud('span', 'budget__etiquette', mot));
-    return c;
-  };
-  conteneur.replaceChildren(
-    colonne(motLogement, t.logement, 'logement'),
-    colonne('Investi', t.investi, 'investi')
+function equation(el, total, motLogement, t) {
+  const investi = Math.max(t.investi, 0);
+  el.replaceChildren(
+    noeud('strong', '', euros.format(total)),
+    ` = ${euros.format(t.logement)} ${motLogement} + `,
+    noeud('strong', '', `${euros.format(investi)} investi${investi >= 2 ? 's' : ''}`)
   );
 }
 

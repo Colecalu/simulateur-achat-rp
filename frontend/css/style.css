@@ -253,26 +253,9 @@ h1, h2, h3 {
 }
 .budget__ecart[hidden] { display: none; }
 
-/* Deux colonnes par projet : logement, investi. Mêmes couleurs des deux côtés,
-   le loyer étant le coût du logement du locataire. */
-.budget__colonnes {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
-  margin-top: 4px;
-}
-.budget__colonne {
-  display: grid;
-  justify-items: center;
-  align-content: end;
-  gap: 4px;
-  min-height: 112px;
-}
-.budget__montant { font-size: .75rem; font-weight: 600; color: var(--encre); }
-.budget__barre { display: block; }
-.budget__segment--logement { fill: var(--poste-possession); }
-.budget__segment--investi  { fill: var(--poste-epargne); }
-.budget__etiquette { font-size: .6875rem; color: var(--encre-2); text-align: center; }
+/* Une phrase-équation par projet : l'effort total et l'investi en gras. */
+.budget__equation { margin: 0; font-size: .9375rem; line-height: 1.4; color: var(--encre-2); }
+.budget__equation strong { font-weight: 600; color: var(--encre); }
 
 #alerteApport { margin-top: 12px; }
 #alerteApport[hidden] { display: none; }

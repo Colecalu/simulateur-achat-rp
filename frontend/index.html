@@ -399,22 +399,19 @@
            Les deux trajectoires COMPARÉES — pas la situation d'aujourd'hui :
            on peut comparer deux projets dans une ville où l'on n'habite pas
            encore. Chacune : ce que coûte le logement, et ce qui est investi.
-           Deux barres verticales par projet, logement et investi, aux mêmes
-           couleurs des deux côtés (le loyer EST le coût du logement du
-           locataire) et à la MÊME échelle : les hauteurs se comparent d'un
-           projet à l'autre. -->
+           Une phrase-équation par projet : « 2 600 € = 1 250 € de loyer +
+           1 350 € investis ». Le « = » dit que l'effort est le même, le « + »
+           dit où va le reste. Rien à décoder. -->
       <section class="budget" id="budget" aria-labelledby="budgetTitre">
         <h2 class="budget__titre" id="budgetTitre">Logement + épargne, chaque mois</h2>
         <div class="budget__tuiles">
           <div class="budget__tuile">
             <p class="budget__mot">Projet location</p>
-            <p class="budget__valeur tabulaire" id="budgetLocation"></p>
-            <div class="budget__colonnes" id="colonnesLocation"></div>
+            <p class="budget__equation tabulaire" id="equationLocation"></p>
           </div>
           <div class="budget__tuile">
             <p class="budget__mot">Projet achat RP <span class="budget__ecart tabulaire" id="budgetEcart" hidden></span></p>
-            <p class="budget__valeur tabulaire" id="budgetAchat"></p>
-            <div class="budget__colonnes" id="colonnesAchat"></div>
+            <p class="budget__equation tabulaire" id="equationAchat"></p>
           </div>
           <div class="budget__tuile budget__tuile--etroite">
             <p class="budget__mot">Taux d'endettement</p>
