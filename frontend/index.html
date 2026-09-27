@@ -105,48 +105,6 @@
       </div>
     </div>
 
-    <!-- ===== L'effort, projet par projet =====
-         Dans le profil, sous la saisie, bandeau ouvert ou replié. Le projet
-         location se remplit dès le profil ; le projet achat attend la fin de
-         la simulation (des traits le disent), puis se remplit à son tour.
-         Avant la simulation, la location montre le loyer actuel et l'épargne
-         du profil ; après, les chiffres de la comparaison (loyer du logement
-         équivalent, investi réel). -->
-    <div class="egal" id="egal">
-      <div class="egal__miroir">
-        <dl class="egal__projet egal__projet--location">
-          <dt class="egal__projet-nom">Projet location <span class="egal__total tabulaire" id="egalTotalLocation"></span></dt>
-          <dd class="egal__ligne"><span>Loyer</span><span class="tabulaire" id="egalLoyer"></span></dd>
-          <dd class="egal__ligne egal__ligne--investi"><span>Investi</span><span class="tabulaire" id="egalInvestiLocation"></span></dd>
-        </dl>
-        <span class="egal__separateur" aria-hidden="true"></span>
-        <dl class="egal__projet egal__projet--achat" id="egalAchat" data-etat="attente">
-          <dt class="egal__projet-nom">Projet achat RP <span class="egal__total tabulaire" id="egalTotalAchat"></span></dt>
-          <dd class="egal__ligne"><span>Logement</span><span class="tabulaire" id="egalLogement"></span></dd>
-          <dd class="egal__ligne egal__ligne--investi"><span>Investi</span><span class="tabulaire" id="egalInvestiAchat"></span></dd>
-          <dd class="egal__attente">En attente de la simulation</dd>
-        </dl>
-      </div>
-
-      <!-- Le choix, en petit : la question elle-même est posée une fois dans
-           une bulle (#question). Il reste modifiable ici, et « Pourquoi ? »
-           rouvre la bulle. La case à cocher reste l'état (lu par le moteur,
-           sauvegardé) ; les boutons ne font que la régler. -->
-      <div class="egal__choix-ligne" id="egalChoix" hidden>
-        <span class="egal__choix-mot">
-          Achat : <b class="tabulaire" id="egalSupplement"></b>/mois. En restant locataire&nbsp;:
-        </span>
-        <div class="egal__choix" role="group" aria-label="En restant locataire, placeriez-vous aussi ce supplément ?">
-          <button type="button" class="egal__reponse" data-reponse="oui" aria-pressed="true">Je les place</button>
-          <button type="button" class="egal__reponse" data-reponse="non" aria-pressed="false">Je garde mes habitudes</button>
-        </div>
-        <button type="button" class="egal__pourquoi" id="questionRouvrir">Pourquoi&nbsp;?</button>
-        <input type="checkbox" class="egal__etat" id="locatairePlaceDifference" checked hidden>
-      </div>
-
-      <p class="egal__endettement" id="egalLigneEndettement" hidden>Taux d'endettement <strong class="tabulaire" id="egalEndettement"></strong></p>
-      <p class="alerte" id="alerteApport" hidden></p>
-    </div>
   </section>
 
   <div class="plateau" id="formulaire">
@@ -463,40 +421,69 @@
         <div class="graphique"><canvas id="graphPatrimoine"></canvas></div>
       </figure>
 
-    <!-- ========== D'OÙ VIENT CET ÉCART ? (divulgation progressive) ==========
-         Un vrai bouton d'appel, centré : le lien discret passait inaperçu.
-         Tout reste replié par défaut, la vue principale garde une seule
-         visualisation. -->
-    <div class="detail">
-      <button type="button" class="cta" id="detailOuvrir"
-              aria-expanded="false" aria-controls="detailPanneau">
-        D'où vient cet écart&nbsp;?
-      </button>
-
-      <div class="detail__panneau" id="detailPanneau" hidden>
-
-        <!-- Quatre chiffres sur une ligne. Ils ne se recouvrent pas :
-             mensualité + charges = le coût réel de propriétaire, à comparer
-             au loyer. -->
+      <!-- ===== Chaque mois =====
+           Tous les chiffres mensuels au même endroit, sous le graphique et
+           HORS du détail repliable : la ligne de choix change le verdict de
+           dizaines de milliers d'euros, elle ne doit jamais être cachée.
+           Première année, ramenée au mois. Les deux projets en miroir : ce que
+           coûte le logement, et ce qui est investi. « Coût réel » = mensualité,
+           assurance, charges de copropriété et taxe foncière. -->
+      <section class="mensuel" id="mensuel" aria-label="Chaque mois">
         <div class="kpis">
           <div class="kpi">
             <p class="kpi__mot">Point d'équilibre</p>
             <p class="kpi__chiffre tabulaire" id="pointMort">—</p>
           </div>
-          <div class="kpi">
-            <p class="kpi__mot">Mensualité du crédit</p>
-            <p class="kpi__chiffre tabulaire" id="kpiMensualite">—</p>
+          <div class="kpi kpi--projet">
+            <p class="kpi__mot kpi__mot--achat">Achat</p>
+            <dl class="kpi__lignes">
+              <div class="kpi__ligne"><dt>Coût réel</dt><dd class="tabulaire" id="kpiCoutReel">—</dd></div>
+              <div class="kpi__ligne kpi__ligne--investi"><dt>Investi</dt><dd class="tabulaire" id="kpiInvestiAchat">—</dd></div>
+            </dl>
+          </div>
+          <div class="kpi kpi--projet">
+            <p class="kpi__mot kpi__mot--location">Location</p>
+            <dl class="kpi__lignes">
+              <div class="kpi__ligne"><dt>Loyer</dt><dd class="tabulaire" id="kpiLoyer">—</dd></div>
+              <div class="kpi__ligne kpi__ligne--investi"><dt>Investi</dt><dd class="tabulaire" id="kpiInvestiLocation">—</dd></div>
+            </dl>
           </div>
           <div class="kpi">
-            <p class="kpi__mot">Coût mensuel réel</p>
-            <p class="kpi__chiffre tabulaire" id="kpiCoutReel">—</p>
-          </div>
-          <div class="kpi">
-            <p class="kpi__mot">Loyer versé</p>
-            <p class="kpi__chiffre tabulaire" id="kpiLoyer">—</p>
+            <p class="kpi__mot">Taux d'endettement</p>
+            <p class="kpi__chiffre tabulaire" id="kpiEndettement">—</p>
           </div>
         </div>
         <p class="kpi__note" id="pointMortMesure"></p>
+
+        <!-- Le choix, en petit : la question elle-même est posée une fois dans
+             une bulle (#question). Il reste modifiable ici, et « Pourquoi ? »
+             rouvre la bulle. La case à cocher reste l'état (lu par le moteur,
+             sauvegardé) ; les boutons ne font que la régler. -->
+        <div class="egal__choix-ligne" id="egalChoix" hidden>
+          <span class="egal__choix-mot">
+            Achat : <b class="tabulaire" id="egalSupplement"></b>/mois. En restant locataire&nbsp;:
+          </span>
+          <div class="egal__choix" role="group" aria-label="En restant locataire, placeriez-vous aussi ce supplément ?">
+            <button type="button" class="egal__reponse" data-reponse="oui" aria-pressed="true">Je les place</button>
+            <button type="button" class="egal__reponse" data-reponse="non" aria-pressed="false">Je garde mes habitudes</button>
+          </div>
+          <button type="button" class="egal__pourquoi" id="questionRouvrir">Pourquoi&nbsp;?</button>
+          <input type="checkbox" class="egal__etat" id="locatairePlaceDifference" checked hidden>
+        </div>
+        <p class="alerte" id="alerteApport" hidden></p>
+      </section>
+
+    <!-- ========== D'OÙ VIENT CET ÉCART ? ==========
+         Déplié par défaut (décision de Lucas) : ce qu'il explique fait partie
+         de la réponse. Le bouton le replie pour qui veut une vue courte. -->
+    <div class="detail">
+      <button type="button" class="cta" id="detailOuvrir"
+              aria-expanded="true" aria-controls="detailPanneau">
+        Masquer le détail
+      </button>
+
+      <div class="detail__panneau" id="detailPanneau">
+
 
         <!-- Rappel du curseur : les cumuls ci-dessous le suivent, et remonter
              en haut de page pour le régler était pénible. Même valeur que le

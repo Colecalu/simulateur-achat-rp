@@ -675,37 +675,6 @@ const poste = (cle, couleur, valeur) =>
 function dessinerDetail(resultat, horizon) {
   if (!detailOuvert() || typeof Chart === 'undefined') return;
 
-  // --- Les quatre chiffres ---------------------------------------------
-  //
-  // `premiereAnneeFavorable` est le PREMIER croisement, pas un acquis : les
-  // deux courbes peuvent se recroiser quand le rendement boursier est élevé.
-  // On ne commente pas le cas normal — le libellé du chiffre suffit — mais on
-  // avertit quand l'avantage ne tient plus, sinon l'écran se contredit.
-  //
-  const pointMort = resultat.premiereAnneeFavorable;
-  const tientEncore = resultat.annees[horizon - 1].ecart >= 0;
-
-  $('#pointMort').textContent =
-    pointMort === null ? 'Jamais' : pointMort === 1 ? 'Dès la 1re année' : `${pointMort} ans`;
-
-  if (pointMort === null) {
-    $('#pointMortMesure').textContent =
-      `Sur ${resultat.annees.length} ans simulés, l'achat ne repasse jamais devant la location.`;
-  } else if (tientEncore) {
-    $('#pointMortMesure').textContent = '';
-  } else {
-    $('#pointMortMesure').textContent =
-      `L'achat passe devant à l'année ${pointMort}, mais la location reprend l'avantage ` +
-      `avant l'année ${horizon}.`;
-  }
-
-  // Le coût mensuel réel CONTIENT la mensualité : c'est voulu. On montre ce
-  // que le propriétaire sort chaque mois, tout compris, face au loyer — pas
-  // une décomposition dont il faudrait faire la somme.
-  $('#kpiMensualite').textContent = euros.format(resultat.mensualiteTotale);
-  $('#kpiCoutReel').textContent = euros.format(resultat.coutMensuelProprio);
-  $('#kpiLoyer').textContent = euros.format(resultat.entrees.loyer);
-
   // --- Couleurs des postes ---------------------------------------------
   const cCredit = jeton('--poste-credit');
   const cCapital = jeton('--poste-capital');
@@ -1512,8 +1481,16 @@ function rafraichir() {
   majScenario();
   majAvertissement();
   afficherProfil(dernierResultat);
-  if (!majAttente()) return;
+  if (!majAttente()) {
+    // Pas de simulation, pas de supplément à interroger.
+    $('#egalChoix').hidden = true;
+    delete $('#visu').dataset.question;
+    if (questionOuverte()) fermerQuestion();
+    return;
+  }
 
+  // Avant le verdict : la question décide s'il peut se montrer.
+  afficherMensuel(dernierResultat, horizon);
   afficherVerdict(dernierResultat, horizon);
   dessinerGraphiques(dernierResultat, horizon, mel);
   dessinerDetail(dernierResultat, horizon);
@@ -1597,73 +1574,52 @@ function afficherProfil(resultat) {
   }
   $('#profilResume').replaceChildren(...resume);
 
-  // L'effort, projet par projet : sous la saisie, bandeau ouvert ou replié.
-  afficherEgal(resultat);
-
 }
 
 /**
- * L'effort, projet par projet, dans le profil. Appelé à chaque rafraîchissement,
- * parcours complet ou non — c'est ce qui le distingue d'un résultat de la
- * visualisation.
+ * « Chaque mois », sous le graphique, hors du détail repliable. N'est appelé
+ * qu'une fois le parcours complet : c'est un résultat.
  *
- * Deux temps :
- * - profil seul : la location montre ce que l'utilisateur a saisi (loyer
- *   actuel, épargne) ; l'achat attend la simulation, des traits le disent ;
- * - parcours complet : les deux projets de la COMPARAISON, première année
- *   ramenée au mois. « Logement » côté achat : mensualité, assurance, charges
- *   de copropriété et taxe foncière.
- * Aucun chiffre d'achat avant la fin du parcours : la page n'affiche pas de
- * résultat calculé sur des valeurs que l'utilisateur n'a pas posées.
+ * Tous les chiffres mensuels au même endroit, première année ramenée au mois :
+ * le point d'équilibre, les deux projets en miroir (ce que coûte le logement,
+ * ce qui est investi), le taux d'endettement. « Coût réel » = mensualité,
+ * assurance, charges de copropriété et taxe foncière. La mensualité seule
+ * n'est plus affichée : elle est comprise dans le coût réel.
  */
-function afficherEgal(resultat) {
-  // Rien avant la validation du profil : à la première saisie, il n'y a que
-  // les trois questions et leurs quatre champs.
-  $('#egal').hidden = !profilValide;
-  if (!profilValide) {
-    delete $('#visu').dataset.question;
-    if (questionOuverte()) fermerQuestion();
-    return;
-  }
+function afficherMensuel(resultat, horizon) {
   const e = resultat.entrees;
-  const complet = parcoursComplet();
   const an1 = resultat.annees[0];
-  const profil = lireProfil();
 
-  const location = complet
-    ? { logement: an1.loyerAnnuel / 12, investi: an1.surplusLocataire / 12, total: an1.enveloppeLocation / 12 }
-    : { logement: profil.loyerActuel, investi: profil.epargneActuelle, total: e.enveloppeMensuelle };
-  $('#egalTotalLocation').textContent = parMois(location.total);
-  $('#egalLoyer').textContent = euros.format(location.logement);
-  $('#egalInvestiLocation').textContent = euros.format(Math.max(location.investi, 0));
-
-  const blocAchat = $('#egalAchat');
-  blocAchat.dataset.etat = complet ? 'pret' : 'attente';
-  if (complet) {
-    $('#egalTotalAchat').textContent = parMois(an1.enveloppeAchat / 12);
-    $('#egalLogement').textContent = euros.format(an1.totalDebourseAnnuel / 12);
-    $('#egalInvestiAchat').textContent = euros.format(Math.max(an1.surplusProprio / 12, 0));
+  // `premiereAnneeFavorable` est le PREMIER croisement, pas un acquis : les
+  // deux courbes peuvent se recroiser quand le rendement boursier est élevé.
+  // On ne commente pas le cas normal — le libellé du chiffre suffit — mais on
+  // avertit quand l'avantage ne tient plus, sinon l'écran se contredit.
+  const pointMort = resultat.premiereAnneeFavorable;
+  const tientEncore = resultat.annees[horizon - 1].ecart >= 0;
+  $('#pointMort').textContent =
+    pointMort === null ? 'Jamais' : pointMort === 1 ? 'Dès la 1re année' : `${pointMort} ans`;
+  if (pointMort === null) {
+    $('#pointMortMesure').textContent =
+      `Sur ${resultat.annees.length} ans simulés, l'achat ne repasse jamais devant la location.`;
+  } else if (tientEncore) {
+    $('#pointMortMesure').textContent = '';
   } else {
-    $('#egalTotalAchat').textContent = '';
-    $('#egalLogement').textContent = '—';
-    $('#egalInvestiAchat').textContent = '—';
+    $('#pointMortMesure').textContent =
+      `L'achat passe devant à l'année ${pointMort}, mais la location reprend l'avantage ` +
+      `avant l'année ${horizon}.`;
   }
 
-  // Taux d'endettement : un chiffre, sans commentaire, une fois le prêt connu.
-  $('#egalLigneEndettement').hidden = !(complet && e.revenusFoyer > 0);
-  if (complet && e.revenusFoyer > 0) $('#egalEndettement').textContent = pourcent(resultat.tauxEndettement);
+  $('#kpiCoutReel').textContent = euros.format(an1.totalDebourseAnnuel / 12);
+  $('#kpiInvestiAchat').textContent = euros.format(Math.max(an1.surplusProprio / 12, 0));
+  $('#kpiLoyer').textContent = euros.format(an1.loyerAnnuel / 12);
+  $('#kpiInvestiLocation').textContent = euros.format(Math.max(an1.surplusLocataire / 12, 0));
+  // Un chiffre, sans commentaire. Sans revenus, aucun ratio n'est inventé.
+  $('#kpiEndettement').textContent = e.revenusFoyer > 0 ? pourcent(resultat.tauxEndettement) : '—';
 
-  if (complet) {
-    afficherQuestion(resultat);
-  } else {
-    // Pas de simulation, pas de supplément à interroger.
-    $('#egalChoix').hidden = true;
-    delete $('#visu').dataset.question;
-    if (questionOuverte()) fermerQuestion();
-  }
+  afficherQuestion(resultat);
 
   const alerte = $('#alerteApport');
-  alerte.hidden = !complet || e.apport <= e.capitalInitial;
+  alerte.hidden = e.apport <= e.capitalInitial;
   if (!alerte.hidden) {
     alerte.textContent =
       `L'apport (${euros.format(e.apport)}) dépasse votre patrimoine financier ` +

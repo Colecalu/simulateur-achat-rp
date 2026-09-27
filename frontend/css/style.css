@@ -206,63 +206,25 @@ h1, h2, h3 {
 
 .profil__pied { display: flex; justify-content: flex-end; margin-top: 14px; }
 
-/* --- L'effort, projet par projet -----------------------------------------
-   Une section du profil, sous la saisie, visible bandeau ouvert ou replié. Deux
-   projets en miroir ; le projet achat attend la fin de la simulation. */
-.egal {
-  margin-top: 14px;
-  padding-top: 12px;
-  border-top: 1px solid var(--trait);
-}
-.egal[hidden] { display: none; }
+/* --- Chaque mois ------------------------------------------------------------
+   Sous le graphique, hors du détail repliable : les chiffres mensuels et la
+   ligne de choix de l'épargne forcée. Les KPI réutilisent la carte .kpis. */
+.mensuel { display: grid; gap: 10px; }
 
-/* Deux colonnes en miroir, un filet entre les deux. */
-.egal__miroir {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 1px minmax(0, 1fr);
-  gap: 0 24px;
-  max-width: 720px;
-  margin: 0 auto;
-}
-.egal__separateur { background: var(--trait); }
-.egal__projet { margin: 0; }
-.egal__projet-nom {
+/* Un KPI « projet » : deux lignes, le logement puis l'investi. */
+.kpi__mot--achat { color: var(--achat); }
+.kpi__mot--location { color: var(--location); }
+.kpi__lignes { display: grid; gap: 2px; margin: 6px 0 0; }
+.kpi__ligne {
   display: flex;
   justify-content: space-between;
-  align-items: baseline;
-  gap: 8px;
-  margin: 0 0 4px;
-  font-size: .75rem;
-  font-weight: 600;
-  letter-spacing: .06em;
-  text-transform: uppercase;
-}
-.egal__projet--location .egal__projet-nom { color: var(--location); }
-.egal__projet--achat .egal__projet-nom { color: var(--achat); }
-.egal__ligne {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  margin: 0;
-  padding: 3px 0;
-  font-size: .875rem;
+  gap: 10px;
+  font-size: .8125rem;
   color: var(--encre-2);
 }
-.egal__ligne--investi { font-weight: 600; color: var(--encre); }
-.egal__ligne--investi span:last-child { color: var(--supplement); }
-.egal__total {
-  font-size: .8125rem;
-  font-weight: 600;
-  letter-spacing: 0;
-  text-transform: none;
-  color: var(--encre);
-}
-
-/* Le projet achat en attente de la simulation : des traits, une mention. */
-.egal__attente { display: none; margin: 4px 0 0; font-size: .75rem; font-style: italic; color: var(--encre-3); }
-.egal__projet[data-etat="attente"] .egal__attente { display: block; }
-.egal__projet[data-etat="attente"] .egal__ligne { color: var(--encre-3); font-weight: 400; border-bottom: 1px dashed var(--bord-champ); }
-.egal__projet[data-etat="attente"] .egal__ligne span:last-child { color: var(--encre-3); }
+.kpi__ligne dt, .kpi__ligne dd { margin: 0; }
+.kpi__ligne dd { font-weight: 600; color: var(--encre); }
+.kpi__ligne--investi dd { color: var(--supplement); }
 
 /* Le choix, en petit, une fois la question posée dans sa bulle. */
 .egal__choix-ligne {
@@ -271,8 +233,7 @@ h1, h2, h3 {
   align-items: center;
   justify-content: center;
   gap: 6px 10px;
-  max-width: 720px;
-  margin: 12px auto 0;
+  margin: 0;
   font-size: .8125rem;
   color: var(--encre-2);
 }
@@ -375,10 +336,7 @@ h1, h2, h3 {
 .question__reponse-titre { font-size: .9375rem; font-weight: 600; color: var(--encre); }
 .question__reponse-aide { font-size: .75rem; font-weight: 400; color: var(--encre-2); }
 
-.egal__endettement { margin: 12px 0 0; text-align: center; font-size: .75rem; color: var(--encre-3); }
-.egal__endettement strong { font-size: .875rem; color: var(--encre); }
-
-#alerteApport { max-width: 720px; margin: 12px auto 0; }
+#alerteApport { margin: 0; }
 #alerteApport[hidden] { display: none; }
 
 /* Rien n'est ouvrable tant que le profil n'est pas posé. */
@@ -1533,7 +1491,7 @@ input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; marg
   line-height: 1.15;
 }
 .kpi:first-child .kpi__chiffre { color: var(--achat); }
-.kpi__note { margin: -8px 0 0; font-size: .8125rem; color: var(--encre-2); }
+.kpi__note { margin: 0; text-align: center; font-size: .8125rem; color: var(--encre-2); }
 .kpi__note:empty { display: none; }
 
 /*

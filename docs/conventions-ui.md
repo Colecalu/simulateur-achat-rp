@@ -211,28 +211,25 @@ réelles — en cours ; **(3)** la mise en location ultérieure — moteur fait,
   navigateur et en `module.exports` côté Node. `calc.js` doit être chargé **avant** `app.js`.
 - Les taux se saisissent en pourcentage à l'écran et se stockent en fraction dans le modèle
   (conversion dans `app.js`, jamais dans `calc.js`).
-- **Une seule visualisation par défaut** : le graphique du patrimoine net d'impôt et l'encadré
-  « si vous revendez dans… ». Les modules « D'où vient cet écart ? » et « mise en location »
-  restent masqués jusqu'à un clic. Cette sobriété est un choix assumé — ne pas rajouter
-  d'indicateurs ou de graphiques sans demande explicite.
-- **La section « D'où vient cet écart ? »** est repliée derrière un vrai bouton d'appel (`.cta`,
-  plein, centré). Le lien texte discret du module de mise en location ne suffisait pas ici : il
-  arrive après un graphique qui occupe tout l'écran et personne ne le voyait. Une fois ouvert, le
-  bouton redevient discret (`.cta[aria-expanded="true"]`) — il n'a plus rien à appeler.
+- **Le détail « D'où vient cet écart ? » est DÉPLIÉ par défaut** (décision de Lucas) : ce qu'il
+  explique fait partie de la réponse. Le bouton (`.cta`) le replie pour qui veut une vue courte ;
+  replié, il reprend son libellé d'appel. Le module « mise en location » reste masqué jusqu'à un
+  clic. Ne pas rajouter d'indicateurs ou de graphiques sans demande explicite.
 - **Deux contrôles d'horizon, une seule date.** Le rappel du curseur (`#horizonBis`) évite de
   remonter en haut de page pour régler l'année. Il **écrit dans** `#horizon`, qui reste la source
   de vérité, et `afficherVerdict` réécrit les deux libellés. Ne jamais leur donner deux valeurs
   indépendantes : deux dates à l'écran, c'est la garantie qu'on finit par comparer deux instants
   différents sans s'en apercevoir.
-- **Quatre chiffres sur une ligne** (`.kpis`), centrés : point d'équilibre, mensualité du crédit,
-  coût mensuel réel, loyer versé. Pas de carte par chiffre — un filet vertical suffit.
-  Le **coût mensuel réel** (`coutMensuelProprio`, 2 634 €) **contient** la mensualité
-  (`mensualiteTotale`, 2 385 €, assurance comprise mais jamais mentionnée) : c'est délibéré. On
-  montre ce que le propriétaire sort chaque mois, tout compris, face au loyer — pas une
-  décomposition dont il faudrait faire la somme. Un test vérifie que ce chiffre vaut bien
-  mensualité + charges de possession, sans quoi son libellé mentirait (à l'euro près :
-  `mensualiteTotale` porte l'assurance du premier mois, `coutMensuelProprio` la moyenne de la
-  première année).
+- **« Chaque mois » : quatre KPI sous le graphique, HORS du détail repliable** (`#mensuel`,
+  carte `.kpis`) : point d'équilibre · **Achat** (coût réel, investi) · **Location** (loyer,
+  investi) · taux d'endettement. Première année, ramenée au mois. Tous les chiffres mensuels au
+  même endroit — ils étaient en double avec un bloc du profil, retiré. Le **coût réel**
+  (mensualité, assurance, charges de copropriété, taxe foncière) contient la mensualité, qui n'est
+  plus affichée seule : on montre ce que le propriétaire sort chaque mois, tout compris, face au
+  loyer. « Investi » en ocre des deux côtés : c'est ce que le logement ne consomme pas. Taux
+  d'endettement : un chiffre sans commentaire, « — » sans revenus. Juste dessous, la **ligne de
+  choix** de l'épargne forcée : hors du détail parce qu'elle change le verdict de dizaines de
+  milliers d'euros et ne doit jamais être cachée.
 - **Aucun commentaire sous les chiffres dans le cas normal.** `#pointMortMesure` reste vide —
   le libellé du chiffre se suffit. Il ne sert qu'à l'avertissement quand l'avantage ne tient plus
   à l'horizon choisi. Ne pas y remettre de glose.
@@ -317,24 +314,14 @@ réelles — en cours ; **(3)** la mise en location ultérieure — moteur fait,
   qui s'affiche pendant qu'on tape — ni phrase d'explication sous les champs, ni part des
   revenus, ni reste à vivre. Ces ratios restent calculés par le moteur (`partEffortActuel`,
   `resteAVivreActuel`) pour de futurs indicateurs dans la visualisation.
-- **L'effort, projet par projet, vit dans le PROFIL, sous la saisie** (décision de Lucas, après
-  une carte dans la visualisation qu'il n'aimait pas à cet endroit). Visible bandeau ouvert ou
-  replié. Deux colonnes en miroir : **Projet location** (loyer, investi) et **Projet achat RP**
-  (logement, investi), chacune avec son total mensuel. Deux temps :
-  - **profil seul** : la location se remplit tout de suite avec ce que l'utilisateur a saisi
-    (loyer actuel, épargne) ; l'achat affiche des traits en pointillé et « En attente de la
-    simulation ». Aucun chiffre d'achat avant la fin du parcours ;
-  - **parcours complet** : les deux projets de la COMPARAISON, première année au mois — la
-    location passe au loyer du logement équivalent (bulle 3) et à l'investi réel, l'achat se
-    remplit (« logement » = mensualité, assurance, charges, taxe foncière). Le taux d'endettement
-    apparaît dessous, un chiffre sans commentaire. La visualisation garde sa forme habituelle.
-  Les chiffres de la location peuvent donc changer au passage du profil seul à la simulation :
-  à juger à l'usage. Essayés puis écartés : KPI détaillés, barres horizontales, barres
-  verticales, phrases-équations, carte « À effort égal » au-dessus du verdict.
+- **Le profil est une saisie nue** : trois questions, quatre champs, rien d'autre, avant comme
+  après validation. Essayés puis écartés pour montrer « le même effort, le reste est investi » :
+  KPI détaillés, barres horizontales puis verticales, phrases-équations, carte « À effort égal »
+  au-dessus du verdict, puis deux colonnes « Projet location / Projet achat RP » dans le profil —
+  retirées parce qu'elles doublaient les KPI du détail.
 - **⚠️ À traiter : les deux loyers.** Le **loyer actuel** (profil) sert à l'effort déclaré ; le
   **loyer du locataire** (bulle 3) est celui de la comparaison. Deux champs pour une notion que
-  l'utilisateur croit unique — d'où des chiffres de location qui changent entre le profil seul et
-  la simulation. On ne peut pas simplement les fusionner : le rapport entre le loyer et le prix DU
+  l'utilisateur croit unique. On ne peut pas simplement les fusionner : le rapport entre le loyer et le prix DU
   BIEN décide souvent du verdict, et le loyer actuel est faux dès que le bien acheté est plus
   grand ou dans une autre ville. Essayé puis écarté par Lucas : déplacer le loyer du locataire
   dans la bulle 1, pré-rempli et lié au loyer actuel. Le champ reste en bulle 3 pour l'instant.
@@ -345,7 +332,7 @@ réelles — en cours ; **(3)** la mise en location ultérieure — moteur fait,
   réponses** : « Oui, je les place » / « Non, je garde mes habitudes ». **Choix obligatoire** : ni
   croix, ni voile, ni Échap ne la ferment. **Le résultat reste masqué** tant qu'on n'a pas répondu
   (`#visu[data-question="attente"]`) : il dépend de la réponse. Puis la bulle **redescend** vers
-  une petite ligne du profil, sous les deux projets — « Achat : +148 €/mois. En restant locataire : [Je les
+  une petite ligne sous les KPI « Chaque mois » — « Achat : +148 €/mois. En restant locataire : [Je les
   place] [Je garde mes habitudes] Pourquoi ? » —, d'où le choix reste modifiable et d'où
   « Pourquoi ? » rouvre la bulle, qui se ferme alors librement. Elle ne resurgit pas si le projet
   change ensuite : la petite ligne se met à jour. Les réponses décrivent un **comportement**, jamais
