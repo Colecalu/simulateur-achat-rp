@@ -317,18 +317,17 @@ réelles — en cours ; **(3)** la mise en location ultérieure — moteur fait,
   qui s'affiche pendant qu'on tape — ni phrase d'explication sous les champs, ni part des
   revenus, ni reste à vivre. Ces ratios restent calculés par le moteur (`partEffortActuel`,
   `resteAVivreActuel`) pour de futurs indicateurs dans la visualisation.
-- **« Votre budget chaque mois » est une carte de la VISUALISATION, pas du profil** (décision de
-  Lucas) : c'est un résultat, il n'a rien à faire dans la saisie. Juste **au-dessus du verdict**.
-  Trois tuiles : **Aujourd'hui** (loyer | épargne), **Si vous achetez** (crédit et charges |
-  capital remboursé | investi), **Taux d'endettement**. Les deux premières portent une barre à la
-  **même échelle** : quand le budget est le même, les barres ont la même longueur, et la part que
-  le logement ne consomme pas se VOIT — elle est investie. C'est le message clé ; les montants
-  seuls ne le faisaient pas passer. Les barres sont en SVG (largeurs en attributs, couleurs par
-  classe) : aucun style en ligne. « Investi 0 € » n'est pas écrit : quand l'achat absorbe tout le
-  budget, c'est le supplément (« +148 € ») et la bascule qui parlent. Retirés à la relecture :
-  graphique de l'enveloppe, liste des périodes (`periodesEnveloppe` reste dans le moteur, testée),
-  effort / revenus et reste à vivre (calculés par le moteur, non affichés), mensualité (déjà dans
-  « D'où vient cet écart ? »).
+- **« Logement + épargne, chaque mois » est une carte de la VISUALISATION, pas du profil**
+  (décision de Lucas) : c'est un résultat. Titre centré, juste **au-dessus du verdict**. Trois
+  tuiles : **Projet location** (loyer | investi), **Projet achat RP** (coût du logement |
+  investi), **Taux d'endettement** (un chiffre, sans commentaire ni seuil). Les tuiles montrent
+  les deux trajectoires **comparées**, pas la situation d'aujourd'hui : on peut comparer deux
+  projets dans une ville où l'on n'habite pas encore. « Coût du logement » = mensualité,
+  assurance, charges de copropriété et taxe foncière, ramenés au mois (première année). Les deux
+  barres sont à la **même échelle** : à enveloppe égale, même longueur, et la part investie se
+  voit. SVG, largeurs en attributs, couleurs par classe : aucun style en ligne. « Investi 0 € »
+  n'est pas écrit. Libellés provisoires. Non affichés mais calculés par le moteur : effort /
+  revenus, reste à vivre, périodes de l'enveloppe.
 - **La bascule d'épargne forcée ne se laisse pas oublier.** Masquée quand l'effort couvre déjà
   l'achat (elle ne changerait rien, la montrer ferait croire à un réglage cassé). Son libellé
   décrit un **comportement**, jamais un résultat (« je place aussi ces 148 €/mois », pas « mode

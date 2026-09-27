@@ -1544,9 +1544,6 @@ const noeud = (balise, classe, texte) => {
 const pourcent = (x) => `${Math.round(x * 100)} %`;
 const parMois = (v) => `${euros.format(v)}/mois`;
 
-/** Seuil du HCSF sur le taux d'endettement, assurance comprise. */
-const PLAFOND_HCSF = 0.35;
-
 /**
  * Le bandeau profil : résumé replié, total de l'effort, retour immédiat sur
  * les revenus, et — une fois le parcours complet — le face-à-face avec le
@@ -1576,75 +1573,45 @@ function afficherProfil(resultat) {
 }
 
 /**
- * « Votre budget chaque mois », dans la visualisation, au-dessus du verdict.
- * N'est appelé qu'une fois le parcours complet : c'est un résultat, et la page
- * n'affiche aucun résultat sur des valeurs que l'utilisateur n'a pas posées.
+ * « Logement + épargne, chaque mois », dans la visualisation, au-dessus du
+ * verdict. N'est appelé qu'une fois le parcours complet : c'est un résultat, et
+ * la page n'affiche aucun résultat sur des valeurs que l'utilisateur n'a pas
+ * posées.
  *
- * Le message à faire passer : le budget est le même, et ce que le logement ne
- * consomme pas est INVESTI. Les montants seuls ne le disaient pas ; deux barres
- * à la même échelle le montrent.
+ * Les deux trajectoires COMPARÉES, première année, ramenées au mois : ce que
+ * coûte le logement, et ce qui est investi. Pas la situation d'aujourd'hui —
+ * on peut comparer deux projets dans une ville où l'on n'habite pas encore.
+ * Deux barres à la même échelle : à enveloppe égale, même longueur, et la part
+ * investie se voit.
  */
 function afficherBudget(resultat) {
   const e = resultat.entrees;
-  const profil = lireProfil();
-  // Première année, ramenée au mois. La répartition vient du moteur : ses
-  // postes sont ceux de « D'où vient cet écart ? », composés de la même façon.
-  const an1 = repartitionAnnuelle(resultat)[0];
-  const achat = {
-    frais: (an1.achat.credit + an1.achat.possession) / 12,
-    capital: an1.achat.capital / 12,
-    investi: an1.achat.epargne / 12,
-  };
-  const totalAchat = resultat.annees[0].enveloppeAchat / 12;
-  const totalAujourdhui = e.enveloppeMensuelle;
+  const an1 = resultat.annees[0];
+  // « Coût du logement » côté achat : mensualité, assurance, charges de copro
+  // et taxe foncière — tout ce que le propriétaire paie pour son logement.
+  const location = { logement: an1.loyerAnnuel / 12, investi: an1.surplusLocataire / 12 };
+  const achat = { logement: an1.totalDebourseAnnuel / 12, investi: an1.surplusProprio / 12 };
+  const totalLocation = an1.enveloppeLocation / 12;
+  const totalAchat = an1.enveloppeAchat / 12;
   // Même échelle pour les deux barres : c'est elle qui rend l'égalité visible.
-  const echelle = Math.max(totalAchat, totalAujourdhui, 1);
+  const echelle = Math.max(totalAchat, totalLocation, 1);
 
-  // --- Aujourd'hui -------------------------------------------------------
-  $('#budgetAujourdhui').textContent = parMois(totalAujourdhui);
-  barre($('#barreAujourdhui'), echelle, [
-    ['location', profil.loyerActuel],
-    ['epargne', profil.epargneActuelle],
-  ]);
-  $('#detailAujourdhui').replaceChildren(
-    part('location', 'Loyer', profil.loyerActuel),
-    part('epargne', 'Épargne', profil.epargneActuelle)
-  );
+  $('#budgetLocation').textContent = parMois(totalLocation);
+  barre($('#barreLocation'), echelle, [['location', location.logement], ['epargne', location.investi]]);
+  $('#detailLocation').replaceChildren(...parts('location', 'Loyer', location));
 
-  // --- Si vous achetez ---------------------------------------------------
   $('#budgetAchat').textContent = parMois(totalAchat);
-  barre($('#barreAchat'), echelle, [
-    ['credit', achat.frais],
-    ['capital', achat.capital],
-    ['epargne', achat.investi],
-  ]);
-  // « Investi 0 € » ne dirait rien : quand l'achat absorbe tout le budget,
-  // c'est le supplément (+148 €) et la bascule qui portent le message.
-  $('#detailAchat').replaceChildren(
-    part('credit', 'Crédit et charges', achat.frais),
-    part('capital', 'Capital remboursé', achat.capital),
-    ...(achat.investi >= 1 ? [part('epargne', 'Investi', achat.investi, true)] : [])
-  );
+  barre($('#barreAchat'), echelle, [['achat', achat.logement], ['epargne', achat.investi]]);
+  $('#detailAchat').replaceChildren(...parts('achat', 'Coût du logement', achat));
 
   const supplement = resultat.supplementAchat;
   const ecart = $('#budgetEcart');
   ecart.hidden = supplement < 1;
   if (!ecart.hidden) ecart.textContent = `+${euros.format(supplement)}`;
 
-  // --- Taux d'endettement ------------------------------------------------
-  if (e.revenusFoyer > 0) {
-    const excessif = resultat.tauxEndettement > PLAFOND_HCSF;
-    $('#budgetEndettement').textContent = pourcent(resultat.tauxEndettement);
-    $('#budgetEndettement').classList.toggle('budget__valeur--alerte', excessif);
-    $('#detailEndettement').textContent = excessif
-      ? 'Au-delà des 35 % retenus par les banques.'
-      : 'Plafond retenu par les banques : 35 %.';
-  } else {
-    // Sans revenus, aucun ratio n'est inventé.
-    $('#budgetEndettement').textContent = '—';
-    $('#budgetEndettement').classList.remove('budget__valeur--alerte');
-    $('#detailEndettement').textContent = 'Renseignez les revenus du foyer dans votre profil.';
-  }
+  // Un chiffre, sans commentaire. Sans revenus, aucun ratio n'est inventé.
+  $('#budgetEndettement').textContent =
+    e.revenusFoyer > 0 ? pourcent(resultat.tauxEndettement) : '—';
 
   afficherBascule(resultat);
 
@@ -1656,6 +1623,18 @@ function afficherBudget(resultat) {
       `(${euros.format(e.capitalInitial)}) : le portefeuille de l'acheteur partirait en ` +
       'négatif. Réduisez l\'apport, ou corrigez votre patrimoine.';
   }
+}
+
+/**
+ * Détail sous une barre : le logement, puis ce qui est investi. « Investi 0 € »
+ * ne dirait rien — quand le logement absorbe tout, c'est le supplément et la
+ * bascule qui parlent.
+ */
+function parts(poste, mot, t) {
+  return [
+    part(poste, mot, t.logement),
+    ...(t.investi >= 1 ? [part('epargne', 'Investi', t.investi, true)] : []),
+  ];
 }
 
 /**
