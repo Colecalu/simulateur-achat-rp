@@ -343,10 +343,15 @@ function dessinerGraphiques(resultat, horizon, mel) {
    *
    * `iFrontiere` est l'INDICE du dernier point réel — les années vont de 1 à 25
    * sur l'indice 0 à 24, d'où le décalage d'un cran.
+   *
+   * Un scénario construit n'a AUCUNE année observée (`reel` à 0) : il n'y a
+   * alors pas de frontière à tracer, puisqu'il n'y a rien à quitter. C'est
+   * l'étiquette « Hypothèse » du groupe qui porte l'avertissement, pas un trait
+   * au milieu de la courbe. D'où le plancher à 0, qui vaut « pas de frontière ».
    */
   const iFrontiere =
     scenarioActif && scenarioActif.reel < resultat.annees.length
-      ? scenarioActif.reel - 1
+      ? Math.max(0, scenarioActif.reel - 1)
       : 0;
   const projection = (couleur) => ({
     borderDash: (ctx) => (ctx.p0DataIndex >= iFrontiere ? [5, 4] : undefined),
@@ -468,6 +473,13 @@ let graphAnnuelLocation = null;
 const pourcentEntier = new Intl.NumberFormat('fr-FR', {
   style: 'percent',
   maximumFractionDigits: 0,
+});
+
+/** « 6,8 % » — un taux annuel au dixième, virgule française comprise. */
+const pourcentDixieme = new Intl.NumberFormat('fr-FR', {
+  style: 'percent',
+  minimumFractionDigits: 1,
+  maximumFractionDigits: 1,
 });
 
 const detailOuvert = () => !$('#detailPanneau').hidden;
@@ -848,11 +860,10 @@ const introOuverte = () => !$('#intro').hidden;
 const apercuOuvert = () => !$('#apercu').hidden;
 
 function ligneScenario(sc) {
-  const continu = sc.famille === 'continu' ? ' scenario__option--continu' : '';
   const date = sc.periode ? `<span class="scenario__periode">${sc.periode}</span>` : '';
   return (
     '<div class="scenario__ligne">' +
-    `<button type="button" class="scenario__option${continu}" data-scenario="${sc.cle}" ` +
+    `<button type="button" class="scenario__option" data-scenario="${sc.cle}" ` +
       'role="radio" aria-checked="false">' +
       `<span class="scenario__nom">${sc.nom}</span>${date}</button>` +
     `<button type="button" class="scenario__apercu" data-apercu="${sc.cle}" ` +
@@ -866,7 +877,12 @@ function construireScenarios() {
   for (const famille of FAMILLES) {
     const liste = scenariosParFamille(famille.cle);
     if (!liste.length) continue;
-    morceaux.push(`<p class="scenario__famille">${famille.nom}</p>`);
+    // L'étiquette dit l'essentiel : « Historique » = observé, « Hypothèse » =
+    // construit. Sans elle, deux scénarios de nature opposée se ressemblent.
+    morceaux.push(
+      `<p class="scenario__famille">${famille.nom}` +
+        `<span class="scenario__etiquette">${famille.etiquette}</span></p>`
+    );
     for (const sc of liste) morceaux.push(ligneScenario(sc));
   }
   $('#scenarioChoix').innerHTML = morceaux.join('');
@@ -909,6 +925,19 @@ const tauxSigne = new Intl.NumberFormat('fr-FR', {
   signDisplay: 'exceptZero',
 });
 
+/**
+ * Combien d'années une série énumère vraiment avant de devenir plate.
+ *
+ * Toutes les séries font vingt-cinq ans, mais la fin est un prolongement à taux
+ * constant. Lister les vingt-cinq valeurs donnerait à ce prolongement l'allure
+ * d'une donnée ; on s'arrête donc là où la série se met à se répéter.
+ */
+function anneesDistinctes(serie) {
+  let n = serie.length;
+  while (n > 1 && serie[n - 1] === serie[n - 2]) n -= 1;
+  return n === 1 ? 0 : n - 1;
+}
+
 function ouvrirApercu(cle) {
   const sc = cle ? scenarioParCle(cle) : null;
   const horizon = dernierResultat ? dernierResultat.annees.length : 25;
@@ -950,22 +979,32 @@ function ouvrirApercu(cle) {
     ? sc.resume
     : 'Vos taux, appliqués tels quels chaque année. Aucune donnée de marché.';
 
-  // On n'affiche que les années OBSERVÉES, suivies du taux qui prolonge. Lister
-  // vingt-cinq valeurs dont quatorze identiques ferait passer un prolongement
-  // pour une donnée.
-  const reel = sc ? Math.min(sc.reel, horizon) : 0;
+  // On n'affiche que les années EXPLICITEMENT DÉFINIES, suivies du taux qui
+  // prolonge. Lister vingt-cinq valeurs dont treize identiques ferait passer un
+  // prolongement pour une donnée.
+  //
+  // `definies` et non `reel` : un scénario construit n'a aucune année observée,
+  // mais ses années de choc sont ce qu'il faut montrer — ce sont elles qui le
+  // définissent.
+  const definies = sc ? Math.min(sc.definies, horizon) : 0;
   $('#apercuSuites').innerHTML = series
     .map((serie) => {
       let valeurs;
       if (!Array.isArray(serie.taux)) {
         valeurs = `${tauxSigne.format(serie.taux * 100)} chaque année`;
       } else {
+        // Compté série par série : dans un stress test, une seule grandeur est
+        // choquée. Les autres valent la tendance longue dès la première année
+        // et n'ont aucune valeur distincte à énumérer.
+        const n = Math.min(anneesDistinctes(serie.taux), horizon);
         valeurs = serie.taux
-          .slice(0, reel)
+          .slice(0, n)
           .map((t) => tauxSigne.format(t * 100))
           .join(' · ');
-        if (reel < horizon) {
-          valeurs += ` <b>puis ${tauxSigne.format(serie.taux[reel] * 100)} par an</b>`;
+        if (n < horizon) {
+          valeurs += n
+            ? ` <b>puis ${tauxSigne.format(serie.taux[n] * 100)} par an</b>`
+            : `<b>${tauxSigne.format(serie.taux[n] * 100)} chaque année</b>`;
         }
       }
       return (
@@ -981,12 +1020,18 @@ function ouvrirApercu(cle) {
     `Taux annuels en %. Base 100 au départ : après ${horizon} ans, ` +
     series.map((x) => `${arrivee(x.taux)} pour « ${x.nom} »`).join(', ') +
     '.' +
-    (sc && reel < horizon
-      ? ` Les ${reel} premières années sont observées ; au-delà, le trait vertical marque le ` +
-        'début du prolongement, au rythme moyen de la période.'
-      : sc
-      ? ' Toutes les années affichées sont observées : aucun prolongement.'
-      : '');
+    // Le texte doit dire ce qui est observé et ce qui ne l'est pas. Un scénario
+    // construit n'a rien d'observé du tout : le dire est plus important que de
+    // décrire un prolongement.
+    (!sc
+      ? ''
+      : sc.reel === 0
+      ? ` Aucune de ces années n'est observée : c'est une hypothèse, où ${definies} ` +
+        'années de choc sont suivies de la tendance longue.'
+      : sc.reel < horizon
+      ? ` Les ${sc.reel} premières années sont observées ; au-delà, le trait vertical marque ` +
+        'le début du prolongement, au rythme annualisé de la période.'
+      : ' Toutes les années affichées sont observées : aucun prolongement.');
 
   // La provenance est une exigence du pilier : un scénario historique sans
   // source n'est qu'une opinion. Les réserves passent devant — une réserve dit
@@ -1016,8 +1061,10 @@ function ouvrirApercu(cle) {
     return ` ${ctx.dataset.label} : ${Math.round(ctx.parsed.y)}${variation}`;
   };
   // Ici l'axe commence à l'année 0 : l'indice du dernier point réel vaut donc
-  // exactement le nombre d'années observées.
-  o.frontiere = sc && reel < horizon ? reel : 0;
+  // exactement le nombre d'années observées. Un scénario construit n'en a
+  // aucune — pas de frontière à tracer, la courbe entière est une hypothèse.
+  const observees = sc ? Math.min(sc.reel, horizon) : 0;
+  o.frontiere = observees < horizon ? observees : 0;
 
   graphApercu = poser(graphApercu, '#graphApercu', 'line', {
     labels: Array.from({ length: horizon + 1 }, (_, i) => i),
@@ -1094,13 +1141,19 @@ function appliquerScenario(cle) {
     b.setAttribute('aria-checked', String(actif));
   }
 
-  $('#scenarioNote').textContent = scenario
-    ? `${scenario.reel} années observées` +
+  // Deux natures, deux phrases : une fenêtre du passé annonce ses années
+  // observées, un stress test annonce qu'il n'en a aucune. Écrire
+  // « 0 années observées » serait exact et incompréhensible.
+  $('#scenarioNote').textContent = !scenario
+    ? ''
+    : scenario.reel === 0
+    ? `Hypothèse : ${scenario.definies} années de choc sur ${scenario.choque.nom}, ` +
+      `puis la tendance longue (${pourcentDixieme.format(scenario.suite[scenario.choque.cle])} par an).`
+    : `${scenario.reel} années observées` +
       (scenario.periode ? ` (${scenario.periode})` : '') +
       (scenario.reel < 25
-        ? `, puis ${(scenario.suiteBourse * 100).toFixed(1)} % par an — extrapolé.`
-        : ', soit tout l\u2019horizon. Rien n\u2019est extrapolé.')
-    : '';
+        ? `, puis ${pourcentDixieme.format(scenario.suiteBourse)} par an — extrapolé.`
+        : ', soit tout l\u2019horizon. Rien n\u2019est extrapolé.');
 
   recalculer();
 }
@@ -1122,14 +1175,30 @@ function majAvertissement() {
   // Le texte doit dire où s'arrêtent les données, pas seulement que des taux
   // varient : c'est la frontière qui décide comment lire la fin du graphique.
   const sc = scenarioActif;
+  const tendance = `${pourcentDixieme.format(sc.suiteBourse)} par an en bourse`;
+
+  // Un stress test n'a aucune année observée : l'avertissement doit dire qu'on
+  // teste UN risque, pas laisser croire à une période documentée. La phrase
+  // nomme le marché après un deux-points, ce qui évite d'accorder « seul » avec
+  // un libellé qui change de genre selon le scénario.
+  if (sc.reel === 0) {
+    $('#avertissement').textContent =
+      `Scénario « ${sc.nom} » : hypothèse construite, aucune année observée. ` +
+      `Un seul marché est choqué : ${sc.choque.nom}, pendant ${sc.definies} ans. ` +
+      `Le reste suit la tendance longue (${sc.autre.nom} à ` +
+      `${pourcentDixieme.format(sc.autre.taux)} par an). C'est ce qui permet de savoir ` +
+      'ce qui est testé. ' +
+      commun;
+    return;
+  }
+
   const observe = sc.periode ? `${sc.reel} années observées (${sc.periode})` : `${sc.reel} années`;
   $('#avertissement').textContent =
     `Scénario « ${sc.nom} » : ${observe}, ` +
     (sc.reel >= 25
       ? "assez pour couvrir tout l'horizon — rien n'est projeté. "
-      : `puis une projection au rythme moyen de la période (${(sc.suiteBourse * 100).toFixed(1)} % ` +
-        "par an en bourse). Au-delà du trait, les courbes sont pointillées : ce n'est plus une " +
-        'donnée. ') +
+      : `puis une projection au rythme annualisé de la période (${tendance}). ` +
+        "Au-delà du trait, les courbes sont pointillées : ce n'est plus une donnée. ") +
     commun;
 }
 
@@ -1141,7 +1210,7 @@ function majScenario() {
     ? 'ouvert'
     : 'ferme';
   $('#scenarioAccroche').textContent = pret
-    ? 'Rejouez une décennie qui a vraiment eu lieu.'
+    ? 'Rejouez vingt ans qui ont vraiment eu lieu, ou testez un choc.'
     : 'Disponible une fois votre simulation complète.';
 }
 
