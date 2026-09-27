@@ -664,6 +664,14 @@ indicateur et un changement de défauts aurait rendu chaque effet impossible à 
 - **`scenarios.js` et `outils/fenetres-historiques.mjs` portent les mêmes tableaux.** Ils changent
   ensemble, sans quoi les fenêtres figées ne correspondent plus au classement qui les a choisies.
 
+### Conflit des deux loyers — à traiter
+
+Le **loyer actuel** (profil) sert à l'effort déclaré ; le **loyer du locataire** (bulle 3) est celui
+de la comparaison. Deux champs pour une notion que l'utilisateur croit unique. On ne peut pas les
+fusionner sans fausser le verdict quand le bien acheté est plus grand ou dans une autre ville : le
+rapport loyer / prix DU BIEN est souvent ce qui décide. Essayé puis écarté : le loyer du locataire
+en bulle 1, lié au loyer actuel. Détail dans [docs/conventions-ui.md](docs/conventions-ui.md).
+
 ### Fonctionnalités
 
 | Fonctionnalité | État |

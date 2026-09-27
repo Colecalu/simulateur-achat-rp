@@ -222,19 +222,6 @@
           </span>
           <span class="champ__aide">Ce que vous en tireriez à la revente en année 0. Souvent inférieure au total dépensé&nbsp;: les frais de notaire ne se récupèrent pas.</span>
         </label>
-            <!-- Le loyer de CE bien s'il était loué : c'est lui que paie le
-                 locataire de la comparaison. Pré-rempli avec le loyer actuel
-                 du profil, et il le suit tant qu'on ne le modifie pas — dans
-                 le cas courant, l'utilisateur n'a qu'un loyer à saisir. -->
-            <label class="champ">
-          <span class="champ__libelle">Loyer d'un logement équivalent</span>
-            <span class="champ__court">Loyer équivalent</span>
-          <span class="champ__saisie">
-            <input type="number" id="loyer" step="50" min="0">
-            <span class="champ__unite">€/mois</span>
-          </span>
-          <span class="champ__aide">Par défaut, votre loyer actuel. À changer si le bien acheté est plus grand, ou dans une autre ville.</span>
-        </label>
             </div>
             <div class="bulle__pied">
               <button type="button" class="bouton bouton--primaire" data-valider="1">Valider</button>
@@ -320,6 +307,14 @@
             <span class="champ__saisie">
               <input type="number" id="taxeFonciere" step="100" min="0">
               <span class="champ__unite">€/an</span>
+            </span>
+          </label>
+              <label class="champ">
+            <span class="champ__libelle">Loyer (charges comprises)</span>
+              <span class="champ__court">Loyer (locataire)</span>
+            <span class="champ__saisie">
+              <input type="number" id="loyer" step="50" min="0">
+              <span class="champ__unite">€/mois</span>
             </span>
           </label>
               </div>

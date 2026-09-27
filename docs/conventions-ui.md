@@ -325,22 +325,19 @@ réelles — en cours ; **(3)** la mise en location ultérieure — moteur fait,
     (loyer actuel, épargne) ; l'achat affiche des traits en pointillé et « En attente de la
     simulation ». Aucun chiffre d'achat avant la fin du parcours ;
   - **parcours complet** : les deux projets de la COMPARAISON, première année au mois — la
-    location passe au loyer du logement équivalent (bulle 1) et à l'investi réel, l'achat se
+    location passe au loyer du logement équivalent (bulle 3) et à l'investi réel, l'achat se
     remplit (« logement » = mensualité, assurance, charges, taxe foncière). Le taux d'endettement
     apparaît dessous, un chiffre sans commentaire. La visualisation garde sa forme habituelle.
-  Tant que le loyer équivalent suit le loyer actuel (cas courant), la colonne location ne change
-  pas de loyer entre les deux temps ; seul l'investi bouge si l'achat relève l'enveloppe. Essayés puis écartés : KPI détaillés, barres horizontales, barres
+  Les chiffres de la location peuvent donc changer au passage du profil seul à la simulation :
+  à juger à l'usage. Essayés puis écartés : KPI détaillés, barres horizontales, barres
   verticales, phrases-équations, carte « À effort égal » au-dessus du verdict.
-- **Deux loyers, un seul à saisir dans le cas courant** (décision de Lucas). Le **loyer actuel**
-  (profil) sert à l'effort déclaré. Le **loyer d'un logement équivalent** (bulle 1, à côté du prix)
-  est celui que paie le locataire de la comparaison : le loyer DE CE BIEN. Le rapport entre ce
-  loyer et le prix décide souvent du verdict — le remplacer par le loyer actuel fausserait tout
-  dès que le bien acheté est plus grand (un studio à 700 € contre un 3 pièces) ou dans une autre
-  ville. Il a quitté la bulle 3, qui ne parle plus que des charges du propriétaire. Il est
-  **pré-rempli avec le loyer actuel et le suit tant qu'on ne le modifie pas** : rien n'est stocké
-  pour le savoir — tant que les deux champs sont égaux il suit, dès qu'ils diffèrent c'est qu'il
-  a été changé exprès. *Reste à trouver une présentation pédagogique de la différence entre les
-  deux loyers.*
+- **⚠️ À traiter : les deux loyers.** Le **loyer actuel** (profil) sert à l'effort déclaré ; le
+  **loyer du locataire** (bulle 3) est celui de la comparaison. Deux champs pour une notion que
+  l'utilisateur croit unique — d'où des chiffres de location qui changent entre le profil seul et
+  la simulation. On ne peut pas simplement les fusionner : le rapport entre le loyer et le prix DU
+  BIEN décide souvent du verdict, et le loyer actuel est faux dès que le bien acheté est plus
+  grand ou dans une autre ville. Essayé puis écarté par Lucas : déplacer le loyer du locataire
+  dans la bulle 1, pré-rempli et lié au loyer actuel. Le champ reste en bulle 3 pour l'instant.
 - **Le cas qui fait toute la différence : l'achat demande plus que l'effort d'aujourd'hui.**
   Une **bulle surgit une seule fois**, au centre, sur un voile, comme les bulles 1 à 4 : « Attention
   — L'achat vous demande **148 € de plus** par mois qu'aujourd'hui », une ligne qui explique
@@ -368,8 +365,8 @@ réelles — en cours ; **(3)** la mise en location ultérieure — moteur fait,
   un écran d'ordinateur). Les hauteurs sont **bornées** (`grid-auto-rows` en haut,
   `grid-template-rows: repeat(2, 1fr)` à gauche) : une bulle qui s'étire pousserait toute la mise
   en page.
-  1. L'opération (dont le **loyer d'un logement équivalent**) · 2. Le financement · 3. Les
-  dépenses annuelles (charges du propriétaire seules) · 4. Le scénario de marché (rendement, fiscalité et toutes les
+  1. L'opération · 2. Le financement · 3. Les dépenses annuelles (charges du propriétaire **et**
+  loyer du locataire) · 4. Le scénario de marché (rendement, fiscalité et toutes les
   revalorisations).
   La bulle 4 est destinée à devenir un **filtre de scénarios** (optimiste / moyen / pessimiste,
   adossés à des séries historiques réelles) appliqué par-dessus le reste du modèle : y regrouper
