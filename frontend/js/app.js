@@ -1486,7 +1486,7 @@ function rafraichir() {
   afficherProfil(dernierResultat);
   if (!majAttente()) return;
 
-  afficherFace(dernierResultat);
+  afficherBudget(dernierResultat);
   afficherVerdict(dernierResultat, horizon);
   dessinerGraphiques(dernierResultat, horizon, mel);
   dessinerDetail(dernierResultat, horizon);
@@ -1576,15 +1576,78 @@ function afficherProfil(resultat) {
 }
 
 /**
- * « Votre effort face au projet », dans la visualisation, au-dessus du verdict.
+ * « Votre budget chaque mois », dans la visualisation, au-dessus du verdict.
  * N'est appelé qu'une fois le parcours complet : c'est un résultat, et la page
  * n'affiche aucun résultat sur des valeurs que l'utilisateur n'a pas posées.
+ *
+ * Le message à faire passer : le budget est le même, et ce que le logement ne
+ * consomme pas est INVESTI. Les montants seuls ne le disaient pas ; deux barres
+ * à la même échelle le montrent.
  */
-function afficherFace(resultat) {
-  afficherEffortProjet(resultat);
-  afficherKpis(resultat);
-
+function afficherBudget(resultat) {
   const e = resultat.entrees;
+  const profil = lireProfil();
+  // Première année, ramenée au mois. La répartition vient du moteur : ses
+  // postes sont ceux de « D'où vient cet écart ? », composés de la même façon.
+  const an1 = repartitionAnnuelle(resultat)[0];
+  const achat = {
+    frais: (an1.achat.credit + an1.achat.possession) / 12,
+    capital: an1.achat.capital / 12,
+    investi: an1.achat.epargne / 12,
+  };
+  const totalAchat = resultat.annees[0].enveloppeAchat / 12;
+  const totalAujourdhui = e.enveloppeMensuelle;
+  // Même échelle pour les deux barres : c'est elle qui rend l'égalité visible.
+  const echelle = Math.max(totalAchat, totalAujourdhui, 1);
+
+  // --- Aujourd'hui -------------------------------------------------------
+  $('#budgetAujourdhui').textContent = parMois(totalAujourdhui);
+  barre($('#barreAujourdhui'), echelle, [
+    ['location', profil.loyerActuel],
+    ['epargne', profil.epargneActuelle],
+  ]);
+  $('#detailAujourdhui').replaceChildren(
+    part('location', 'Loyer', profil.loyerActuel),
+    part('epargne', 'Épargne', profil.epargneActuelle)
+  );
+
+  // --- Si vous achetez ---------------------------------------------------
+  $('#budgetAchat').textContent = parMois(totalAchat);
+  barre($('#barreAchat'), echelle, [
+    ['credit', achat.frais],
+    ['capital', achat.capital],
+    ['epargne', achat.investi],
+  ]);
+  // « Investi 0 € » ne dirait rien : quand l'achat absorbe tout le budget,
+  // c'est le supplément (+148 €) et la bascule qui portent le message.
+  $('#detailAchat').replaceChildren(
+    part('credit', 'Crédit et charges', achat.frais),
+    part('capital', 'Capital remboursé', achat.capital),
+    ...(achat.investi >= 1 ? [part('epargne', 'Investi', achat.investi, true)] : [])
+  );
+
+  const supplement = resultat.supplementAchat;
+  const ecart = $('#budgetEcart');
+  ecart.hidden = supplement < 1;
+  if (!ecart.hidden) ecart.textContent = `+${euros.format(supplement)}`;
+
+  // --- Taux d'endettement ------------------------------------------------
+  if (e.revenusFoyer > 0) {
+    const excessif = resultat.tauxEndettement > PLAFOND_HCSF;
+    $('#budgetEndettement').textContent = pourcent(resultat.tauxEndettement);
+    $('#budgetEndettement').classList.toggle('budget__valeur--alerte', excessif);
+    $('#detailEndettement').textContent = excessif
+      ? 'Au-delà des 35 % retenus par les banques.'
+      : 'Plafond retenu par les banques : 35 %.';
+  } else {
+    // Sans revenus, aucun ratio n'est inventé.
+    $('#budgetEndettement').textContent = '—';
+    $('#budgetEndettement').classList.remove('budget__valeur--alerte');
+    $('#detailEndettement').textContent = 'Renseignez les revenus du foyer dans votre profil.';
+  }
+
+  afficherBascule(resultat);
+
   const alerte = $('#alerteApport');
   alerte.hidden = e.apport <= e.capitalInitial;
   if (!alerte.hidden) {
@@ -1595,74 +1658,51 @@ function afficherFace(resultat) {
   }
 }
 
-/** Effort actuel → ce que l'achat demande, la phrase qui l'explique, la bascule. */
-function afficherEffortProjet(resultat) {
-  const e = resultat.entrees;
-  const supplement = resultat.supplementAchat;
-
-  $('#faceEffort').textContent = parMois(e.enveloppeMensuelle);
-  $('#faceAchat').textContent = parMois(resultat.coutMensuelProprio);
-
-  const ecart = $('#faceEcart');
-  const phrase = $('#facePhrase');
-  const bascule = $('#bascule');
-
-  // Pas de supplément, pas d'épargne forcée : la bascule ne changerait rien,
-  // la montrer ferait croire à un réglage cassé.
-  if (supplement < 1) {
-    ecart.hidden = true;
-    bascule.hidden = true;
-    phrase.className = 'face__phrase face__phrase--neutre';
-    phrase.textContent =
-      'Votre effort actuel couvre le coût de l\'achat : les deux côtés partent du même budget, ' +
-      'sans effort supplémentaire.';
-    return;
+/**
+ * Une barre empilée en SVG. Les largeurs sont des ATTRIBUTS, pas des styles :
+ * aucune règle de style en ligne, la couleur vient d'une classe du thème.
+ */
+function barre(svg, echelle, segments) {
+  const NS = 'http://www.w3.org/2000/svg';
+  let x = 0;
+  const rects = [];
+  for (const [poste, montant] of segments) {
+    const largeur = (Math.max(montant, 0) / echelle) * 100;
+    if (largeur <= 0) continue;
+    const r = document.createElementNS(NS, 'rect');
+    r.setAttribute('x', x);
+    r.setAttribute('y', 0);
+    r.setAttribute('width', largeur);
+    r.setAttribute('height', 10);
+    r.setAttribute('class', `budget__segment budget__segment--${poste}`);
+    rects.push(r);
+    x += largeur;
   }
-
-  ecart.hidden = false;
-  ecart.textContent = `+${euros.format(supplement)} (+${pourcent(supplement / Math.max(e.enveloppeMensuelle, 1))})`;
-  phrase.className = 'face__phrase';
-  // La phrase suit la bascule : dire « le locataire place aussi » quand
-  // l'utilisateur vient de déclarer le contraire serait faux.
-  phrase.textContent = e.locatairePlaceDifference
-    ? `L'achat vous demande ${euros.format(supplement)} de plus par mois que votre effort actuel. ` +
-      `Pour comparer à armes égales, le locataire place aussi ces ${euros.format(supplement)} chaque mois.`
-    : `L'achat vous demande ${euros.format(supplement)} de plus par mois que votre effort actuel. ` +
-      `Le locataire, lui, garde ses habitudes : il ne place pas ces ${euros.format(supplement)}.`;
-
-  bascule.hidden = false;
-  $('#basculeLibelle').replaceChildren('En restant locataire, ',
-    noeud('strong', '', `je place aussi ces ${parMois(supplement)}`), '.');
-  $('#basculeAide').textContent = e.locatairePlaceDifference
-    ? 'Désactivez si, sans crédit à rembourser, vous garderiez vos habitudes d\'épargne actuelles.'
-    : 'Désactivé : seul l\'acheteur se serre la ceinture.';
+  svg.replaceChildren(...rects);
 }
 
-/**
- * Faisabilité, en trois chiffres : taux d'endettement, part des revenus que
- * l'achat demande, reste à vivre. Sans revenus renseignés, aucun ratio n'est
- * inventé — une ligne le dit.
- */
-function afficherKpis(resultat) {
-  const dl = $('#faceKpis');
-  if (!(resultat.entrees.revenusFoyer > 0)) {
-    dl.replaceChildren(noeud('p', 'face__vide',
-      'Renseignez les revenus du foyer dans votre profil pour voir votre taux d\'endettement ' +
-      'et votre reste à vivre.'));
-    return;
-  }
-  const kpi = (mot, valeur, alerte) => {
-    const d = noeud('div', 'face__kpi' + (alerte ? ' face__kpi--alerte' : ''));
-    d.append(noeud('dt', 'face__kpi-mot', mot), noeud('dd', 'face__kpi-valeur tabulaire', valeur));
-    return d;
-  };
-  const excessif = resultat.tauxEndettement > PLAFOND_HCSF;
-  dl.replaceChildren(
-    kpi(excessif ? 'Taux d\'endettement · au-delà de 35 %' : 'Taux d\'endettement',
-      pourcent(resultat.tauxEndettement), excessif),
-    kpi('Effort de l\'achat / revenus', pourcent(resultat.partEffortAchat)),
-    kpi('Reste à vivre', parMois(resultat.resteAVivreAchat), resultat.resteAVivreAchat < 0)
+/** « ● Loyer 1 100 € » : pastille, mot, montant. */
+function part(poste, mot, montant, fort) {
+  const s = noeud('span', 'budget__part' + (fort ? ' budget__part--fort' : ''));
+  s.append(noeud('span', `pastille pastille--${poste}`), `${mot} ${euros.format(Math.max(montant, 0))}`);
+  return s;
+}
+
+/** La bascule, seulement quand l'achat demande plus que l'effort actuel. */
+function afficherBascule(resultat) {
+  const supplement = resultat.supplementAchat;
+  const bascule = $('#bascule');
+  // Pas de supplément, pas d'épargne forcée : la bascule ne changerait rien,
+  // la montrer ferait croire à un réglage cassé.
+  bascule.hidden = supplement < 1;
+  if (bascule.hidden) return;
+  $('#basculeLibelle').replaceChildren(
+    `L'achat vous demande ${euros.format(supplement)} de plus par mois qu'aujourd'hui. `,
+    'En restant locataire, ', noeud('strong', '', `je place aussi ces ${parMois(supplement)}`), '.'
   );
+  $('#basculeAide').textContent = resultat.entrees.locatairePlaceDifference
+    ? 'Désactivez si, sans crédit à rembourser, vous garderiez vos habitudes d\'épargne actuelles.'
+    : 'Désactivé : le locataire garde ses habitudes, seul l\'acheteur se serre la ceinture.';
 }
 
 /** Toutes les bulles sont-elles renseignées ? Sans quoi rien n'est affiché. */

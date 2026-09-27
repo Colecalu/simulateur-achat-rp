@@ -206,63 +206,63 @@ h1, h2, h3 {
 
 .profil__pied { display: flex; justify-content: flex-end; margin-top: 14px; }
 
-/* --- Votre effort face au projet ----------------------------------------
-   Une carte de la visualisation, juste au-dessus du verdict : à gauche
-   l'effort et la bascule, à droite trois chiffres de faisabilité. */
-.face {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(220px, 280px);
-  gap: 16px 24px;
-  align-items: start;
-  padding: 16px 20px;
+/* --- Votre budget chaque mois --------------------------------------------
+   Une carte de la visualisation, au-dessus du verdict. Trois tuiles ; les deux
+   premières portent une barre à la même échelle, pour que l'égalité des
+   budgets — et la part investie — se VOIE. */
+.budget {
+  padding: 14px 20px 16px;
   background: var(--surface);
   border: 1px solid var(--trait);
   border-radius: var(--rayon-large);
   box-shadow: var(--ombre);
 }
-@media (max-width: 900px) { .face { grid-template-columns: 1fr; } }
-
-.face__escalier { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; }
-.face__marche {
-  margin: 0;
-  padding: 8px 12px;
-  border: 1px solid var(--trait);
+.budget__titre {
+  margin: 0 0 10px;
+  font-family: var(--police);
+  font-size: .6875rem;
+  font-weight: 600;
+  letter-spacing: var(--interlettre-caps);
+  text-transform: uppercase;
+  color: var(--encre-2);
+}
+.budget__tuiles {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(150px, .55fr);
+  gap: 12px;
+}
+@media (max-width: 900px) { .budget__tuiles { grid-template-columns: 1fr; } }
+.budget__tuile {
+  display: grid;
+  align-content: start;
+  gap: 6px;
+  padding: 10px 12px;
   border-radius: var(--rayon);
   background: var(--plan);
 }
-.face__marche--achat { background: var(--achat-voile); }
-.face__marche-mot { display: block; font-size: .6875rem; color: var(--encre-3); }
-.face__marche-valeur { font-size: 1.05rem; font-weight: 600; color: var(--encre); }
-.face__marche--achat .face__marche-valeur { color: var(--accent-fort); }
-.face__fleche { color: var(--encre-3); }
-.face__ecart {
-  padding: 3px 9px;
+.budget__mot { display: flex; align-items: center; gap: 8px; margin: 0; font-size: .75rem; color: var(--encre-2); }
+.budget__valeur { margin: 0; font-size: 1.25rem; font-weight: 600; line-height: 1.1; color: var(--encre); }
+.budget__valeur--alerte { color: var(--alerte); }
+.budget__ecart {
+  padding: 1px 7px;
   border-radius: 999px;
   background: var(--supplement-fond);
   color: var(--supplement);
-  font-size: .8125rem;
+  font-size: .6875rem;
   font-weight: 600;
 }
-.face__ecart[hidden] { display: none; }
+.budget__ecart[hidden] { display: none; }
 
-.face__phrase { margin: 10px 0 0; max-width: 62ch; font-size: .875rem; color: var(--encre); }
-.face__phrase--neutre { font-size: .875rem; color: var(--encre-2); }
+.budget__barre { display: block; width: 100%; height: 10px; border-radius: 3px; background: var(--trait); }
+.budget__segment--location { fill: var(--location); }
+.budget__segment--epargne  { fill: var(--poste-epargne); }
+.budget__segment--credit   { fill: var(--poste-credit); }
+.budget__segment--capital  { fill: var(--poste-capital); }
 
-.face__kpis { display: grid; gap: 8px; margin: 0; }
-.face__kpi {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 8px 12px;
-  border-radius: var(--rayon);
-  background: var(--plan);
-}
-.face__kpi-mot { margin: 0; font-size: .75rem; color: var(--encre-2); }
-.face__kpi-valeur { margin: 0; font-size: 1rem; font-weight: 600; color: var(--encre); }
-.face__kpi--alerte .face__kpi-valeur,
-.face__kpi--alerte .face__kpi-mot { color: var(--alerte); }
-.face__vide { margin: 0; font-size: .75rem; color: var(--encre-3); }
+.budget__detail { display: flex; flex-wrap: wrap; gap: 2px 12px; margin: 0; font-size: .6875rem; color: var(--encre-2); }
+.budget__part { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; }
+.budget__part .pastille { width: 7px; height: 7px; }
+.budget__part--fort { font-weight: 600; color: var(--encre); }
 
 #alerteApport { margin-top: 12px; }
 #alerteApport[hidden] { display: none; }

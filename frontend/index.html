@@ -394,39 +394,47 @@
         <p class="attente__compte" id="attenteCompte"></p>
       </div>
 
-      <!-- ===== Votre effort face au projet =====
-           Dans la visualisation, jamais dans la saisie du profil : c'est un
-           résultat, pas une question. Juste au-dessus du verdict, parce que la
-           bascule d'épargne forcée est l'hypothèse qui pèse souvent le plus
-           lourd sur lui. À gauche l'effort, à droite la faisabilité. -->
-      <section class="face" id="face" aria-label="Votre effort face au projet">
-        <div class="face__effort">
-          <div class="face__escalier">
-            <p class="face__marche">
-              <span class="face__marche-mot">Votre effort aujourd'hui</span>
-              <span class="face__marche-valeur tabulaire" id="faceEffort"></span>
-            </p>
-            <span class="face__fleche" aria-hidden="true">→</span>
-            <p class="face__marche face__marche--achat">
-              <span class="face__marche-mot">Ce que l'achat demande (année 1)</span>
-              <span class="face__marche-valeur tabulaire" id="faceAchat"></span>
-            </p>
-            <span class="face__ecart tabulaire" id="faceEcart" hidden></span>
+      <!-- ===== Votre budget chaque mois =====
+           Un résultat, donc dans la visualisation et jamais dans la saisie.
+           Trois tuiles. Les deux premières portent une barre à la MÊME échelle :
+           quand le budget est le même, les barres ont la même longueur, et ce
+           que le logement ne consomme pas se voit — il est investi. C'est le
+           message que les montants seuls ne faisaient pas passer. -->
+      <section class="budget" id="budget" aria-labelledby="budgetTitre">
+        <h2 class="budget__titre" id="budgetTitre">Votre budget chaque mois</h2>
+        <div class="budget__tuiles">
+          <div class="budget__tuile">
+            <p class="budget__mot">Aujourd'hui</p>
+            <p class="budget__valeur tabulaire" id="budgetAujourdhui"></p>
+            <svg class="budget__barre" id="barreAujourdhui" viewBox="0 0 100 10"
+                 preserveAspectRatio="none" aria-hidden="true"></svg>
+            <p class="budget__detail" id="detailAujourdhui"></p>
           </div>
-          <p class="face__phrase" id="facePhrase"></p>
-
-          <label class="bascule" id="bascule">
-            <input type="checkbox" id="locatairePlaceDifference" role="switch" checked>
-            <span class="bascule__piste" aria-hidden="true"></span>
-            <span class="bascule__texte">
-              <span id="basculeLibelle"></span>
-              <span class="bascule__aide" id="basculeAide"></span>
-            </span>
-          </label>
-          <p class="alerte" id="alerteApport" hidden></p>
+          <div class="budget__tuile budget__tuile--achat">
+            <p class="budget__mot">Si vous achetez <span class="budget__ecart tabulaire" id="budgetEcart" hidden></span></p>
+            <p class="budget__valeur tabulaire" id="budgetAchat"></p>
+            <svg class="budget__barre" id="barreAchat" viewBox="0 0 100 10"
+                 preserveAspectRatio="none" aria-hidden="true"></svg>
+            <p class="budget__detail" id="detailAchat"></p>
+          </div>
+          <div class="budget__tuile budget__tuile--etroite">
+            <p class="budget__mot">Taux d'endettement</p>
+            <p class="budget__valeur tabulaire" id="budgetEndettement"></p>
+            <p class="budget__detail" id="detailEndettement"></p>
+          </div>
         </div>
 
-        <dl class="face__kpis" id="faceKpis"></dl>
+        <!-- La bascule n'existe que si l'achat demande plus que l'effort
+             actuel : sans supplément, pas d'épargne forcée. -->
+        <label class="bascule" id="bascule">
+          <input type="checkbox" id="locatairePlaceDifference" role="switch" checked>
+          <span class="bascule__piste" aria-hidden="true"></span>
+          <span class="bascule__texte">
+            <span id="basculeLibelle"></span>
+            <span class="bascule__aide" id="basculeAide"></span>
+          </span>
+        </label>
+        <p class="alerte" id="alerteApport" hidden></p>
       </section>
 
       <div class="verdict" id="verdict">
