@@ -253,15 +253,26 @@ h1, h2, h3 {
 }
 .budget__ecart[hidden] { display: none; }
 
-.budget__barre { display: block; width: 100%; height: 10px; border-radius: 3px; background: var(--trait); }
-.budget__segment--location { fill: var(--location); }
-.budget__segment--epargne  { fill: var(--poste-epargne); }
-.budget__segment--achat    { fill: var(--achat); }
-
-.budget__detail { display: flex; flex-wrap: wrap; gap: 2px 12px; margin: 0; font-size: .6875rem; color: var(--encre-2); }
-.budget__part { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; }
-.budget__part .pastille { width: 7px; height: 7px; }
-.budget__part--fort { font-weight: 600; color: var(--encre); }
+/* Deux colonnes par projet : logement, investi. Mêmes couleurs des deux côtés,
+   le loyer étant le coût du logement du locataire. */
+.budget__colonnes {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 4px;
+}
+.budget__colonne {
+  display: grid;
+  justify-items: center;
+  align-content: end;
+  gap: 4px;
+  min-height: 112px;
+}
+.budget__montant { font-size: .75rem; font-weight: 600; color: var(--encre); }
+.budget__barre { display: block; }
+.budget__segment--logement { fill: var(--poste-possession); }
+.budget__segment--investi  { fill: var(--poste-epargne); }
+.budget__etiquette { font-size: .6875rem; color: var(--encre-2); text-align: center; }
 
 #alerteApport { margin-top: 12px; }
 #alerteApport[hidden] { display: none; }

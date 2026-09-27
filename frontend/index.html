@@ -399,24 +399,22 @@
            Les deux trajectoires COMPARÉES — pas la situation d'aujourd'hui :
            on peut comparer deux projets dans une ville où l'on n'habite pas
            encore. Chacune : ce que coûte le logement, et ce qui est investi.
-           Barres à la MÊME échelle : à enveloppe égale, même longueur, et la
-           part investie se voit. -->
+           Deux barres verticales par projet, logement et investi, aux mêmes
+           couleurs des deux côtés (le loyer EST le coût du logement du
+           locataire) et à la MÊME échelle : les hauteurs se comparent d'un
+           projet à l'autre. -->
       <section class="budget" id="budget" aria-labelledby="budgetTitre">
         <h2 class="budget__titre" id="budgetTitre">Logement + épargne, chaque mois</h2>
         <div class="budget__tuiles">
           <div class="budget__tuile">
             <p class="budget__mot">Projet location</p>
             <p class="budget__valeur tabulaire" id="budgetLocation"></p>
-            <svg class="budget__barre" id="barreLocation" viewBox="0 0 100 10"
-                 preserveAspectRatio="none" aria-hidden="true"></svg>
-            <p class="budget__detail" id="detailLocation"></p>
+            <div class="budget__colonnes" id="colonnesLocation"></div>
           </div>
           <div class="budget__tuile">
             <p class="budget__mot">Projet achat RP <span class="budget__ecart tabulaire" id="budgetEcart" hidden></span></p>
             <p class="budget__valeur tabulaire" id="budgetAchat"></p>
-            <svg class="budget__barre" id="barreAchat" viewBox="0 0 100 10"
-                 preserveAspectRatio="none" aria-hidden="true"></svg>
-            <p class="budget__detail" id="detailAchat"></p>
+            <div class="budget__colonnes" id="colonnesAchat"></div>
           </div>
           <div class="budget__tuile budget__tuile--etroite">
             <p class="budget__mot">Taux d'endettement</p>

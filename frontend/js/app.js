@@ -1581,8 +1581,8 @@ function afficherProfil(resultat) {
  * Les deux trajectoires COMPARÉES, première année, ramenées au mois : ce que
  * coûte le logement, et ce qui est investi. Pas la situation d'aujourd'hui —
  * on peut comparer deux projets dans une ville où l'on n'habite pas encore.
- * Deux barres à la même échelle : à enveloppe égale, même longueur, et la part
- * investie se voit.
+ * Deux barres verticales par projet, logement et investi, à la MÊME échelle
+ * pour les deux projets : les hauteurs se comparent d'une tuile à l'autre.
  */
 function afficherBudget(resultat) {
   const e = resultat.entrees;
@@ -1593,16 +1593,15 @@ function afficherBudget(resultat) {
   const achat = { logement: an1.totalDebourseAnnuel / 12, investi: an1.surplusProprio / 12 };
   const totalLocation = an1.enveloppeLocation / 12;
   const totalAchat = an1.enveloppeAchat / 12;
-  // Même échelle pour les deux barres : c'est elle qui rend l'égalité visible.
-  const echelle = Math.max(totalAchat, totalLocation, 1);
+  // Une seule échelle pour les quatre barres : sans elle, deux barres de même
+  // hauteur dans deux tuiles pourraient valoir des montants différents.
+  const echelle = Math.max(location.logement, location.investi, achat.logement, achat.investi, 1);
 
   $('#budgetLocation').textContent = parMois(totalLocation);
-  barre($('#barreLocation'), echelle, [['location', location.logement], ['epargne', location.investi]]);
-  $('#detailLocation').replaceChildren(...parts('location', 'Loyer', location));
+  colonnes($('#colonnesLocation'), echelle, 'Loyer', location);
 
   $('#budgetAchat').textContent = parMois(totalAchat);
-  barre($('#barreAchat'), echelle, [['achat', achat.logement], ['epargne', achat.investi]]);
-  $('#detailAchat').replaceChildren(...parts('achat', 'Coût du logement', achat));
+  colonnes($('#colonnesAchat'), echelle, 'Coût du logement', achat);
 
   const supplement = resultat.supplementAchat;
   const ecart = $('#budgetEcart');
@@ -1626,45 +1625,42 @@ function afficherBudget(resultat) {
 }
 
 /**
- * Détail sous une barre : le logement, puis ce qui est investi. « Investi 0 € »
- * ne dirait rien — quand le logement absorbe tout, c'est le supplément et la
- * bascule qui parlent.
+ * Deux barres verticales : le logement, puis ce qui est investi. Les mêmes
+ * classes des deux côtés — le loyer EST le coût du logement du locataire. La
+ * hauteur est un ATTRIBUT du SVG, pas un style : aucune règle de style en ligne.
+ * Une barre à 0 € reste affichée : dans ce format, « rien d'investi » se lit.
  */
-function parts(poste, mot, t) {
-  return [
-    part(poste, mot, t.logement),
-    ...(t.investi >= 1 ? [part('epargne', 'Investi', t.investi, true)] : []),
-  ];
-}
-
-/**
- * Une barre empilée en SVG. Les largeurs sont des ATTRIBUTS, pas des styles :
- * aucune règle de style en ligne, la couleur vient d'une classe du thème.
- */
-function barre(svg, echelle, segments) {
+function colonnes(conteneur, echelle, motLogement, t) {
   const NS = 'http://www.w3.org/2000/svg';
-  let x = 0;
-  const rects = [];
-  for (const [poste, montant] of segments) {
-    const largeur = (Math.max(montant, 0) / echelle) * 100;
-    if (largeur <= 0) continue;
+  // Le SVG a la hauteur de SA barre (attribut `height`, en pixels) : le
+  // montant, posé juste au-dessus dans la colonne, suit ainsi le sommet de la
+  // barre au lieu de flotter en haut de la zone.
+  const HAUTEUR_MAX = 72;
+  const colonne = (mot, montant, poste) => {
+    const hauteur = Math.max((Math.max(montant, 0) / echelle) * HAUTEUR_MAX, 1);
+    const svg = document.createElementNS(NS, 'svg');
+    svg.setAttribute('class', 'budget__barre');
+    svg.setAttribute('width', 44);
+    svg.setAttribute('height', hauteur);
+    svg.setAttribute('viewBox', '0 0 10 10');
+    svg.setAttribute('preserveAspectRatio', 'none');
+    svg.setAttribute('aria-hidden', 'true');
     const r = document.createElementNS(NS, 'rect');
-    r.setAttribute('x', x);
+    r.setAttribute('x', 0);
     r.setAttribute('y', 0);
-    r.setAttribute('width', largeur);
+    r.setAttribute('width', 10);
     r.setAttribute('height', 10);
     r.setAttribute('class', `budget__segment budget__segment--${poste}`);
-    rects.push(r);
-    x += largeur;
-  }
-  svg.replaceChildren(...rects);
-}
-
-/** « ● Loyer 1 100 € » : pastille, mot, montant. */
-function part(poste, mot, montant, fort) {
-  const s = noeud('span', 'budget__part' + (fort ? ' budget__part--fort' : ''));
-  s.append(noeud('span', `pastille pastille--${poste}`), `${mot} ${euros.format(Math.max(montant, 0))}`);
-  return s;
+    svg.append(r);
+    const c = noeud('div', 'budget__colonne');
+    c.append(noeud('span', 'budget__montant tabulaire', euros.format(Math.max(montant, 0))), svg,
+      noeud('span', 'budget__etiquette', mot));
+    return c;
+  };
+  conteneur.replaceChildren(
+    colonne(motLogement, t.logement, 'logement'),
+    colonne('Investi', t.investi, 'investi')
+  );
 }
 
 /** La bascule, seulement quand l'achat demande plus que l'effort actuel. */

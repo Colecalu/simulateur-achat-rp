@@ -323,10 +323,12 @@ réelles — en cours ; **(3)** la mise en location ultérieure — moteur fait,
   investi), **Taux d'endettement** (un chiffre, sans commentaire ni seuil). Les tuiles montrent
   les deux trajectoires **comparées**, pas la situation d'aujourd'hui : on peut comparer deux
   projets dans une ville où l'on n'habite pas encore. « Coût du logement » = mensualité,
-  assurance, charges de copropriété et taxe foncière, ramenés au mois (première année). Les deux
-  barres sont à la **même échelle** : à enveloppe égale, même longueur, et la part investie se
-  voit. SVG, largeurs en attributs, couleurs par classe : aucun style en ligne. « Investi 0 € »
-  n'est pas écrit. Libellés provisoires. Non affichés mais calculés par le moteur : effort /
+  assurance, charges de copropriété et taxe foncière, ramenés au mois (première année). La part investie se
+  voit. **Deux barres verticales par projet** (logement, investi), aux **mêmes couleurs des deux
+  côtés** — le loyer EST le coût du logement du locataire — et à une **seule échelle pour les
+  quatre barres**, pour que les hauteurs se comparent d'une tuile à l'autre. Le montant est posé
+  sur sa barre. SVG dont la hauteur est un attribut, couleurs par classe : aucun style en ligne.
+  Une barre à 0 € reste affichée : dans ce format, « rien d'investi » se lit. Libellés provisoires. Non affichés mais calculés par le moteur : effort /
   revenus, reste à vivre, périodes de l'enveloppe.
 - **La bascule d'épargne forcée ne se laisse pas oublier.** Masquée quand l'effort couvre déjà
   l'achat (elle ne changerait rien, la montrer ferait croire à un réglage cassé). Son libellé
