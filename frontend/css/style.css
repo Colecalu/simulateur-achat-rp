@@ -165,8 +165,7 @@ h1, h2, h3 {
   border-radius: 14px;
   background: var(--plan);
 }
-.profil__groupe-titre,
-.face__titre {
+.profil__groupe-titre {
   margin: 0;
   font-family: var(--police);
   font-size: .6875rem;
@@ -207,12 +206,21 @@ h1, h2, h3 {
 
 .profil__pied { display: flex; justify-content: flex-end; margin-top: 14px; }
 
-/* --- Face à votre projet ------------------------------------------------ */
-.face { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--trait); }
-.face[hidden] { display: none; }
-.face__titre { margin-bottom: 12px; }
-.face__grille { display: grid; grid-template-columns: 1.3fr 1fr; gap: 20px; }
-@media (max-width: 900px) { .face__grille { grid-template-columns: 1fr; } }
+/* --- Votre effort face au projet ----------------------------------------
+   Une carte de la visualisation, juste au-dessus du verdict : à gauche
+   l'effort et la bascule, à droite trois chiffres de faisabilité. */
+.face {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(220px, 280px);
+  gap: 16px 24px;
+  align-items: start;
+  padding: 16px 20px;
+  background: var(--surface);
+  border: 1px solid var(--trait);
+  border-radius: var(--rayon-large);
+  box-shadow: var(--ombre);
+}
+@media (max-width: 900px) { .face { grid-template-columns: 1fr; } }
 
 .face__escalier { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; }
 .face__marche {
@@ -237,19 +245,24 @@ h1, h2, h3 {
 }
 .face__ecart[hidden] { display: none; }
 
-.face__phrase { margin: 12px 0 0; max-width: 62ch; font-size: .9375rem; color: var(--encre); }
+.face__phrase { margin: 10px 0 0; max-width: 62ch; font-size: .875rem; color: var(--encre); }
 .face__phrase--neutre { font-size: .875rem; color: var(--encre-2); }
 
-.face__periodes { display: grid; gap: 4px; margin: 12px 0 0; padding: 0; list-style: none; font-size: .8125rem; color: var(--encre-2); }
-.face__periodes li::before { content: "• "; color: var(--supplement); font-weight: 700; }
-
-.face__faisabilite { margin: 0; font-size: .8125rem; color: var(--encre-2); }
-.face__ligne { display: flex; justify-content: space-between; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--trait); }
-.face__ligne:last-child { border-bottom: 0; }
-.face__ligne dt { margin: 0; }
-.face__ligne dd { margin: 0; font-weight: 600; color: var(--encre); font-variant-numeric: tabular-nums; }
-.face__ligne--alerte dd { color: var(--alerte); }
-.face__vide { margin: 8px 0 0; font-size: .75rem; color: var(--encre-3); }
+.face__kpis { display: grid; gap: 8px; margin: 0; }
+.face__kpi {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 12px;
+  border-radius: var(--rayon);
+  background: var(--plan);
+}
+.face__kpi-mot { margin: 0; font-size: .75rem; color: var(--encre-2); }
+.face__kpi-valeur { margin: 0; font-size: 1rem; font-weight: 600; color: var(--encre); }
+.face__kpi--alerte .face__kpi-valeur,
+.face__kpi--alerte .face__kpi-mot { color: var(--alerte); }
+.face__vide { margin: 0; font-size: .75rem; color: var(--encre-3); }
 
 #alerteApport { margin-top: 12px; }
 #alerteApport[hidden] { display: none; }
@@ -261,8 +274,8 @@ h1, h2, h3 {
   display: flex;
   align-items: flex-start;
   gap: 12px;
-  margin-top: 14px;
-  padding: 12px 14px;
+  margin-top: 10px;
+  padding: 10px 12px;
   border: 1px solid var(--trait);
   border-radius: var(--rayon);
   background: var(--surface);
@@ -298,8 +311,6 @@ h1, h2, h3 {
 .bascule__texte { font-size: .875rem; color: var(--encre); }
 .bascule__texte strong { font-weight: 600; }
 .bascule__aide { display: block; margin-top: 2px; font-size: .75rem; color: var(--encre-3); }
-/* Mise en évidence quand on y arrive depuis le verdict. */
-.bascule--signalee { border-color: var(--accent); box-shadow: var(--anneau); }
 
 /* Rien n'est ouvrable tant que le profil n'est pas posé. */
 .plateau--bloque { opacity: .45; pointer-events: none; }
@@ -995,23 +1006,6 @@ h1, h2, h3 {
 }
 .verdict__mouvement[hidden] { display: none; }
 
-.verdict__hypothese {
-  margin: 10px auto 0;
-  max-width: 52ch;
-  font-size: .8125rem;
-  color: var(--encre-3);
-}
-.verdict__hypothese[hidden] { display: none; }
-.lien {
-  padding: 0;
-  border: 0;
-  background: none;
-  font: inherit;
-  color: var(--accent-fort);
-  text-decoration: underline;
-  text-underline-offset: 2px;
-  cursor: pointer;
-}
 
 
 .pastille { width: 8px; height: 8px; border-radius: 2px; flex: none; }

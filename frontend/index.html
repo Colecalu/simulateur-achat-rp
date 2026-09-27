@@ -104,45 +104,6 @@
         </button>
       </div>
     </div>
-
-    <!-- ===== Face à votre projet =====
-         Visible une fois le parcours complet, bandeau ouvert ou replié : c'est
-         ici que se lit l'effort que l'achat demande, et l'hypothèse qui pèse le
-         plus lourd sur le verdict — l'épargne forcée. -->
-    <div class="face" id="profilFace" hidden>
-      <h3 class="face__titre">Face à votre projet</h3>
-      <div class="face__grille">
-        <div class="face__effort">
-          <div class="face__escalier">
-            <p class="face__marche">
-              <span class="face__marche-mot">Votre effort aujourd'hui</span>
-              <span class="face__marche-valeur tabulaire" id="faceEffort"></span>
-            </p>
-            <span class="face__fleche" aria-hidden="true">→</span>
-            <p class="face__marche face__marche--achat">
-              <span class="face__marche-mot">Ce que l'achat demande (année 1)</span>
-              <span class="face__marche-valeur tabulaire" id="faceAchat"></span>
-            </p>
-            <span class="face__ecart tabulaire" id="faceEcart" hidden></span>
-          </div>
-          <p class="face__phrase" id="facePhrase"></p>
-
-          <label class="bascule" id="bascule">
-            <input type="checkbox" id="locatairePlaceDifference" role="switch" checked>
-            <span class="bascule__piste" aria-hidden="true"></span>
-            <span class="bascule__texte">
-              <span id="basculeLibelle"></span>
-              <span class="bascule__aide" id="basculeAide"></span>
-            </span>
-          </label>
-
-          <ul class="face__periodes" id="facePeriodes"></ul>
-        </div>
-
-        <dl class="face__faisabilite" id="faceFaisabilite"></dl>
-      </div>
-      <p class="alerte" id="alerteApport" hidden></p>
-    </div>
   </section>
 
   <div class="plateau" id="formulaire">
@@ -433,6 +394,41 @@
         <p class="attente__compte" id="attenteCompte"></p>
       </div>
 
+      <!-- ===== Votre effort face au projet =====
+           Dans la visualisation, jamais dans la saisie du profil : c'est un
+           résultat, pas une question. Juste au-dessus du verdict, parce que la
+           bascule d'épargne forcée est l'hypothèse qui pèse souvent le plus
+           lourd sur lui. À gauche l'effort, à droite la faisabilité. -->
+      <section class="face" id="face" aria-label="Votre effort face au projet">
+        <div class="face__effort">
+          <div class="face__escalier">
+            <p class="face__marche">
+              <span class="face__marche-mot">Votre effort aujourd'hui</span>
+              <span class="face__marche-valeur tabulaire" id="faceEffort"></span>
+            </p>
+            <span class="face__fleche" aria-hidden="true">→</span>
+            <p class="face__marche face__marche--achat">
+              <span class="face__marche-mot">Ce que l'achat demande (année 1)</span>
+              <span class="face__marche-valeur tabulaire" id="faceAchat"></span>
+            </p>
+            <span class="face__ecart tabulaire" id="faceEcart" hidden></span>
+          </div>
+          <p class="face__phrase" id="facePhrase"></p>
+
+          <label class="bascule" id="bascule">
+            <input type="checkbox" id="locatairePlaceDifference" role="switch" checked>
+            <span class="bascule__piste" aria-hidden="true"></span>
+            <span class="bascule__texte">
+              <span id="basculeLibelle"></span>
+              <span class="bascule__aide" id="basculeAide"></span>
+            </span>
+          </label>
+          <p class="alerte" id="alerteApport" hidden></p>
+        </div>
+
+        <dl class="face__kpis" id="faceKpis"></dl>
+      </section>
+
       <div class="verdict" id="verdict">
         <div class="verdict__entete">
           <h2 class="verdict__question">Si vous revendez dans</h2>
@@ -446,13 +442,6 @@
         <p class="verdict__mesure" id="verdictMesure"></p>
         <!-- Le clic sur la bascule doit se VOIR : de combien le verdict a bougé. -->
         <p class="verdict__mouvement tabulaire" id="verdictMouvement" hidden></p>
-        <!-- L'hypothèse qui pèse le plus lourd, rappelée sous le chiffre qu'elle
-             décide : on ne la laisse pas dans le bandeau du haut, où elle
-             passerait inaperçue. -->
-        <p class="verdict__hypothese" id="verdictHypothese" hidden>
-          <span id="verdictHypotheseTexte"></span>
-          <button type="button" class="lien" id="verdictHypotheseModifier">Changer</button>
-        </p>
       </div>
 
       <figure class="carte carte--graphique">

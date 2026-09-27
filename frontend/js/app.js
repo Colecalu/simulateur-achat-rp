@@ -23,7 +23,6 @@
   const DEFAUTS_LOCATION = window.SimuRPLocation.DEFAUTS_LOCATION;
   const simulerMiseEnLocation = window.SimuRPLocation.simulerMiseEnLocation;
   const planchersEnveloppe = window.SimuRPLocation.planchersEnveloppe;
-  const periodesEnveloppe = window.SimuRP.periodesEnveloppe;
 
 /* ------------------------------------------------------------------ Outils */
 
@@ -201,7 +200,6 @@ function afficherVerdict(resultat, horizon) {
   // Plus de refus de trancher quand l'effort ne couvre pas l'achat : le moteur
   // ne laisse plus le dépassement impayé, il fait monter l'enveloppe des deux
   // côtés. L'écart est donc juste, et le supplément se lit dans le profil.
-  afficherHypothese(resultat);
   afficherMouvement(ecart);
 
   chiffre.textContent = signe(ecart);
@@ -248,24 +246,6 @@ function afficherMouvement(ecart) {
     `Le verdict a bougé de ${euros.format(Math.abs(delta))} vers ` +
     (delta >= 0 ? 'l\'achat.' : 'la location.');
   el.hidden = Math.abs(delta) < 1;
-}
-
-/**
- * Rappel de l'hypothèse sous le verdict. L'hypothèse pèse souvent plus que le
- * marché ; la laisser dans le bandeau du haut, c'est la laisser passer
- * inaperçue. Rien à rappeler quand l'effort couvre déjà l'achat : il n'y a
- * alors pas de supplément dont on se demanderait s'il serait placé.
- */
-function afficherHypothese(resultat) {
-  const supplement = resultat.supplementAchat;
-  const el = $('#verdictHypothese');
-  el.hidden = supplement < 1;
-  if (el.hidden) return;
-  $('#verdictHypotheseTexte').textContent = resultat.entrees.locatairePlaceDifference
-    ? `Hypothèse : en restant locataire, vous placez aussi les ${euros.format(supplement)}/mois ` +
-      'que l\'achat vous demanderait en plus.'
-    : `Hypothèse : en restant locataire, vous ne placez pas les ${euros.format(supplement)}/mois ` +
-      'que l\'achat vous imposerait — seul l\'acheteur se serre la ceinture.';
 }
 
 /* --------------------------------------------------------------- Graphiques */
@@ -1506,6 +1486,7 @@ function rafraichir() {
   afficherProfil(dernierResultat);
   if (!majAttente()) return;
 
+  afficherFace(dernierResultat);
   afficherVerdict(dernierResultat, horizon);
   dessinerGraphiques(dernierResultat, horizon, mel);
   dessinerDetail(dernierResultat, horizon);
@@ -1592,18 +1573,18 @@ function afficherProfil(resultat) {
   }
   $('#profilResume').replaceChildren(...resume);
 
-  // --- Face à votre projet -----------------------------------------------
-  // Rien avant que le projet soit entièrement décrit : c'est la règle de
-  // toute la page, pas de chiffre sur des valeurs que l'utilisateur n'a pas
-  // posées.
-  const face = $('#profilFace');
-  face.hidden = !parcoursComplet();
-  if (face.hidden) return;
+}
 
+/**
+ * « Votre effort face au projet », dans la visualisation, au-dessus du verdict.
+ * N'est appelé qu'une fois le parcours complet : c'est un résultat, et la page
+ * n'affiche aucun résultat sur des valeurs que l'utilisateur n'a pas posées.
+ */
+function afficherFace(resultat) {
   afficherEffortProjet(resultat);
-  afficherPeriodes(resultat);
-  afficherFaisabilite(resultat);
+  afficherKpis(resultat);
 
+  const e = resultat.entrees;
   const alerte = $('#alerteApport');
   alerte.hidden = e.apport <= e.capitalInitial;
   if (!alerte.hidden) {
@@ -1641,73 +1622,47 @@ function afficherEffortProjet(resultat) {
   ecart.hidden = false;
   ecart.textContent = `+${euros.format(supplement)} (+${pourcent(supplement / Math.max(e.enveloppeMensuelle, 1))})`;
   phrase.className = 'face__phrase';
-  phrase.textContent =
-    `L'achat vous demande ${euros.format(supplement)} de plus par mois que votre effort actuel. ` +
-    `Pour comparer à armes égales, le locataire place aussi ces ${euros.format(supplement)} ` +
-    'chaque mois.';
+  // La phrase suit la bascule : dire « le locataire place aussi » quand
+  // l'utilisateur vient de déclarer le contraire serait faux.
+  phrase.textContent = e.locatairePlaceDifference
+    ? `L'achat vous demande ${euros.format(supplement)} de plus par mois que votre effort actuel. ` +
+      `Pour comparer à armes égales, le locataire place aussi ces ${euros.format(supplement)} chaque mois.`
+    : `L'achat vous demande ${euros.format(supplement)} de plus par mois que votre effort actuel. ` +
+      `Le locataire, lui, garde ses habitudes : il ne place pas ces ${euros.format(supplement)}.`;
 
   bascule.hidden = false;
   $('#basculeLibelle').replaceChildren('En restant locataire, ',
     noeud('strong', '', `je place aussi ces ${parMois(supplement)}`), '.');
   $('#basculeAide').textContent = e.locatairePlaceDifference
     ? 'Désactivez si, sans crédit à rembourser, vous garderiez vos habitudes d\'épargne actuelles.'
-    : 'Désactivé : le locataire garde son effort actuel, seul l\'acheteur se serre la ceinture.';
+    : 'Désactivé : seul l\'acheteur se serre la ceinture.';
 }
 
-/** Ce qui fixe l'enveloppe, période par période. */
-const PILOTES = {
-  effort: 'votre effort déclaré suffit',
-  achat: 'l\'enveloppe suit le coût du propriétaire',
-  loyer: 'le loyer dépasse, l\'enveloppe le suit',
-  autre: 'le loyer payé ailleurs après la mise en location la fait monter',
-  maintenu: 'plus rien ne l\'exige, elle reste au niveau atteint',
-};
-
-function afficherPeriodes(resultat) {
-  const liste = [];
-  const ecrire = (periodes, qui) => {
-    // Une seule période « effort » : rien ne bouge, inutile de le dire.
-    if (periodes.length === 1 && periodes[0].pilote === 'effort') return;
-    for (const p of periodes) {
-      const ans = p.debut === p.fin ? `Année ${p.debut}` : `Années ${p.debut} à ${p.fin}`;
-      const montant = Math.round(p.depuis) === Math.round(p.jusqua)
-        ? euros.format(p.depuis)
-        : `${euros.format(p.depuis)} → ${euros.format(p.jusqua)}`;
-      liste.push(noeud('li', '', `${qui ? qui + ' — ' : ''}${ans} : ${PILOTES[p.pilote]} (${montant}/mois).`));
-    }
-  };
-  if (resultat.entrees.locatairePlaceDifference) {
-    ecrire(periodesEnveloppe(resultat, 'achat'));
-  } else {
-    ecrire(periodesEnveloppe(resultat, 'achat'), 'Acheteur');
-    ecrire(periodesEnveloppe(resultat, 'location'), 'Locataire');
+/**
+ * Faisabilité, en trois chiffres : taux d'endettement, part des revenus que
+ * l'achat demande, reste à vivre. Sans revenus renseignés, aucun ratio n'est
+ * inventé — une ligne le dit.
+ */
+function afficherKpis(resultat) {
+  const dl = $('#faceKpis');
+  if (!(resultat.entrees.revenusFoyer > 0)) {
+    dl.replaceChildren(noeud('p', 'face__vide',
+      'Renseignez les revenus du foyer dans votre profil pour voir votre taux d\'endettement ' +
+      'et votre reste à vivre.'));
+    return;
   }
-  $('#facePeriodes').replaceChildren(...liste);
-}
-
-/** Mensualité, endettement, part des revenus, reste à vivre. */
-function afficherFaisabilite(resultat) {
-  const dl = $('#faceFaisabilite');
-  const lignes = [];
-  const ligne = (mot, valeur, alerte) => {
-    const d = noeud('div', 'face__ligne' + (alerte ? ' face__ligne--alerte' : ''));
-    d.append(noeud('dt', '', mot), noeud('dd', '', valeur));
-    lignes.push(d);
+  const kpi = (mot, valeur, alerte) => {
+    const d = noeud('div', 'face__kpi' + (alerte ? ' face__kpi--alerte' : ''));
+    d.append(noeud('dt', 'face__kpi-mot', mot), noeud('dd', 'face__kpi-valeur tabulaire', valeur));
+    return d;
   };
-
-  ligne('Mensualité, assurance comprise', parMois(resultat.mensualiteTotale));
-  if (resultat.entrees.revenusFoyer > 0) {
-    const excessif = resultat.tauxEndettement > PLAFOND_HCSF;
-    ligne('Taux d\'endettement' + (excessif ? ' — au-delà des 35 % du HCSF' : ''),
-      pourcent(resultat.tauxEndettement), excessif);
-    ligne('Effort de l\'achat / revenus', pourcent(resultat.partEffortAchat));
-    ligne('Reste pour le quotidien', parMois(resultat.resteAVivreAchat), resultat.resteAVivreAchat < 0);
-    dl.replaceChildren(...lignes);
-  } else {
-    dl.replaceChildren(...lignes,
-      noeud('p', 'face__vide',
-        'Renseignez vos revenus pour voir votre taux d\'endettement et ce qui vous reste pour vivre.'));
-  }
+  const excessif = resultat.tauxEndettement > PLAFOND_HCSF;
+  dl.replaceChildren(
+    kpi(excessif ? 'Taux d\'endettement · au-delà de 35 %' : 'Taux d\'endettement',
+      pourcent(resultat.tauxEndettement), excessif),
+    kpi('Effort de l\'achat / revenus', pourcent(resultat.partEffortAchat)),
+    kpi('Reste à vivre', parMois(resultat.resteAVivreAchat), resultat.resteAVivreAchat < 0)
+  );
 }
 
 /** Toutes les bulles sont-elles renseignées ? Sans quoi rien n'est affiché. */
@@ -1978,15 +1933,6 @@ function initialiser() {
     ecartAvantBascule = parcoursComplet() && dernierResultat
       ? dernierResultat.annees[horizon - 1].ecart
       : null;
-  });
-  // « Changer », sous le verdict : on mène à la bascule plutôt que de la
-  // dupliquer — deux commandes pour un même état finissent par se contredire.
-  $('#verdictHypotheseModifier').addEventListener('click', () => {
-    const bascule = $('#bascule');
-    bascule.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    bascule.classList.add('bascule--signalee');
-    $('#locatairePlaceDifference').focus({ preventScroll: true });
-    setTimeout(() => bascule.classList.remove('bascule--signalee'), 1600);
   });
 
   initialiserBulles();

@@ -317,21 +317,23 @@ réelles — en cours ; **(3)** la mise en location ultérieure — moteur fait,
   qui s'affiche pendant qu'on tape — ni phrase d'explication sous les champs, ni part des
   revenus, ni reste à vivre. Ces ratios restent calculés par le moteur (`partEffortActuel`,
   `resteAVivreActuel`) pour de futurs indicateurs dans la visualisation.
-- **« Face à votre projet »**, une fois le parcours complet, bandeau ouvert ou replié : effort
-  actuel → ce que l'achat demande en année 1, le supplément, la phrase qui dit que le locataire
-  place aussi ce supplément, **la bascule**, les périodes de l'enveloppe (« années 1 à 20 :
-  l'enveloppe suit le coût du propriétaire »), la faisabilité (mensualité, taux d'endettement
-  contre les 35 % du HCSF, part des revenus, reste à vivre). **Pas de graphique**
-  de l'enveloppe : retiré à la relecture, les périodes écrites suffisent. Les périodes plutôt qu'une ligne par année : les charges bougent chaque
-  année, une liste annuelle serait illisible.
+- **« Votre effort face au projet » est une carte de la VISUALISATION, pas du profil** (décision
+  de Lucas) : les indicateurs sont des résultats, ils n'ont rien à faire dans la saisie. Elle se
+  place juste **au-dessus du verdict**, parce que la bascule d'épargne forcée pèse souvent plus
+  lourd sur lui que le marché. À gauche : effort actuel → ce que l'achat demande en année 1, le
+  supplément, une phrase qui **suit la bascule** (« le locataire place aussi ces 148 € » ou « il
+  ne les place pas »), et la bascule elle-même. À droite, trois KPI compacts : taux
+  d'endettement (alerte au-delà des 35 % du HCSF), effort de l'achat / revenus, reste à vivre.
+  Sans revenus renseignés, une ligne le dit au lieu d'inventer un ratio. Retirés à la relecture :
+  le graphique de l'enveloppe, la liste des périodes (`periodesEnveloppe` reste dans le moteur,
+  testée) et la mensualité, déjà dans « D'où vient cet écart ? ».
 - **La bascule d'épargne forcée ne se laisse pas oublier.** Masquée quand l'effort couvre déjà
   l'achat (elle ne changerait rien, la montrer ferait croire à un réglage cassé). Son libellé
   décrit un **comportement**, jamais un résultat (« je place aussi ces 148 €/mois », pas « mode
-  réaliste »). Sous le verdict : le rappel de l'hypothèse en cours, un lien « Changer » qui **mène**
-  à la bascule plutôt que de la dupliquer (deux commandes pour un état finissent par se
-  contredire), et, juste après un clic, **de combien le verdict a bougé** — c'est ce montant qui
-  dit ce que vaut la discipline. *Présentation provisoire : la forme définitive (bascule, deux
-  verdicts côte à côte, autre) reste à décider.*
+  réaliste »). Juste après un clic, le verdict dit **de combien il a bougé** — c'est ce montant
+  qui dit ce que vaut la discipline. Plus de rappel sous le verdict : la bascule est juste
+  au-dessus. *Présentation provisoire : la forme définitive (bascule, deux verdicts côte à côte,
+  autre) reste à décider.*
 - **Les champs du profil vivent hors de `#formulaire`** : `#profil` a donc son propre écouteur
   `input`, sans quoi les éditer ne recalculerait rien avant le clic sur « Valider mon profil ».
 - La saisie se fait dans un **plateau de quatre bulles** autour de la visualisation : deux en haut
