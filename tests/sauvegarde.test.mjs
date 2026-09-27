@@ -198,11 +198,14 @@ test("l'avancement est normalisé et ne contient que des bulles plausibles", () 
   // L'avancement vit dans l'enveloppe, pas dans `params` : il décrit cette
   // session dans ce navigateur, et ne partira jamais en base.
   const { normaliserAvancement } = sauvegarde;
-  assert.deepEqual(normaliserAvancement(null), { profilValide: false, bullesValidees: [] });
-  assert.deepEqual(normaliserAvancement({ profilValide: 'oui', bullesValidees: 'x' }),
-    { profilValide: false, bullesValidees: [] });
+  const vide = { profilValide: false, bullesValidees: [], epargneForceeRepondue: false };
+  assert.deepEqual(normaliserAvancement(null), vide);
+  assert.deepEqual(normaliserAvancement({ profilValide: 'oui', bullesValidees: 'x' }), vide);
   assert.deepEqual(normaliserAvancement({ profilValide: true, bullesValidees: [1, 2, 9, 0, 'x', 4] }),
-    { profilValide: true, bullesValidees: [1, 2, 4] });
+    { profilValide: true, bullesValidees: [1, 2, 4], epargneForceeRepondue: false });
+  // Seul un vrai booléen vaut réponse : une valeur douteuse repose la question.
+  assert.equal(normaliserAvancement({ epargneForceeRepondue: true }).epargneForceeRepondue, true);
+  assert.equal(normaliserAvancement({ epargneForceeRepondue: 'oui' }).epargneForceeRepondue, false);
 });
 
 test("un champ dont le défaut est null conserve sa valeur numérique", () => {

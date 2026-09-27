@@ -273,9 +273,15 @@
    * bulle — exactement ce qu'on s'interdit.
    */
   function normaliserAvancement(a) {
-    var propre = { profilValide: false, bullesValidees: [] };
+    // `epargneForceeRepondue` : l'utilisateur a-t-il déjà répondu à la question
+    // « placeriez-vous aussi ce supplément ? ». La RÉPONSE est un paramètre du
+    // projet (`locatairePlaceDifference`) ; le fait d'avoir répondu décrit
+    // cette session, comme « profil validé » — sans lui, la question
+    // resurgirait à chaque rechargement.
+    var propre = { profilValide: false, bullesValidees: [], epargneForceeRepondue: false };
     if (!a || typeof a !== 'object') return propre;
     propre.profilValide = a.profilValide === true;
+    propre.epargneForceeRepondue = a.epargneForceeRepondue === true;
     if (Array.isArray(a.bullesValidees)) {
       propre.bullesValidees = a.bullesValidees
         .map(function (n) {

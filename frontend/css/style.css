@@ -260,40 +260,116 @@ h1, h2, h3 {
 .egal__ligne--investi { font-weight: 600; color: var(--encre); }
 .egal__ligne--investi span:last-child { color: var(--supplement); }
 
-/* Le cas qui fait toute la différence : en rouge, avec une vraie question. */
-.egal__alerte {
+/* Le choix, en petit, une fois la question posée dans sa bulle. */
+.egal__choix-ligne {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 6px 10px;
   max-width: 620px;
-  margin: 14px auto 0;
-  padding: 12px 14px;
-  border-radius: var(--rayon);
-  background: var(--alerte-fond);
-  border: 1px solid color-mix(in srgb, var(--alerte) 30%, transparent);
+  margin: 12px auto 0;
+  font-size: .8125rem;
+  color: var(--encre-2);
 }
-.egal__alerte[hidden] { display: none; }
-.egal__alerte-titre { margin: 0; font-size: .9375rem; font-weight: 600; color: var(--encre); }
-.egal__alerte-titre b { color: var(--alerte); }
-.egal__question { margin: 6px 0 0; font-size: .875rem; color: var(--encre); }
+.egal__choix-ligne[hidden] { display: none; }
+.egal__choix-mot b { color: var(--alerte); font-weight: 600; }
 .egal__choix {
   display: inline-flex;
-  margin-top: 8px;
   padding: 2px;
   border: 1px solid var(--bord-champ);
   border-radius: 999px;
   background: var(--surface);
 }
 .egal__reponse {
-  padding: 5px 14px;
+  padding: 4px 12px;
   border: 0;
   border-radius: 999px;
   background: none;
   font: inherit;
-  font-size: .8125rem;
+  font-size: .75rem;
   color: var(--encre-2);
   cursor: pointer;
 }
 .egal__reponse[aria-pressed="true"] { background: var(--encre); color: var(--surface); }
 .egal__reponse:focus-visible { outline: none; box-shadow: var(--anneau); }
-.egal__consequence { margin: 6px 0 0; font-size: .75rem; color: var(--encre-2); }
+.egal__pourquoi {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: .75rem;
+  color: var(--accent-fort);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+
+/* Tant que la question attend sa réponse, le résultat qui en dépend ne se
+   montre pas : seule la carte « À effort égal » reste lisible. */
+.plateau__visu[data-question="attente"] > :not(.egal):not(.attente) { visibility: hidden; }
+
+/* --- La bulle de question -----------------------------------------------
+   Même geste que les bulles 1 à 4 : elle grossit au centre, sur un voile. */
+.question {
+  position: fixed;
+  z-index: 50;
+  top: 50%;
+  left: 50%;
+  translate: -50% -50%;
+  width: min(560px, calc(100vw - 32px));
+  max-height: calc(100vh - 48px);
+  overflow: auto;
+  padding: 22px 24px 20px;
+  background: var(--surface);
+  border: 1px solid var(--alerte);
+  border-radius: var(--rayon-large);
+  box-shadow: 0 24px 64px rgba(11, 11, 11, .28);
+  animation: questionEntree .32s cubic-bezier(.22, .8, .28, 1);
+}
+.question[hidden] { display: none; }
+@media (prefers-reduced-motion: reduce) { .question { animation: none; } }
+@keyframes questionEntree {
+  from { transform: scale(.72); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+.question__signal {
+  margin: 0 0 6px;
+  font-size: .6875rem;
+  font-weight: 600;
+  letter-spacing: var(--interlettre-caps);
+  text-transform: uppercase;
+  color: var(--alerte);
+}
+.question__titre {
+  margin: 0;
+  font-family: var(--police-titre);
+  font-weight: var(--graisse-titre);
+  font-size: 1.5rem;
+  line-height: 1.2;
+  letter-spacing: var(--interlettre-titre);
+  color: var(--encre);
+}
+.question__titre b { color: var(--alerte); font-weight: inherit; }
+.question__texte { margin: 10px 0 0; font-size: .875rem; color: var(--encre-2); }
+.question__demande { margin: 14px 0 0; font-size: 1rem; font-weight: 600; color: var(--encre); }
+.question__reponses { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+@media (max-width: 560px) { .question__reponses { grid-template-columns: 1fr; } }
+.question__reponse {
+  display: grid;
+  gap: 4px;
+  padding: 12px 14px;
+  text-align: left;
+  background: var(--plan);
+  border: 1px solid var(--bord-champ);
+  border-radius: var(--rayon);
+  cursor: pointer;
+  transition: border-color var(--duree-rapide) var(--aise), background var(--duree-rapide) var(--aise);
+}
+.question__reponse:hover { border-color: var(--accent); background: var(--accent-doux); }
+.question__reponse:focus-visible { outline: none; border-color: var(--accent); box-shadow: var(--anneau); }
+.question__reponse-titre { font-size: .9375rem; font-weight: 600; color: var(--encre); }
+.question__reponse-aide { font-size: .75rem; font-weight: 400; color: var(--encre-2); }
 
 .egal__endettement { margin: 12px 0 0; text-align: center; font-size: .75rem; color: var(--encre-3); }
 .egal__endettement strong { font-size: .875rem; color: var(--encre); }

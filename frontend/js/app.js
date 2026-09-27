@@ -1307,7 +1307,11 @@ function paramsCourants() {
 }
 
 function avancementCourant() {
-  return { profilValide: profilValide, bullesValidees: [...validees] };
+  return {
+    profilValide: profilValide,
+    bullesValidees: [...validees],
+    epargneForceeRepondue: epargneForceeRepondue,
+  };
 }
 
 const heure = new Intl.DateTimeFormat('fr-FR', { hour: '2-digit', minute: '2-digit' });
@@ -1379,6 +1383,7 @@ function restaurerBrouillon() {
   // `recalculer`, qui lit `profilValide` et `validees` pour décider ce qui
   // s'affiche.
   profilValide = brouillon.avancement.profilValide;
+  epargneForceeRepondue = brouillon.avancement.epargneForceeRepondue;
   validees.clear();
   for (const n of brouillon.avancement.bullesValidees) validees.add(n);
   if (profilValide) figerProfil(true);
@@ -1613,26 +1618,129 @@ function afficherEgal(resultat) {
   }
 }
 
+/* ----------------------------------------------- Question de l'épargne forcée */
+
+/**
+ * L'utilisateur a-t-il déjà répondu ? État de SESSION (rangé dans
+ * `avancement`), pas du projet : la réponse elle-même est un paramètre
+ * (`locatairePlaceDifference`), le fait d'y avoir répondu non.
+ */
+let epargneForceeRepondue = false;
+/** La bulle a été rouverte par « Pourquoi ? » : elle se ferme alors librement. */
+let questionLibre = false;
+const questionOuverte = () => !$('#question').hidden;
+
 /**
  * Le cas qui fait toute la différence : l'achat demande plus que l'effort
  * d'aujourd'hui. Sans supplément, pas d'épargne forcée, et la question n'a pas
  * d'objet — on ne la pose pas.
+ *
+ * Avec un supplément : la bulle surgit UNE fois et impose un choix ; ensuite il
+ * ne reste qu'une petite ligne sous « À effort égal ».
  */
 function afficherQuestion(resultat) {
   const supplement = resultat.supplementAchat;
-  const bloc = $('#egalAlerte');
-  bloc.hidden = supplement < 1;
-  if (bloc.hidden) return;
-
+  const aPoser = supplement >= 1;
   const place = resultat.entrees.locatairePlaceDifference;
-  $('#egalSupplement').textContent = `${euros.format(supplement)} de plus`;
-  $('#egalQuestion').textContent =
-    `En restant locataire, placeriez-vous aussi ces ${euros.format(supplement)} chaque mois ?`;
-  $('#reponseOui').setAttribute('aria-pressed', String(place));
-  $('#reponseNon').setAttribute('aria-pressed', String(!place));
-  $('#egalConsequence').textContent = place
-    ? 'Comparaison à armes égales : le même effort des deux côtés.'
-    : 'Seul l\'acheteur se serre la ceinture : le locataire garde son effort d\'aujourd\'hui.';
+
+  $('#egalChoix').hidden = !aPoser;
+  // Le verdict dépend de la réponse : tant qu'elle manque, il reste masqué.
+  $('#visu').dataset.question = aPoser && !epargneForceeRepondue ? 'attente' : 'repondue';
+
+  if (!aPoser) {
+    if (questionOuverte()) fermerQuestion();
+    return;
+  }
+
+  const montant = euros.format(supplement);
+  $('#egalSupplement').textContent = `+${montant}`;
+  for (const b of document.querySelectorAll('.egal__reponse')) {
+    b.setAttribute('aria-pressed', String((b.dataset.reponse === 'oui') === place));
+  }
+
+  $('#questionSupplement').textContent = montant;
+  $('#questionTexte').textContent =
+    `Le crédit, les charges et la taxe foncière coûtent ${euros.format(resultat.coutMensuelProprio)} ` +
+    `par mois, pour un effort d'aujourd'hui de ${euros.format(resultat.entrees.enveloppeMensuelle)}. ` +
+    "En achetant, vous n'aurez pas le choix : la banque prélève. En restant locataire, rien ne vous y oblige.";
+  $('#questionDemande').textContent =
+    `En restant locataire, placeriez-vous aussi ces ${montant} chaque mois ?`;
+
+  // Une seule fois, et jamais par-dessus une bulle en cours de saisie.
+  if (!epargneForceeRepondue && !questionOuverte() && bulleZoomee === null) ouvrirQuestion(false);
+}
+
+/**
+ * @param {boolean} libre - rouverte à la demande : voile et Échap la
+ *   referment. À la première apparition, seul un choix la ferme.
+ */
+function ouvrirQuestion(libre) {
+  questionLibre = libre;
+  $('#voileQuestion').hidden = false;
+  const q = $('#question');
+  q.hidden = false;
+  q.querySelector('.question__reponse').focus();
+}
+
+/**
+ * La bulle redescend vers la petite ligne qui la remplace : l'œil suit, et
+ * sait où retrouver le choix. Animation par transformation seule.
+ */
+function fermerQuestion() {
+  const q = $('#question');
+  const cible = $('#egalChoix');
+  $('#voileQuestion').hidden = true;
+  let fait = false;
+  const fin = () => {
+    if (fait) return;
+    fait = true;
+    q.hidden = true;
+    const choisi = cible.querySelector('.egal__reponse[aria-pressed="true"]');
+    if (choisi && !cible.hidden) choisi.focus({ preventScroll: true });
+  };
+  const depart = q.getBoundingClientRect();
+  const arrivee = cible.hidden ? null : cible.getBoundingClientRect();
+  const sansMouvement = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (!arrivee || !depart.width || sansMouvement || typeof q.animate !== 'function') return fin();
+  const dx = arrivee.left + arrivee.width / 2 - (depart.left + depart.width / 2);
+  const dy = arrivee.top + arrivee.height / 2 - (depart.top + depart.height / 2);
+  const echelle = Math.max(arrivee.width / depart.width, 0.2);
+  q.animate(
+    [
+      // Le centrage passe par la propriété `translate` (CSS), indépendante de
+      // `transform` : on n'anime ici que le déplacement vers la petite ligne.
+      { transform: 'translate(0, 0) scale(1)', opacity: 1 },
+      { transform: `translate(${dx}px, ${dy}px) scale(${echelle})`, opacity: 0 },
+    ],
+    { duration: 380, easing: 'cubic-bezier(.4, 0, .2, 1)' }
+  ).onfinish = fin;
+  // Filet : un onglet en arrière-plan suspend les animations, et `onfinish`
+  // n'arriverait jamais — la bulle resterait affichée, déjà répondue.
+  setTimeout(fin, 450);
+}
+
+/**
+ * Une réponse, d'où qu'elle vienne (bulle ou petite ligne). La case à cocher
+ * reste l'état : on la règle, puis on la laisse émettre ses événements comme
+ * si on l'avait cochée — mémoire de l'écart, recalcul, sauvegarde.
+ */
+function repondre(place) {
+  const caseEtat = $('#locatairePlaceDifference');
+  const change = caseEtat.checked !== place;
+  if (questionOuverte()) fermerQuestion();
+  if (change) {
+    caseEtat.checked = place;
+    caseEtat.dispatchEvent(new Event('input', { bubbles: true }));
+    caseEtat.dispatchEvent(new Event('change', { bubbles: true }));
+  }
+  // Marqué APRÈS le recalcul : à la première réponse, le verdict n'avait
+  // jamais été montré, dire « il a bougé de… » n'aurait aucun sens.
+  const premiere = !epargneForceeRepondue;
+  epargneForceeRepondue = true;
+  if (premiere || !change) {
+    rafraichir();
+    enregistrerBrouillon();
+  }
 }
 
 /** Toutes les bulles sont-elles renseignées ? Sans quoi rien n'est affiché. */
@@ -1811,6 +1919,8 @@ function initialiserBulles() {
   });
   document.addEventListener('keydown', (e) => {
     if (e.key !== 'Escape') return;
+    // Choix obligatoire : Échap ne ferme la question que rouverte à la demande.
+    if (questionOuverte()) { if (questionLibre) fermerQuestion(); return; }
     if (apercuOuvert()) return fermerApercu();
     if (introOuverte()) return fermerIntro();
     if (bulleZoomee !== null) validerBulle(bulleZoomee);
@@ -1881,6 +1991,8 @@ function initialiser() {
     $('#horizon').value = 20;
     validees.clear();
     profilValide = false;
+    epargneForceeRepondue = false;
+    if (questionOuverte()) fermerQuestion();
     scenarioActif = null;
     hypothesesUtilisateur = null;
     scenariosDecouverts = false;
@@ -1898,22 +2010,17 @@ function initialiser() {
 
   // La case reçoit l'événement AVANT le bandeau qui l'écoute par propagation :
   // on mémorise ici l'écart affiché, pour dire ensuite de combien il a bougé.
-  // Oui / Non règlent la case, puis la laissent émettre ses événements comme
-  // si on l'avait cochée : l'écart est mémorisé, le moteur recalcule, la
-  // sauvegarde écrit. Un clic sur la réponse déjà choisie ne fait rien.
-  const repondre = (place) => {
-    const caseEtat = $('#locatairePlaceDifference');
-    if (caseEtat.checked === place) return;
-    caseEtat.checked = place;
-    caseEtat.dispatchEvent(new Event('input', { bubbles: true }));
-    caseEtat.dispatchEvent(new Event('change', { bubbles: true }));
-  };
-  $('#reponseOui').addEventListener('click', () => repondre(true));
-  $('#reponseNon').addEventListener('click', () => repondre(false));
+  // Les réponses : dans la bulle comme dans la petite ligne.
+  for (const b of document.querySelectorAll('[data-reponse]')) {
+    b.addEventListener('click', () => repondre(b.dataset.reponse === 'oui'));
+  }
+  // « Pourquoi ? » rouvre la bulle, qui se ferme alors librement.
+  $('#questionRouvrir').addEventListener('click', () => ouvrirQuestion(true));
+  $('#voileQuestion').addEventListener('click', () => { if (questionLibre) fermerQuestion(); });
 
   $('#locatairePlaceDifference').addEventListener('input', () => {
     const horizon = parseInt($('#horizon').value, 10);
-    ecartAvantBascule = parcoursComplet() && dernierResultat
+    ecartAvantBascule = parcoursComplet() && dernierResultat && epargneForceeRepondue
       ? dernierResultat.annees[horizon - 1].ecart
       : null;
   });

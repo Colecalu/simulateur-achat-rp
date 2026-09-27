@@ -328,16 +328,26 @@ réelles — en cours ; **(3)** la mise en location ultérieure — moteur fait,
   Essayés puis écartés par Lucas, parce qu'ils compliquaient : KPI détaillés (effort / revenus,
   reste à vivre — toujours calculés par le moteur), barres horizontales, barres verticales,
   phrases-équations. Maquettes des variantes comparées : A (retenue), récit, tuiles, ticket.
-- **Le cas qui fait toute la différence : l'achat demande plus que l'effort d'aujourd'hui.** Un
-  encadré rouge : « L'achat vous demande **148 € de plus** par mois qu'aujourd'hui », puis une
-  **vraie question** — « En restant locataire, placeriez-vous aussi ces 148 € chaque mois ? » —
-  et **deux réponses** : « Oui, je les place » / « Non, je garde mes habitudes ». Plus clair qu'un
-  interrupteur. Les réponses décrivent un **comportement**, jamais un résultat. La case à cocher
-  `#locatairePlaceDifference` reste l'état (masquée, lue par le moteur, sauvegardée) : les boutons
-  la règlent puis lui font émettre `input` et `change`, si bien que la mémoire de l'écart, le
-  recalcul et la sauvegarde marchent sans rien d'autre. Sans supplément, pas de question. Avec
-  « Non », l'effort n'est plus commun : le chiffre central le dit (« 1 848 € achat · 1 700 €
-  location »). Juste après une réponse, le verdict dit **de combien il a bougé**.
+- **Le cas qui fait toute la différence : l'achat demande plus que l'effort d'aujourd'hui.**
+  Une **bulle surgit une seule fois**, au centre, sur un voile, comme les bulles 1 à 4 : « Attention
+  — L'achat vous demande **148 € de plus** par mois qu'aujourd'hui », une ligne qui explique
+  pourquoi (la banque prélève, rien n'y oblige le locataire), puis **une vraie question** et **deux
+  réponses** : « Oui, je les place » / « Non, je garde mes habitudes ». **Choix obligatoire** : ni
+  croix, ni voile, ni Échap ne la ferment. **Le résultat reste masqué** tant qu'on n'a pas répondu
+  (`#visu[data-question="attente"]`) : il dépend de la réponse. Puis la bulle **redescend** vers
+  une petite ligne sous « À effort égal » — « Achat : +148 €/mois. En restant locataire : [Je les
+  place] [Je garde mes habitudes] Pourquoi ? » —, d'où le choix reste modifiable et d'où
+  « Pourquoi ? » rouvre la bulle, qui se ferme alors librement. Elle ne resurgit pas si le projet
+  change ensuite : la petite ligne se met à jour. Les réponses décrivent un **comportement**, jamais
+  un résultat.
+- **Qui retient quoi.** La RÉPONSE est un paramètre du projet (`locatairePlaceDifference`, case à
+  cocher masquée, lue par le moteur). Le FAIT d'avoir répondu est un état de session
+  (`avancement.epargneForceeRepondue`), comme « profil validé » : sans lui la bulle resurgirait à
+  chaque rechargement. Les boutons règlent la case puis lui font émettre `input` et `change` : mémoire
+  de l'écart, recalcul et sauvegarde suivent sans rien d'autre. « Le verdict a bougé de… » ne
+  s'affiche qu'à partir de la deuxième réponse : à la première, il n'avait jamais été montré. La
+  fermeture animée a un filet (`setTimeout`) : un onglet en arrière-plan suspend les animations, et
+  la bulle resterait affichée. Pas d'animation avec `prefers-reduced-motion`.
 - **Les champs du profil vivent hors de `#formulaire`** : `#profil` a donc son propre écouteur
   `input`, sans quoi les éditer ne recalculerait rien avant le clic sur « Valider mon profil ».
 - La saisie se fait dans un **plateau de quatre bulles** autour de la visualisation : deux en haut

@@ -237,7 +237,8 @@ demi-seconde. Fermer l'onglet ne fait rien perdre, sans compte ni réseau.
   `enveloppeMensuelle` s'en **déduit** et ne se stocke pas. Schéma **v2** : la migration v1 → v2
   renomme `salaireNet` en `revenusFoyer` et range l'ancien effort tout entier en épargne (loyer à
   0) — la seule répartition qui n'invente rien, et qui redonne exactement les mêmes chiffres.
-- **`avancement` décrit CETTE session dans CE navigateur** — profil validé, bulles validées. Il
+- **`avancement` décrit CETTE session dans CE navigateur** — profil validé, bulles validées,
+  question de l'épargne forcée déjà répondue. Il
   vit dans l'enveloppe du brouillon, jamais dans `params`, et ne partira jamais en base. Sans
   lui, rouvrir l'onglet afficherait un résultat complet alors que l'utilisateur n'a rempli
   qu'une bulle — ce qu'on s'interdit.

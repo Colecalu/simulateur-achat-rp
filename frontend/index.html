@@ -421,20 +421,19 @@
           </dl>
         </div>
 
-        <!-- Le cas qui fait toute la différence : l'achat demande plus que
-             l'effort d'aujourd'hui. Une vraie question, deux réponses — plus
-             clair qu'un interrupteur. La case à cocher reste l'état (lu par le
-             moteur, sauvegardé) ; les deux boutons ne font que la régler. -->
-        <div class="egal__alerte" id="egalAlerte" hidden>
-          <p class="egal__alerte-titre">
-            L'achat vous demande <b class="tabulaire" id="egalSupplement"></b> par mois qu'aujourd'hui.
-          </p>
-          <p class="egal__question" id="egalQuestion"></p>
-          <div class="egal__choix" role="group" aria-labelledby="egalQuestion">
-            <button type="button" class="egal__reponse" id="reponseOui" aria-pressed="true">Oui, je les place</button>
-            <button type="button" class="egal__reponse" id="reponseNon" aria-pressed="false">Non, je garde mes habitudes</button>
+        <!-- Le choix, en petit : la question elle-même a été posée une fois dans
+             une bulle (#question). Il reste modifiable ici, et « Pourquoi ? »
+             rouvre la bulle. La case à cocher reste l'état (lu par le moteur,
+             sauvegardé) ; les boutons ne font que la régler. -->
+        <div class="egal__choix-ligne" id="egalChoix" hidden>
+          <span class="egal__choix-mot">
+            Achat : <b class="tabulaire" id="egalSupplement"></b>/mois. En restant locataire&nbsp;:
+          </span>
+          <div class="egal__choix" role="group" aria-label="En restant locataire, placeriez-vous aussi ce supplément ?">
+            <button type="button" class="egal__reponse" data-reponse="oui" aria-pressed="true">Je les place</button>
+            <button type="button" class="egal__reponse" data-reponse="non" aria-pressed="false">Je garde mes habitudes</button>
           </div>
-          <p class="egal__consequence" id="egalConsequence"></p>
+          <button type="button" class="lien egal__pourquoi" id="questionRouvrir">Pourquoi&nbsp;?</button>
           <input type="checkbox" class="egal__etat" id="locatairePlaceDifference" checked hidden>
         </div>
 
@@ -703,6 +702,36 @@
   </div>
 
   <div class="voile" id="voile" hidden></div>
+
+  <!-- ===== La question de l'épargne forcée =====
+       Surgit UNE fois, quand le parcours est complet et que l'achat demande
+       plus que l'effort d'aujourd'hui. Choix obligatoire : pas de croix, ni
+       voile ni Échap ne la ferment tant qu'on n'a pas répondu. Le verdict
+       reste masqué jusque-là — il dépend de la réponse. Ensuite elle redescend
+       vers la petite ligne de « À effort égal », d'où « Pourquoi ? » la rouvre
+       (et là, elle se ferme librement). Son propre voile : celui des bulles
+       ferme la bulle zoomée au clic, ce qu'on ne veut pas ici. -->
+  <div class="voile" id="voileQuestion" hidden></div>
+  <section class="question" id="question" role="dialog" aria-modal="true"
+           aria-labelledby="questionTitre" hidden>
+    <p class="question__signal">Attention</p>
+    <h2 class="question__titre" id="questionTitre">
+      L'achat vous demande <b class="tabulaire" id="questionSupplement"></b> de plus par mois
+      qu'aujourd'hui.
+    </h2>
+    <p class="question__texte" id="questionTexte"></p>
+    <p class="question__demande" id="questionDemande"></p>
+    <div class="question__reponses">
+      <button type="button" class="question__reponse" data-reponse="oui">
+        <span class="question__reponse-titre">Oui, je les place</span>
+        <span class="question__reponse-aide">Comparaison à armes égales&nbsp;: le même effort des deux côtés.</span>
+      </button>
+      <button type="button" class="question__reponse" data-reponse="non">
+        <span class="question__reponse-titre">Non, je garde mes habitudes</span>
+        <span class="question__reponse-aide">Seul l'acheteur se serre la ceinture&nbsp;: c'est l'épargne forcée du crédit.</span>
+      </button>
+    </div>
+  </section>
 
       <!-- Aperçu d'un scénario : il vit ici, hors du rail de gauche, et non
            dans la carte scénario. Le rail est `position: sticky`, donc un
