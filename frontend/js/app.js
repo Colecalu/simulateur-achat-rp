@@ -1486,7 +1486,7 @@ function rafraichir() {
   afficherProfil(dernierResultat);
   if (!majAttente()) return;
 
-  afficherBudget(dernierResultat);
+  afficherEgal(dernierResultat);
   afficherVerdict(dernierResultat, horizon);
   dessinerGraphiques(dernierResultat, horizon, mel);
   dessinerDetail(dernierResultat, horizon);
@@ -1573,40 +1573,35 @@ function afficherProfil(resultat) {
 }
 
 /**
- * « Logement + épargne, chaque mois », dans la visualisation, au-dessus du
- * verdict. N'est appelé qu'une fois le parcours complet : c'est un résultat, et
- * la page n'affiche aucun résultat sur des valeurs que l'utilisateur n'a pas
- * posées.
+ * « À effort égal », dans la visualisation, au-dessus du verdict. N'est appelé
+ * qu'une fois le parcours complet : c'est un résultat, et la page n'affiche
+ * aucun résultat sur des valeurs que l'utilisateur n'a pas posées.
  *
- * Les deux trajectoires COMPARÉES, première année, ramenées au mois : ce que
- * coûte le logement, et ce qui est investi. Pas la situation d'aujourd'hui —
- * on peut comparer deux projets dans une ville où l'on n'habite pas encore.
- * Une phrase-équation par projet : l'effort total = le logement + l'investi.
- * Le « = » dit que l'effort est le même des deux côtés, le « + » dit où va ce
- * que le logement ne consomme pas. Les barres essayées avant compliquaient.
+ * L'effort commun au centre, les deux projets comparés en miroir, première
+ * année ramenée au mois. « Logement » côté achat : mensualité, assurance,
+ * charges de copropriété et taxe foncière.
  */
-function afficherBudget(resultat) {
+function afficherEgal(resultat) {
   const e = resultat.entrees;
   const an1 = resultat.annees[0];
-  // « Coût du logement » côté achat : mensualité, assurance, charges de copro
-  // et taxe foncière — tout ce que le propriétaire paie pour son logement.
-  const location = { logement: an1.loyerAnnuel / 12, investi: an1.surplusLocataire / 12 };
-  const achat = { logement: an1.totalDebourseAnnuel / 12, investi: an1.surplusProprio / 12 };
-  const totalLocation = an1.enveloppeLocation / 12;
-  const totalAchat = an1.enveloppeAchat / 12;
-  equation($('#equationLocation'), totalLocation, 'de loyer', location);
-  equation($('#equationAchat'), totalAchat, 'de logement', achat);
+  const location = { logement: an1.loyerAnnuel / 12, investi: an1.surplusLocataire / 12, total: an1.enveloppeLocation / 12 };
+  const achat = { logement: an1.totalDebourseAnnuel / 12, investi: an1.surplusProprio / 12, total: an1.enveloppeAchat / 12 };
 
-  const supplement = resultat.supplementAchat;
-  const ecart = $('#budgetEcart');
-  ecart.hidden = supplement < 1;
-  if (!ecart.hidden) ecart.textContent = `+${euros.format(supplement)}`;
+  // Un seul chiffre quand l'effort est commun ; deux, dits comme tels, quand
+  // l'utilisateur a déclaré que le locataire garderait ses habitudes.
+  $('#egalEffort').textContent = Math.round(location.total) === Math.round(achat.total)
+    ? euros.format(achat.total)
+    : `${euros.format(achat.total)} achat · ${euros.format(location.total)} location`;
+
+  $('#egalLoyer').textContent = euros.format(location.logement);
+  $('#egalInvestiLocation').textContent = euros.format(Math.max(location.investi, 0));
+  $('#egalLogement').textContent = euros.format(achat.logement);
+  $('#egalInvestiAchat').textContent = euros.format(Math.max(achat.investi, 0));
 
   // Un chiffre, sans commentaire. Sans revenus, aucun ratio n'est inventé.
-  $('#budgetEndettement').textContent =
-    e.revenusFoyer > 0 ? pourcent(resultat.tauxEndettement) : '—';
+  $('#egalEndettement').textContent = e.revenusFoyer > 0 ? pourcent(resultat.tauxEndettement) : '—';
 
-  afficherBascule(resultat);
+  afficherQuestion(resultat);
 
   const alerte = $('#alerteApport');
   alerte.hidden = e.apport <= e.capitalInitial;
@@ -1619,34 +1614,25 @@ function afficherBudget(resultat) {
 }
 
 /**
- * « 2 600 € = 1 250 € de loyer + 1 350 € investis ». Les montants en gras sont
- * ceux qui se comparent d'un projet à l'autre : l'effort total, et l'investi.
- * « 0 € investi » est écrit : dans une équation, l'absence se lit.
+ * Le cas qui fait toute la différence : l'achat demande plus que l'effort
+ * d'aujourd'hui. Sans supplément, pas d'épargne forcée, et la question n'a pas
+ * d'objet — on ne la pose pas.
  */
-function equation(el, total, motLogement, t) {
-  const investi = Math.max(t.investi, 0);
-  el.replaceChildren(
-    noeud('strong', '', euros.format(total)),
-    ` = ${euros.format(t.logement)} ${motLogement} + `,
-    noeud('strong', '', `${euros.format(investi)} investi${investi >= 2 ? 's' : ''}`)
-  );
-}
-
-/** La bascule, seulement quand l'achat demande plus que l'effort actuel. */
-function afficherBascule(resultat) {
+function afficherQuestion(resultat) {
   const supplement = resultat.supplementAchat;
-  const bascule = $('#bascule');
-  // Pas de supplément, pas d'épargne forcée : la bascule ne changerait rien,
-  // la montrer ferait croire à un réglage cassé.
-  bascule.hidden = supplement < 1;
-  if (bascule.hidden) return;
-  $('#basculeLibelle').replaceChildren(
-    `L'achat vous demande ${euros.format(supplement)} de plus par mois qu'aujourd'hui. `,
-    'En restant locataire, ', noeud('strong', '', `je place aussi ces ${parMois(supplement)}`), '.'
-  );
-  $('#basculeAide').textContent = resultat.entrees.locatairePlaceDifference
-    ? 'Désactivez si, sans crédit à rembourser, vous garderiez vos habitudes d\'épargne actuelles.'
-    : 'Désactivé : le locataire garde ses habitudes, seul l\'acheteur se serre la ceinture.';
+  const bloc = $('#egalAlerte');
+  bloc.hidden = supplement < 1;
+  if (bloc.hidden) return;
+
+  const place = resultat.entrees.locatairePlaceDifference;
+  $('#egalSupplement').textContent = `${euros.format(supplement)} de plus`;
+  $('#egalQuestion').textContent =
+    `En restant locataire, placeriez-vous aussi ces ${euros.format(supplement)} chaque mois ?`;
+  $('#reponseOui').setAttribute('aria-pressed', String(place));
+  $('#reponseNon').setAttribute('aria-pressed', String(!place));
+  $('#egalConsequence').textContent = place
+    ? 'Comparaison à armes égales : le même effort des deux côtés.'
+    : 'Seul l\'acheteur se serre la ceinture : le locataire garde son effort d\'aujourd\'hui.';
 }
 
 /** Toutes les bulles sont-elles renseignées ? Sans quoi rien n'est affiché. */
@@ -1912,6 +1898,19 @@ function initialiser() {
 
   // La case reçoit l'événement AVANT le bandeau qui l'écoute par propagation :
   // on mémorise ici l'écart affiché, pour dire ensuite de combien il a bougé.
+  // Oui / Non règlent la case, puis la laissent émettre ses événements comme
+  // si on l'avait cochée : l'écart est mémorisé, le moteur recalcule, la
+  // sauvegarde écrit. Un clic sur la réponse déjà choisie ne fait rien.
+  const repondre = (place) => {
+    const caseEtat = $('#locatairePlaceDifference');
+    if (caseEtat.checked === place) return;
+    caseEtat.checked = place;
+    caseEtat.dispatchEvent(new Event('input', { bubbles: true }));
+    caseEtat.dispatchEvent(new Event('change', { bubbles: true }));
+  };
+  $('#reponseOui').addEventListener('click', () => repondre(true));
+  $('#reponseNon').addEventListener('click', () => repondre(false));
+
   $('#locatairePlaceDifference').addEventListener('input', () => {
     const horizon = parseInt($('#horizon').value, 10);
     ecartAvantBascule = parcoursComplet() && dernierResultat

@@ -394,41 +394,51 @@
         <p class="attente__compte" id="attenteCompte"></p>
       </div>
 
-      <!-- ===== Logement + épargne, chaque mois =====
+      <!-- ===== À effort égal =====
            Un résultat, donc dans la visualisation et jamais dans la saisie.
-           Les deux trajectoires COMPARÉES — pas la situation d'aujourd'hui :
-           on peut comparer deux projets dans une ville où l'on n'habite pas
-           encore. Chacune : ce que coûte le logement, et ce qui est investi.
-           Une phrase-équation par projet : « 2 600 € = 1 250 € de loyer +
-           1 350 € investis ». Le « = » dit que l'effort est le même, le « + »
-           dit où va le reste. Rien à décoder. -->
-      <section class="budget" id="budget" aria-labelledby="budgetTitre">
-        <h2 class="budget__titre" id="budgetTitre">Logement + épargne, chaque mois</h2>
-        <div class="budget__tuiles">
-          <div class="budget__tuile">
-            <p class="budget__mot">Projet location</p>
-            <p class="budget__equation tabulaire" id="equationLocation"></p>
-          </div>
-          <div class="budget__tuile">
-            <p class="budget__mot">Projet achat RP <span class="budget__ecart tabulaire" id="budgetEcart" hidden></span></p>
-            <p class="budget__equation tabulaire" id="equationAchat"></p>
-          </div>
-          <div class="budget__tuile budget__tuile--etroite">
-            <p class="budget__mot">Taux d'endettement</p>
-            <p class="budget__valeur tabulaire" id="budgetEndettement"></p>
-          </div>
+           L'effort commun est posé UNE fois, au centre : l'égalité se voit sans
+           être dite. Dessous, les deux projets comparés en miroir — logement,
+           puis investi — pour comparer ligne à ligne. Ce sont les trajectoires
+           de la simulation, pas la situation d'aujourd'hui : on peut comparer
+           deux projets dans une ville où l'on n'habite pas encore. -->
+      <section class="egal" id="egal" aria-labelledby="egalTitre">
+        <h2 class="egal__titre" id="egalTitre">À effort égal</h2>
+        <p class="egal__effort">
+          <span class="egal__effort-mot">Votre effort chaque mois</span>
+          <strong class="egal__effort-valeur tabulaire" id="egalEffort"></strong>
+        </p>
+        <div class="egal__miroir">
+          <dl class="egal__projet egal__projet--location">
+            <dt class="egal__projet-nom">Projet location</dt>
+            <dd class="egal__ligne"><span>Loyer</span><span class="tabulaire" id="egalLoyer"></span></dd>
+            <dd class="egal__ligne egal__ligne--investi"><span>Investi</span><span class="tabulaire" id="egalInvestiLocation"></span></dd>
+          </dl>
+          <span class="egal__separateur" aria-hidden="true"></span>
+          <dl class="egal__projet egal__projet--achat">
+            <dt class="egal__projet-nom">Projet achat RP</dt>
+            <dd class="egal__ligne"><span>Logement</span><span class="tabulaire" id="egalLogement"></span></dd>
+            <dd class="egal__ligne egal__ligne--investi"><span>Investi</span><span class="tabulaire" id="egalInvestiAchat"></span></dd>
+          </dl>
         </div>
 
-        <!-- La bascule n'existe que si l'achat demande plus que l'effort
-             actuel : sans supplément, pas d'épargne forcée. -->
-        <label class="bascule" id="bascule">
-          <input type="checkbox" id="locatairePlaceDifference" role="switch" checked>
-          <span class="bascule__piste" aria-hidden="true"></span>
-          <span class="bascule__texte">
-            <span id="basculeLibelle"></span>
-            <span class="bascule__aide" id="basculeAide"></span>
-          </span>
-        </label>
+        <!-- Le cas qui fait toute la différence : l'achat demande plus que
+             l'effort d'aujourd'hui. Une vraie question, deux réponses — plus
+             clair qu'un interrupteur. La case à cocher reste l'état (lu par le
+             moteur, sauvegardé) ; les deux boutons ne font que la régler. -->
+        <div class="egal__alerte" id="egalAlerte" hidden>
+          <p class="egal__alerte-titre">
+            L'achat vous demande <b class="tabulaire" id="egalSupplement"></b> par mois qu'aujourd'hui.
+          </p>
+          <p class="egal__question" id="egalQuestion"></p>
+          <div class="egal__choix" role="group" aria-labelledby="egalQuestion">
+            <button type="button" class="egal__reponse" id="reponseOui" aria-pressed="true">Oui, je les place</button>
+            <button type="button" class="egal__reponse" id="reponseNon" aria-pressed="false">Non, je garde mes habitudes</button>
+          </div>
+          <p class="egal__consequence" id="egalConsequence"></p>
+          <input type="checkbox" class="egal__etat" id="locatairePlaceDifference" checked hidden>
+        </div>
+
+        <p class="egal__endettement">Taux d'endettement <strong class="tabulaire" id="egalEndettement"></strong></p>
         <p class="alerte" id="alerteApport" hidden></p>
       </section>
 

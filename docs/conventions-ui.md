@@ -317,27 +317,27 @@ réelles — en cours ; **(3)** la mise en location ultérieure — moteur fait,
   qui s'affiche pendant qu'on tape — ni phrase d'explication sous les champs, ni part des
   revenus, ni reste à vivre. Ces ratios restent calculés par le moteur (`partEffortActuel`,
   `resteAVivreActuel`) pour de futurs indicateurs dans la visualisation.
-- **« Logement + épargne, chaque mois » est une carte de la VISUALISATION, pas du profil**
-  (décision de Lucas) : c'est un résultat. Titre centré, juste **au-dessus du verdict**. Trois
-  tuiles : **Projet location** (loyer | investi), **Projet achat RP** (coût du logement |
-  investi), **Taux d'endettement** (un chiffre, sans commentaire ni seuil). Les tuiles montrent
-  les deux trajectoires **comparées**, pas la situation d'aujourd'hui : on peut comparer deux
-  projets dans une ville où l'on n'habite pas encore. « Coût du logement » = mensualité,
-  assurance, charges de copropriété et taxe foncière, ramenés au mois (première année). La part investie se
-  lit dans **une phrase-équation par projet** : « **2 600 €** = 1 250 € de loyer + **1 350 €
-  investis** ». Le « = » dit que l'effort est le même des deux côtés, le « + » dit où va ce que
-  le logement ne consomme pas ; l'effort et l'investi, en gras, se comparent d'un projet à
-  l'autre. « 0 € investi » est écrit : dans une équation, l'absence se lit. Essayés puis
-  écartés par Lucas, parce qu'ils compliquaient : barres horizontales empilées, puis deux barres
-  verticales par projet. Libellés provisoires. Non affichés mais calculés par le moteur : effort /
-  revenus, reste à vivre, périodes de l'enveloppe.
-- **La bascule d'épargne forcée ne se laisse pas oublier.** Masquée quand l'effort couvre déjà
-  l'achat (elle ne changerait rien, la montrer ferait croire à un réglage cassé). Son libellé
-  décrit un **comportement**, jamais un résultat (« je place aussi ces 148 €/mois », pas « mode
-  réaliste »). Juste après un clic, le verdict dit **de combien il a bougé** — c'est ce montant
-  qui dit ce que vaut la discipline. Plus de rappel sous le verdict : la bascule est juste
-  au-dessus. *Présentation provisoire : la forme définitive (bascule, deux verdicts côte à côte,
-  autre) reste à décider.*
+- **« À effort égal » est une carte de la VISUALISATION, pas du profil** (décision de Lucas) :
+  c'est un résultat. Juste **au-dessus du verdict**. L'effort commun est posé **une seule fois,
+  au centre** — l'égalité se voit sans être dite. Dessous, les deux projets **en miroir** :
+  « Projet location » (loyer, investi) et « Projet achat RP » (logement, investi), pour comparer
+  ligne à ligne. Ce sont les deux trajectoires **comparées**, pas la situation d'aujourd'hui : on
+  peut comparer deux projets dans une ville où l'on n'habite pas encore. « Logement » côté achat =
+  mensualité, assurance, charges de copropriété et taxe foncière, au mois, première année. Le taux
+  d'endettement passe en pied, un chiffre sans commentaire. Libellés provisoires.
+  Essayés puis écartés par Lucas, parce qu'ils compliquaient : KPI détaillés (effort / revenus,
+  reste à vivre — toujours calculés par le moteur), barres horizontales, barres verticales,
+  phrases-équations. Maquettes des variantes comparées : A (retenue), récit, tuiles, ticket.
+- **Le cas qui fait toute la différence : l'achat demande plus que l'effort d'aujourd'hui.** Un
+  encadré rouge : « L'achat vous demande **148 € de plus** par mois qu'aujourd'hui », puis une
+  **vraie question** — « En restant locataire, placeriez-vous aussi ces 148 € chaque mois ? » —
+  et **deux réponses** : « Oui, je les place » / « Non, je garde mes habitudes ». Plus clair qu'un
+  interrupteur. Les réponses décrivent un **comportement**, jamais un résultat. La case à cocher
+  `#locatairePlaceDifference` reste l'état (masquée, lue par le moteur, sauvegardée) : les boutons
+  la règlent puis lui font émettre `input` et `change`, si bien que la mémoire de l'écart, le
+  recalcul et la sauvegarde marchent sans rien d'autre. Sans supplément, pas de question. Avec
+  « Non », l'effort n'est plus commun : le chiffre central le dit (« 1 848 € achat · 1 700 €
+  location »). Juste après une réponse, le verdict dit **de combien il a bougé**.
 - **Les champs du profil vivent hors de `#formulaire`** : `#profil` a donc son propre écouteur
   `input`, sans quoi les éditer ne recalculerait rien avant le clic sur « Valider mon profil ».
 - La saisie se fait dans un **plateau de quatre bulles** autour de la visualisation : deux en haut
