@@ -313,11 +313,10 @@ réelles — en cours ; **(3)** la mise en location ultérieure — moteur fait,
   (groupe `profil` de la sauvegarde) et se déduit à la lecture. Son total n'est **pas affiché**
   dans le bandeau pour l'instant (décision de Lucas) : il reviendra ailleurs. Les trois groupes ont
   la même hauteur, la plus faible possible — aides d'une ligne, champs de 38 px.
-- **« Ces montants ne font pas pencher la balance »** : dit explicitement. Avec l'enveloppe
-  identique, c'est exact au centime, et c'est ce qui évite à l'utilisateur d'hésiter pendant dix
-  minutes entre 3 000 et 3 400 € en croyant changer la réponse.
-- **Le retour immédiat ne dépend pas du projet** : part de l'effort dans les revenus et reste pour
-  le quotidien s'affichent dès la saisie du profil.
+- **La saisie du profil est nue** (décision de Lucas) : trois questions, quatre champs, rien
+  qui s'affiche pendant qu'on tape — ni phrase d'explication sous les champs, ni part des
+  revenus, ni reste à vivre. Ces ratios restent calculés par le moteur (`partEffortActuel`,
+  `resteAVivreActuel`) pour de futurs indicateurs dans la visualisation.
 - **« Face à votre projet »**, une fois le parcours complet, bandeau ouvert ou replié : effort
   actuel → ce que l'achat demande en année 1, le supplément, la phrase qui dit que le locataire
   place aussi ce supplément, **la bascule**, les périodes de l'enveloppe (« années 1 à 20 :

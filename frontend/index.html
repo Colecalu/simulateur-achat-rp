@@ -94,14 +94,9 @@
         </div>
       </div>
 
-      <!-- Ne dépend pas du prêt : s'affiche dès que l'effort et les revenus sont là. -->
-      <p class="profil__retour" id="profilRetour" hidden aria-live="polite"></p>
-
-      <p class="profil__rassure">
-        <span class="profil__rassure-icone" aria-hidden="true">=</span>
-        <span>Ces montants <strong>ne font pas pencher la balance</strong>&nbsp;: acheteur et
-        locataire partent du même budget. Ils servent à vérifier que le projet est tenable pour vous.</span>
-      </p>
+      <!-- Saisie nue, volontairement : trois questions, quatre champs, rien qui
+           s'affiche pendant qu'on tape. Les ratios (part des revenus, reste à
+           vivre) restent calculés par le moteur, pour de futurs indicateurs. -->
 
       <div class="profil__pied">
         <button type="button" class="bouton bouton--primaire" id="profilValider">

@@ -205,45 +205,6 @@ h1, h2, h3 {
   font-size: .9375rem;
 }
 
-/* Retour immédiat : part de l'effort dans les revenus, reste à vivre. */
-.profil__retour {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 6px 22px;
-  margin: 14px 0 0;
-  padding: 12px 14px;
-  border-radius: var(--rayon);
-  background: var(--surface-creuse);
-  font-size: .875rem;
-  color: var(--encre-2);
-}
-.profil__retour[hidden] { display: none; }
-.profil__retour strong { color: var(--encre); font-weight: 600; }
-.profil__retour--alerte strong { color: var(--alerte); }
-
-.profil__rassure {
-  display: flex;
-  gap: 10px;
-  align-items: flex-start;
-  margin: 14px 0 0;
-  font-size: .8125rem;
-  color: var(--encre-2);
-}
-.profil__rassure-icone {
-  flex: none;
-  display: grid;
-  place-items: center;
-  width: 18px;
-  height: 18px;
-  margin-top: 1px;
-  border-radius: 50%;
-  background: var(--location-voile);
-  color: var(--location);
-  font-size: .75rem;
-  font-weight: 700;
-}
-
 .profil__pied { display: flex; justify-content: flex-end; margin-top: 14px; }
 
 /* --- Face à votre projet ------------------------------------------------ */

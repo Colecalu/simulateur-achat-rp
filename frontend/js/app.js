@@ -1592,21 +1592,6 @@ function afficherProfil(resultat) {
   }
   $('#profilResume').replaceChildren(...resume);
 
-  // --- Retour immédiat ---------------------------------------------------
-  // Ne dépend pas du projet : il s'affiche dès la saisie.
-  const retour = $('#profilRetour');
-  retour.hidden = !(e.revenusFoyer > 0);
-  if (!retour.hidden) {
-    const a = noeud('span');
-    a.append('Votre effort représente ', noeud('strong', '', pourcent(resultat.partEffortActuel)),
-      ' de vos revenus');
-    const b = noeud('span');
-    b.append(noeud('strong', '', parMois(Math.max(resultat.resteAVivreActuel, 0))),
-      ' restent pour le quotidien');
-    retour.replaceChildren(a, b);
-    retour.classList.toggle('profil__retour--alerte', resultat.resteAVivreActuel < 0);
-  }
-
   // --- Face à votre projet -----------------------------------------------
   // Rien avant que le projet soit entièrement décrit : c'est la règle de
   // toute la page, pas de chiffre sur des valeurs que l'utilisateur n'a pas
