@@ -90,6 +90,30 @@ function remplirProfil(profil) {
   for (const champ of CHAMPS_EFFORT) document.getElementById(champ).value = profil[champ];
 }
 
+/**
+ * Le loyer d'un logement équivalent (bulle 1) SUIT le loyer actuel du profil
+ * tant que l'utilisateur ne l'a pas modifié : dans le cas courant — il achète
+ * un logement comparable à celui qu'il loue —, il n'a qu'un loyer à saisir.
+ *
+ * Rien n'est stocké pour le savoir : tant que les deux champs sont égaux, le
+ * loyer équivalent suit ; dès qu'ils diffèrent, c'est qu'il a été changé
+ * exprès (bien plus grand, autre ville), et on n'y touche plus. Un état
+ * « lié » en plus pourrait contredire les valeurs ; celles-ci ne le peuvent pas.
+ */
+let loyerActuelPrecedent = null;
+function suivreLoyerActuel() {
+  const actuel = $('#loyerActuel').value;
+  const equivalent = $('#loyer');
+  if (loyerActuelPrecedent !== null && equivalent.value === loyerActuelPrecedent) {
+    equivalent.value = actuel;
+  }
+  loyerActuelPrecedent = actuel;
+}
+/** À appeler après tout remplissage : le point de départ de la comparaison. */
+function memoriserLoyerActuel() {
+  loyerActuelPrecedent = $('#loyerActuel').value;
+}
+
 function lireFormulaire() {
   const saisie = {};
   for (const champ of CHAMPS) {
@@ -2007,6 +2031,9 @@ function initialiser() {
   $('#formulaire').addEventListener('input', recalculer);
   // Le profil vit hors du plateau : sans son propre écouteur, l'éditer ne
   // recalculerait rien avant le clic sur « Valider mon profil ».
+  // Le loyer équivalent suit le loyer actuel avant le recalcul, pour que le
+  // moteur lise la valeur à jour.
+  $('#loyerActuel').addEventListener('input', suivreLoyerActuel);
   $('#profil').addEventListener('input', recalculer);
 
   $('#horizon').addEventListener('input', rafraichir);
@@ -2019,6 +2046,7 @@ function initialiser() {
   $('#reinitialiser').addEventListener('click', () => {
     remplirFormulaire(DEFAUTS);
     remplirProfil(Sauvegarde.DEFAUTS_PROFIL);
+    memoriserLoyerActuel();
     $('#horizon').value = 20;
     validees.clear();
     profilValide = false;
@@ -2078,6 +2106,7 @@ function initialiser() {
 
   // En dernier : la restauration écrase les défauts et l'état du parcours.
   initialiserBrouillon();
+  memoriserLoyerActuel();
 
   recalculer();
 }
