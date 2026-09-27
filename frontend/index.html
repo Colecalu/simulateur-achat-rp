@@ -37,39 +37,74 @@
 
     <div class="profil__saisie" id="profilSaisie">
       <p class="profil__intro">
-        Tout part de votre situation d'aujourd'hui. Elle est propre à vous, elle ne change pas
-        d'une simulation à l'autre&nbsp;: c'est le socle commun sur lequel les deux trajectoires
-        sont comparées.
+        Votre situation d'aujourd'hui, en trois questions. Elle vous appartient et ne change pas
+        d'un projet à l'autre.
       </p>
-      <div class="profil__champs">
+
+      <!-- Trois groupes, un par question. L'effort mensuel n'est plus saisi :
+           personne ne le connaît de tête. On le compose à partir de deux
+           chiffres que tout le monde connaît. -->
+      <div class="profil__groupes">
+        <div class="profil__groupe">
+          <h3 class="profil__groupe-titre">Ce que vous possédez</h3>
           <label class="champ">
-          <span class="champ__libelle">Patrimoine financier aujourd'hui</span>
-            <span class="champ__court">Patrimoine</span>
-          <span class="champ__saisie">
-            <input type="number" id="capitalInitial" step="1000" min="0">
-            <span class="champ__unite">€</span>
-          </span>
-          <span class="champ__aide">Épargne, placements, liquidités&nbsp;: ce qui pourra servir d'apport, ou rester investi si vous n'achetez pas.</span>
-        </label>
-          <label class="champ">
-          <span class="champ__libelle">Effort mensuel&nbsp;: logement + épargne</span>
-            <span class="champ__court">Effort mensuel</span>
-          <span class="champ__saisie">
-            <input type="number" id="enveloppeMensuelle" step="50" min="0">
-            <span class="champ__unite">€/mois</span>
-          </span>
-          <span class="champ__aide">Ce que vous sortez chaque mois pour vous loger et pour investir. Le même montant des deux côtés&nbsp;: c'est ce qui rend la comparaison honnête.</span>
-        </label>
-          <label class="champ">
-            <span class="champ__libelle">Salaire net avant impôt&nbsp;<em>(facultatif)</em></span>
-            <span class="champ__court">Salaire</span>
+            <span class="champ__libelle">Patrimoine financier</span>
             <span class="champ__saisie">
-              <input type="number" id="salaireNet" step="100" min="0" placeholder="—">
+              <input type="number" id="capitalInitial" step="1000" min="0">
+              <span class="champ__unite">€</span>
+            </span>
+            <span class="champ__aide">Livrets, placements, épargne salariale. <b>Ni votre voiture, ni un bien immobilier.</b> C'est là que l'apport sera pris.</span>
+          </label>
+        </div>
+
+        <div class="profil__groupe profil__groupe--large">
+          <h3 class="profil__groupe-titre">Ce que vous sortez chaque mois</h3>
+          <div class="profil__somme">
+            <label class="champ">
+              <span class="champ__libelle">Loyer actuel</span>
+              <span class="champ__saisie">
+                <input type="number" id="loyerActuel" step="50" min="0">
+                <span class="champ__unite">€/mois</span>
+              </span>
+            </label>
+            <span class="profil__signe" aria-hidden="true">+</span>
+            <label class="champ">
+              <span class="champ__libelle">Épargne mensuelle</span>
+              <span class="champ__saisie">
+                <input type="number" id="epargneActuelle" step="50" min="0">
+                <span class="champ__unite">€/mois</span>
+              </span>
+            </label>
+          </div>
+          <span class="champ__aide">Loyer charges comprises. Épargne&nbsp;: ce que vous mettez de côté en moyenne, virements automatiques compris.</span>
+          <p class="profil__total" aria-live="polite">
+            <span class="profil__total-mot">Votre effort mensuel</span>
+            <output class="profil__total-valeur tabulaire" id="effortTotal">—</output>
+          </p>
+        </div>
+
+        <div class="profil__groupe">
+          <h3 class="profil__groupe-titre">Ce que vous gagnez <em>(facultatif)</em></h3>
+          <label class="champ">
+            <span class="champ__libelle">Revenus nets du foyer, avant impôt</span>
+            <span class="champ__saisie">
+              <input type="number" id="revenusFoyer" step="100" min="0" placeholder="—">
               <span class="champ__unite">€/mois</span>
             </span>
-            <span class="champ__aide">Sert à calculer votre taux d'endettement et la part de votre salaire que représente l'effort mensuel. N'entre dans aucun calcul de patrimoine.</span>
+            <span class="champ__aide">Ligne <b>« Net à payer avant impôt »</b> de la fiche de paie. À deux, additionnez. Primes et 13ᵉ mois&nbsp;: total annuel ÷ 12.</span>
           </label>
+        </div>
       </div>
+
+      <!-- Ne dépend pas du prêt : s'affiche dès que l'effort et les revenus sont là. -->
+      <p class="profil__retour" id="profilRetour" hidden aria-live="polite"></p>
+
+      <p class="profil__rassure">
+        <span class="profil__rassure-icone" aria-hidden="true">=</span>
+        <span>Ces montants <strong>ne font pas pencher la balance</strong>&nbsp;: acheteur et
+        locataire partent du même budget. Ils servent à vérifier que le projet est tenable pour vous.</span>
+      </p>
+
       <div class="profil__pied">
         <button type="button" class="bouton bouton--primaire" id="profilValider">
           Valider mon profil
@@ -77,7 +112,53 @@
       </div>
     </div>
 
-    <p class="profil__ratios" id="profilRatios" hidden></p>
+    <!-- ===== Face à votre projet =====
+         Visible une fois le parcours complet, bandeau ouvert ou replié : c'est
+         ici que se lit l'effort que l'achat demande, et l'hypothèse qui pèse le
+         plus lourd sur le verdict — l'épargne forcée. -->
+    <div class="face" id="profilFace" hidden>
+      <h3 class="face__titre">Face à votre projet</h3>
+      <div class="face__grille">
+        <div class="face__effort">
+          <div class="face__escalier">
+            <p class="face__marche">
+              <span class="face__marche-mot">Votre effort aujourd'hui</span>
+              <span class="face__marche-valeur tabulaire" id="faceEffort"></span>
+            </p>
+            <span class="face__fleche" aria-hidden="true">→</span>
+            <p class="face__marche face__marche--achat">
+              <span class="face__marche-mot">Ce que l'achat demande (année 1)</span>
+              <span class="face__marche-valeur tabulaire" id="faceAchat"></span>
+            </p>
+            <span class="face__ecart tabulaire" id="faceEcart" hidden></span>
+          </div>
+          <p class="face__phrase" id="facePhrase"></p>
+
+          <label class="bascule" id="bascule">
+            <input type="checkbox" id="locatairePlaceDifference" role="switch" checked>
+            <span class="bascule__piste" aria-hidden="true"></span>
+            <span class="bascule__texte">
+              <span id="basculeLibelle"></span>
+              <span class="bascule__aide" id="basculeAide"></span>
+            </span>
+          </label>
+
+          <ul class="face__periodes" id="facePeriodes"></ul>
+        </div>
+
+        <dl class="face__faisabilite" id="faceFaisabilite"></dl>
+      </div>
+      <p class="alerte" id="alerteApport" hidden></p>
+
+      <figure class="face__graphe">
+        <figcaption>
+          <span class="face__graphe-titre">Votre enveloppe, année après année</span>
+          <span class="face__graphe-sous">Elle monte quand un logement l'exige, et ne redescend jamais.</span>
+        </figcaption>
+        <div class="graphique graphique--enveloppe"><canvas id="graphEnveloppe"></canvas></div>
+        <div class="legende legende--compacte" id="legendeEnveloppeProfil"></div>
+      </figure>
+    </div>
   </section>
 
   <div class="plateau" id="formulaire">
@@ -368,12 +449,6 @@
         <p class="attente__compte" id="attenteCompte"></p>
       </div>
 
-      <p class="alerte" id="alerteEnveloppe" hidden>
-        Votre enveloppe mensuelle ne couvre pas le coût de propriétaire
-        (<strong id="alerteCout"></strong>). Augmentez-la, ou revoyez le prix du bien&nbsp;:
-        en l'état, le scénario d'achat n'est pas finançable.
-      </p>
-
       <div class="verdict" id="verdict">
         <div class="verdict__entete">
           <h2 class="verdict__question">Si vous revendez dans</h2>
@@ -385,6 +460,15 @@
         </div>
         <p class="verdict__chiffre" id="verdictChiffre">—</p>
         <p class="verdict__mesure" id="verdictMesure"></p>
+        <!-- Le clic sur la bascule doit se VOIR : de combien le verdict a bougé. -->
+        <p class="verdict__mouvement tabulaire" id="verdictMouvement" hidden></p>
+        <!-- L'hypothèse qui pèse le plus lourd, rappelée sous le chiffre qu'elle
+             décide : on ne la laisse pas dans le bandeau du haut, où elle
+             passerait inaperçue. -->
+        <p class="verdict__hypothese" id="verdictHypothese" hidden>
+          <span id="verdictHypotheseTexte"></span>
+          <button type="button" class="lien" id="verdictHypotheseModifier">Changer</button>
+        </p>
       </div>
 
       <figure class="carte carte--graphique">

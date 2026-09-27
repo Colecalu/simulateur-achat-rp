@@ -244,7 +244,9 @@ réelles — en cours ; **(3)** la mise en location ultérieure — moteur fait,
   Ne jamais opposer « charges de l'acheteur » à « loyers du locataire » sans les épargnes : on
   conclurait que l'achat coûte 210 k€ de plus, alors que cet écart n'est pas dépensé mais investi.
   `repartitionEnveloppe()` porte cette lecture et un test verrouille l'égalité des totaux. Quand
-  l'enveloppe est insuffisante, le côté achat dépasse : c'est voulu, on le montre.
+  l'effort est insuffisant, l'enveloppe monte des deux côtés : les totaux restent égaux. Ils ne
+  diffèrent que si l'utilisateur déclare que le locataire ne placerait pas la différence — l'écart
+  des totaux EST alors l'épargne forcée.
 - **Les titres des deux cartes cumulées portent la période** (« Total versé sur 20 ans », « Frais
   irrécupérables sur 20 ans ») et suivent le curseur. Sans elle, un montant cumulé ne dit pas sur
   quelle durée il est cumulé. Dire **« versé »** et non « dépensé » : l'épargne investie est un
@@ -298,12 +300,38 @@ réelles — en cours ; **(3)** la mise en location ultérieure — moteur fait,
   progression) et `data-etat="pret"`. Les graphiques sont **créés seulement une fois la zone
   visible**, et `resize()` est rappelé au passage attente → prêt : un canevas dimensionné dans un
   conteneur masqué reste à zéro.
-- **Le profil est un bandeau, pas une bulle.** Il décrit l'utilisateur (patrimoine financier,
-  effort mensuel, salaire net facultatif), pas le projet : saisi une fois, il ne varie pas d'une
-  simulation à l'autre. Il vit hors du parcours numéroté, se replie sur une ligne une fois validé
-  et reste modifiable en un clic. Tant qu'il n'est pas validé, le plateau est grisé et inerte
-  (`.plateau--bloque`). Le jour où les comptes utilisateurs arrivent, c'est ce bandeau qui se
-  sauvegarde dans le profil tandis que les bulles deviennent des simulations enregistrables.
+- **Le profil est un bandeau, pas une bulle.** Il décrit l'utilisateur, pas le projet : saisi une
+  fois, il ne varie pas d'une simulation à l'autre. Il vit hors du parcours numéroté, se replie sur
+  une ligne une fois validé et reste modifiable en un clic. Tant qu'il n'est pas validé, le plateau
+  est grisé et inerte (`.plateau--bloque`). Le jour où les comptes utilisateurs arrivent, c'est ce
+  bandeau qui se sauvegarde dans le profil tandis que les bulles deviennent des simulations
+  enregistrables.
+- **Trois questions, et l'effort n'est jamais saisi.** « Ce que vous possédez » (patrimoine
+  financier), « ce que vous sortez chaque mois » (loyer actuel + épargne mensuelle), « ce que vous
+  gagnez » (revenus nets du **foyer**, facultatifs). Personne ne connaît son « effort mensuel » de
+  tête ; tout le monde connaît son loyer et ce qu'il met de côté. L'effort s'affiche comme un
+  **total calculé**, qui ne doit pas avoir l'air d'un champ. Il se stocke décomposé (groupe
+  `profil` de la sauvegarde) et se déduit à la lecture.
+- **« Ces montants ne font pas pencher la balance »** : dit explicitement. Avec l'enveloppe
+  identique, c'est exact au centime, et c'est ce qui évite à l'utilisateur d'hésiter pendant dix
+  minutes entre 3 000 et 3 400 € en croyant changer la réponse.
+- **Le retour immédiat ne dépend pas du projet** : part de l'effort dans les revenus et reste pour
+  le quotidien s'affichent dès la saisie du profil.
+- **« Face à votre projet »**, une fois le parcours complet, bandeau ouvert ou replié : effort
+  actuel → ce que l'achat demande en année 1, le supplément, la phrase qui dit que le locataire
+  place aussi ce supplément, **la bascule**, les périodes de l'enveloppe (« années 1 à 20 :
+  l'enveloppe suit le coût du propriétaire »), la faisabilité (mensualité, taux d'endettement
+  contre les 35 % du HCSF, part des revenus, reste à vivre) et un petit graphique de l'enveloppe en
+  marches d'escalier. Les périodes plutôt qu'une ligne par année : les charges bougent chaque
+  année, une liste annuelle serait illisible.
+- **La bascule d'épargne forcée ne se laisse pas oublier.** Masquée quand l'effort couvre déjà
+  l'achat (elle ne changerait rien, la montrer ferait croire à un réglage cassé). Son libellé
+  décrit un **comportement**, jamais un résultat (« je place aussi ces 148 €/mois », pas « mode
+  réaliste »). Sous le verdict : le rappel de l'hypothèse en cours, un lien « Changer » qui **mène**
+  à la bascule plutôt que de la dupliquer (deux commandes pour un état finissent par se
+  contredire), et, juste après un clic, **de combien le verdict a bougé** — c'est ce montant qui
+  dit ce que vaut la discipline. *Présentation provisoire : la forme définitive (bascule, deux
+  verdicts côte à côte, autre) reste à décider.*
 - **Les champs du profil vivent hors de `#formulaire`** : `#profil` a donc son propre écouteur
   `input`, sans quoi les éditer ne recalculerait rien avant le clic sur « Valider mon profil ».
 - La saisie se fait dans un **plateau de quatre bulles** autour de la visualisation : deux en haut

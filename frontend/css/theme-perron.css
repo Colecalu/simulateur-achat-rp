@@ -108,6 +108,12 @@
   --achat-voile:     var(--clay-50);
   --location-voile:  var(--olive-50);
 
+  /* Ce que l'achat demande EN PLUS de l'effort actuel : l'épargne forcée.
+     Ocre, ni terre cuite ni olive — ce n'est ni l'achat ni la location, c'est
+     l'écart entre les deux budgets. */
+  --supplement:      var(--ochre-700);
+  --supplement-fond: var(--ochre-100);
+
   --succes:          var(--green-500);
   --alerte:          var(--brick-500);
   --alerte-fond:     var(--brick-100);

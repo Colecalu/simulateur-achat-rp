@@ -346,3 +346,45 @@ test('une bascule au-delà de l\'horizon laisse la trajectoire d\'achat intacte'
     );
   }
 });
+
+/* ------------------------------------------- L'enveloppe après la bascule */
+
+test('un loyer futur au-dessus de l\'enveloppe la fait monter, sans reliquat négatif', () => {
+  // L'ancien module plafonnait le reliquat à zéro : le loyer payé ailleurs
+  // dépassait l'enveloppe et personne ne payait la différence.
+  const o = options({ loyerFutur: 4000 });
+  const mel = simulerMiseEnLocation(base, o);
+  for (const l of mel.annees.filter((x) => x.enLocation)) {
+    assert.ok(l.reliquatEnveloppe >= 0, `année ${l.annee} : reliquat positif ou nul`);
+    proche(l.reliquatEnveloppe + l.loyerFuturAnnuel, l.enveloppe, `année ${l.annee} : tout est payé`);
+  }
+});
+
+test('enveloppe identique : le loyer futur relève aussi celle du locataire', () => {
+  // Sans ce plancher transmis au moteur de base, l'utilisateur qui loue son
+  // bien sortirait plus que le locataire de la comparaison, qui n'aurait pas
+  // le droit de placer la même somme : le biais corrigé par le cliquet.
+  const o = options({ loyerFutur: 4000 });
+  const e = { horizon: 25 };
+  const planchers = calcLocation.planchersEnveloppe({ ...calc.DEFAUTS, ...e }, o, 25);
+  const b = simuler({ ...e, planchersEnveloppe: planchers });
+  const mel = simulerMiseEnLocation(b, o);
+  mel.annees.forEach((l, i) => {
+    proche(l.enveloppe, b.annees[i].enveloppeLocation, `année ${l.annee} : même enveloppe`);
+  });
+  // Et l'écart achat / location du moteur de base n'en bouge pas.
+  simuler(e).annees.forEach((x, i) => proche(b.annees[i].ecart, x.ecart, `écart année ${x.annee}`));
+});
+
+test('sans enveloppe identique, aucun plancher n\'est imposé au moteur de base', () => {
+  const e = { ...calc.DEFAUTS, locatairePlaceDifference: false };
+  assert.equal(calcLocation.planchersEnveloppe(e, options(), 25), null);
+  assert.equal(calcLocation.planchersEnveloppe(calc.DEFAUTS, { anneeBascule: null }, 25), null);
+});
+
+test('un loyer futur modeste laisse le module inchangé', () => {
+  // Non-régression : quand l'effort couvre le loyer payé ailleurs, l'enveloppe
+  // reste l'effort déclaré, comme avant.
+  const mel = simulerMiseEnLocation(base, options({ loyerFutur: 1600 }));
+  for (const l of mel.annees) proche(l.enveloppe, 3400 * 12, `année ${l.annee}`);
+});

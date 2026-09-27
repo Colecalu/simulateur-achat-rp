@@ -124,6 +124,45 @@
   }
 
   /**
+   * Loyer payé par l'utilisateur pour se loger ailleurs, l'année `t`, en €/an.
+   *
+   * Saisi en euros DU MOMENT DE LA BASCULE, puis indexé à l'IRL à partir de
+   * là. C'est volontaire : il décrit une décision future (se loger ailleurs,
+   * éventuellement moins cher, en province par exemple). Il n'a donc aucune
+   * raison de suivre la trajectoire du loyer de référence, qui décrit une
+   * autre vie. Indexé sur les années RÉELLEMENT écoulées depuis la bascule :
+   * avec une série, ce sont ces années-là du scénario qui s'appliquent.
+   */
+  function loyerFuturAnnuel(entrees, o, N, t) {
+    if (t < N) return 0;
+    return o.loyerFutur * 12 * facteur(entrees.revalLoyer, N + 1, t);
+  }
+
+  /**
+   * Les planchers d'enveloppe que la mise en location impose au moteur de
+   * base, à lui passer en `planchersEnveloppe` AVANT de simuler.
+   *
+   * Pourquoi c'est nécessaire : après la bascule, l'utilisateur paie un loyer
+   * ailleurs. S'il dépasse l'enveloppe, celle de l'utilisateur monte — et avec
+   * l'enveloppe identique, le locataire de la comparaison doit pouvoir placer
+   * la même somme. Sinon on reproduit exactement le biais que le cliquet
+   * corrige : un côté dépense plus que l'enveloppe, l'autre n'en profite pas.
+   *
+   * Sans enveloppe identique, rien à imposer : chaque trajectoire porte son
+   * propre effort, et la mise en location gère le sien (`simulerMiseEnLocation`).
+   *
+   * @returns {number[]|null} €/an, un par année d'horizon, ou null
+   */
+  function planchersEnveloppe(entrees, options, horizon) {
+    var o = Object.assign({}, DEFAUTS_LOCATION, options || {});
+    if (!entrees.locatairePlaceDifference || o.anneeBascule === null) return null;
+    var N = Math.max(1, Math.round(o.anneeBascule));
+    var planchers = [];
+    for (var t = 1; t <= horizon; t++) planchers.push(loyerFuturAnnuel(entrees, o, N, t));
+    return planchers;
+  }
+
+  /**
    * @param {object} base    - résultat de SimuRP.simuler(), en lecture seule
    * @param {object} options - voir DEFAUTS_LOCATION
    * @returns {object} { options, annees[], dotation, prixAcquisitionFiscal }
@@ -132,7 +171,11 @@
     var o = Object.assign({}, DEFAUTS_LOCATION, options || {});
     var e = base.entrees;
     var N = Math.max(1, Math.round(o.anneeBascule));
-    var enveloppeAnnuelle = e.enveloppeMensuelle * 12;
+    // L'enveloppe de l'utilisateur à l'entrée dans la bascule : celle que le
+    // scénario d'achat avait atteinte l'année précédente. Le cliquet continue.
+    var enveloppe = N > 1 && base.annees.length >= N - 1
+      ? base.annees[N - 2].enveloppeAchat
+      : e.enveloppeMensuelle * 12;
 
     // Valeur du bien l'année où il entre dans l'activité locative : c'est elle
     // qui sert de base à l'amortissement, pas le prix payé des années plus tôt.
@@ -183,6 +226,7 @@
           stockAmortissement: 0,
           stockDeficitFoncier: 0,
           loyerFuturAnnuel: 0,
+          enveloppe: b.enveloppeAchat,
           reliquatEnveloppe: b.surplusProprio,
           versementPortefeuille: b.surplusProprio,
           capitalPortefeuilleBrut: b.capitalAchatBrut,
@@ -203,18 +247,12 @@
       // ---------------------------------------------------------------
       var anneesDepuisBascule = t - N;
 
-      // Les deux loyers sont saisis en euros DU MOMENT DE LA BASCULE, puis
-      // indexés à l'IRL à partir de là. C'est volontaire : ils décrivent une
-      // décision future (relouer son bien, se loger ailleurs — éventuellement
-      // moins cher, en province par exemple). Ils n'ont donc aucune raison de
-      // suivre la trajectoire du loyer de référence, qui décrit une autre vie.
-      // Indexé sur les années RÉELLEMENT écoulées depuis la bascule : avec une
-      // série, ce sont ces années-là du scénario qui s'appliquent, pas les
-      // premières.
+      // Le loyer perçu suit la même règle que le loyer payé ailleurs : saisi
+      // en euros du moment de la bascule, indexé ensuite (voir loyerFuturAnnuel).
       var indexation = facteur(e.revalLoyer, N + 1, t);
       var loyerPercuAnnuel = o.loyerPercu * 12 * indexation;
       var revenusBruts = loyerPercuAnnuel * (1 - o.tauxVacance);
-      var loyerFuturAnnuel = o.loyerFutur * 12 * indexation;
+      var loyerFutur = loyerFuturAnnuel(e, o, N, t);
 
       // Charges et mensualité viennent telles quelles du moteur de base :
       // aucune logique de prêt n'est redupliquée ici.
@@ -288,7 +326,13 @@
       var cashFlowNet = cashFlowAvantImpot - impotLocatif + economieDeficit;
 
       // --- Portefeuille boursier ----------------------------------------
-      var reliquatEnveloppe = Math.max(enveloppeAnnuelle - loyerFuturAnnuel, 0);
+      // Même règle que le moteur de base : l'enveloppe monte si le loyer payé
+      // ailleurs l'exige, ne redescend jamais, et suit celle du scénario
+      // d'achat — qui porte déjà ce loyer en plancher quand l'enveloppe est
+      // identique (voir planchersEnveloppe). La mensualité, elle, n'est plus
+      // payée par l'enveloppe : elle passe par le cash-flow locatif.
+      enveloppe = Math.max(enveloppe, b.enveloppeAchat, loyerFutur);
+      var reliquatEnveloppe = enveloppe - loyerFutur;
 
       // Le mobilier est acheté une seule fois, l'année de la mise en location.
       // C'est une sortie de trésorerie réelle : elle ponctionne le portefeuille.
@@ -340,7 +384,8 @@
         stockAmortissement: stockAmortissement,
         stockDeficitFoncier: totalStock(stockDeficitFoncier),
         loyerPercuAnnuel: loyerPercuAnnuel,
-        loyerFuturAnnuel: loyerFuturAnnuel,
+        loyerFuturAnnuel: loyerFutur,
+        enveloppe: enveloppe,
         reliquatEnveloppe: reliquatEnveloppe,
         achatMobilier: achatMobilier,
         versementPortefeuille: versement,
@@ -372,6 +417,7 @@
     purgerStock: purgerStock,
     abattementPlusValue: abattementPlusValue,
     dotationAmortissement: dotationAmortissement,
+    planchersEnveloppe: planchersEnveloppe,
     simulerMiseEnLocation: simulerMiseEnLocation,
   };
 

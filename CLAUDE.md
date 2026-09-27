@@ -12,7 +12,7 @@ Document de référence du projet. Court par nature : le détail vit dans `docs/
 ## Commandes
 
 ```bash
-node --test "tests/*.test.mjs"   # 74 tests : moteur, location, indicateurs, séries, sauvegarde
+node --test "tests/*.test.mjs"   # 94 tests : moteur, location, indicateurs, séries, sauvegarde
 ```
 
 Le motif est entre guillemets : `node --test tests/` échoue sous Windows (Node tente de charger
@@ -56,7 +56,7 @@ structurante change.
   de feature ouverte par Claude Code est à considérer comme une expérimentation en cours.
 - **Une expérimentation ne remplace jamais l'implémentation en place automatiquement.** Elle est
   analysée sur demande, puis intégrée, adaptée ou écartée — décision de Lucas.
-- **Les 76 tests sont l'arbitre.** Une proposition qui les casse est rejetée, quelle que soit son
+- **Les 94 tests sont l'arbitre.** Une proposition qui les casse est rejetée, quelle que soit son
   élégance. La fixture Excel compare 25 années × 15 grandeurs **au centime** : elle ne se
   contourne pas, elle se respecte ou se discute explicitement.
 
@@ -111,6 +111,18 @@ Un test verrouille la propriété qui en découle : le capital initial et l'enve
 pas l'écart, seulement les niveaux — ils s'annulent dans la différence. Conséquence produit :
 le profil détermine la **faisabilité**, pas la réponse.
 
+**L'enveloppe s'ajuste, elle n'est plus fixe.** L'effort déclaré (loyer actuel + épargne) est
+un plancher : quand un logement coûte plus, l'enveloppe monte à ce niveau, des deux côtés, et ne
+redescend jamais. L'ancien plafonnement de l'épargne à zéro laissait le dépassement payé par
+personne (+454 k€ au lieu de +106 k€ pour un effort de 1 500 €). Désormais l'écart ne dépend du
+profil **pour aucun effort**.
+
+**Seule dérogation admise : l'épargne forcée** (décision de Lucas, sept. 2026). Par défaut le
+locataire place ce que l'acheteur rembourse. L'utilisateur peut déclarer qu'il ne le ferait pas
+(`locatairePlaceDifference`) : seul l'acheteur relève alors son effort, parce que le crédit l'y
+oblige. C'est souvent ce qui décide du verdict ; l'interface la pose, la rappelle sous le verdict
+et dit de combien il bouge. Détail : [docs/modele-de-calcul.md](docs/modele-de-calcul.md).
+
 ### Les trois piliers
 
 1. **Comparaison à coût d'opportunité** — les deux trajectoires complètes. *Fait.*
@@ -146,8 +158,10 @@ les écarts délibérés documentés en fin de ce document-là.
 - Un taux du moteur est **un nombre ou une série année par année** (`tauxAnnee`, `facteur`).
   Une série plus courte que l'horizon n'est **jamais rejouée en boucle** : le prolongement est
   une décision de scénario, explicite et tracée à l'écran.
-- Le **salaire net est facultatif** et n'entre dans aucun calcul patrimonial : il ne sert qu'au
-  taux d'endettement. Non renseigné, l'indicateur vaut `null` — jamais un ratio inventé.
+- Les **revenus nets du foyer sont facultatifs** et n'entrent dans aucun calcul patrimonial : ils
+  ne servent qu'au taux d'endettement, à la part de l'effort et au reste à vivre. Non renseignés,
+  ces indicateurs valent `null` — jamais un ratio inventé. Du **foyer** : un couple qui n'en
+  déclarerait qu'un verrait son taux d'endettement doubler.
 
 Tout changement du moteur doit laisser `node --test "tests/*.test.mjs"` au vert : la fixture contient les
 valeurs réellement calculées par Excel sur 25 ans, au centime près.
@@ -190,7 +204,7 @@ frontend/                    servi tel quel, racine web en production
         app.js               tout le DOM, toute l'interface
 backend/                     vide aujourd'hui — voir docs/backend-spec.md
 docs/                        modèle, conventions UI, spec backend, design, Excel
-tests/                       node --test, 56 tests
+tests/                       node --test, 94 tests
 migrations/                  à créer : SQL numéroté, appliqué à la main
 ```
 
@@ -219,6 +233,10 @@ demi-seconde. Fermer l'onglet ne fait rien perdre, sans compte ni réseau.
 - **`params` décrit un PROJET** — les champs du moteur, ceux de la mise en location, le scénario
   appliqué et l'horizon. C'est ce qui partira tel quel vers le compte. **Aucun état d'interface
   dedans.**
+- **`params.profil` porte la décomposition de l'effort** (`loyerActuel`, `epargneActuelle`) ;
+  `enveloppeMensuelle` s'en **déduit** et ne se stocke pas. Schéma **v2** : la migration v1 → v2
+  renomme `salaireNet` en `revenusFoyer` et range l'ancien effort tout entier en épargne (loyer à
+  0) — la seule répartition qui n'invente rien, et qui redonne exactement les mêmes chiffres.
 - **`avancement` décrit CETTE session dans CE navigateur** — profil validé, bulles validées. Il
   vit dans l'enveloppe du brouillon, jamais dans `params`, et ne partira jamais en base. Sans
   lui, rouvrir l'onglet afficherait un résultat complet alors que l'utilisateur n'a rempli

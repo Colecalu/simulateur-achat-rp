@@ -43,6 +43,15 @@ Les deux trajectoires — achat et location — disposent exactement du même bu
 entre logement et investissement. On ne compare jamais une mensualité à un loyer, on compare deux
 trajectoires de patrimoine. *C'est le différenciateur du projet.* Tout ce qui le dilue le tue.
 
+Précision (décision de Lucas, sept. 2026) : l'enveloppe identique définit le **verdict de
+référence**, affiché par défaut. L'utilisateur peut déclarer qu'en restant locataire il ne
+placerait pas le supplément que l'achat lui imposerait (`locatairePlaceDifference` à `false`) :
+c'est l'**épargne forcée** du crédit, et c'est un choix explicite de l'utilisateur, jamais un
+défaut. Ce n'est pas une violation de l'invariant — c'est la seule dérogation admise, et elle
+est rappelée sous le verdict. L'enveloppe, elle, n'est plus fixe : l'effort déclaré est un
+plancher, elle monte quand un logement l'exige et ne redescend jamais (voir
+docs/modele-de-calcul.md).
+
 **2. La fiscalité s'applique une seule fois, à la sortie.**
 `max(valeur − cumul des versements ; 0) × taux`, jamais annuellement. Le portefeuille capitalise
 brut ; l'impôt n'est retranché que pour afficher le patrimoine net à l'année considérée. C'est un

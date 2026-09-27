@@ -28,16 +28,28 @@ test("les deux trajectoires dépensent exactement la même enveloppe", () => {
     const rep = repartitionEnveloppe(r, annee);
     proche(rep.achat.total, rep.enveloppeCumulee);
     proche(rep.location.total, rep.enveloppeCumulee);
+    proche(rep.enveloppeCumuleeLocation, rep.enveloppeCumulee);
   }
 });
 
-test("l'enveloppe insuffisante fait dépasser le côté achat, sans le masquer", () => {
-  // Hors du domaine finançable, le moteur plafonne le surplus à zéro : le coût
-  // de possession dépasse l'enveloppe. Le dépassement doit rester visible.
+test("un effort insuffisant fait monter l'enveloppe des DEUX côtés", () => {
+  // L'ancien moteur laissait ici le côté achat dépasser l'enveloppe pendant
+  // que le locataire restait bridé. Désormais l'enveloppe monte, et les deux
+  // totaux restent égaux : le locataire place ce que l'acheteur rembourse.
   const serre = simuler({ enveloppeMensuelle: 1200, horizon: 10 });
   const rep = repartitionEnveloppe(serre, 10);
-  assert.equal(rep.achat.epargne, 0);
-  assert.ok(rep.achat.total > rep.enveloppeCumulee);
+  assert.equal(rep.achat.epargne, 0, "l'acheteur n'a rien à placer");
+  assert.ok(rep.enveloppeCumulee > 1200 * 12 * 10, "l'enveloppe est montée");
+  proche(rep.achat.total, rep.enveloppeCumulee);
+  proche(rep.location.total, rep.enveloppeCumulee);
+});
+
+test("sans discipline, l'écart des totaux EST l'épargne forcée", () => {
+  const e = { enveloppeMensuelle: 1200, horizon: 10, locatairePlaceDifference: false };
+  const rep = repartitionEnveloppe(simuler(e), 10);
+  proche(rep.achat.total, rep.enveloppeCumulee);
+  proche(rep.location.total, rep.enveloppeCumuleeLocation);
+  assert.ok(rep.achat.total > rep.location.total, "l'acheteur sort plus que le locataire");
 });
 
 test("la répartition somme bien ses propres postes", () => {
@@ -118,14 +130,16 @@ test("les cumuls sont bornés à l'horizon simulé", () => {
 });
 
 test("la répartition annuelle somme l'enveloppe de chaque année", () => {
-  const annuel = calc.repartitionAnnuelle(r);
-  const enveloppe = DEFAUTS.enveloppeMensuelle * 12;
-  assert.equal(annuel.length, r.annees.length);
-  for (const ligne of annuel) {
+  // Sur un effort serré, pour que l'enveloppe varie d'une année à l'autre.
+  const s = simuler({ enveloppeMensuelle: 1500, dureeAnnees: 15, horizon: 25 });
+  const annuel = calc.repartitionAnnuelle(s);
+  assert.equal(annuel.length, s.annees.length);
+  annuel.forEach((ligne, i) => {
     const a = ligne.achat;
+    const enveloppe = s.annees[i].enveloppeAchat;
     proche(a.credit + a.capital + a.possession + a.epargne, enveloppe);
     proche(ligne.location.loyers + ligne.location.epargne, enveloppe);
-  }
+  });
 });
 
 test("le cumul des années redonne la répartition cumulée", () => {

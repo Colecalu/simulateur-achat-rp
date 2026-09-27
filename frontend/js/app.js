@@ -22,6 +22,8 @@
   const fraisIrrecuperables = window.SimuRP.fraisIrrecuperables;
   const DEFAUTS_LOCATION = window.SimuRPLocation.DEFAUTS_LOCATION;
   const simulerMiseEnLocation = window.SimuRPLocation.simulerMiseEnLocation;
+  const planchersEnveloppe = window.SimuRPLocation.planchersEnveloppe;
+  const periodesEnveloppe = window.SimuRP.periodesEnveloppe;
 
 /* ------------------------------------------------------------------ Outils */
 
@@ -36,10 +38,14 @@ const POURCENTAGES = new Set([
 const CHAMPS = Object.keys(DEFAUTS).filter((c) => c !== 'horizon');
 
 /** Champs facultatifs : laissés vides à l'écran plutôt qu'affichés à zéro. */
-const FACULTATIFS = new Set(['salaireNet']);
+const FACULTATIFS = new Set(['revenusFoyer']);
 
-/** Champs du profil : saisis une fois, hors du parcours numéroté. */
-const CHAMPS_PROFIL = ['capitalInitial', 'enveloppeMensuelle', 'salaireNet'];
+/**
+ * La décomposition de l'effort, saisie dans le profil. Le moteur n'en voit que
+ * la somme (`enveloppeMensuelle`) ; ces deux champs vivent donc dans le groupe
+ * `profil` de la sauvegarde, pas dans celui du moteur.
+ */
+const CHAMPS_EFFORT = ['loyerActuel', 'epargneActuelle'];
 
 const euros = new Intl.NumberFormat('fr-FR', {
   style: 'currency', currency: 'EUR', maximumFractionDigits: 0,
@@ -67,11 +73,33 @@ function attenue(couleur, part) {
 
 /* ------------------------------------------------------- Lecture du formulaire */
 
+/**
+ * Loyer actuel et épargne, tels que saisis. Un champ vidé vaut 0, pas le
+ * défaut : ce sont des montants qui s'additionnent, et « rien » est une
+ * réponse plausible (on n'épargne pas, on est hébergé gratuitement).
+ */
+function lireProfil() {
+  const profil = {};
+  for (const champ of CHAMPS_EFFORT) {
+    const v = parseFloat(document.getElementById(champ).value);
+    profil[champ] = Number.isFinite(v) ? Math.max(v, 0) : 0;
+  }
+  return profil;
+}
+
+function remplirProfil(profil) {
+  for (const champ of CHAMPS_EFFORT) document.getElementById(champ).value = profil[champ];
+}
+
 function lireFormulaire() {
   const saisie = {};
   for (const champ of CHAMPS) {
     const el = document.getElementById(champ);
     if (!el) continue;
+    if (el.type === 'checkbox') {
+      saisie[champ] = el.checked;
+      continue;
+    }
     if (el.tagName === 'SELECT') {
       saisie[champ] = el.value;
       continue;
@@ -81,6 +109,11 @@ function lireFormulaire() {
     saisie[champ] = POURCENTAGES.has(champ) ? valeur / 100 : valeur;
   }
   saisie.horizon = 25; // on calcule toujours 25 ans, le curseur ne fait que lire
+
+  // L'effort déclaré n'est pas saisi : il se compose. Addition et non calcul
+  // financier, elle a sa place ici comme la conversion des pourcentages.
+  const profil = lireProfil();
+  saisie.enveloppeMensuelle = profil.loyerActuel + profil.epargneActuelle;
 
   // Un scénario actif remplace les taux du formulaire par ses SÉRIES. Les
   // champs de la bulle 4 n'affichent alors que le taux annuel équivalent :
@@ -95,6 +128,7 @@ function remplirFormulaire(valeurs) {
     const el = document.getElementById(champ);
     if (!el) continue;
     const v = valeurs[champ];
+    if (el.type === 'checkbox') { el.checked = v !== false; continue; }
     if (FACULTATIFS.has(champ) && !v) { el.value = ''; continue; }
     el.value = POURCENTAGES.has(champ) ? +(v * 100).toFixed(4) : v;
   }
@@ -164,18 +198,11 @@ function afficherVerdict(resultat, horizon) {
   const chiffre = $('#verdictChiffre');
   const mesure = $('#verdictMesure');
 
-  // Enveloppe insuffisante : le modèle plafonne les deux épargnes à zéro et
-  // ne facture nulle part le déficit du propriétaire. L'écart calculé serait
-  // flatteur pour l'achat sans rien vouloir dire — on refuse de le trancher.
-  if (!resultat.enveloppeSuffisante) {
-    chiffre.textContent = '—';
-    chiffre.className = 'verdict__chiffre verdict__chiffre--indecis';
-    mesure.textContent =
-      `Votre enveloppe ne finance pas l'achat : il manque ${eurosPrecis.format(
-        resultat.coutMensuelProprio - resultat.entrees.enveloppeMensuelle
-      )} par mois la première année.`;
-    return;
-  }
+  // Plus de refus de trancher quand l'effort ne couvre pas l'achat : le moteur
+  // ne laisse plus le dépassement impayé, il fait monter l'enveloppe des deux
+  // côtés. L'écart est donc juste, et le supplément se lit dans le profil.
+  afficherHypothese(resultat);
+  afficherMouvement(ecart);
 
   chiffre.textContent = signe(ecart);
   chiffre.className = 'verdict__chiffre ' +
@@ -193,16 +220,52 @@ function afficherVerdict(resultat, horizon) {
     : 'de patrimoine en plus en restant locataire qu\'en achetant.';
 }
 
-/* ------------------------------------------------------------------ Alerte */
+/* --------------------------------------------------------- Épargne forcée */
 
-/** Prévient quand l'enveloppe ne finance pas le scénario d'achat. */
-function afficherAlerte(resultat) {
-  const alerte = $('#alerteEnveloppe');
-  alerte.hidden = resultat.enveloppeSuffisante;
-  if (!resultat.enveloppeSuffisante) {
-    $('#alerteCout').textContent =
-      `${eurosPrecis.format(resultat.coutMensuelProprio)} par mois la première année`;
+/**
+ * Écart affiché juste avant un clic sur la bascule, ou null. Posé par
+ * l'écouteur de la case, AVANT le recalcul (la case le reçoit avant le
+ * bandeau, qui l'écoute par propagation) ; consommé par le verdict qui suit.
+ */
+let ecartAvantBascule = null;
+
+/**
+ * « Le verdict a bougé de 88 895 € vers l'achat. »
+ *
+ * La bascule change le verdict de dizaines ou de centaines de milliers
+ * d'euros. Sans ce rappel, le chiffre change sous les yeux sans qu'on sache
+ * de combien : c'est pourtant CE montant qui dit ce que vaut la discipline.
+ */
+function afficherMouvement(ecart) {
+  const el = $('#verdictMouvement');
+  if (ecartAvantBascule === null) {
+    el.hidden = true;
+    return;
   }
+  const delta = ecart - ecartAvantBascule;
+  ecartAvantBascule = null;
+  el.textContent =
+    `Le verdict a bougé de ${euros.format(Math.abs(delta))} vers ` +
+    (delta >= 0 ? 'l\'achat.' : 'la location.');
+  el.hidden = Math.abs(delta) < 1;
+}
+
+/**
+ * Rappel de l'hypothèse sous le verdict. L'hypothèse pèse souvent plus que le
+ * marché ; la laisser dans le bandeau du haut, c'est la laisser passer
+ * inaperçue. Rien à rappeler quand l'effort couvre déjà l'achat : il n'y a
+ * alors pas de supplément dont on se demanderait s'il serait placé.
+ */
+function afficherHypothese(resultat) {
+  const supplement = resultat.supplementAchat;
+  const el = $('#verdictHypothese');
+  el.hidden = supplement < 1;
+  if (el.hidden) return;
+  $('#verdictHypotheseTexte').textContent = resultat.entrees.locatairePlaceDifference
+    ? `Hypothèse : en restant locataire, vous placez aussi les ${euros.format(supplement)}/mois ` +
+      'que l\'achat vous demanderait en plus.'
+    : `Hypothèse : en restant locataire, vous ne placez pas les ${euros.format(supplement)}/mois ` +
+      'que l\'achat vous imposerait — seul l\'acheteur se serre la ceinture.';
 }
 
 /* --------------------------------------------------------------- Graphiques */
@@ -1166,6 +1229,8 @@ function paramsCourants() {
   for (const champ of Object.keys(p.moteur)) {
     if (champ in saisie) p.moteur[champ] = saisie[champ];
   }
+  // La décomposition, pas la somme : l'effort se déduit, il ne se stocke pas.
+  p.profil = lireProfil();
 
   // Les champs de mise en location sont lus directement : `lireFormulaireMel`
   // rend `null` tant que le palier 1 est incomplet, or on veut sauvegarder la
@@ -1237,6 +1302,7 @@ function restaurerBrouillon() {
   if (!brouillon) return false;
 
   remplirFormulaire(brouillon.params.moteur);
+  remplirProfil(brouillon.params.profil);
 
   const champ = (id, v, pourcentage) => {
     const el = document.getElementById(id);
@@ -1316,9 +1382,23 @@ function initialiserBrouillon() {
 /* ---------------------------------------------------------------- Orchestre */
 
 let dernierResultat = null;
+/** Options de mise en location du dernier calcul, ou null si le module est fermé ou incomplet. */
+let dernieresOptionsMel = null;
 
 function recalculer() {
-  dernierResultat = simuler(lireFormulaire());
+  const saisie = lireFormulaire();
+
+  // La mise en location se lit AVANT le moteur de base : le loyer payé
+  // ailleurs après la bascule peut dépasser l'enveloppe, et avec l'enveloppe
+  // identique le locataire de la comparaison doit pouvoir placer la même
+  // somme. calc-location.js fournit ces planchers ; calc.js les applique sans
+  // savoir d'où ils viennent.
+  dernieresOptionsMel = $('#melPanneau').hidden ? null : lireFormulaireMel();
+  saisie.planchersEnveloppe = dernieresOptionsMel
+    ? planchersEnveloppe(saisie, dernieresOptionsMel, saisie.horizon)
+    : null;
+
+  dernierResultat = simuler(saisie);
   rafraichir();
 }
 
@@ -1348,8 +1428,7 @@ function rafraichir() {
   if (!dernierResultat) return;
   const horizon = parseInt($('#horizon').value, 10);
 
-  const optionsMel = $('#melPanneau').hidden ? null : lireFormulaireMel();
-  const mel = optionsMel ? simulerMiseEnLocation(dernierResultat, optionsMel) : null;
+  const mel = dernieresOptionsMel ? simulerMiseEnLocation(dernierResultat, dernieresOptionsMel) : null;
   $('#melIncomplet').hidden = !!mel || $('#melPanneau').hidden;
 
   majBulles();
@@ -1358,7 +1437,6 @@ function rafraichir() {
   afficherProfil(dernierResultat);
   if (!majAttente()) return;
 
-  afficherAlerte(dernierResultat);
   afficherVerdict(dernierResultat, horizon);
   dessinerGraphiques(dernierResultat, horizon, mel);
   dessinerDetail(dernierResultat, horizon);
@@ -1405,41 +1483,247 @@ function figerProfil(discret) {
   if (suivante !== null) bulle(suivante).querySelector('.bulle__declencheur').focus();
 }
 
-/** Résumé du bandeau replié, et ratios déduits du salaire s'il est renseigné. */
+/* Petits constructeurs DOM : tout ce qui s'affiche ici passe par textContent,
+   jamais par innerHTML — les montants viennent de la saisie de l'utilisateur. */
+const noeud = (balise, classe, texte) => {
+  const el = document.createElement(balise);
+  if (classe) el.className = classe;
+  if (texte !== undefined) el.textContent = texte;
+  return el;
+};
+const pourcent = (x) => `${Math.round(x * 100)} %`;
+const parMois = (v) => `${euros.format(v)}/mois`;
+
+/** Seuil du HCSF sur le taux d'endettement, assurance comprise. */
+const PLAFOND_HCSF = 0.35;
+
+/**
+ * Le bandeau profil : résumé replié, total de l'effort, retour immédiat sur
+ * les revenus, et — une fois le parcours complet — le face-à-face avec le
+ * projet. Aucune règle de calcul ici : tout vient de `resultat`.
+ */
 function afficherProfil(resultat) {
   const e = resultat.entrees;
+  const profil = lireProfil();
 
-  const morceaux = [
-    `<span class="profil__item"><span class="profil__mot">Patrimoine</span> ${euros.format(e.capitalInitial)}</span>`,
-    `<span class="profil__item"><span class="profil__mot">Effort</span> ${euros.format(e.enveloppeMensuelle)}/mois</span>`,
+  // --- Résumé du bandeau replié ------------------------------------------
+  const item = (mot, valeur, detail) => {
+    const s = noeud('span', 'profil__item');
+    s.append(noeud('span', 'profil__mot', mot), valeur);
+    if (detail) s.append(noeud('span', 'profil__detail', detail));
+    return s;
+  };
+  const resume = [
+    item('Patrimoine', euros.format(e.capitalInitial)),
+    item('Effort', parMois(e.enveloppeMensuelle),
+      `(loyer ${euros.format(profil.loyerActuel)} + épargne ${euros.format(profil.epargneActuelle)})`),
   ];
-  if (e.salaireNet > 0) {
-    morceaux.push(
-      `<span class="profil__item"><span class="profil__mot">Salaire</span> ${euros.format(e.salaireNet)}/mois</span>`
-    );
+  if (e.revenusFoyer > 0) {
+    resume.push(item('Revenus', parMois(e.revenusFoyer), `· effort ${pourcent(resultat.partEffortActuel)}`));
   }
-  $('#profilResume').innerHTML = morceaux.join('');
+  $('#profilResume').replaceChildren(...resume);
 
-  const ratios = $('#profilRatios');
-  if (e.salaireNet <= 0) {
-    ratios.hidden = true;
+  // --- Total de l'effort, et retour immédiat -----------------------------
+  // Ni l'un ni l'autre ne dépend du projet : ils s'affichent dès la saisie.
+  $('#effortTotal').textContent = parMois(e.enveloppeMensuelle);
+
+  const retour = $('#profilRetour');
+  retour.hidden = !(e.revenusFoyer > 0);
+  if (!retour.hidden) {
+    const a = noeud('span');
+    a.append('Votre effort représente ', noeud('strong', '', pourcent(resultat.partEffortActuel)),
+      ' de vos revenus');
+    const b = noeud('span');
+    b.append(noeud('strong', '', parMois(Math.max(resultat.resteAVivreActuel, 0))),
+      ' restent pour le quotidien');
+    retour.replaceChildren(a, b);
+    retour.classList.toggle('profil__retour--alerte', resultat.resteAVivreActuel < 0);
+  }
+
+  // --- Face à votre projet -----------------------------------------------
+  // Rien avant que le projet soit entièrement décrit : c'est la règle de
+  // toute la page, pas de chiffre sur des valeurs que l'utilisateur n'a pas
+  // posées.
+  const face = $('#profilFace');
+  face.hidden = !parcoursComplet();
+  if (face.hidden) return;
+
+  afficherEffortProjet(resultat);
+  afficherPeriodes(resultat);
+  afficherFaisabilite(resultat);
+
+  const alerte = $('#alerteApport');
+  alerte.hidden = e.apport <= e.capitalInitial;
+  if (!alerte.hidden) {
+    alerte.textContent =
+      `L'apport (${euros.format(e.apport)}) dépasse votre patrimoine financier ` +
+      `(${euros.format(e.capitalInitial)}) : le portefeuille de l'acheteur partirait en ` +
+      'négatif. Réduisez l\'apport, ou corrigez votre patrimoine.';
+  }
+
+  dessinerEnveloppe(resultat);
+}
+
+/** Effort actuel → ce que l'achat demande, la phrase qui l'explique, la bascule. */
+function afficherEffortProjet(resultat) {
+  const e = resultat.entrees;
+  const supplement = resultat.supplementAchat;
+
+  $('#faceEffort').textContent = parMois(e.enveloppeMensuelle);
+  $('#faceAchat').textContent = parMois(resultat.coutMensuelProprio);
+
+  const ecart = $('#faceEcart');
+  const phrase = $('#facePhrase');
+  const bascule = $('#bascule');
+
+  // Pas de supplément, pas d'épargne forcée : la bascule ne changerait rien,
+  // la montrer ferait croire à un réglage cassé.
+  if (supplement < 1) {
+    ecart.hidden = true;
+    bascule.hidden = true;
+    phrase.className = 'face__phrase face__phrase--neutre';
+    phrase.textContent =
+      'Votre effort actuel couvre le coût de l\'achat : les deux côtés partent du même budget, ' +
+      'sans effort supplémentaire.';
     return;
   }
 
-  // Le taux d'endettement dépend du prêt : rien à montrer avant que
-  // l'opération et le financement soient renseignés.
-  if (!parcoursComplet()) {
-    ratios.hidden = true;
-    return;
-  }
+  ecart.hidden = false;
+  ecart.textContent = `+${euros.format(supplement)} (+${pourcent(supplement / Math.max(e.enveloppeMensuelle, 1))})`;
+  phrase.className = 'face__phrase';
+  phrase.textContent =
+    `L'achat vous demande ${euros.format(supplement)} de plus par mois que votre effort actuel. ` +
+    `Pour comparer à armes égales, le locataire place aussi ces ${euros.format(supplement)} ` +
+    'chaque mois.';
 
-  const taux = resultat.tauxEndettement;
-  ratios.innerHTML =
-    `Taux d'endettement&nbsp;: <strong>${Math.round(taux * 100)} %</strong> ` +
-    `(mensualité ${eurosPrecis.format(resultat.mensualiteTotale)}).` +
-    (taux > 0.35 ? ' Au-delà du plafond de 35 % habituellement retenu par les banques.' : '');
-  ratios.classList.toggle('profil__ratios--alerte', taux > 0.35);
-  ratios.hidden = false;
+  bascule.hidden = false;
+  $('#basculeLibelle').replaceChildren('En restant locataire, ',
+    noeud('strong', '', `je place aussi ces ${parMois(supplement)}`), '.');
+  $('#basculeAide').textContent = e.locatairePlaceDifference
+    ? 'Désactivez si, sans crédit à rembourser, vous garderiez vos habitudes d\'épargne actuelles.'
+    : 'Désactivé : le locataire garde son effort actuel, seul l\'acheteur se serre la ceinture.';
+}
+
+/** Ce qui fixe l'enveloppe, période par période. */
+const PILOTES = {
+  effort: 'votre effort déclaré suffit',
+  achat: 'l\'enveloppe suit le coût du propriétaire',
+  loyer: 'le loyer dépasse, l\'enveloppe le suit',
+  autre: 'le loyer payé ailleurs après la mise en location la fait monter',
+  maintenu: 'plus rien ne l\'exige, elle reste au niveau atteint',
+};
+
+function afficherPeriodes(resultat) {
+  const liste = [];
+  const ecrire = (periodes, qui) => {
+    // Une seule période « effort » : rien ne bouge, inutile de le dire.
+    if (periodes.length === 1 && periodes[0].pilote === 'effort') return;
+    for (const p of periodes) {
+      const ans = p.debut === p.fin ? `Année ${p.debut}` : `Années ${p.debut} à ${p.fin}`;
+      const montant = Math.round(p.depuis) === Math.round(p.jusqua)
+        ? euros.format(p.depuis)
+        : `${euros.format(p.depuis)} → ${euros.format(p.jusqua)}`;
+      liste.push(noeud('li', '', `${qui ? qui + ' — ' : ''}${ans} : ${PILOTES[p.pilote]} (${montant}/mois).`));
+    }
+  };
+  if (resultat.entrees.locatairePlaceDifference) {
+    ecrire(periodesEnveloppe(resultat, 'achat'));
+  } else {
+    ecrire(periodesEnveloppe(resultat, 'achat'), 'Acheteur');
+    ecrire(periodesEnveloppe(resultat, 'location'), 'Locataire');
+  }
+  $('#facePeriodes').replaceChildren(...liste);
+}
+
+/** Mensualité, endettement, part des revenus, reste à vivre. */
+function afficherFaisabilite(resultat) {
+  const dl = $('#faceFaisabilite');
+  const lignes = [];
+  const ligne = (mot, valeur, alerte) => {
+    const d = noeud('div', 'face__ligne' + (alerte ? ' face__ligne--alerte' : ''));
+    d.append(noeud('dt', '', mot), noeud('dd', '', valeur));
+    lignes.push(d);
+  };
+
+  ligne('Mensualité, assurance comprise', parMois(resultat.mensualiteTotale));
+  if (resultat.entrees.revenusFoyer > 0) {
+    const excessif = resultat.tauxEndettement > PLAFOND_HCSF;
+    ligne('Taux d\'endettement' + (excessif ? ' — au-delà des 35 % du HCSF' : ''),
+      pourcent(resultat.tauxEndettement), excessif);
+    ligne('Effort de l\'achat / revenus', pourcent(resultat.partEffortAchat));
+    ligne('Reste pour le quotidien', parMois(resultat.resteAVivreAchat), resultat.resteAVivreAchat < 0);
+    dl.replaceChildren(...lignes);
+  } else {
+    dl.replaceChildren(...lignes,
+      noeud('p', 'face__vide',
+        'Renseignez vos revenus pour voir votre taux d\'endettement et ce qui vous reste pour vivre.'));
+  }
+}
+
+let graphEnveloppe = null;
+
+/**
+ * L'enveloppe année par année, avec ce qui la fait monter : coût du
+ * propriétaire et loyer en tirets, effort déclaré en pointillé. En marches
+ * d'escalier, parce qu'elle change d'une année sur l'autre, pas en continu.
+ */
+function dessinerEnveloppe(resultat) {
+  if (typeof Chart === 'undefined') return;
+  const A = resultat.annees;
+  const identique = resultat.entrees.locatairePlaceDifference;
+  const cAchat = jeton('--achat');
+  const cLocation = jeton('--location');
+
+  const courbe = (label, valeurs, couleur, options) => Object.assign({
+    label,
+    data: valeurs.map((v) => v / 12),
+    borderColor: couleur,
+    backgroundColor: couleur,
+    borderWidth: 1.5,
+    pointRadius: 0,
+    pointHoverRadius: 4,
+    fill: false,
+  }, options);
+
+  const datasets = [];
+  if (identique) {
+    datasets.push(courbe('Enveloppe, des deux côtés', A.map((x) => x.enveloppeAchat),
+      jeton('--encre'), { borderWidth: 3, stepped: 'before' }));
+  } else {
+    datasets.push(courbe('Enveloppe de l\'acheteur', A.map((x) => x.enveloppeAchat),
+      cAchat, { borderWidth: 3, stepped: 'before' }));
+    datasets.push(courbe('Enveloppe du locataire', A.map((x) => x.enveloppeLocation),
+      cLocation, { borderWidth: 3, stepped: 'before' }));
+  }
+  datasets.push(courbe('Coût du propriétaire', A.map((x) => x.totalDebourseAnnuel),
+    attenue(cAchat, 0.6), { borderDash: [5, 4] }));
+  datasets.push(courbe('Loyer', A.map((x) => x.loyerAnnuel),
+    attenue(cLocation, 0.6), { borderDash: [5, 4] }));
+  datasets.push(courbe('Effort déclaré', A.map(() => resultat.entrees.enveloppeMensuelle * 12),
+    jeton('--encre-3'), { borderDash: [2, 4] }));
+
+  const o = optionsCommunes();
+  o.scales.y.ticks.callback = (v) => euros.format(v);
+  o.scales.y.ticks.maxTicksLimit = 5;
+
+  graphEnveloppe = poser(graphEnveloppe, '#graphEnveloppe', 'line', {
+    labels: A.map((x) => x.annee),
+    datasets,
+  }, o);
+
+  const trait = (classe, texte) => {
+    const s = noeud('span', 'legende__item');
+    s.append(noeud('span', `trait trait--${classe}`), texte);
+    return s;
+  };
+  $('#legendeEnveloppeProfil').replaceChildren(
+    ...(identique
+      ? [trait('enveloppe', 'Enveloppe, des deux côtés')]
+      : [trait('achat', 'Enveloppe de l\'acheteur'), trait('location', 'Enveloppe du locataire')]),
+    trait('cout', 'Coût du propriétaire'),
+    trait('loyer', 'Loyer'),
+    trait('effort', 'Effort déclaré')
+  );
 }
 
 /** Toutes les bulles sont-elles renseignées ? Sans quoi rien n'est affiché. */
@@ -1665,6 +1949,7 @@ function initialiserSaisie() {
 
 function initialiser() {
   remplirFormulaire(DEFAUTS);
+  remplirProfil(Sauvegarde.DEFAUTS_PROFIL);
   remplirFormulaireMel();
   initialiserSaisie();
   initialiserDetail();
@@ -1683,6 +1968,7 @@ function initialiser() {
   });
   $('#reinitialiser').addEventListener('click', () => {
     remplirFormulaire(DEFAUTS);
+    remplirProfil(Sauvegarde.DEFAUTS_PROFIL);
     $('#horizon').value = 20;
     validees.clear();
     profilValide = false;
@@ -1701,6 +1987,24 @@ function initialiser() {
   $('#profilValider').addEventListener('click', figerProfil);
   $('#profilModifier').addEventListener('click', ouvrirProfil);
 
+  // La case reçoit l'événement AVANT le bandeau qui l'écoute par propagation :
+  // on mémorise ici l'écart affiché, pour dire ensuite de combien il a bougé.
+  $('#locatairePlaceDifference').addEventListener('input', () => {
+    const horizon = parseInt($('#horizon').value, 10);
+    ecartAvantBascule = parcoursComplet() && dernierResultat
+      ? dernierResultat.annees[horizon - 1].ecart
+      : null;
+  });
+  // « Changer », sous le verdict : on mène à la bascule plutôt que de la
+  // dupliquer — deux commandes pour un même état finissent par se contredire.
+  $('#verdictHypotheseModifier').addEventListener('click', () => {
+    const bascule = $('#bascule');
+    bascule.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    bascule.classList.add('bascule--signalee');
+    $('#locatairePlaceDifference').focus({ preventScroll: true });
+    setTimeout(() => bascule.classList.remove('bascule--signalee'), 1600);
+  });
+
   initialiserBulles();
 
   // Divulgation progressive : le module n'existe qu'après un clic explicite.
@@ -1709,15 +2013,17 @@ function initialiser() {
     $('#melOuvrir').hidden = true;
     $('#melOuvrir').setAttribute('aria-expanded', 'true');
     $('#melAnneeBascule').focus();
-    rafraichir();
+    recalculer();
   });
   $('#melFermer').addEventListener('click', () => {
     $('#melPanneau').hidden = true;
     $('#melOuvrir').hidden = false;
     $('#melOuvrir').setAttribute('aria-expanded', 'false');
-    rafraichir();
+    recalculer();
   });
-  $('#melFormulaire').addEventListener('input', rafraichir);
+  // `recalculer` et non plus `rafraichir` : le loyer payé après la bascule
+  // peut relever l'enveloppe du moteur de base (voir `recalculer`).
+  $('#melFormulaire').addEventListener('input', recalculer);
 
   // En dernier : la restauration écrase les défauts et l'état du parcours.
   initialiserBrouillon();

@@ -25,9 +25,13 @@ const paquet = (params, version = SCHEMA_VERSION) => ({
 test('un brouillon vide porte tous les défauts du moteur', () => {
   const p = vide();
   for (const cle of Object.keys(DEFAUTS)) {
-    if (cle === 'horizon') continue;
+    if (cle === 'horizon' || cle === 'enveloppeMensuelle') continue;
     assert.equal(p.moteur[cle], DEFAUTS[cle], `champ ${cle}`);
   }
+  // L'effort ne se stocke pas : il se déduit du profil, et le profil par
+  // défaut redonne exactement l'effort du moteur — donc la fixture Excel.
+  assert.ok(!('enveloppeMensuelle' in p.moteur), "l'effort déduit n'est pas stocké");
+  assert.equal(p.profil.loyerActuel + p.profil.epargneActuelle, DEFAUTS.enveloppeMensuelle);
   assert.equal(p.scenario, null);
   assert.equal(p.horizon, 20);
   assert.ok('anneeBascule' in p.location, 'les champs de mise en location sont là');
@@ -81,22 +85,58 @@ test('des paramètres absents donnent un brouillon complet, pas une erreur', () 
 });
 
 test('les migrations s\'appliquent dans l\'ordre des versions', () => {
-  // La mécanique est testée avec des migrations fabriquées : aujourd'hui il n'y
-  // en a aucune de réelle, mais c'est le jour où on en écrira une qu'il sera
-  // trop tard pour découvrir qu'elles ne s'enchaînent pas.
+  // La mécanique est testée avec des migrations fabriquées, pour ne dépendre
+  // d'aucune migration réelle.
   const trace = [];
   const fausses = {
     2: (p) => { trace.push(2); p.moteur.prixNetVendeur += 1; return p; },
     3: (p) => { trace.push(3); p.moteur.prixNetVendeur += 10; return p; },
   };
-  const original = sauvegarde.SCHEMA_VERSION;
 
-  // On ne peut pas changer SCHEMA_VERSION depuis le test : on vérifie donc que
-  // les migrations au-delà de la version courante NE sont PAS appliquées.
+  // Depuis la v1, seules les migrations jusqu'à la version courante s'appliquent,
+  // dans l'ordre ; celles au-delà NE sont PAS appliquées.
   const p = migrer(paquet({ moteur: { prixNetVendeur: 100 }, location: {} }, 1), fausses);
-  assert.deepEqual(trace, [], 'aucune migration au-delà de la version courante');
-  assert.equal(p.moteur.prixNetVendeur, 100);
-  assert.equal(original, SCHEMA_VERSION);
+  const attendues = [2, 3].filter((v) => v <= SCHEMA_VERSION);
+  assert.deepEqual(trace, attendues, 'dans l\'ordre, et pas au-delà de la version courante');
+  assert.equal(p.moteur.prixNetVendeur, 100 + (attendues.includes(2) ? 1 : 0) + (attendues.includes(3) ? 10 : 0));
+});
+
+/* ---------------------------------------------------------- Migration v2 */
+
+test('v1 → v2 : le salaire devient les revenus du foyer, valeur conservée', () => {
+  const p = migrer(paquet({ moteur: { salaireNet: 4200 }, location: {} }, 1));
+  assert.equal(p.moteur.revenusFoyer, 4200);
+  assert.ok(!('salaireNet' in p.moteur));
+});
+
+test('v1 → v2 : l\'effort se range en épargne, et redonne exactement le même effort', () => {
+  // Une v1 ne dit pas comment son effort se répartissait entre loyer et
+  // épargne. La migration ne l'invente pas : tout en épargne, loyer à 0.
+  const p = migrer(paquet({ moteur: { enveloppeMensuelle: 2750 }, location: {} }, 1));
+  assert.equal(p.profil.loyerActuel, 0);
+  assert.equal(p.profil.epargneActuelle, 2750);
+  assert.ok(!('enveloppeMensuelle' in p.moteur), 'plus stocké : il se déduit');
+});
+
+test('v1 → v2 : une v1 complète se calcule exactement comme avant', () => {
+  // Le test qui compte : même projet, mêmes chiffres. Tant que l'effort couvre
+  // le logement, la règle de l'enveloppe n'a rien changé au calcul.
+  const v1 = { moteur: { ...DEFAUTS, salaireNet: 5000 }, location: {}, horizon: 25 };
+  delete v1.moteur.revenusFoyer;
+  delete v1.moteur.locatairePlaceDifference;
+  const p = migrer(paquet(v1, 1));
+  const effort = p.profil.loyerActuel + p.profil.epargneActuelle;
+  const apres = calc.simuler({ ...p.moteur, enveloppeMensuelle: effort, horizon: 25 });
+  const avant = calc.simuler({ ...DEFAUTS, revenusFoyer: 5000, horizon: 25 });
+  apres.annees.forEach((x, i) => assert.equal(x.ecart, avant.annees[i].ecart, `année ${x.annee}`));
+  assert.equal(apres.tauxEndettement, avant.tauxEndettement);
+});
+
+test('v1 → v2 : une v1 bricolée ne fait pas planter la migration', () => {
+  for (const params of [null, {}, { moteur: null }, { moteur: { enveloppeMensuelle: 'x' } }]) {
+    assert.doesNotThrow(() => migrer(paquet(params, 1)));
+    assert.notEqual(migrer(paquet(params, 1)), null);
+  }
 });
 
 test('une migration qui casse ne casse pas la page', () => {
@@ -180,7 +220,7 @@ test("un aller-retour complet ne perd aucune valeur", () => {
   // avec des valeurs distinctes des défauts, et on vérifie qu'ils survivent.
   const avant = vide();
   let n = 1;
-  for (const groupe of ['moteur', 'location']) {
+  for (const groupe of ['profil', 'moteur', 'location']) {
     for (const cle of Object.keys(avant[groupe])) {
       const d = avant[groupe][cle];
       if (typeof d === 'number' || d === null) avant[groupe][cle] = 1000 + n++;

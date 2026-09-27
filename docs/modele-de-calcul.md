@@ -80,12 +80,54 @@ loyer annuel          = loyer×12 × (1 + reval loyer)^(a−1)
 déboursé annuel (achat) = intérêts + capital amorti + assurance + charges + taxe
 patrimoine immo net     = valeur du bien − capital restant dû
 
-surplus propriétaire  = max(enveloppe×12 − déboursé annuel, 0)
-surplus locataire     = max(enveloppe×12 − loyer annuel,    0)
+effort déclaré        = loyer actuel + épargne actuelle        (profil, €/mois)
+
+enveloppe achat(a)    = max(enveloppe achat(a−1), déboursé annuel, plancher(a))
+enveloppe location(a) = max(enveloppe location(a−1), loyer annuel)
+  avec enveloppe(0) = effort déclaré × 12
+  et, si le locataire place la différence (défaut) :
+  enveloppe achat(a) = enveloppe location(a) = le plus grand des deux
+
+surplus propriétaire  = enveloppe achat(a)    − déboursé annuel   (≥ 0 par construction)
+surplus locataire     = enveloppe location(a) − loyer annuel      (≥ 0 par construction)
 ```
 
-Noter le `max(…, 0)` : le modèle ne descend pas en dessous de zéro d'épargne. Il
-ne sait donc **pas** représenter un propriétaire en déficit — voir « Limites ».
+### L'enveloppe s'ajuste au lieu de plafonner l'épargne
+
+L'effort déclaré est un **plancher**. Quand un logement coûte plus — l'achat dès
+l'année 1, ou le loyer qui finit par dépasser l'effort —, l'enveloppe **monte** à
+ce niveau, et **ne redescend jamais** (cliquet) : qui a tenu un effort pendant des
+années a prouvé qu'il le pouvait, et le faire revenir d'un coup à son effort
+d'origine supposerait qu'il se mette à dépenser la différence.
+
+Pourquoi c'est nécessaire. L'ancien moteur écrivait `max(enveloppe×12 − coût, 0)` :
+le côté qui dépassait l'enveloppe voyait son épargne plafonnée à zéro, et le
+dépassement n'était **payé par personne**, pendant que l'autre côté restait bridé
+à l'effort déclaré. Mesuré sur le profil par défaut, un effort de 1 500 €/mois
+faisait calculer **+454 k€** pour l'achat au lieu de **+106 k€**. L'interface
+refusait de trancher quand le dépassement arrivait dès l'année 1, mais pas quand il
+arrivait plus tard (un loyer indexé qui rattrape l'effort, par exemple).
+
+`plancher(a)` porte les besoins que calc.js ne connaît pas : le loyer payé ailleurs
+après une mise en location (voir `planchersEnveloppe` dans calc-location.js).
+
+### L'épargne forcée : `locatairePlaceDifference`
+
+Quand l'achat coûte plus que l'effort actuel, l'acheteur **doit** relever son
+effort — la banque prélève. Le locataire, lui, n'y est obligé par rien.
+
+- **Activé (défaut)** : la même enveloppe des deux côtés. Le locataire place ce que
+  l'acheteur rembourse. C'est le **verdict de référence**, et le différenciateur du
+  projet : l'écart ne dépend alors plus du tout du profil.
+- **Désactivé** : le locataire garde ses habitudes — son effort déclaré, relevé
+  seulement si son loyer le dépasse. Seul l'acheteur se serre la ceinture. Le
+  patrimoine de l'acheteur est **identique** dans les deux cas ; seul celui du
+  locataire baisse, de ce qu'il n'a pas placé.
+
+Ce choix change souvent le verdict de dizaines ou de centaines de milliers d'euros.
+Ce n'est pas un réglage de marché, c'est une question sur le comportement de
+l'utilisateur : l'interface la pose explicitement, la rappelle sous le verdict, et
+dit de combien le verdict bouge quand on la change.
 
 ### Portefeuille
 
@@ -123,9 +165,12 @@ mais jamais leur écart :
 
 La raison est mécanique : un euro de plus au départ, ou un euro de plus
 d'enveloppe, alimente les **deux** portefeuilles à l'identique et subit la même
-fiscalité de sortie. Il s'annule donc dans la différence. Cela ne vaut que tant
-qu'aucun des deux surplus n'est plafonné à zéro — c'est-à-dire dans tout le
-domaine où le scénario d'achat est finançable.
+fiscalité de sortie. Il s'annule donc dans la différence.
+
+Depuis que l'enveloppe s'ajuste, c'est vrai **pour tout effort**, y compris un
+effort qui ne couvre pas l'achat — à condition que le locataire place la
+différence (le défaut). Sans cette hypothèse, l'effort déclaré compte : c'est
+précisément ce qu'il mesure.
 
 L'écart ne dépend que des **asymétries** : l'apport immobilisé dans le bien,
 l'écart entre coût de propriétaire et loyer, la revalorisation du bien, et les
@@ -133,17 +178,20 @@ frais d'acquisition non récupérables.
 
 ## Indicateurs de faisabilité
 
-Le **salaire net avant impôt** est facultatif et n'entre dans aucun calcul
-patrimonial. Il ne sert qu'à deux ratios :
+Les **revenus nets du foyer, avant impôt** sont facultatifs et n'entrent dans
+aucun calcul patrimonial. Ils ne servent qu'aux ratios :
 
 ```
-taux d'endettement = mensualité (crédit + assurance) / salaire net
-part de l'enveloppe = enveloppe mensuelle / salaire net
+taux d'endettement      = mensualité (crédit + assurance) / revenus
+part de l'effort actuel = effort déclaré / revenus
+part de l'effort achat  = enveloppe achat de l'année 1 / revenus
+reste à vivre           = revenus − effort (actuel, ou de l'achat)
 ```
 
 Le taux d'endettement est calculé assurance comprise, comme le fait le HCSF, dont
-le plafond usuel est de 35 %. Sans salaire renseigné, les deux valent `null` :
-aucun ratio n'est inventé.
+le plafond usuel est de 35 %, sur les revenus du **foyer** : un couple qui n'en
+déclarerait qu'un verrait son taux doubler. Sans revenus renseignés, tous valent
+`null` : aucun ratio n'est inventé.
 
 ## Écarts délibérés avec le classeur
 
@@ -169,15 +217,17 @@ opposées :
 Le simulateur applique partout la comparaison nette (colonne `W`), conforme à la
 règle « toujours net d'impôt des deux côtés ».
 
-### 2. Enveloppe insuffisante : refus de trancher
+### 2. Enveloppe insuffisante : l'enveloppe monte au lieu de plafonner
 
-Quand l'enveloppe ne couvre pas le coût de propriétaire, les deux `max(…, 0)`
-plafonnent les épargnes à zéro et le déficit du propriétaire n'est facturé nulle
-part. Le classeur affiche un `WARNING` mais continue d'afficher des chiffres —
-qui deviennent très favorables à l'achat, sans aucun sens.
+Quand l'enveloppe ne couvre pas le coût de propriétaire, les `max(…, 0)` du
+classeur plafonnent les épargnes à zéro et le déficit du propriétaire n'est
+facturé nulle part. Le classeur affiche un `WARNING` mais continue d'afficher des
+chiffres — qui deviennent très favorables à l'achat, sans aucun sens.
 
-Le simulateur affiche l'alerte **et** neutralise le verdict tant que le scénario
-n'est pas finançable.
+Le simulateur a d'abord neutralisé le verdict dans ce cas. Il fait désormais
+monter l'enveloppe (voir « L'enveloppe s'ajuste »), ce qui rend le verdict juste
+au lieu de le taire. Hors de ce cas, les deux modèles coïncident : la fixture
+Excel passe au centime sans avoir été touchée.
 
 ## Limites du modèle
 
@@ -319,13 +369,20 @@ module ne le prévoyait pas : c'est un écart délibéré, désactivable.
 Pour chaque année t ≥ N :
 
 ```
-versement au portefeuille = max(enveloppe annuelle − loyer futur, 0)
+enveloppe(t)              = max(enveloppe(t−1), enveloppe achat du moteur de base(t), loyer futur(t))
+versement au portefeuille = enveloppe(t) − loyer futur(t)
                           + cash-flow net
                           − achat de meubles       (l'année de la bascule seulement)
 
 patrimoine = valeur du bien − capital restant dû − impôt de plus-value
            + portefeuille net d'impôt
 ```
+
+L'enveloppe suit la même règle que le moteur de base : elle monte si le loyer payé
+ailleurs l'exige, et ne redescend jamais. Avec l'enveloppe identique, ce loyer est
+aussi transmis au moteur de base comme **plancher** (`planchersEnveloppe`), pour que
+le locataire de la comparaison puisse placer la même somme. L'écart achat /
+location du moteur de base n'en bouge pas : seul le niveau des enveloppes monte.
 
 Après la bascule, le ménage dispose de l'enveloppe **plus** les loyers encaissés,
 et il paie un loyer **et** une mensualité de crédit. La contrainte « même

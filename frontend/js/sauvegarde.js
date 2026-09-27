@@ -42,9 +42,28 @@
    * **Ajouter un champ ne casse rien** — `normaliser()` lui donne sa valeur par
    * défaut — et n'exige donc pas d'incrément.
    */
-  var SCHEMA_VERSION = 1;
+  var SCHEMA_VERSION = 2;
 
   var CLE_BROUILLON = 'simurp.brouillon';
+
+  /**
+   * Le profil tel que l'utilisateur le décrit : son loyer et son épargne
+   * d'aujourd'hui. Le moteur n'en voit que la somme (`enveloppeMensuelle`,
+   * l'effort déclaré) — c'est donc la décomposition qu'on stocke, et l'effort
+   * qu'on en DÉDUIT : stocker les deux laisserait une sauvegarde se
+   * contredire.
+   *
+   * Défauts : le loyer du classeur de référence, et l'épargne qui complète
+   * l'effort du moteur. Leur somme redonne exactement `DEFAUTS.enveloppeMensuelle`,
+   * donc la fixture Excel.
+   */
+  var DEFAUTS_PROFIL = {
+    loyerActuel: moteur.DEFAUTS.loyer,
+    epargneActuelle: moteur.DEFAUTS.enveloppeMensuelle - moteur.DEFAUTS.loyer,
+  };
+
+  /** Champs du moteur qui se DÉDUISENT et ne se stockent donc pas. */
+  var CHAMPS_DEDUITS = ['horizon', 'enveloppeMensuelle'];
 
   /**
    * Migrations indexées par la version qu'elles PRODUISENT.
@@ -61,18 +80,47 @@
    *        return p;
    *      },
    */
-  var MIGRATIONS = {};
+  var MIGRATIONS = {
+    /*
+     * v1 → v2 : le profil se décompose, et le salaire devient les revenus du foyer.
+     *
+     * - `salaireNet` → `revenusFoyer`. Même unité (€/mois, net avant impôt) ;
+     *   seul le périmètre s'élargit au foyer. La valeur saisie reste la bonne
+     *   pour quelqu'un qui vit seul, et le calcul est inchangé.
+     * - `enveloppeMensuelle` ne se stocke plus : elle se déduit de
+     *   `profil.loyerActuel + profil.epargneActuelle`. Une v1 ne dit pas comment
+     *   son effort se répartissait. On le range tout entier en épargne, loyer
+     *   à 0 : c'est la seule répartition qui ne s'invente rien, et elle
+     *   redonne exactement le même effort — donc les mêmes résultats.
+     *   L'utilisateur voit « loyer 0 € » et corrige s'il le souhaite.
+     */
+    2: function (p) {
+      p = p && typeof p === 'object' ? p : {};
+      var m = p.moteur && typeof p.moteur === 'object' ? p.moteur : {};
+      if ('salaireNet' in m) {
+        m.revenusFoyer = m.salaireNet;
+        delete m.salaireNet;
+      }
+      if (typeof m.enveloppeMensuelle === 'number' && Number.isFinite(m.enveloppeMensuelle)) {
+        p.profil = { loyerActuel: 0, epargneActuelle: m.enveloppeMensuelle };
+      }
+      delete m.enveloppeMensuelle;
+      p.moteur = m;
+      return p;
+    },
+  };
 
   /* ------------------------------------------------------------ Structure */
 
   /**
-   * Les champs du moteur, sans `horizon` : l'horizon n'est pas une hypothèse
-   * du modèle mais une question posée au résultat (« si je revends dans… »).
-   * Il est donc rangé à part, au même niveau que le scénario.
+   * Les champs du moteur, sans ceux qui se déduisent :
+   * - `horizon` n'est pas une hypothèse du modèle mais une question posée au
+   *   résultat (« si je revends dans… ») : il est rangé à part ;
+   * - `enveloppeMensuelle` se déduit du profil (voir DEFAUTS_PROFIL).
    */
   function champsMoteur() {
     return Object.keys(moteur.DEFAUTS).filter(function (c) {
-      return c !== 'horizon';
+      return CHAMPS_DEDUITS.indexOf(c) === -1;
     });
   }
 
@@ -82,7 +130,10 @@
 
   /** La forme d'un brouillon vide, tous champs à leur valeur par défaut. */
   function vide() {
-    var p = { moteur: {}, location: {}, scenario: null, horizon: 20 };
+    var p = { profil: {}, moteur: {}, location: {}, scenario: null, horizon: 20 };
+    Object.keys(DEFAUTS_PROFIL).forEach(function (c) {
+      p.profil[c] = DEFAUTS_PROFIL[c];
+    });
     champsMoteur().forEach(function (c) {
       p.moteur[c] = moteur.DEFAUTS[c];
     });
@@ -107,7 +158,7 @@
     var propre = vide();
     if (!params || typeof params !== 'object') return propre;
 
-    ['moteur', 'location'].forEach(function (groupe) {
+    ['profil', 'moteur', 'location'].forEach(function (groupe) {
       var source = params[groupe];
       if (!source || typeof source !== 'object') return;
       Object.keys(propre[groupe]).forEach(function (cle) {
@@ -303,6 +354,7 @@
   var api = {
     SCHEMA_VERSION: SCHEMA_VERSION,
     CLE_BROUILLON: CLE_BROUILLON,
+    DEFAUTS_PROFIL: DEFAUTS_PROFIL,
     MIGRATIONS: MIGRATIONS,
     vide: vide,
     normaliser: normaliser,

@@ -13,6 +13,10 @@
  * Principe du modèle : les deux trajectoires consomment la MÊME enveloppe
  * mensuelle (logement + épargne). Ce que le logement ne consomme pas est
  * investi en bourse. On compare les deux patrimoines nets d'impôt.
+ *
+ * L'enveloppe part de l'effort déclaré et monte quand un logement l'exige
+ * (voir `simuler`). Seule dérogation à l'enveloppe identique, choisie par
+ * l'utilisateur : l'épargne forcée (`locatairePlaceDifference`).
  */
 (function (global) {
   'use strict';
@@ -20,8 +24,18 @@
   /** Valeurs par défaut = scénario « Paris » du classeur de référence. */
   var DEFAUTS = {
     capitalInitial: 200000,
+    // Effort mensuel DÉCLARÉ : ce que l'utilisateur sort aujourd'hui pour se
+    // loger et épargner. L'interface le compose (loyer actuel + épargne) ; le
+    // moteur n'en voit que la somme. C'est un PLANCHER : l'enveloppe réelle
+    // monte au-dessus quand un logement l'exige (voir `simuler`).
     enveloppeMensuelle: 3400,
-    salaireNet: 0, // net avant impôt, €/mois. 0 = non renseigné, facultatif.
+    revenusFoyer: 0, // nets avant impôt, €/mois, tout le foyer. 0 = non renseigné, facultatif.
+
+    // « En restant locataire, je place aussi la différence. »
+    // true  : la même enveloppe des deux côtés — le verdict de référence.
+    // false : le locataire garde ses habitudes. Seul l'acheteur relève son
+    //         effort, parce que le crédit l'y oblige : c'est l'épargne forcée.
+    locatairePlaceDifference: true,
 
     prixNetVendeur: 420000,
     typeBien: 'ancien', // 'ancien' | 'neuf'
@@ -199,7 +213,7 @@
       ? pret.lignes[0].echeance + pret.lignes[0].assurance
       : 0;
 
-    var enveloppeAnnuelle = e.enveloppeMensuelle * 12;
+    var effortAnnuel = e.enveloppeMensuelle * 12;
 
     // --- Trajectoires année par année ------------------------------------
     var annees = [];
@@ -208,6 +222,8 @@
     var capitalLocation = e.capitalInitial; // le locataire garde tout
     var versementsAchat = 0;
     var versementsLocation = 0;
+    var enveloppeAchat = effortAnnuel;
+    var enveloppeLocation = effortAnnuel;
 
     for (var a = 1; a <= horizon; a++) {
       var pa = parAnnee[a - 1];
@@ -222,10 +238,41 @@
 
       cumulDecaisse += a === 1 ? e.apport + totalDebourseAnnuel : totalDebourseAnnuel;
 
-      // Ce que l'enveloppe laisse disponible pour la bourse, de chaque côté
-      var surplusProprio = Math.max(enveloppeAnnuelle - totalDebourseAnnuel, 0);
       var loyerAnnuel = e.loyer * 12 * facteur(e.revalLoyer, 1, a - 1);
-      var surplusLocataire = Math.max(enveloppeAnnuelle - loyerAnnuel, 0);
+
+      // --- L'enveloppe de l'année ----------------------------------------
+      //
+      // L'effort déclaré est un plancher. Quand un logement coûte plus, on ne
+      // plafonne plus l'épargne à zéro en laissant le dépassement payé par
+      // personne : c'était un biais massif. Sur le profil par défaut, un
+      // effort de 1 500 €/mois faisait calculer +454 k€ pour l'achat au lieu
+      // de +106 k€ — l'acheteur dépensait 500 €/mois de plus que l'enveloppe,
+      // sans que le locataire ait le droit de placer la même somme.
+      //
+      // L'enveloppe MONTE donc au niveau de ce qu'exige le logement, et ne
+      // redescend jamais (cliquet) : qui a tenu un effort pendant des années a
+      // prouvé qu'il le pouvait, et le faire revenir d'un coup à son effort
+      // d'origine supposerait qu'il se mette à dépenser la différence.
+      //
+      // `planchersEnveloppe` (€/an, facultatif, hors DEFAUTS parce qu'il ne se
+      // saisit pas) porte les besoins que ce moteur ne connaît pas : le loyer
+      // payé ailleurs après une mise en location. calc-location.js les
+      // calcule ; ce fichier ignore d'où ils viennent.
+      var plancher = e.planchersEnveloppe ? e.planchersEnveloppe[a - 1] || 0 : 0;
+      enveloppeAchat = Math.max(enveloppeAchat, totalDebourseAnnuel, plancher);
+      enveloppeLocation = Math.max(enveloppeLocation, loyerAnnuel);
+
+      // Enveloppe identique : le locataire suit tout ce que l'acheteur doit
+      // payer, et réciproquement. Le cliquet ajoute alors la même somme des
+      // deux côtés : l'écart ne dépend plus du tout du profil.
+      if (e.locatairePlaceDifference) {
+        enveloppeAchat = enveloppeLocation = Math.max(enveloppeAchat, enveloppeLocation);
+      }
+
+      // Ce que l'enveloppe laisse disponible pour la bourse, de chaque côté.
+      // Positif ou nul par construction : plus aucun dépassement caché.
+      var surplusProprio = enveloppeAchat - totalDebourseAnnuel;
+      var surplusLocataire = enveloppeLocation - loyerAnnuel;
 
       // Portefeuille : rendement sur le capital de début d'année, puis versement
       var bourse = tauxAnnee(e.rendementBourse, a);
@@ -260,6 +307,7 @@
         cumulDecaisse: cumulDecaisse,
         gainCashPur: patrimoineNetImmo - cumulDecaisse,
         surplusProprio: surplusProprio,
+        enveloppeAchat: enveloppeAchat, // €/an, ce que l'acheteur sort cette année
         capitalAchatBrut: capitalAchat,
         impotAchat: impotAchat,
         capitalAchatNet: capitalAchat - impotAchat,
@@ -267,6 +315,7 @@
         // location
         loyerAnnuel: loyerAnnuel,
         surplusLocataire: surplusLocataire,
+        enveloppeLocation: enveloppeLocation, // €/an, ce que le locataire sort cette année
         capitalLocationBrut: capitalLocation,
         impotLocation: impotLocation,
         patrimoineTotalLocation: patrimoineTotalLocation,
@@ -278,6 +327,9 @@
     var favorable = annees.find(function (x) {
       return x.ecart >= 0;
     });
+    var effortAchatAnnuel = annees.length
+      ? Math.max(effortAnnuel, annees[0].totalDebourseAnnuel)
+      : effortAnnuel;
 
     return {
       entrees: e,
@@ -292,14 +344,29 @@
       // affichés côte à côte, les deux doivent s'additionner, pas se recouvrir.
       chargesMensuelles: annees.length ? (annees[0].taxeFonciere + annees[0].charges) / 12 : 0,
 
-      // Indicateurs de faisabilité, seulement si le salaire est renseigné.
+      // Ce que l'achat demande EN PLUS de l'effort déclaré, par mois, la
+      // première année. Zéro quand l'effort actuel couvre déjà le coût. C'est
+      // l'épargne forcée : l'effort que le crédit impose et que le locataire,
+      // lui, n'est obligé à rien de faire.
+      supplementAchat: annees.length
+        ? Math.max(annees[0].totalDebourseAnnuel - effortAnnuel, 0) / 12
+        : 0,
+      // Ce que l'achat OBLIGE à sortir chaque mois la première année : l'effort
+      // déclaré, ou le coût de l'achat s'il est plus haut. Pas l'enveloppe de
+      // l'acheteur : avec l'enveloppe identique, un loyer plus cher que tout le
+      // reste la relève aussi, et ce surplus-là est placé, pas imposé.
+      effortAchat: effortAchatAnnuel / 12,
+
+      // Indicateurs de faisabilité, seulement si les revenus sont renseignés :
+      // un ratio sans dénominateur réel serait un ratio inventé.
       // Le taux d'endettement se calcule sur la mensualité assurance comprise,
-      // comme le fait le HCSF (plafond usuel de 35 %).
-      tauxEndettement: e.salaireNet > 0 ? mensualiteTotale / e.salaireNet : null,
-      partEnveloppe: e.salaireNet > 0 ? e.enveloppeMensuelle / e.salaireNet : null,
-      enveloppeSuffisante: annees.length
-        ? annees[0].totalDebourseAnnuel <= enveloppeAnnuelle
-        : true,
+      // comme le fait le HCSF (plafond usuel de 35 %), sur les revenus du FOYER
+      // — un couple qui n'en déclarerait qu'un verrait son taux doubler.
+      tauxEndettement: e.revenusFoyer > 0 ? mensualiteTotale / e.revenusFoyer : null,
+      partEffortActuel: e.revenusFoyer > 0 ? e.enveloppeMensuelle / e.revenusFoyer : null,
+      partEffortAchat: e.revenusFoyer > 0 ? effortAchatAnnuel / 12 / e.revenusFoyer : null,
+      resteAVivreActuel: e.revenusFoyer > 0 ? e.revenusFoyer - e.enveloppeMensuelle : null,
+      resteAVivreAchat: e.revenusFoyer > 0 ? e.revenusFoyer - effortAchatAnnuel / 12 : null,
       premiereAnneeFavorable: favorable ? favorable.annee : null,
       annees: annees,
     };
@@ -323,9 +390,9 @@
    * épargnes ferait conclure que l'achat coûte plus cher, alors que l'écart
    * n'est pas dépensé : il est investi.
    *
-   * Seule exception : quand l'enveloppe ne couvre pas le coût de possession,
-   * le moteur plafonne le surplus à zéro et le côté achat dépasse l'enveloppe.
-   * Ce dépassement est une information, pas une anomalie — on le laisse voir.
+   * Seule exception, VOULUE : quand l'utilisateur déclare que le locataire ne
+   * placerait pas la différence (`locatairePlaceDifference` à false), l'acheteur
+   * sort plus que le locataire. L'écart des totaux EST alors l'épargne forcée.
    */
   function repartitionEnveloppe(res, annee) {
     var a = res.annees;
@@ -358,10 +425,61 @@
 
     return {
       annee: n,
-      enveloppeCumulee: res.entrees.enveloppeMensuelle * 12 * n,
+      // L'enveloppe n'est plus fixe : elle se cumule année par année.
+      enveloppeCumulee: c('enveloppeAchat'),
+      enveloppeCumuleeLocation: c('enveloppeLocation'),
       achat: achat,
       location: location,
     };
+  }
+
+  /**
+   * Ce qui fixe l'enveloppe d'un côté, période par période.
+   *
+   * Pour dire « années 1 à 20 : l'enveloppe suit le coût du propriétaire »
+   * plutôt qu'une ligne par année : les charges montent chaque année, donc
+   * l'enveloppe bouge presque tout le temps, et une liste année par année
+   * serait illisible.
+   *
+   * @param {object} res  - résultat de `simuler`
+   * @param {string} cote - 'achat' ou 'location'
+   * @returns {Array<{pilote, debut, fin, depuis, jusqua}>} montants en €/mois.
+   *   `pilote` vaut 'effort' (l'effort déclaré suffit), 'achat' (le coût du
+   *   propriétaire), 'loyer', 'autre' (un plancher externe, comme le loyer
+   *   payé après une mise en location) ou 'maintenu' (plus rien ne l'exige,
+   *   le cliquet la garde au niveau atteint).
+   */
+  function periodesEnveloppe(res, cote) {
+    var effort = res.entrees.enveloppeMensuelle * 12;
+    var identique = res.entrees.locatairePlaceDifference;
+    var cle = cote === 'location' ? 'enveloppeLocation' : 'enveloppeAchat';
+    var tolerance = 0.5; // €/an : on compare des sommes de flottants
+    var periodes = [];
+
+    res.annees.forEach(function (x) {
+      var env = x[cle];
+      // Ce côté ne suit le coût de l'autre que si l'enveloppe est partagée.
+      var voitAchat = cote === 'achat' || identique;
+      var voitLoyer = cote === 'location' || identique;
+      var pilote;
+      if (env <= effort + tolerance) pilote = 'effort';
+      else if (voitAchat && Math.abs(env - x.totalDebourseAnnuel) < tolerance) pilote = 'achat';
+      else if (voitLoyer && Math.abs(env - x.loyerAnnuel) < tolerance) pilote = 'loyer';
+      else if (
+        res.entrees.planchersEnveloppe &&
+        Math.abs(env - (res.entrees.planchersEnveloppe[x.annee - 1] || 0)) < tolerance
+      ) pilote = 'autre';
+      else pilote = 'maintenu';
+
+      var derniere = periodes[periodes.length - 1];
+      if (derniere && derniere.pilote === pilote) {
+        derniere.fin = x.annee;
+        derniere.jusqua = env / 12;
+      } else {
+        periodes.push({ pilote: pilote, debut: x.annee, fin: x.annee, depuis: env / 12, jusqua: env / 12 });
+      }
+    });
+    return periodes;
   }
 
   /**
@@ -442,6 +560,7 @@
     simuler: simuler,
     repartitionEnveloppe: repartitionEnveloppe,
     repartitionAnnuelle: repartitionAnnuelle,
+    periodesEnveloppe: periodesEnveloppe,
     fraisIrrecuperables: fraisIrrecuperables,
   };
 
