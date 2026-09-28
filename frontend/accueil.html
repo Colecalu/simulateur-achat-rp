@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Acheter ou louer sa résidence principale — le simulateur à budget identique</title>
+  <meta name="description" content="Acheter votre résidence principale ou rester locataire et investir la différence ? Le simulateur compare deux trajectoires de patrimoine, à budget mensuel identique, net d'impôt. Gratuit, sans compte.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <!-- Même thème que le simulateur : les deux pages lisent les mêmes jetons.
+       accueil.css ne porte que la structure propre au site vitrine. -->
+  <link rel="stylesheet" href="css/theme-perron.css">
+  <link rel="stylesheet" href="css/accueil.css">
+</head>
+<body class="accueil">
+
+<a class="evitement" href="#contenu">Aller au contenu</a>
+
+<!-- ============================================================ En-tête -->
+<header class="site-entete">
+  <div class="site-entete__contenu">
+    <a class="logotype" href="accueil.html" aria-label="Acheter ou louer — accueil">
+      Acheter <i>ou</i> louer
+    </a>
+    <nav class="site-nav" aria-label="Navigation principale">
+      <a href="#principe">Le principe</a>
+      <a href="#exemple">L'exemple</a>
+      <a href="#methode">Ce qui est compté</a>
+      <a href="#questions">Questions</a>
+    </nav>
+    <a class="bouton bouton--primaire bouton--petit" href="index.html">
+      Faire ma simulation <span class="icone icone--fleche" aria-hidden="true"></span>
+    </a>
+  </div>
+</header>
+
+<main id="contenu">
+
+  <!-- ====================================================== Accroche -->
+  <section class="accroche">
+    <div class="conteneur accroche__grille">
+      <div class="accroche__texte">
+        <span class="pastille"><span class="icone icone--balance" aria-hidden="true"></span>Comparaison à budget identique</span>
+        <h1 class="accroche__titre">
+          Acheter ou louer&#8239;? <em>Comparez deux patrimoines, pas une mensualité et un loyer.</em>
+        </h1>
+        <p class="accroche__chapo">
+          Vous hésitez à acheter votre résidence principale. Le simulateur suit deux vies
+          parallèles avec exactement le même budget chaque mois&nbsp;: devenir propriétaire, ou
+          rester locataire et placer la différence. Puis il compare ce que chacune vous laisse,
+          année après année, une fois l'impôt payé.
+        </p>
+        <div class="accroche__actions">
+          <a class="bouton bouton--primaire bouton--grand" href="index.html">
+            Faire ma simulation <span class="icone icone--fleche" aria-hidden="true"></span>
+          </a>
+          <a class="bouton bouton--grand" href="#exemple">Voir un exemple chiffré</a>
+        </div>
+        <ul class="accroche__garanties">
+          <li><span class="icone icone--coche" aria-hidden="true"></span>Gratuit, sans compte</li>
+          <li><span class="icone icone--cadenas" aria-hidden="true"></span>Calculé dans votre navigateur</li>
+          <li><span class="icone icone--coche" aria-hidden="true"></span>Rien à vendre</li>
+        </ul>
+      </div>
+
+      <!-- La carte de l'accroche montre LE principe du produit, pas un
+           verdict : un verdict affiché avant toute saisie serait lu comme la
+           réponse. Les montants viennent du moteur (accueil.js), sur le même
+           exemple que la section « L'exemple ». -->
+      <figure class="carte carte--haute enveloppe" aria-labelledby="enveloppeTitre">
+        <div class="enveloppe__bandeau">
+          <span class="surtitre surtitre--inverse">Un même budget chaque mois</span>
+          <p class="enveloppe__montant" id="enveloppeTitre">
+            <span class="tabulaire" data-demo="enveloppe">2 500 €</span> <span class="enveloppe__unite">par mois, des deux côtés</span>
+          </p>
+        </div>
+        <div class="enveloppe__corps">
+          <div class="repartition">
+            <p class="repartition__nom repartition__nom--achat">Si vous achetez</p>
+            <div class="repartition__barre" data-demo-barre="achat">
+              <span class="repartition__part repartition__part--logement"></span>
+              <span class="repartition__part repartition__part--investi"></span>
+            </div>
+            <p class="repartition__legende">
+              <span><span class="tabulaire" data-demo="logementAchat">—</span> crédit, assurance, charges, taxe foncière</span>
+              <span><span class="tabulaire" data-demo="investiAchat">—</span> investis</span>
+            </p>
+          </div>
+          <div class="repartition">
+            <p class="repartition__nom repartition__nom--location">Si vous louez</p>
+            <div class="repartition__barre" data-demo-barre="location">
+              <span class="repartition__part repartition__part--logement"></span>
+              <span class="repartition__part repartition__part--investi"></span>
+            </div>
+            <p class="repartition__legende">
+              <span><span class="tabulaire" data-demo="loyer">—</span> loyer</span>
+              <span><span class="tabulaire" data-demo="investiLocation">—</span> investis</span>
+            </p>
+          </div>
+          <figcaption class="enveloppe__note">
+            Ce qui ne part pas dans le logement est placé en bourse, au même rendement des deux
+            côtés. Aucune trajectoire n'a le droit de dépenser plus que l'autre.
+          </figcaption>
+        </div>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ====================================================== Principe -->
+  <section class="section section--creuse" id="principe">
+    <div class="conteneur">
+      <header class="section__entete">
+        <span class="surtitre">Le principe</span>
+        <h2 class="section__titre">« Un loyer, c'est de l'argent jeté »&nbsp;: la moitié du calcul</h2>
+        <p class="section__chapo">
+          Comparer une mensualité de crédit à un loyer oublie tout ce qui se passe autour. Le
+          propriétaire paie des frais de notaire, des intérêts, une taxe foncière, des charges. Le
+          locataire, lui, garde son apport et peut placer ce qu'il ne rembourse pas. Pour savoir qui
+          s'enrichit le plus, il faut suivre les deux jusqu'au bout.
+        </p>
+      </header>
+
+      <ol class="etapes">
+        <li class="carte etape">
+          <span class="etape__icone"><span class="icone icone--portefeuille" aria-hidden="true"></span></span>
+          <span class="surtitre">Étape 1</span>
+          <h3 class="etape__titre">Votre situation</h3>
+          <p>Votre épargne, votre loyer actuel, ce que vous mettez de côté chaque mois. Trois
+            questions, qui fixent le budget des deux trajectoires.</p>
+        </li>
+        <li class="carte etape">
+          <span class="etape__icone"><span class="icone icone--maison" aria-hidden="true"></span></span>
+          <span class="surtitre">Étape 2</span>
+          <h3 class="etape__titre">Votre projet</h3>
+          <p>Le bien visé, son prix, ancien ou neuf, votre apport et votre crédit. En face, le
+            loyer d'un logement équivalent.</p>
+        </li>
+        <li class="carte etape">
+          <span class="etape__icone"><span class="icone icone--courbe" aria-hidden="true"></span></span>
+          <span class="surtitre">Étape 3</span>
+          <h3 class="etape__titre">Deux patrimoines</h3>
+          <p>Le bien net de sa dette et le portefeuille d'un côté, le portefeuille seul de
+            l'autre. Net d'impôt, année par année, jusqu'à l'horizon que vous choisissez.</p>
+        </li>
+      </ol>
+
+      <aside class="encart">
+        <span class="icone icone--info encart__icone" aria-hidden="true"></span>
+        <div>
+          <p class="encart__titre">Votre budget ne décide pas de la réponse</p>
+          <p>
+            Comme les deux trajectoires disposent du même argent, ce que vous gagnez ou épargnez
+            aujourd'hui s'annule dans la comparaison. Votre profil dit si l'achat est
+            <strong>faisable</strong>. Ce qui dit s'il est <strong>rentable</strong>, c'est le
+            rapport entre le prix du bien et le loyer que vous paieriez à sa place.
+          </p>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- ====================================================== Exemple -->
+  <section class="section" id="exemple">
+    <div class="conteneur exemple">
+      <header class="section__entete">
+        <span class="surtitre">L'exemple</span>
+        <h2 class="section__titre">Même appartement, même budget. <em>Seul le loyer change.</em></h2>
+        <p class="section__chapo">
+          Un appartement ancien à 400&nbsp;000&nbsp;€, 80&nbsp;000&nbsp;€ d'apport, un crédit sur
+          25&nbsp;ans à 3,5&nbsp;%. Déplacez le loyer d'un logement équivalent&nbsp;: le verdict
+          bascule d'un côté à l'autre. Ce calcul est fait, ici même, par le moteur du simulateur.
+        </p>
+      </header>
+
+      <div class="carte demo">
+        <div class="demo__reglage">
+          <label class="demo__libelle" for="demoLoyer">
+            Loyer d'un logement équivalent
+            <output class="demo__valeur tabulaire" id="demoLoyerValeur" for="demoLoyer">—</output>
+          </label>
+          <input class="curseur" type="range" id="demoLoyer" min="700" max="2200" step="25" value="1150"
+                 aria-describedby="demoRendement">
+          <div class="demo__graduation" aria-hidden="true">
+            <span class="tabulaire">700 €</span>
+            <span class="tabulaire">2 200 €</span>
+          </div>
+          <p class="demo__rendement" id="demoRendement">
+            Rendement locatif brut&nbsp;: <strong class="tabulaire" data-demo="rendement">—</strong>
+            <span class="demo__seuil">· l'achat l'emporte au-delà de <span class="tabulaire" data-demo="rendementSeuil">—</span></span>
+          </p>
+          <div class="demo__raccourcis" role="group" aria-label="Rendements locatifs typiques">
+            <button type="button" class="puce" data-rendement="0.032">Paris · ≈ 3,2&nbsp;%</button>
+            <button type="button" class="puce" data-rendement="0.045">Grande métropole · ≈ 4,5&nbsp;%</button>
+            <button type="button" class="puce" data-rendement="0.06">Ville moyenne · ≈ 6&nbsp;%</button>
+          </div>
+        </div>
+
+        <div class="demo__resultat" aria-live="polite">
+          <span class="surtitre">Au bout de 25 ans, net d'impôt</span>
+          <p class="demo__verdict" id="demoVerdict">—</p>
+          <div class="comparaison">
+            <div class="comparaison__ligne">
+              <span class="comparaison__nom">Acheter</span>
+              <span class="comparaison__piste"><span class="comparaison__barre comparaison__barre--achat" data-demo-part="achat"></span></span>
+              <span class="comparaison__montant tabulaire" data-demo="patrimoineAchat">—</span>
+            </div>
+            <div class="comparaison__ligne">
+              <span class="comparaison__nom">Louer et investir</span>
+              <span class="comparaison__piste"><span class="comparaison__barre comparaison__barre--location" data-demo-part="location"></span></span>
+              <span class="comparaison__montant tabulaire" data-demo="patrimoineLocation">—</span>
+            </div>
+          </div>
+          <p class="demo__bascule" id="demoBascule"></p>
+        </div>
+      </div>
+
+      <p class="exemple__note">
+        Hypothèses de long terme en cours de consolidation&nbsp;: bourse 6,8&nbsp;% par an,
+        immobilier 2,5&nbsp;%, loyers et charges à l'inflation (2&nbsp;%), taxe foncière
+        2,5&nbsp;%, fiscalité de sortie 31,4&nbsp;%. Un demi-point de rendement boursier suffit à
+        déplacer le seuil&nbsp;: c'est pourquoi le simulateur vous laisse les modifier, et vous
+        montre ce que donnent des marchés réels.
+      </p>
+    </div>
+  </section>
+
+  <!-- ====================================================== Méthode -->
+  <section class="section section--creuse" id="methode">
+    <div class="conteneur">
+      <header class="section__entete">
+        <span class="surtitre">Ce qui est compté</span>
+        <h2 class="section__titre">Tout ce qui coûte, des deux côtés</h2>
+        <p class="section__chapo">
+          Un simulateur qui oublie un poste penche toujours du même côté. Celui-ci chiffre ce que
+          vous paierez vraiment, et vérifie ses formules au centime près contre un classeur de
+          référence.
+        </p>
+      </header>
+
+      <div class="colonnes">
+        <div class="carte colonne colonne--achat">
+          <h3 class="colonne__titre"><span class="icone icone--maison" aria-hidden="true"></span>Côté propriétaire</h3>
+          <ul class="liste-coches">
+            <li>Frais de notaire, calculés différemment dans l'ancien et le neuf</li>
+            <li>Frais d'agence, de dossier, travaux</li>
+            <li>Intérêts et assurance emprunteur, mois par mois</li>
+            <li>Taxe foncière et charges de copropriété, revalorisées chaque année</li>
+            <li>Valeur du bien, moins ce qui reste dû à la banque</li>
+          </ul>
+        </div>
+        <div class="carte colonne colonne--location">
+          <h3 class="colonne__titre"><span class="icone icone--tirelire" aria-hidden="true"></span>Côté locataire</h3>
+          <ul class="liste-coches">
+            <li>Loyer indexé chaque année sur l'IRL</li>
+            <li>Apport resté placé au lieu d'être versé</li>
+            <li>Différence de budget investie chaque mois</li>
+            <li>Capitalisation brute, sans impôt prélevé en route</li>
+            <li>Impôt sur la plus-value appliqué une seule fois, à la sortie</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="piliers">
+        <article class="pilier">
+          <span class="icone icone--balance pilier__icone" aria-hidden="true"></span>
+          <h3 class="pilier__titre">Net d'impôt, des deux côtés</h3>
+          <p>Le rendement se saisit en brut, l'impôt se déduit à la sortie. Le taux est
+            modifiable&nbsp;: 31,4&nbsp;% par défaut pour un compte-titres, moins pour un PEA ou une
+            assurance-vie.</p>
+        </article>
+        <article class="pilier">
+          <span class="icone icone--courbe pilier__icone" aria-hidden="true"></span>
+          <h3 class="pilier__titre">Des marchés réels, pas des taux constants</h3>
+          <p>Aucun marché ne monte de 5&nbsp;% tous les ans. Rejouez votre projet sur des années
+            réellement observées, ou face à une correction immobilière et une décennie perdue en
+            bourse.</p>
+        </article>
+        <article class="pilier">
+          <span class="icone icone--cle pilier__icone" aria-hidden="true"></span>
+          <h3 class="pilier__titre">Et si vous la louiez&nbsp;?</h3>
+          <p>Une résidence principale ne se revend pas toujours. Le simulateur calcule aussi ce
+            que donne sa mise en location au lieu de sa vente.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====================================================== Engagements -->
+  <section class="section" id="engagements">
+    <div class="conteneur engagements">
+      <div class="engagements__texte">
+        <span class="surtitre">Ce que nous ne faisons pas</span>
+        <h2 class="section__titre">Un calcul, <em>pas une vente</em></h2>
+        <p class="section__chapo">
+          La plupart des simulateurs immobiliers appartiennent à une banque, un courtier ou un
+          promoteur. Ils ont intérêt à ce que vous achetiez. Celui-ci n'a rien à vous proposer
+          ensuite&nbsp;: ni crédit, ni placement, ni appartement.
+        </p>
+      </div>
+      <ul class="engagements__liste">
+        <li class="engagement">
+          <span class="icone icone--cadenas" aria-hidden="true"></span>
+          <div>
+            <p class="engagement__titre">Vos chiffres restent chez vous</p>
+            <p>Tout est calculé dans votre navigateur. Aucune saisie n'est envoyée à un serveur.</p>
+          </div>
+        </li>
+        <li class="engagement">
+          <span class="icone icone--coche" aria-hidden="true"></span>
+          <div>
+            <p class="engagement__titre">Aucun compte pour calculer</p>
+            <p>Toutes les fonctions sont accessibles sans inscription. Votre saisie est gardée
+              dans ce navigateur si vous fermez l'onglet.</p>
+          </div>
+        </li>
+        <li class="engagement">
+          <span class="icone icone--info" aria-hidden="true"></span>
+          <div>
+            <p class="engagement__titre">Des hypothèses sourcées et affichées</p>
+            <p>Chaque taux par défaut dit d'où il vient. Quand une donnée est incertaine, l'écran
+              le dit aussi.</p>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ====================================================== Questions -->
+  <section class="section section--creuse" id="questions">
+    <div class="conteneur conteneur--lecture">
+      <header class="section__entete">
+        <span class="surtitre">Questions</span>
+        <h2 class="section__titre">Avant de commencer</h2>
+      </header>
+
+      <div class="faq">
+        <details class="faq__item">
+          <summary>Pourquoi supposer que le locataire investit la différence&nbsp;?</summary>
+          <p>Parce que c'est la seule comparaison juste&nbsp;: sans cela, le propriétaire
+            s'enrichit en remboursant et le locataire dépense ce qu'il ne rembourse pas. Si vous
+            savez que vous ne placeriez pas cet argent, dites-le au simulateur&nbsp;: il en tient
+            compte, et vous montre de combien le verdict bouge. C'est souvent ce qui décide.</p>
+        </details>
+        <details class="faq__item">
+          <summary>Combien de temps faut-il&nbsp;?</summary>
+          <p>Quelques minutes. Il suffit de connaître votre épargne, votre loyer actuel, et le prix
+            du bien qui vous intéresse. Tout le reste est pré-rempli avec des valeurs que vous
+            pouvez garder ou modifier.</p>
+        </details>
+        <details class="faq__item">
+          <summary>Les résultats sont-ils fiables&nbsp;?</summary>
+          <p>Les formules le sont&nbsp;: elles sont vérifiées au centime près, sur vingt-cinq
+            années, contre un classeur de référence. Le futur, lui, ne l'est pas. Personne ne
+            connaît le rendement des marchés ni l'évolution des prix sur vingt ans&nbsp;: c'est
+            l'écart entre plusieurs scénarios qui est instructif, pas un chiffre unique.</p>
+        </details>
+        <details class="faq__item">
+          <summary>Est-ce un conseil en investissement&nbsp;?</summary>
+          <p>Non. Le simulateur projette des hypothèses que vous pouvez voir et modifier. Il ne
+            tient compte ni de votre situation familiale, ni de votre fiscalité personnelle, ni de
+            votre envie d'être chez vous — qui compte aussi.</p>
+        </details>
+        <details class="faq__item">
+          <summary>Pourquoi le simulateur n'est-il pas terminé&nbsp;?</summary>
+          <p>Parce qu'il est construit en public. La comparaison est complète et utilisable
+            dès aujourd'hui. Les séries de marché historiques sont en cours de consolidation, et
+            la sauvegarde dans un compte arrivera plus tard. L'écran signale ce qui est provisoire.</p>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====================================================== Appel final -->
+  <section class="appel">
+    <div class="conteneur conteneur--lecture appel__contenu">
+      <h2 class="appel__titre">Votre ville n'est pas une moyenne nationale</h2>
+      <p class="appel__texte">
+        Entrez votre situation et le bien que vous visez&nbsp;: vous saurez de quel côté vous
+        tombez, et à partir de quelle année.
+      </p>
+      <a class="bouton bouton--inverse bouton--grand" href="index.html">
+        Faire ma simulation <span class="icone icone--fleche" aria-hidden="true"></span>
+      </a>
+    </div>
+  </section>
+
+</main>
+
+<!-- ============================================================ Pied -->
+<footer class="site-pied">
+  <div class="conteneur site-pied__grille">
+    <div class="site-pied__marque">
+      <span class="logotype logotype--inverse">Acheter <i>ou</i> louer</span>
+      <p>Un simulateur qui compare l'achat de votre résidence principale au fait de rester
+        locataire, à budget identique.</p>
+    </div>
+    <nav class="site-pied__colonne" aria-label="Le site">
+      <span class="surtitre surtitre--inverse">Le site</span>
+      <a href="index.html">Le simulateur</a>
+      <a href="#principe">Le principe</a>
+      <a href="#methode">Ce qui est compté</a>
+      <a href="#questions">Questions</a>
+    </nav>
+  </div>
+  <div class="conteneur">
+    <div class="site-pied__bas">
+      <span>© 2026 — Les résultats sont des projections, pas un conseil en investissement.</span>
+      <span class="site-pied__confiance"><span class="icone icone--cadenas" aria-hidden="true"></span>Aucune saisie envoyée à un serveur</span>
+    </div>
+  </div>
+</footer>
+
+<!-- Même ordre que le simulateur : le moteur, puis les scénarios (pour la
+     tendance longue), puis la page. Scripts classiques, pas de modules ES. -->
+<script src="js/calc.js"></script>
+<script src="js/scenarios.js"></script>
+<script src="js/accueil.js"></script>
+</body>
+</html>
