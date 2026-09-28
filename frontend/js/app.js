@@ -1671,14 +1671,23 @@ function afficherQuestion(resultat, horizon) {
   // première ne se répond pas à l'écran : elle se répond dans sa tête, et
   // c'est elle qui décide si la seconde a un sens.
   $('#questionSupplement').textContent = montant;
-  // Espace INSÉCABLE avant le « ? » : sans elle, le point d'interrogation tombe
-  // seul à la ligne dès que la bulle se resserre.
-  $('#questionDemande1').textContent =
-    `Êtes-vous prêt à sortir ${montant} de plus chaque mois, pendant ` +
-    `${resultat.entrees.dureeAnnees} ans ?`;
+  // La question qui dérange, et qui fait tout le travail : si l'effort est
+  // tenable, pourquoi ne le fait-il pas DÉJÀ ? La réponse honnête est presque
+  // toujours « parce que rien ne m'y oblige » — et c'est exactement ce que le
+  // crédit changerait. Espace INSÉCABLE avant le « ? », sinon il tombe seul à
+  // la ligne dès que la bulle se resserre.
   $('#questionDemande2').textContent =
-    `Si oui : en restant locataire, placeriez-vous vraiment ces ${montant}, ` +
-    'au lieu de les dépenser ?';
+    'Si oui : pourquoi ne le faites-vous pas déjà, aujourd’hui, ' +
+    'en tant que locataire ?';
+
+  // Ce que le choix engage vraiment : deux enveloppes différentes pour toute la
+  // suite. Sans ça, on répond à une question de principe sans voir qu'on
+  // paramètre la simulation.
+  $('#questionTexte').textContent =
+    'C’est tout l’enjeu : le crédit vous FORCERA à mettre cette somme de ' +
+    'côté chaque mois, alors que rien ne vous y oblige en restant locataire. ' +
+    `Selon votre réponse, les deux trajectoires n’auront pas la même ` +
+    `enveloppe : ${montant} par mois d’écart, pendant toute la simulation.`;
 
   majEnjeu(resultat, horizon);
 

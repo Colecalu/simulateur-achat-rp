@@ -229,86 +229,85 @@ h1, h2, h3 {
 /* --- La bascule de l'épargne forcée ------------------------------------
    Deux boutons côte à côte se lisaient comme deux indicateurs de plus, noyés
    sous quatre KPI. Un interrupteur dit qu'on EST dans un état, et qu'on peut
-   en changer. Il a donc droit à sa carte, pas à une ligne de note. */
+   en changer. Il a donc droit à sa carte, pas à une ligne de note.
+
+   Deux colonnes, et l'interrupteur est À DROITE, largeur fixe : quand on
+   bascule, le libellé change de longueur et c'est LUI qui s'adapte. Un
+   interrupteur qui se déplace à chaque clic est insupportable — on vise une
+   cible qui bouge. */
 .bascule {
   display: grid;
-  gap: 8px;
-  justify-items: center;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 16px;
   margin-top: 12px;
-  padding: 12px 16px;
+  padding: 12px 18px;
   border: 1px solid var(--alerte);
   border-radius: var(--rayon-large);
   background: var(--surface);
 }
 .bascule[hidden] { display: none; }
-.bascule__constat {
-  margin: 0;
-  font-size: .875rem;
-  color: var(--encre-2);
-  text-align: center;
-}
-.bascule__constat b { color: var(--alerte); font-weight: 600; }
-.bascule__ligne {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: center;
-  gap: 8px 14px;
-}
 
-/* L'interrupteur : piste, curseur, et le libellé DANS le bouton — cliquer le
-   mot bascule aussi, c'est la cible la plus large. */
-.bascule__interrupteur {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
+/* Toute la zone de texte rouvre l'explication. C'est la cible la plus large
+   possible, et elle évite un lien de plus dans une carte déjà dense. */
+.bascule__zone {
+  display: grid;
+  gap: 2px;
   padding: 4px;
+  margin: -4px;
+  border: 0;
+  border-radius: var(--rayon);
+  background: none;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.bascule__zone:hover .bascule__mot { text-decoration: underline; text-underline-offset: 3px; }
+.bascule__zone:focus-visible { outline: none; box-shadow: var(--anneau); }
+.bascule__constat { font-size: .8125rem; color: var(--encre-2); }
+.bascule__constat b { color: var(--alerte); font-weight: 600; }
+.bascule__mot { font-size: .9375rem; font-weight: 600; color: var(--encre); }
+
+/* L'interrupteur. Un vrai, avec du relief : piste creusée (ombre interne),
+   curseur bombé (dégradé clair vers le haut + ombre portée). Sans ça il se
+   lisait comme une étiquette colorée, pas comme une commande. */
+.bascule__interrupteur {
+  flex: none;
+  padding: 3px;
   border: 0;
   border-radius: 999px;
   background: none;
-  font: inherit;
   cursor: pointer;
 }
 .bascule__piste {
+  display: block;
   position: relative;
-  flex: none;
-  width: 40px;
-  height: 22px;
+  width: 54px;
+  height: 30px;
   border-radius: 999px;
   background: var(--trait);
-  transition: background .18s ease;
+  box-shadow: inset 0 2px 4px rgba(11, 11, 11, .28), inset 0 -1px 0 rgba(255, 255, 255, .35);
+  transition: background var(--duree-rapide) var(--aise);
 }
 .bascule__curseur {
   position: absolute;
   top: 3px;
   left: 3px;
-  width: 16px;
-  height: 16px;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
-  background: var(--surface);
-  box-shadow: 0 1px 3px rgba(11, 11, 11, .3);
-  transition: transform .18s ease;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 1), rgba(255, 255, 255, .82));
+  box-shadow: 0 2px 4px rgba(11, 11, 11, .32), 0 0 0 1px rgba(11, 11, 11, .06);
+  transition: transform var(--duree-rapide) var(--aise);
 }
 .bascule__interrupteur[aria-checked="true"] .bascule__piste { background: var(--accent-fort); }
-.bascule__interrupteur[aria-checked="true"] .bascule__curseur { transform: translateX(18px); }
-.bascule__mot { font-size: .875rem; font-weight: 600; color: var(--encre); }
-.bascule__interrupteur:focus-visible { outline: none; box-shadow: var(--anneau); }
+.bascule__interrupteur[aria-checked="true"] .bascule__curseur { transform: translateX(24px); }
+.bascule__interrupteur:focus-visible { outline: none; box-shadow: var(--anneau); border-radius: 999px; }
+.bascule__interrupteur:active .bascule__curseur { transform: scale(.94) translateX(0); }
+.bascule__interrupteur[aria-checked="true"]:active .bascule__curseur { transform: scale(.94) translateX(24px); }
 @media (prefers-reduced-motion: reduce) {
   .bascule__piste, .bascule__curseur { transition: none; }
 }
-
-.bascule__aide {
-  padding: 0;
-  border: 0;
-  background: none;
-  font: inherit;
-  font-size: .75rem;
-  color: var(--accent-fort);
-  text-decoration: underline;
-  text-underline-offset: 2px;
-  cursor: pointer;
-}
-.bascule__aide:focus-visible { outline: none; box-shadow: var(--anneau); border-radius: 4px; }
 
 /* Tant que la question attend sa réponse, le résultat qui en dépend ne se
    montre pas. */
@@ -321,8 +320,18 @@ h1, h2, h3 {
   z-index: 50;
   top: 50%;
   left: 50%;
-  translate: -50% -50%;
-  width: min(560px, calc(100vw - 32px));
+  /* Centrée sur la VISUALISATION, pas sur la fenêtre. La colonne de droite est
+     décalée du rail et de sa gouttiere ; comme la page est centrée et ses marges
+     symétriques, le centre du visuel tombe toujours à la moitié de ce décalage
+     à droite du centre de la fenêtre — quelle que soit sa largeur. */
+  translate: calc(-50% + (var(--rail-largeur) + var(--rail-gouttiere)) / 2) -50%;
+  /* Jamais plus large que la colonne où elle se centre, sinon elle déborde de
+     la fenêtre entre 1040 et 1400 px. */
+  width: min(
+    860px,
+    calc(min(1360px, 100vw) - 48px - var(--rail-largeur) - var(--rail-gouttiere)),
+    calc(100vw - 32px)
+  );
   max-height: calc(100vh - 48px);
   overflow: auto;
   padding: 22px 24px 20px;
@@ -334,6 +343,14 @@ h1, h2, h3 {
 }
 .question[hidden] { display: none; }
 @media (prefers-reduced-motion: reduce) { .question { animation: none; } }
+/* Une seule colonne : le visuel prend toute la largeur, la bulle revient au
+   centre de la fenêtre. Même seuil que `.plateau`. */
+@media (max-width: 1040px) {
+  .question { translate: -50% -50%; }
+  /* Une colonne : plus de place à gagner, le titre peut revenir à la ligne
+     plutôt que de devenir minuscule. */
+  .question__titre { white-space: normal; font-size: 1.25rem; }
+}
 @keyframes questionEntree {
   from { transform: scale(.72); opacity: 0; }
   to { transform: scale(1); opacity: 1; }
@@ -350,14 +367,22 @@ h1, h2, h3 {
   margin: 0;
   font-family: var(--police-titre);
   font-weight: var(--graisse-titre);
-  font-size: 1.5rem;
-  line-height: 1.2;
+  /* Le constat tient sur UNE ligne (demande de Lucas) : c'est une phrase, pas
+     un paragraphe, et coupée en deux elle perdait sa force. `nowrap` interdit
+     le retour à la ligne, et la taille fluide garantit qu'elle rentre quelle
+     que soit la largeur — y compris avec un montant à six chiffres. */
+  font-size: clamp(1.0625rem, 1.85vw, 1.375rem);
+  white-space: nowrap;
+  line-height: 1.25;
   letter-spacing: var(--interlettre-titre);
   color: var(--encre);
 }
 .question__titre b { color: var(--alerte); font-weight: inherit; }
 .question__texte { margin: 10px 0 0; font-size: .875rem; color: var(--encre-2); }
 .question__demande { margin: 14px 0 0; font-size: 1rem; font-weight: 600; color: var(--encre); }
+/* La question qui dérange : elle doit se voir comme la bascule du raisonnement,
+   pas comme une deuxième question de même rang. */
+.question__demande--gene { margin-top: 6px; color: var(--alerte); }
 .question__reponses { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
 @media (max-width: 560px) { .question__reponses { grid-template-columns: 1fr; } }
 /* Deux libellés, rien de plus : l'aide sous chaque bouton ajoutait deux lignes
@@ -410,13 +435,17 @@ h1, h2, h3 {
   padding: 16px 24px 24px;
 }
 
+/* Largeur du rail et gouttiere : nommées parce que la bulle de question s'en
+   sert pour se centrer sur la VISUALISATION et non sur la fenêtre. */
+:root { --rail-largeur: 292px; --rail-gouttiere: 14px; }
+
 .plateau {
   display: grid;
-  grid-template-columns: 292px minmax(0, 1fr);
+  grid-template-columns: var(--rail-largeur) minmax(0, 1fr);
   grid-template-areas:
     "coin   haut"
     "gauche visu";
-  gap: 14px;
+  gap: var(--rail-gouttiere);
   align-items: start;
 }
 

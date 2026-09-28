@@ -458,21 +458,22 @@
         <!-- Le choix, une fois la question posée : une BASCULE, pas deux boutons
              côte à côte. Deux boutons se lisaient comme deux indicateurs de plus,
              perdus sous quatre KPI ; un interrupteur dit qu'on EST dans un état
-             et qu'on peut en changer d'un clic. Le libellé décrit l'état courant,
-             pas l'action — sinon on ne sait plus lequel des deux est vrai. -->
+             et qu'on peut en changer d'un clic.
+             Toute la carte rouvre l'explication — d'où l'absence de lien
+             « Comprendre ce choix », qui faisait un troisième point de clic pour
+             la même chose. L'interrupteur, lui, a sa propre cible. -->
         <div class="bascule" id="egalChoix" hidden>
-          <p class="bascule__constat">
-            L'achat demande <b class="tabulaire" id="egalSupplement"></b>/mois de plus
-            que votre effort actuel.
-          </p>
-          <div class="bascule__ligne">
-            <button type="button" class="bascule__interrupteur" id="egalSwitch"
-                    role="switch" aria-checked="true">
-              <span class="bascule__piste" aria-hidden="true"><span class="bascule__curseur"></span></span>
-              <span class="bascule__mot" id="egalEtat"></span>
-            </button>
-            <button type="button" class="bascule__aide" id="questionRouvrir">Comprendre ce choix</button>
-          </div>
+          <button type="button" class="bascule__zone" id="questionRouvrir">
+            <span class="bascule__constat">
+              L'achat demande <b class="tabulaire" id="egalSupplement"></b>/mois de plus
+              que votre effort actuel.
+            </span>
+            <span class="bascule__mot" id="egalEtat"></span>
+          </button>
+          <button type="button" class="bascule__interrupteur" id="egalSwitch"
+                  role="switch" aria-checked="true" aria-labelledby="egalEtat">
+            <span class="bascule__piste" aria-hidden="true"><span class="bascule__curseur"></span></span>
+          </button>
           <input type="checkbox" class="egal__etat" id="locatairePlaceDifference" checked hidden>
         </div>
         <p class="alerte" id="alerteApport" hidden></p>
@@ -704,17 +705,17 @@
            aria-labelledby="questionTitre" hidden>
 
     <!-- Une seule question, et elle INTERROGE au lieu d'expliquer. Le constat
-         tient dans le titre ; le reste était de la répétition (l'effort actuel
-         est déjà au profil, le mécanisme déjà dans le mot « de plus »). Deux
-         questions : la première ne se répond pas à l'écran, elle se répond dans
-         sa tête ; la seconde a les deux boutons. -->
+         tient dans le titre. Les deux premières questions n'ont pas de bouton :
+         elles se répondent dans sa tête, et la seconde est celle qui dérange —
+         c'est elle qui fait la valeur de la réponse suivante. -->
     <div class="question__temps" id="questionEpargne">
       <h2 class="question__titre" id="questionTitre">
         Cet achat demande <b class="tabulaire" id="questionSupplement"></b> de plus par mois
         que votre effort actuel.
       </h2>
-      <p class="question__demande" id="questionDemande1"></p>
-      <p class="question__demande" id="questionDemande2"></p>
+      <p class="question__demande">Êtes-vous vraiment prêt à faire cet effort supplémentaire&nbsp;?</p>
+      <p class="question__demande question__demande--gene" id="questionDemande2"></p>
+      <p class="question__texte" id="questionTexte"></p>
       <p class="question__franchise">
         Répondez franchement, même si la réponse ne vous arrange pas&nbsp;: c'est souvent
         elle qui décide du résultat.

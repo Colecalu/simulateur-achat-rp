@@ -326,42 +326,58 @@ réelles — en cours ; **(3)** la mise en location ultérieure — moteur fait,
   grand ou dans une autre ville. Essayé puis écarté par Lucas : déplacer le loyer du locataire
   dans la bulle 1, pré-rempli et lié au loyer actuel. Le champ reste en bulle 3 pour l'instant.
 - **Le cas qui fait toute la différence : l'achat demande plus que l'effort d'aujourd'hui.**
-  Une **bulle surgit une seule fois**, au centre, sur un voile, comme les bulles 1 à 4. Elle
-  **interroge**, elle n'explique pas (réécrite le 28/09/2026, demande de Lucas) :
+  Une **bulle surgit une seule fois**, au centre, sur un voile. Elle **interroge**, elle n'explique
+  pas (réécrite les 28 et 29/09/2026, demandes de Lucas) :
 
-  > Cet achat demande **235 €** de plus par mois que votre effort actuel.
-  > Êtes-vous prêt à sortir 235 € de plus chaque mois, pendant 25 ans ?
-  > Si oui : en restant locataire, placeriez-vous vraiment ces 235 €, au lieu de les dépenser ?
-  > *Répondez franchement, même si la réponse ne vous arrange pas : c'est souvent elle qui décide
-  > du résultat.*
+  > **Cet achat demande 23 807 € de plus par mois que votre effort actuel.**
+  > Êtes-vous vraiment prêt à faire cet effort supplémentaire ?
+  > *Si oui : pourquoi ne le faites-vous pas déjà, aujourd'hui, en tant que locataire ?*
+  > C'est tout l'enjeu : le crédit vous FORCERA à mettre cette somme de côté chaque mois, alors
+  > que rien ne vous y oblige en restant locataire. Selon votre réponse, les deux trajectoires
+  > n'auront pas la même enveloppe : 23 807 € par mois d'écart, pendant toute la simulation.
+  > *Répondez franchement, même si la réponse ne vous arrange pas.*
   > [ Je place le gap ] [ Je conserve mon effort actuel ]
-  > À 10 ans, votre réponse déplace le résultat de 33 579 €.
+  > À 10 ans, votre réponse déplace le résultat de 3 362 108 €.
 
-  - **Deux questions, dont la première ne se répond pas à l'écran.** Elle se répond dans sa tête,
-    et c'est elle qui décide si la seconde a un sens. Lui donner des boutons aurait ajouté une
-    étape sans rien apprendre au modèle.
-  - **Ce qui a été RETIRÉ, et pourquoi.** Le signal « L'effort augmente » : le titre le dit déjà.
-    La phrase « Aujourd'hui vous y consacrez 3 400 € — 1 600 € de loyer et 1 800 € d'épargne » :
-    elle redétaillait le profil que l'utilisateur vient de remplir. Les aides sous les deux
-    boutons : deux lignes de texte de plus juste après la question. **Une bulle dense ne se lit
-    pas** — et celle-ci arrive au moment où il faut réfléchir, pas lire.
-  - **Le ton fait partie de la fonction.** « Sans vous mentir » n'est pas une formule : la réponse
-    n'est vérifiable par personne, et une réponse complaisante fausse tout le reste.
-  - **L'enjeu est mesuré à DIX ans**, pas à l'horizon regardé (`HORIZON_ENJEU`). À vingt-cinq ans
-    le chiffre devient énorme et invraisemblable — et un chiffre qu'on ne croit pas ne fait pas
-    réfléchir. Dix ans, c'est à mi-crédit : l'écart est installé, la projection reste concrète.
-    Le moteur tourne une seconde fois avec l'autre réponse ; le montant n'est jamais affirmé.
-  - **Choix obligatoire** : ni croix, ni voile, ni Échap ne la ferment. **Le résultat reste masqué**
-    tant qu'on n'a pas répondu (`#visu[data-question="attente"]`) : il dépend de la réponse.
-- **Une BASCULE, pas deux boutons** (28/09/2026). Une fois répondu, la bulle redescend vers une
-  **carte cernée**, sous les quatre KPI : le constat chiffré, un **interrupteur** dont le libellé
-  décrit l'état courant (« En restant locataire, je place le gap » / « … je conserve mon effort
-  actuel »), et « Comprendre ce choix » qui rouvre la bulle — elle se ferme alors librement.
+  - **La deuxième question est celle qui fait tout le travail**, et elle dérange exprès : si
+    l'effort est tenable, pourquoi ne le fait-on pas déjà ? La réponse honnête est presque
+    toujours « parce que rien ne m'y oblige » — c'est exactement ce que le crédit changerait.
+    Elle est **en couleur d'alerte** : ce n'est pas une question de même rang que la première.
+    Ni l'une ni l'autre n'a de bouton : elles se répondent dans sa tête.
+  - **Le paragraphe dit ce que le choix ENGAGE**, pas ce qu'est l'épargne forcée : deux enveloppes
+    différentes pour toute la suite, chiffrées. Sans lui, on répond à une question de principe
+    sans voir qu'on paramètre la simulation.
+  - **Le titre tient sur UNE ligne** (`white-space: nowrap` + `clamp()`) : c'est une phrase, pas un
+    paragraphe, et coupée en deux elle perdait sa force. La taille fluide garantit qu'elle rentre
+    même avec un montant à six chiffres ; sous 1040 px elle peut revenir à la ligne.
+  - **La bulle se centre sur la VISUALISATION, pas sur la fenêtre.** Centrée sur la fenêtre, elle
+    paraissait décalée à gauche — le rail de saisie occupe 292 px à gauche du visuel. Le décalage
+    vaut exactement la moitié du rail et de sa gouttiere, **quelle que soit la largeur**, parce que
+    la page est centrée et ses marges symétriques : `translate: calc(-50% + (var(--rail-largeur) +
+    var(--rail-gouttiere)) / 2)`. Pur CSS — `app.js` ne pose **aucun style en ligne** (invariant 6),
+    et une mesure en JS aurait été le premier.
+  - **L'enjeu est mesuré à DIX ans** (`HORIZON_ENJEU`), pas à l'horizon regardé. À vingt-cinq ans
+    le chiffre devient énorme et invraisemblable — un chiffre qu'on ne croit pas ne fait pas
+    réfléchir. Le moteur tourne une seconde fois avec l'autre réponse ; rien n'est affirmé.
+  - **Choix obligatoire** : ni croix, ni voile, ni Échap. **Le résultat reste masqué** tant qu'on
+    n'a pas répondu (`#visu[data-question="attente"]`) : il dépend de la réponse.
+- **Une BASCULE, pas deux boutons.** Une fois répondu, la bulle redescend vers une **carte cernée
+  pleine largeur** sous les quatre KPI : à gauche le constat chiffré et l'état courant, à droite un
+  **interrupteur**.
   - **Pourquoi un interrupteur.** Deux boutons côte à côte se lisaient comme deux indicateurs de
     plus, perdus sous quatre KPI, et on ne savait pas lequel était actif. Un interrupteur dit
-    qu'on **est** dans un état et qu'on peut en changer d'un clic, sans viser le bon bouton.
+    qu'on **est** dans un état et qu'on en change d'un clic, sans viser le bon bouton.
+  - **Il ne bouge JAMAIS.** La carte est une grille `1fr auto` : l'interrupteur est collé à droite,
+    et c'est le libellé qui s'adapte quand il passe de 36 à 50 caractères. Une première version le
+    laissait suivre le texte — la cible se déplaçait à chaque clic, ce qui est insupportable.
+    Vérifié : même abscisse au pixel près dans les deux états.
+  - **Il a du relief** : piste creusée (ombre interne), curseur bombé (dégradé + ombre portée),
+    enfoncé au `:active`. Plat, il se lisait comme une étiquette colorée, pas comme une commande.
   - **Le libellé décrit l'ÉTAT, pas l'action.** « Placer le gap » laisserait ignorer lequel des
     deux mondes est simulé à l'écran.
+  - **Toute la zone de texte rouvre l'explication.** Le lien « Comprendre ce choix » a été retiré :
+    il faisait un troisième point de clic pour la même chose. L'interrupteur garde sa cible propre,
+    et basculer ne rouvre donc pas la bulle.
   - **L'enjeu chiffré n'est PAS répété sur la carte** : il a sa place dans la bulle, au moment de
     trancher. Sous les KPI, il redevenait un cinquième chiffre au milieu des autres.
 - **Une seule pop-up, jamais deux** (28/09/2026). Une mise en garde de faisabilité — taux
