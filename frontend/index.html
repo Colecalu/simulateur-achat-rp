@@ -406,8 +406,6 @@
         </div>
         <p class="verdict__chiffre" id="verdictChiffre">—</p>
         <p class="verdict__mesure" id="verdictMesure"></p>
-        <!-- Le clic sur la bascule doit se VOIR : de combien le verdict a bougé. -->
-        <p class="verdict__mouvement tabulaire" id="verdictMouvement" hidden></p>
       </div>
 
       <figure class="carte carte--graphique">
@@ -455,25 +453,33 @@
         </div>
         <p class="kpi__note" id="pointMortMesure"></p>
 
-        <!-- Le choix, une fois la question posée : une BASCULE, pas deux boutons
-             côte à côte. Deux boutons se lisaient comme deux indicateurs de plus,
-             perdus sous quatre KPI ; un interrupteur dit qu'on EST dans un état
-             et qu'on peut en changer d'un clic.
-             Toute la carte rouvre l'explication — d'où l'absence de lien
-             « Comprendre ce choix », qui faisait un troisième point de clic pour
-             la même chose. L'interrupteur, lui, a sa propre cible. -->
-        <div class="bascule" id="egalChoix" hidden>
-          <button type="button" class="bascule__zone" id="questionRouvrir">
-            <span class="bascule__constat">
-              L'achat demande <b class="tabulaire" id="egalSupplement"></b>/mois de plus
-              que votre effort actuel.
-            </span>
-            <span class="bascule__mot" id="egalEtat"></span>
+        <!-- Le choix, une fois la question posée : les DEUX options écrites en
+             toutes lettres, côte à côte, avec leur montant. Un interrupteur
+             demandait de deviner ce que valait l'autre état ; ici les deux
+             enveloppes sont lisibles en même temps, et c'est justement ce qu'il
+             faut comprendre — elles ne sont pas les mêmes.
+             À gauche l'effort aligné sur celui de l'acheteur (comparaison à
+             armes égales), à droite l'effort d'aujourd'hui conservé. Le titre
+             de la carte rouvre l'explication. -->
+        <div class="choix" id="egalChoix" hidden>
+          <button type="button" class="choix__titre" id="questionRouvrir">
+            En restant locataire, mon effort mensuel&nbsp;:
+            <span class="choix__aide" aria-hidden="true">?</span>
           </button>
-          <button type="button" class="bascule__interrupteur" id="egalSwitch"
-                  role="switch" aria-checked="true" aria-labelledby="egalEtat">
-            <span class="bascule__piste" aria-hidden="true"><span class="bascule__curseur"></span></span>
-          </button>
+          <div class="choix__options" role="radiogroup" aria-label="Effort du locataire">
+            <button type="button" class="choix__option" data-choix="aligne"
+                    role="radio" aria-checked="true">
+              <span class="choix__mot">Je le porte à</span>
+              <span class="choix__somme tabulaire" id="choixSommeAligne">—</span>
+              <span class="choix__note">le même effort que l'acheteur</span>
+            </button>
+            <button type="button" class="choix__option" data-choix="actuel"
+                    role="radio" aria-checked="false">
+              <span class="choix__mot">Je le conserve à</span>
+              <span class="choix__somme tabulaire" id="choixSommeActuel">—</span>
+              <span class="choix__note">l'acheteur, lui, épargne de force</span>
+            </button>
+          </div>
           <input type="checkbox" class="egal__etat" id="locatairePlaceDifference" checked hidden>
         </div>
         <p class="alerte" id="alerteApport" hidden></p>

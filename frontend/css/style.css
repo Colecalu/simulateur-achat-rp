@@ -226,88 +226,87 @@ h1, h2, h3 {
 .kpi__ligne dd { font-weight: 600; color: var(--encre); }
 .kpi__ligne--investi dd { color: var(--supplement); }
 
-/* --- La bascule de l'épargne forcée ------------------------------------
-   Deux boutons côte à côte se lisaient comme deux indicateurs de plus, noyés
-   sous quatre KPI. Un interrupteur dit qu'on EST dans un état, et qu'on peut
-   en changer. Il a donc droit à sa carte, pas à une ligne de note.
-
-   Deux colonnes, et l'interrupteur est À DROITE, largeur fixe : quand on
-   bascule, le libellé change de longueur et c'est LUI qui s'adapte. Un
-   interrupteur qui se déplace à chaque clic est insupportable — on vise une
-   cible qui bouge. */
-.bascule {
+/* --- Le choix de l'effort du locataire -----------------------------------
+   Les deux options sont ÉCRITES, côte à côte, avec leur montant. Un
+   interrupteur demandait de deviner ce que valait l'autre état ; ici les deux
+   enveloppes se lisent en même temps — et c'est exactement ce qu'il faut
+   comprendre : elles ne sont pas les mêmes. */
+.choix {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 16px;
+  gap: 8px;
   margin-top: 12px;
-  padding: 12px 18px;
-  border: 1px solid var(--alerte);
+  padding: 12px;
+  border: 1px solid var(--trait);
   border-radius: var(--rayon-large);
   background: var(--surface);
 }
-.bascule[hidden] { display: none; }
+.choix[hidden] { display: none; }
 
-/* Toute la zone de texte rouvre l'explication. C'est la cible la plus large
-   possible, et elle évite un lien de plus dans une carte déjà dense. */
-.bascule__zone {
-  display: grid;
-  gap: 2px;
-  padding: 4px;
-  margin: -4px;
+/* Le titre rouvre l'explication : la cible la plus évidente, et ça évite un
+   lien de plus dans une carte déjà pleine. */
+.choix__titre {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 2px;
   border: 0;
-  border-radius: var(--rayon);
   background: none;
   font: inherit;
-  text-align: left;
+  font-size: .75rem;
+  font-weight: 600;
+  letter-spacing: var(--interlettre-caps);
+  text-transform: uppercase;
+  color: var(--encre-3);
   cursor: pointer;
 }
-.bascule__zone:hover .bascule__mot { text-decoration: underline; text-underline-offset: 3px; }
-.bascule__zone:focus-visible { outline: none; box-shadow: var(--anneau); }
-.bascule__constat { font-size: .8125rem; color: var(--encre-2); }
-.bascule__constat b { color: var(--alerte); font-weight: 600; }
-.bascule__mot { font-size: .9375rem; font-weight: 600; color: var(--encre); }
-
-/* L'interrupteur. Un vrai, avec du relief : piste creusée (ombre interne),
-   curseur bombé (dégradé clair vers le haut + ombre portée). Sans ça il se
-   lisait comme une étiquette colorée, pas comme une commande. */
-.bascule__interrupteur {
-  flex: none;
-  padding: 3px;
-  border: 0;
-  border-radius: 999px;
-  background: none;
-  cursor: pointer;
-}
-.bascule__piste {
-  display: block;
-  position: relative;
-  width: 54px;
-  height: 30px;
-  border-radius: 999px;
-  background: var(--trait);
-  box-shadow: inset 0 2px 4px rgba(11, 11, 11, .28), inset 0 -1px 0 rgba(255, 255, 255, .35);
-  transition: background var(--duree-rapide) var(--aise);
-}
-.bascule__curseur {
-  position: absolute;
-  top: 3px;
-  left: 3px;
-  width: 24px;
-  height: 24px;
+.choix__titre:hover { color: var(--accent-fort); }
+.choix__titre:focus-visible { outline: none; box-shadow: var(--anneau); border-radius: var(--rayon); }
+.choix__aide {
+  display: grid;
+  place-items: center;
+  width: 15px;
+  height: 15px;
+  border: 1px solid currentColor;
   border-radius: 50%;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 1), rgba(255, 255, 255, .82));
-  box-shadow: 0 2px 4px rgba(11, 11, 11, .32), 0 0 0 1px rgba(11, 11, 11, .06);
-  transition: transform var(--duree-rapide) var(--aise);
+  font-size: .625rem;
+  text-transform: none;
 }
-.bascule__interrupteur[aria-checked="true"] .bascule__piste { background: var(--accent-fort); }
-.bascule__interrupteur[aria-checked="true"] .bascule__curseur { transform: translateX(24px); }
-.bascule__interrupteur:focus-visible { outline: none; box-shadow: var(--anneau); border-radius: 999px; }
-.bascule__interrupteur:active .bascule__curseur { transform: scale(.94) translateX(0); }
-.bascule__interrupteur[aria-checked="true"]:active .bascule__curseur { transform: scale(.94) translateX(24px); }
-@media (prefers-reduced-motion: reduce) {
-  .bascule__piste, .bascule__curseur { transition: none; }
+
+.choix__options { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+@media (max-width: 560px) { .choix__options { grid-template-columns: 1fr; } }
+
+/* Un vrai bouton : relief au repos, enfoncé quand il est choisi. C'est le
+   relief qui dit lequel des deux est actif — pas une simple couleur. */
+.choix__option {
+  display: grid;
+  gap: 2px;
+  justify-items: center;
+  padding: 10px 12px;
+  border: 1px solid var(--bord-champ);
+  border-radius: var(--rayon);
+  background: var(--plan);
+  font: inherit;
+  text-align: center;
+  cursor: pointer;
+  box-shadow: 0 1px 0 rgba(11, 11, 11, .08);
+  transition: border-color var(--duree-rapide) var(--aise),
+              background var(--duree-rapide) var(--aise),
+              box-shadow var(--duree-rapide) var(--aise);
 }
+.choix__option:hover { border-color: var(--accent); }
+.choix__option:focus-visible { outline: none; border-color: var(--accent); box-shadow: var(--anneau); }
+.choix__option[aria-checked="true"] {
+  border-color: var(--accent-fort);
+  background: var(--accent-doux);
+  box-shadow: inset 0 2px 4px rgba(11, 11, 11, .12);
+}
+
+.choix__mot { font-size: .75rem; color: var(--encre-2); }
+.choix__somme { font-size: 1.125rem; font-weight: 600; color: var(--encre-3); }
+.choix__option[aria-checked="true"] .choix__somme { color: var(--encre); }
+.choix__note { font-size: .6875rem; color: var(--encre-3); }
+.choix__option[aria-checked="true"] .choix__note { color: var(--encre-2); }
 
 /* Tant que la question attend sa réponse, le résultat qui en dépend ne se
    montre pas. */
@@ -1110,17 +1109,6 @@ h1, h2, h3 {
   color: var(--encre-2);
 }
 
-.verdict__mouvement {
-  display: inline-block;
-  margin: 8px 0 0;
-  padding: 3px 10px;
-  border-radius: 999px;
-  background: var(--supplement-fond);
-  color: var(--supplement);
-  font-size: .8125rem;
-  font-weight: 600;
-}
-.verdict__mouvement[hidden] { display: none; }
 
 
 

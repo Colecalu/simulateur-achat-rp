@@ -223,9 +223,11 @@ function afficherVerdict(resultat, horizon) {
   // Plus de refus de trancher quand l'effort ne couvre pas l'achat : le moteur
   // ne laisse plus le dépassement impayé, il fait monter l'enveloppe des deux
   // côtés. L'écart est donc juste, et le supplément se lit dans le profil.
-  afficherMouvement(ecart);
-
-  chiffre.textContent = signe(ecart);
+  // JAMAIS de signe négatif. Un écart négatif ne veut pas dire « moins de
+  // patrimoine » dans l'absolu : il veut dire que c'est l'AUTRE trajectoire qui
+  // gagne, et de ce montant-là. La couleur le dit, la phrase juste en dessous
+  // l'explicite — le signe, lui, se lisait comme une perte.
+  chiffre.textContent = euros.format(Math.abs(ecart));
   chiffre.className = 'verdict__chiffre ' +
     (ecart >= 0 ? 'verdict__chiffre--achat' : 'verdict__chiffre--location');
 
@@ -242,34 +244,6 @@ function afficherVerdict(resultat, horizon) {
 }
 
 /* --------------------------------------------------------- Épargne forcée */
-
-/**
- * Écart affiché juste avant un clic sur la bascule, ou null. Posé par
- * l'écouteur de la case, AVANT le recalcul (la case le reçoit avant le
- * bandeau, qui l'écoute par propagation) ; consommé par le verdict qui suit.
- */
-let ecartAvantBascule = null;
-
-/**
- * « Le verdict a bougé de 88 895 € vers l'achat. »
- *
- * La bascule change le verdict de dizaines ou de centaines de milliers
- * d'euros. Sans ce rappel, le chiffre change sous les yeux sans qu'on sache
- * de combien : c'est pourtant CE montant qui dit ce que vaut la discipline.
- */
-function afficherMouvement(ecart) {
-  const el = $('#verdictMouvement');
-  if (ecartAvantBascule === null) {
-    el.hidden = true;
-    return;
-  }
-  const delta = ecart - ecartAvantBascule;
-  ecartAvantBascule = null;
-  el.textContent =
-    `Le verdict a bougé de ${euros.format(Math.abs(delta))} vers ` +
-    (delta >= 0 ? 'l\'achat.' : 'la location.');
-  el.hidden = Math.abs(delta) < 1;
-}
 
 /* --------------------------------------------------------------- Graphiques */
 
@@ -1662,8 +1636,7 @@ function afficherQuestion(resultat, horizon) {
   }
 
   const montant = euros.format(supplement);
-  $('#egalSupplement').textContent = `+${montant}`;
-  majBascule(place);
+  majChoix(resultat, place);
 
   // La bulle INTERROGE, elle n'explique pas. Le constat est dans le titre ; le
   // reste était de la répétition — l'effort actuel est déjà au profil, et le
@@ -1705,16 +1678,19 @@ function afficherQuestion(resultat, horizon) {
 }
 
 /**
- * L'interrupteur dit l'ÉTAT, pas l'action. « Je place le gap » quand il est
- * allumé décrit ce qui est simulé en ce moment ; un libellé d'action
- * (« placer le gap ») laisserait ignorer lequel des deux mondes on regarde.
+ * Les deux options portent leur MONTANT, pas un intitulé abstrait.
+ *
+ * C'est là que se comprend l'épargne forcée : à gauche le locataire s'aligne
+ * sur l'effort de l'acheteur, à droite il garde le sien. Voir les deux sommes
+ * côte à côte dit ce qu'aucune phrase ne disait — les deux enveloppes ne sont
+ * pas les mêmes, et l'acheteur, lui, n'a pas eu le choix.
  */
-function majBascule(place) {
-  const bouton = $('#egalSwitch');
-  bouton.setAttribute('aria-checked', String(place));
-  $('#egalEtat').textContent = place
-    ? 'En restant locataire, je place le gap'
-    : 'En restant locataire, je conserve mon effort actuel';
+function majChoix(resultat, place) {
+  $('#choixSommeAligne').textContent = euros.format(resultat.effortAchat);
+  $('#choixSommeActuel').textContent = euros.format(resultat.entrees.enveloppeMensuelle);
+  for (const b of document.querySelectorAll('.choix__option')) {
+    b.setAttribute('aria-checked', String((b.dataset.choix === 'aligne') === place));
+  }
 }
 
 /**
@@ -1776,10 +1752,10 @@ function fermerQuestion() {
     if (fait) return;
     fait = true;
     q.hidden = true;
-    // Le focus atterrit sur l'interrupteur : c'est là que le choix vit
+    // Le focus atterrit sur l'option retenue : c'est là que le choix vit
     // désormais, et c'est de là qu'on peut en changer.
-    const bascule = cible.querySelector('.bascule__interrupteur');
-    if (bascule && !cible.hidden) bascule.focus({ preventScroll: true });
+    const choisi = cible.querySelector('.choix__option[aria-checked="true"]');
+    if (choisi && !cible.hidden) choisi.focus({ preventScroll: true });
   };
   const depart = q.getBoundingClientRect();
   const arrivee = cible.hidden ? null : cible.getBoundingClientRect();
@@ -2112,19 +2088,12 @@ function initialiser() {
   }
   // « Pourquoi ? » rouvre la bulle, qui se ferme alors librement.
   $('#questionRouvrir').addEventListener('click', () => ouvrirQuestion(true));
-  // L'interrupteur bascule d'un clic, dans les deux sens : c'est ce qui le
-  // distingue de deux boutons — on n'a pas à viser le bon.
-  $('#egalSwitch').addEventListener('click', () => {
-    repondre($('#egalSwitch').getAttribute('aria-checked') !== 'true');
-  });
+  // Les deux choix, en toutes lettres. Cliquer celui déjà actif ne fait rien :
+  // ce n'est pas une bascule, c'est une sélection.
+  for (const b of document.querySelectorAll('.choix__option')) {
+    b.addEventListener('click', () => repondre(b.dataset.choix === 'aligne'));
+  }
   $('#voileQuestion').addEventListener('click', () => { if (questionLibre) fermerQuestion(); });
-
-  $('#locatairePlaceDifference').addEventListener('input', () => {
-    const horizon = parseInt($('#horizon').value, 10);
-    ecartAvantBascule = parcoursComplet() && dernierResultat && epargneForceeRepondue
-      ? dernierResultat.annees[horizon - 1].ecart
-      : null;
-  });
 
   initialiserBulles();
 

@@ -361,25 +361,35 @@ réelles — en cours ; **(3)** la mise en location ultérieure — moteur fait,
     réfléchir. Le moteur tourne une seconde fois avec l'autre réponse ; rien n'est affirmé.
   - **Choix obligatoire** : ni croix, ni voile, ni Échap. **Le résultat reste masqué** tant qu'on
     n'a pas répondu (`#visu[data-question="attente"]`) : il dépend de la réponse.
-- **Une BASCULE, pas deux boutons.** Une fois répondu, la bulle redescend vers une **carte cernée
-  pleine largeur** sous les quatre KPI : à gauche le constat chiffré et l'état courant, à droite un
-  **interrupteur**.
-  - **Pourquoi un interrupteur.** Deux boutons côte à côte se lisaient comme deux indicateurs de
-    plus, perdus sous quatre KPI, et on ne savait pas lequel était actif. Un interrupteur dit
-    qu'on **est** dans un état et qu'on en change d'un clic, sans viser le bon bouton.
-  - **Il ne bouge JAMAIS.** La carte est une grille `1fr auto` : l'interrupteur est collé à droite,
-    et c'est le libellé qui s'adapte quand il passe de 36 à 50 caractères. Une première version le
-    laissait suivre le texte — la cible se déplaçait à chaque clic, ce qui est insupportable.
-    Vérifié : même abscisse au pixel près dans les deux états.
-  - **Il a du relief** : piste creusée (ombre interne), curseur bombé (dégradé + ombre portée),
-    enfoncé au `:active`. Plat, il se lisait comme une étiquette colorée, pas comme une commande.
-  - **Le libellé décrit l'ÉTAT, pas l'action.** « Placer le gap » laisserait ignorer lequel des
-    deux mondes est simulé à l'écran.
-  - **Toute la zone de texte rouvre l'explication.** Le lien « Comprendre ce choix » a été retiré :
-    il faisait un troisième point de clic pour la même chose. L'interrupteur garde sa cible propre,
-    et basculer ne rouvre donc pas la bulle.
-  - **L'enjeu chiffré n'est PAS répété sur la carte** : il a sa place dans la bulle, au moment de
-    trancher. Sous les KPI, il redevenait un cinquième chiffre au milieu des autres.
+- **Les DEUX options écrites, avec leur montant** (29/09/2026). Une fois répondu, la bulle
+  redescend vers une carte sous les quatre KPI :
+
+  > EN RESTANT LOCATAIRE, MON EFFORT MENSUEL : (?)
+  > [ **Je le porte à 3 909 €** — le même effort que l'acheteur ]
+  > [ **Je le conserve à 3 400 €** — l'acheteur, lui, épargne de force ]
+
+  - **Pourquoi pas un interrupteur.** Essayé puis écarté par Lucas. Un interrupteur n'affiche que
+    l'état COURANT : il faut deviner ce que vaut l'autre. Les deux options côte à côte montrent
+    **les deux enveloppes en même temps** — 3 909 € contre 3 400 € — et c'est exactement ce qu'il
+    faut comprendre : elles ne sont pas les mêmes. C'est là, et pas dans un paragraphe, que
+    l'épargne forcée devient évidente.
+  - **Le montant fait le travail, pas le vocabulaire.** « Je place le gap » demandait de retenir ce
+    qu'était le gap. « Je le porte à 3 909 € » se lit sans rien retenir.
+  - **La note de droite nomme l'asymétrie** : « l'acheteur, lui, épargne de force ». C'est la
+    seule phrase de la carte, et elle est sur l'option où elle compte.
+  - **Le relief dit lequel est actif**, pas seulement la couleur : l'option retenue est **enfoncée**
+    (ombre interne), l'autre légèrement en relief.
+  - **Cliquer l'option déjà active ne fait rien** : c'est une sélection, pas une bascule.
+  - **Le titre de la carte rouvre l'explication** (avec un « ? » discret). Les options gardent leur
+    cible propre : choisir ne rouvre pas la bulle.
+- **Le verdict n'affiche JAMAIS de signe négatif** (29/09/2026). Un écart négatif ne veut pas dire
+  « moins de patrimoine » : il veut dire que c'est l'AUTRE trajectoire qui gagne, et de ce
+  montant-là. La couleur le dit, la phrase juste en dessous l'explicite (« de patrimoine en plus en
+  restant locataire qu'en achetant ») — le signe, lui, se lisait comme une perte.
+- **« Le verdict a bougé de 256 000 € vers l'achat » a été supprimé** (29/09/2026) : la ligne
+  prenait trop de place sous le chiffre, juste sous le curseur d'horizon. L'enjeu du choix est déjà
+  donné dans la bulle, au moment de trancher — c'est là qu'il sert.
+
 - **Une seule pop-up, jamais deux** (28/09/2026). Une mise en garde de faisabilité — taux
   d'endettement au-delà des 35 % du HCSF — avait été ajoutée **avant** la question, puis
   **retirée par Lucas** : deux bulles modales d'affilée sont trop agressives, et l'utilisateur sait
