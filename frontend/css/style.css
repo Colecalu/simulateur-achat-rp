@@ -258,7 +258,11 @@ h1, h2, h3 {
 }
 .egal__reponse[aria-pressed="true"] { background: var(--encre); color: var(--surface); }
 .egal__reponse:focus-visible { outline: none; box-shadow: var(--anneau); }
-.egal__pourquoi {
+/* L'appel à ouvrir la bulle : une phrase entière, sur sa propre ligne, pas un
+   mot isolé à droite. `flex-basis: 100%` la force sous le choix plutôt que de
+   la laisser flotter en bout de ligne, où on la prenait pour une note. */
+.egal__enjeu {
+  flex-basis: 100%;
   padding: 0;
   border: 0;
   background: none;
@@ -269,6 +273,8 @@ h1, h2, h3 {
   text-underline-offset: 2px;
   cursor: pointer;
 }
+.egal__enjeu[hidden] { display: none; }
+.egal__enjeu:focus-visible { outline: none; box-shadow: var(--anneau); border-radius: 4px; }
 
 /* Tant que la question attend sa réponse, le résultat qui en dépend ne se
    montre pas. */
@@ -335,6 +341,16 @@ h1, h2, h3 {
 .question__reponse:focus-visible { outline: none; border-color: var(--accent); box-shadow: var(--anneau); }
 .question__reponse-titre { font-size: .9375rem; font-weight: 600; color: var(--encre); }
 .question__reponse-aide { font-size: .75rem; font-weight: 400; color: var(--encre-2); }
+.question__temps[hidden] { display: none; }
+/* Ce que le choix déplace, mesuré : la bulle ne demande pas de trancher sans
+   dire ce qui est en jeu. */
+.question__enjeu {
+  margin: 12px 0 0;
+  font-size: .75rem;
+  color: var(--encre-2);
+  text-align: center;
+}
+.question__enjeu b { color: var(--encre); font-weight: 600; }
 
 #alerteApport { margin: 0; }
 #alerteApport[hidden] { display: none; }

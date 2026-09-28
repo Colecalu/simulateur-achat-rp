@@ -326,17 +326,59 @@ réelles — en cours ; **(3)** la mise en location ultérieure — moteur fait,
   grand ou dans une autre ville. Essayé puis écarté par Lucas : déplacer le loyer du locataire
   dans la bulle 1, pré-rempli et lié au loyer actuel. Le champ reste en bulle 3 pour l'instant.
 - **Le cas qui fait toute la différence : l'achat demande plus que l'effort d'aujourd'hui.**
-  Une **bulle surgit une seule fois**, au centre, sur un voile, comme les bulles 1 à 4 : « Attention
-  — L'achat vous demande **148 € de plus** par mois qu'aujourd'hui », une ligne qui explique
-  pourquoi (la banque prélève, rien n'y oblige le locataire), puis **une vraie question** et **deux
-  réponses** : « Oui, je les place » / « Non, je garde mes habitudes ». **Choix obligatoire** : ni
-  croix, ni voile, ni Échap ne la ferment. **Le résultat reste masqué** tant qu'on n'a pas répondu
-  (`#visu[data-question="attente"]`) : il dépend de la réponse. Puis la bulle **redescend** vers
-  une petite ligne sous les KPI « Chaque mois » — « Achat : +148 €/mois. En restant locataire : [Je les
-  place] [Je garde mes habitudes] Pourquoi ? » —, d'où le choix reste modifiable et d'où
-  « Pourquoi ? » rouvre la bulle, qui se ferme alors librement. Elle ne resurgit pas si le projet
-  change ensuite : la petite ligne se met à jour. Les réponses décrivent un **comportement**, jamais
-  un résultat.
+  Une **bulle surgit une seule fois**, au centre, sur un voile, comme les bulles 1 à 4. Elle a
+  **deux temps**, et ils sont indépendants — chacun n'apparaît que si son cas est réuni.
+
+  **Temps 1 — « Limite bancaire dépassée »** (28/09/2026). On peut saisir 5 000 000 € et obtenir
+  une mensualité de 26 923 € sans que rien à l'écran ne dise que ce projet ne sera jamais
+  financé : le taux d'endettement affichait « 337 % », froidement, comme un chiffre parmi d'autres.
+  Demander à ce stade « placeriez-vous aussi ces 23 807 € ? », c'est demander à quelqu'un ce
+  qu'il ferait d'un argent qu'il n'a pas. La bulle **confirme d'abord** : la mensualité, le ratio,
+  le seuil, et ce qu'il resterait pour vivre — puis « Voulez-vous quand même l'étudier ? » avec
+  « Je corrige mon projet » (rouvre la bulle 1, curseur dans le prix) et « Je l'étudie quand
+  même » (enchaîne sur le temps 2).
+  - **Le seuil est celui des banques, 35 % (HCSF), pas le nôtre.** C'est la seule raison qui
+    autorise à dire à quelqu'un que son projet ne tient pas. Sans revenus renseignés, **aucun
+    avertissement** : même règle que pour le KPI, on n'invente pas de ratio.
+  - **Le texte reste juste aux deux extrêmes.** À 36 % le dépassement est léger et dérogeable ;
+    à 337 % le projet n'existe pas. Une première version disait « aucun crédit ne serait
+    accordé » dans les deux cas — faux dans le premier, et **contredit par la phrase suivante**,
+    qui annonçait 4 600 € restants pour vivre. C'est le **reste à vivre** qui fait la différence
+    (« il vous manquerait 19 207 € par mois »), pas un second seuil inventé par nous.
+  - **Cet état n'est PAS sauvegardé** (`porteeConfirmee`, de session) : c'est un avertissement sur
+    un projet infinançable, pas une préférence. Le revoir en rouvrant l'onglet est le bon
+    comportement, et ça évite d'incrémenter `SCHEMA_VERSION` pour un état qui ne décrit pas le
+    projet.
+
+  **Temps 2 — l'épargne forcée.** « Cet achat demande **23 807 € de plus** par mois que votre
+  effort actuel », puis le mécanisme en trois temps courts — l'effort d'aujourd'hui **repris du
+  profil avec ses deux composantes** (« 3 400 € : 1 600 € de loyer et 1 800 € d'épargne »), ce que
+  l'achat demande, et pourquoi ça change tout (la banque prélève, rien n'y oblige le locataire).
+  Puis **une vraie question** — « que feriez-vous de ces 23 807 € chaque mois ? » — et **deux
+  réponses** : « Je les place » / « Je garde mes habitudes ». Les aides sont **chiffrées** :
+  « Vous continuez d'épargner 1 800 € » dit le comportement réel, là où « c'est l'épargne forcée
+  du crédit » nommait un concept.
+  - **Le vocabulaire est celui du profil.** « Effort » est déjà défini à la saisie ; « supplément »
+    ne voulait rien dire tant que les deux efforts n'étaient pas remis côte à côte.
+  - **Choix obligatoire** : ni croix, ni voile, ni Échap. **Le résultat reste masqué** tant qu'on
+    n'a pas répondu (`#visu[data-question="attente"]`) : il dépend de la réponse. Le temps 1, lui,
+    ne masque rien — il ne change aucun chiffre.
+
+  Puis la bulle **redescend** vers une petite ligne sous les KPI « Chaque mois » : « L'effort à
+  l'achat dépasse le vôtre de **+23 807 €**/mois. En restant locataire : [Je les place] [Je garde
+  mes habitudes] ». Le choix y reste modifiable, et elle se met à jour si le projet change.
+- **« Pourquoi ? » a été remplacé par l'enjeu chiffré** (28/09/2026). Le mot, seul et souligné en
+  bout de ligne, ne disait pas ce qu'on trouverait derrière — et on le prenait pour une note. À la
+  place, une phrase entière sur sa propre ligne : « **Ce choix déplace le résultat de 8 274 471 €.
+  Comprendre.** » Le montant est **mesuré, pas affirmé** : le moteur tourne une seconde fois avec
+  l'autre réponse, à l'horizon regardé. Un chiffre donne une raison de cliquer ; un mot
+  interrogatif, non. La même mesure est rappelée sous les deux réponses dans la bulle : on ne
+  demande pas de trancher sans dire ce qui est en jeu.
+- **« Sur 25 ans simulés, l'achat ne repasse jamais devant la location » a été supprimée**
+  (28/09/2026) : le KPI dit déjà « Jamais » et la courbe le montre — c'était la troisième fois.
+  L'avertissement de **recroisement**, lui, reste : il contredit le chiffre affiché, donc il a
+  quelque chose à dire.
+  Les réponses décrivent un **comportement**, jamais un résultat.
 - **Rien ne réagit à une valeur en cours de frappe** (demande de Lucas). Remplacer 25 ans par 20,
   c'est passer par « 2 » : une durée de 2 ans fait exploser la mensualité, et la simulation — pire,
   la question de l'épargne forcée — partait sur une valeur que personne n'a voulue. Deux gardes :

@@ -1598,10 +1598,10 @@ function afficherMensuel(resultat, horizon) {
   const tientEncore = resultat.annees[horizon - 1].ecart >= 0;
   $('#pointMort').textContent =
     pointMort === null ? 'Jamais' : pointMort === 1 ? 'Dès la 1re année' : `${pointMort} ans`;
-  if (pointMort === null) {
-    $('#pointMortMesure').textContent =
-      `Sur ${resultat.annees.length} ans simulés, l'achat ne repasse jamais devant la location.`;
-  } else if (tientEncore) {
+  // Le cas « jamais » ne se commente PAS : le KPI dit déjà « Jamais » et la
+  // courbe le montre. La phrase répétait l'information une troisième fois.
+  // Le recroisement, lui, reste à dire : il contredit le chiffre affiché.
+  if (pointMort === null || tientEncore) {
     $('#pointMortMesure').textContent = '';
   } else {
     $('#pointMortMesure').textContent =
@@ -1616,7 +1616,7 @@ function afficherMensuel(resultat, horizon) {
   // Un chiffre, sans commentaire. Sans revenus, aucun ratio n'est inventé.
   $('#kpiEndettement').textContent = e.revenusFoyer > 0 ? pourcent(resultat.tauxEndettement) : '—';
 
-  afficherQuestion(resultat);
+  afficherQuestion(resultat, horizon);
 
   const alerte = $('#alerteApport');
   alerte.hidden = e.apport <= e.capitalInitial;
@@ -1636,8 +1636,17 @@ function afficherMensuel(resultat, horizon) {
  * (`locatairePlaceDifference`), le fait d'y avoir répondu non.
  */
 let epargneForceeRepondue = false;
-/** La bulle a été rouverte par « Pourquoi ? » : elle se ferme alors librement. */
+/** La bulle a été rouverte à la demande : elle se ferme alors librement. */
 let questionLibre = false;
+/**
+ * La mise en garde « hors de portée » a été écartée pour ce projet.
+ *
+ * De SESSION, et volontairement NON sauvegardée : c'est un avertissement sur
+ * un projet infinançable, pas une préférence. Le revoir en rouvrant l'onglet
+ * est le bon comportement — et ça évite d'incrémenter `SCHEMA_VERSION` pour
+ * un état qui ne décrit pas le projet.
+ */
+let porteeConfirmee = false;
 const questionOuverte = () => !$('#question').hidden;
 
 /**
@@ -1648,44 +1657,79 @@ const questionOuverte = () => !$('#question').hidden;
  * Avec un supplément : la bulle surgit UNE fois et impose un choix ; ensuite il
  * ne reste qu'une petite ligne sous « À effort égal ».
  */
-function afficherQuestion(resultat) {
+function afficherQuestion(resultat, horizon) {
   const supplement = resultat.supplementAchat;
   const aPoser = supplement >= 1;
   const place = resultat.entrees.locatairePlaceDifference;
 
   $('#egalChoix').hidden = !aPoser;
+  majPortee(resultat);
 
   if (!aPoser) {
-    if (questionOuverte()) fermerQuestion();
-    $('#visu').dataset.question = 'repondue';
+    $('#questionEpargne').hidden = true;
+    if (questionOuverte() && !porteeAPoser()) fermerQuestion();
+    ouvrirSiNecessaire();
     return;
   }
 
   const montant = euros.format(supplement);
+  const profil = lireProfil();
   $('#egalSupplement').textContent = `+${montant}`;
   for (const b of document.querySelectorAll('.egal__reponse')) {
     b.setAttribute('aria-pressed', String((b.dataset.reponse === 'oui') === place));
   }
 
+  // Le texte repart de l'effort DÉJÀ déclaré au profil, avec le même mot et les
+  // mêmes chiffres : « supplément » ne veut rien dire tant qu'on n'a pas remis
+  // les deux efforts côte à côte.
   $('#questionSupplement').textContent = montant;
   $('#questionTexte').textContent =
-    `Le crédit, les charges et la taxe foncière coûtent ${euros.format(resultat.coutMensuelProprio)} ` +
-    `par mois, pour un effort d'aujourd'hui de ${euros.format(resultat.entrees.enveloppeMensuelle)}. ` +
-    "En achetant, vous n'aurez pas le choix : la banque prélève. En restant locataire, rien ne vous y oblige.";
+    `Aujourd'hui vous y consacrez ${euros.format(resultat.entrees.enveloppeMensuelle)} par mois ` +
+    `— ${euros.format(profil.loyerActuel)} de loyer et ${euros.format(profil.epargneActuelle)} ` +
+    `d'épargne. Cet achat en demande ${euros.format(resultat.coutMensuelProprio)} : crédit, ` +
+    'assurance, charges et taxe foncière. En achetant, vous n’avez pas le choix, la banque ' +
+    'prélève. En restant locataire, personne ne vous y oblige.';
   $('#questionDemande').textContent =
-    `En restant locataire, placeriez-vous aussi ces ${montant} chaque mois ?`;
+    `En restant locataire, que feriez-vous de ces ${montant} chaque mois ?`;
+  $('#questionAideOui').textContent =
+    'Le même effort des deux côtés : la comparaison la plus juste.';
+  $('#questionAideNon').textContent =
+    `Vous continuez d’épargner ${euros.format(profil.epargneActuelle)}. L’achat vous ` +
+    'aurait forcé à mettre davantage de côté.';
 
-  // Une seule fois, jamais par-dessus une bulle zoomée, et jamais pendant
-  // qu'on tape : en remplaçant 25 par 20, on passe par « 2 » — une durée de
-  // 2 ans fait exploser la mensualité, et la question surgirait sur une valeur
-  // que personne n'a voulue. Elle attend la sortie du champ (voir
-  // `saisieEnCours` et l'écouteur `focusout`), puis tout est revérifié.
-  if (!epargneForceeRepondue && !questionOuverte() && bulleZoomee === null && !saisieEnCours()) {
-    ouvrirQuestion(false);
+  majEnjeu(resultat, horizon);
+  ouvrirSiNecessaire();
+}
+
+/**
+ * Ce que la réponse déplace, MESURÉ : le moteur tourne une seconde fois avec
+ * l'autre réponse, à l'horizon regardé. On ne demande pas de trancher sans
+ * dire ce qui est en jeu — et c'est souvent énorme, parfois plus que tout le
+ * reste réuni. C'est aussi ce qui remplace « Pourquoi ? » : un chiffre donne
+ * une raison de cliquer, un mot interrogatif non.
+ */
+function majEnjeu(resultat, horizon) {
+  const appel = $('#questionRouvrir');
+  let enjeu = 0;
+  try {
+    const autre = simuler(
+      Object.assign(lireFormulaire(), {
+        locatairePlaceDifference: !resultat.entrees.locatairePlaceDifference,
+      })
+    );
+    enjeu = Math.abs(autre.annees[horizon - 1].ecart - resultat.annees[horizon - 1].ecart);
+  } catch (e) {
+    enjeu = 0;
   }
-  // Le verdict dépend de la réponse : masqué tant que la question est posée
-  // et sans réponse — pas pendant la frappe, où elle n'est pas encore posée.
-  $('#visu').dataset.question = !epargneForceeRepondue && questionOuverte() ? 'attente' : 'repondue';
+  const dit = Number.isFinite(enjeu) && enjeu >= 1
+    ? `Ce choix déplace le résultat de ${euros.format(enjeu)}. Comprendre.`
+    : 'Ce que ce choix change.';
+  appel.textContent = dit;
+  appel.hidden = false;
+  $('#questionEnjeu').innerHTML = '';
+  $('#questionEnjeu').textContent = Number.isFinite(enjeu) && enjeu >= 1
+    ? `À ${horizon} ans, votre réponse déplace le résultat de ${euros.format(enjeu)}.`
+    : '';
 }
 
 /** Un champ numérique a le focus : l'utilisateur est en train de taper. */
@@ -1694,16 +1738,109 @@ function saisieEnCours() {
   return !!el && el.tagName === 'INPUT' && el.type === 'number';
 }
 
+/* ------------------------------------------- Faisabilité : hors de portée ? */
+
+/**
+ * Le seuil est celui des banques, pas le nôtre : **35 % d'endettement**, limite
+ * usuelle fixée par le HCSF. C'est la seule raison pour laquelle on se permet
+ * de dire à quelqu'un que son projet ne tient pas — un seuil inventé n'aurait
+ * pas ce droit.
+ *
+ * Sans revenus renseignés, aucun avertissement : on ne sait pas, et on
+ * n'invente pas de ratio (même règle que pour le KPI).
+ */
+const PLAFOND_ENDETTEMENT = 0.35;
+
+function porteeAPoser() {
+  if (porteeConfirmee || !dernierResultat) return false;
+  const taux = dernierResultat.tauxEndettement;
+  return taux !== null && taux > PLAFOND_ENDETTEMENT;
+}
+
+function epargneAPoser() {
+  return !epargneForceeRepondue && !!dernierResultat && dernierResultat.supplementAchat >= 1;
+}
+
+/**
+ * Le texte de la mise en garde. Il ne dit pas « c'est beaucoup » : il donne la
+ * mensualité, le ratio, le seuil bancaire et ce qu'il resterait pour vivre.
+ * Quatre faits, dont trois déjà calculés ailleurs — aucun jugement.
+ */
+function majPortee(resultat) {
+  const taux = resultat.tauxEndettement;
+  if (taux === null) return;
+
+  $('#questionPorteeTitre').textContent =
+    `La mensualité atteint ${euros.format(resultat.mensualiteTotale)}, ` +
+    `soit ${pourcent(taux)} de vos revenus.`;
+
+  // Le texte doit rester JUSTE aux deux extrêmes : à 36 % le dépassement est
+  // léger et dérogeable, à 337 % le projet n'existe pas. Annoncer « aucun
+  // crédit ne serait accordé » dans les deux cas était faux dans le premier — et
+  // se contredisait tout seul, juste avant de dire qu'il resterait 4 600 €
+  // pour vivre. C'est le reste à vivre qui fait la différence, pas un seuil de
+  // plus inventé par nous.
+  const reste = resultat.resteAVivreAchat;
+  const vivre = reste === null
+    ? ''
+    : reste < 0
+    ? ` Ici, une fois l’achat payé, il vous manquerait ${euros.format(-reste)} par mois ` +
+      'pour vivre : aucun financement ne suivra.'
+    : ` Une fois l’achat payé, il vous resterait ${euros.format(reste)} par mois pour vivre.`;
+
+  $('#questionPorteeTexte').textContent =
+    'Les banques s’arrêtent à 35 % (limite du HCSF) et ne dépassent ce seuil que par ' +
+    'dérogation, sur une part limitée de leurs dossiers.' + vivre +
+    ' Le simulateur calcule de la même façon dans tous les cas.';
+}
+
+/**
+ * Qui parle, et quand. Deux questions indépendantes, dans cet ordre : à quoi
+ * bon demander à quelqu'un ce qu'il ferait d'un supplément de 24 000 € par mois
+ * avant de lui avoir dit qu'aucune banque ne le suivra ?
+ *
+ * Jamais par-dessus une bulle zoomée, et jamais pendant qu'on tape : en
+ * remplaçant 25 par 20, on passe par « 2 » — une durée de 2 ans fait exploser
+ * la mensualité, et la bulle surgirait sur une valeur que personne n'a voulue.
+ * Elle attend la sortie du champ (voir `saisieEnCours` et `focusout`).
+ */
+function ouvrirSiNecessaire() {
+  const portee = porteeAPoser();
+  const epargne = epargneAPoser();
+
+  if (!portee && !epargne) {
+    if (questionOuverte() && !questionLibre) fermerQuestion();
+    $('#visu').dataset.question = 'repondue';
+    return;
+  }
+  if (!questionOuverte() && bulleZoomee === null && !saisieEnCours()) {
+    ouvrirQuestion(false, portee ? 'portee' : 'epargne');
+  }
+  // Le verdict dépend de la réponse à l'épargne forcée : masqué tant qu'elle
+  // est posée et sans réponse. La mise en garde de faisabilité, elle, ne change
+  // aucun chiffre — elle ne masque rien.
+  $('#visu').dataset.question =
+    epargne && questionOuverte() && !$('#questionEpargne').hidden ? 'attente' : 'repondue';
+}
+
 /**
  * @param {boolean} libre - rouverte à la demande : voile et Échap la
  *   referment. À la première apparition, seul un choix la ferme.
+ * @param {string} temps - 'portee' ou 'epargne'.
  */
-function ouvrirQuestion(libre) {
+function ouvrirQuestion(libre, temps) {
   questionLibre = libre;
+  const portee = temps === 'portee';
+  $('#questionPortee').hidden = !portee;
+  $('#questionEpargne').hidden = portee;
+  // Le titre qui nomme la bulle change avec le temps affiché : sans ça, un
+  // lecteur d'écran annoncerait le titre de l'autre étape.
+  $('#question').setAttribute('aria-labelledby', portee ? 'questionPorteeTitre' : 'questionTitre');
   $('#voileQuestion').hidden = false;
   const q = $('#question');
   q.hidden = false;
-  q.querySelector('.question__reponse').focus();
+  const premier = q.querySelector('.question__temps:not([hidden]) .question__reponse');
+  if (premier) premier.focus();
 }
 
 /**
@@ -2029,6 +2166,7 @@ function initialiser() {
     validees.clear();
     profilValide = false;
     epargneForceeRepondue = false;
+    porteeConfirmee = false;
     if (questionOuverte()) fermerQuestion();
     scenarioActif = null;
     hypothesesUtilisateur = null;
@@ -2052,7 +2190,42 @@ function initialiser() {
     b.addEventListener('click', () => repondre(b.dataset.reponse === 'oui'));
   }
   // « Pourquoi ? » rouvre la bulle, qui se ferme alors librement.
-  $('#questionRouvrir').addEventListener('click', () => ouvrirQuestion(true));
+  $('#questionRouvrir').addEventListener('click', () => ouvrirQuestion(true, 'epargne'));
+  // « Je l'étudie quand même » : on écarte la mise en garde et on enchaîne sur
+  // l'épargne forcée s'il y a lieu — sans refermer, pour que le parcours reste
+  // d'un seul tenant.
+  $('#porteeContinuer').addEventListener('click', () => {
+    porteeConfirmee = true;
+    if (epargneAPoser()) {
+      ouvrirQuestion(false, 'epargne');
+    } else {
+      fermerQuestion();
+    }
+    rafraichir();
+  });
+  // « Je corrige » : on referme et on rouvre la bulle du prix. La mise en garde
+  // n'est PAS écartée — elle reviendra si le projet reste hors de portée, ce
+  // qui est exactement ce qu'on veut. Le zoom de la bulle suffit à la retenir
+  // en attendant (voir `bulleZoomee` dans `ouvrirSiNecessaire`).
+  $('#porteeCorriger').addEventListener('click', () => {
+    fermerQuestion();
+    const prix = document.getElementById('prixNetVendeur');
+    if (prix) {
+      const bulle = prix.closest('.bulle');
+      if (bulle) {
+        const tete = bulle.querySelector('.bulle__entete, .bulle__titre, button');
+        if (tete) tete.click();
+      }
+      // Le focus attend la FIN du zoom, pas la trame suivante : en s'ouvrant, la
+      // bulle est ré-attachée à `<body>` (le rail est `position: sticky`, donc
+      // un contexte d'empilement — voir CLAUDE.md), et un déplacement de nœud
+      // vide le focus. Même délai de sûreté que `fermerQuestion`.
+      setTimeout(() => {
+        prix.focus({ preventScroll: false });
+        prix.select();
+      }, 450);
+    }
+  });
   $('#voileQuestion').addEventListener('click', () => { if (questionLibre) fermerQuestion(); });
 
   $('#locatairePlaceDifference').addEventListener('input', () => {
