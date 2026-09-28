@@ -455,25 +455,25 @@
         </div>
         <p class="kpi__note" id="pointMortMesure"></p>
 
-        <!-- Le choix, en petit : la question elle-même est posée une fois dans
-             une bulle (#question). Il reste modifiable ici, et « Pourquoi ? »
-             rouvre la bulle. La case à cocher reste l'état (lu par le moteur,
-             sauvegardé) ; les boutons ne font que la régler. -->
-        <div class="egal__choix-ligne" id="egalChoix" hidden>
-          <span class="egal__choix-mot">
-            L'effort à l'achat dépasse le vôtre de <b class="tabulaire" id="egalSupplement"></b>/mois.
-            En restant locataire&nbsp;:
-          </span>
-          <div class="egal__choix" role="group" aria-label="En restant locataire, placeriez-vous aussi ce supplément ?">
-            <button type="button" class="egal__reponse" data-reponse="oui" aria-pressed="true">Je les place</button>
-            <button type="button" class="egal__reponse" data-reponse="non" aria-pressed="false">Je garde mes habitudes</button>
+        <!-- Le choix, une fois la question posée : une BASCULE, pas deux boutons
+             côte à côte. Deux boutons se lisaient comme deux indicateurs de plus,
+             perdus sous quatre KPI ; un interrupteur dit qu'on EST dans un état
+             et qu'on peut en changer d'un clic. Le libellé décrit l'état courant,
+             pas l'action — sinon on ne sait plus lequel des deux est vrai. -->
+        <div class="bascule" id="egalChoix" hidden>
+          <p class="bascule__constat">
+            L'achat demande <b class="tabulaire" id="egalSupplement"></b>/mois de plus
+            que votre effort actuel.
+          </p>
+          <div class="bascule__ligne">
+            <button type="button" class="bascule__interrupteur" id="egalSwitch"
+                    role="switch" aria-checked="true">
+              <span class="bascule__piste" aria-hidden="true"><span class="bascule__curseur"></span></span>
+              <span class="bascule__mot" id="egalEtat"></span>
+            </button>
+            <button type="button" class="bascule__aide" id="questionRouvrir">Comprendre ce choix</button>
           </div>
           <input type="checkbox" class="egal__etat" id="locatairePlaceDifference" checked hidden>
-          <!-- Remplaçait « Pourquoi ? » : le mot ne disait pas ce qu'on trouverait
-               derrière, donc personne ne cliquait. Le montant que ce choix
-               déplace, lui, est une raison de cliquer — et il est mesuré, pas
-               affirmé : le moteur tourne une seconde fois avec l'autre réponse. -->
-          <button type="button" class="egal__enjeu" id="questionRouvrir"></button>
         </div>
         <p class="alerte" id="alerteApport" hidden></p>
       </section>
@@ -703,50 +703,25 @@
   <section class="question" id="question" role="dialog" aria-modal="true"
            aria-labelledby="questionTitre" hidden>
 
-    <!-- TEMPS 1 — la faisabilité. N'apparaît QUE si le taux d'endettement
-         dépasse la limite bancaire ET que les revenus sont renseignés : sans
-         revenus on ne sait pas, et on n'invente pas. Sa raison d'être : on
-         peut saisir 5 000 000 € et obtenir un effort de 27 000 €/mois sans que
-         rien à l'écran ne dise que ce projet ne sera jamais financé. Poser la
-         question de l'épargne forcée à ce stade reviendrait à demander à
-         quelqu'un ce qu'il ferait d'un argent qu'il n'a pas. -->
-    <div class="question__temps" id="questionPortee" hidden>
-      <p class="question__signal">Limite bancaire dépassée</p>
-      <h2 class="question__titre" id="questionPorteeTitre"></h2>
-      <p class="question__texte" id="questionPorteeTexte"></p>
-      <p class="question__demande">Voulez-vous quand même l'étudier&nbsp;?</p>
-      <div class="question__reponses">
-        <button type="button" class="question__reponse" id="porteeCorriger">
-          <span class="question__reponse-titre">Je corrige mon projet</span>
-          <span class="question__reponse-aide">Revenir au prix, à l'apport ou à la durée du crédit.</span>
-        </button>
-        <button type="button" class="question__reponse" id="porteeContinuer">
-          <span class="question__reponse-titre">Je l'étudie quand même</span>
-          <span class="question__reponse-aide">Le calcul est le même&nbsp;; c'est le financement qui ne suivrait pas.</span>
-        </button>
-      </div>
-    </div>
-
-    <!-- TEMPS 2 — l'épargne forcée. Le texte part de l'effort DÉJÀ déclaré au
-         profil, avec le même mot et les mêmes chiffres : c'est ce qui permet
-         de comprendre le supplément sans l'expliquer deux fois. -->
-    <div class="question__temps" id="questionEpargne" hidden>
-      <p class="question__signal">L'effort augmente</p>
+    <!-- Une seule question, et elle INTERROGE au lieu d'expliquer. Le constat
+         tient dans le titre ; le reste était de la répétition (l'effort actuel
+         est déjà au profil, le mécanisme déjà dans le mot « de plus »). Deux
+         questions : la première ne se répond pas à l'écran, elle se répond dans
+         sa tête ; la seconde a les deux boutons. -->
+    <div class="question__temps" id="questionEpargne">
       <h2 class="question__titre" id="questionTitre">
         Cet achat demande <b class="tabulaire" id="questionSupplement"></b> de plus par mois
         que votre effort actuel.
       </h2>
-      <p class="question__texte" id="questionTexte"></p>
-      <p class="question__demande" id="questionDemande"></p>
+      <p class="question__demande" id="questionDemande1"></p>
+      <p class="question__demande" id="questionDemande2"></p>
+      <p class="question__franchise">
+        Répondez franchement, même si la réponse ne vous arrange pas&nbsp;: c'est souvent
+        elle qui décide du résultat.
+      </p>
       <div class="question__reponses">
-        <button type="button" class="question__reponse" data-reponse="oui">
-          <span class="question__reponse-titre">Je les place</span>
-          <span class="question__reponse-aide" id="questionAideOui"></span>
-        </button>
-        <button type="button" class="question__reponse" data-reponse="non">
-          <span class="question__reponse-titre">Je garde mes habitudes</span>
-          <span class="question__reponse-aide" id="questionAideNon"></span>
-        </button>
+        <button type="button" class="question__reponse" data-reponse="oui">Je place le gap</button>
+        <button type="button" class="question__reponse" data-reponse="non">Je conserve mon effort actuel</button>
       </div>
       <p class="question__enjeu" id="questionEnjeu"></p>
     </div>

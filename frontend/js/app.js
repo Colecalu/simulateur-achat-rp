@@ -1638,15 +1638,6 @@ function afficherMensuel(resultat, horizon) {
 let epargneForceeRepondue = false;
 /** La bulle a été rouverte à la demande : elle se ferme alors librement. */
 let questionLibre = false;
-/**
- * La mise en garde « hors de portée » a été écartée pour ce projet.
- *
- * De SESSION, et volontairement NON sauvegardée : c'est un avertissement sur
- * un projet infinançable, pas une préférence. Le revoir en rouvrant l'onglet
- * est le bon comportement — et ça évite d'incrémenter `SCHEMA_VERSION` pour
- * un état qui ne décrit pas le projet.
- */
-let porteeConfirmee = false;
 const questionOuverte = () => !$('#question').hidden;
 
 /**
@@ -1663,53 +1654,71 @@ function afficherQuestion(resultat, horizon) {
   const place = resultat.entrees.locatairePlaceDifference;
 
   $('#egalChoix').hidden = !aPoser;
-  majPortee(resultat);
 
   if (!aPoser) {
-    $('#questionEpargne').hidden = true;
-    if (questionOuverte() && !porteeAPoser()) fermerQuestion();
-    ouvrirSiNecessaire();
+    if (questionOuverte()) fermerQuestion();
+    $('#visu').dataset.question = 'repondue';
     return;
   }
 
   const montant = euros.format(supplement);
-  const profil = lireProfil();
   $('#egalSupplement').textContent = `+${montant}`;
-  for (const b of document.querySelectorAll('.egal__reponse')) {
-    b.setAttribute('aria-pressed', String((b.dataset.reponse === 'oui') === place));
-  }
+  majBascule(place);
 
-  // Le texte repart de l'effort DÉJÀ déclaré au profil, avec le même mot et les
-  // mêmes chiffres : « supplément » ne veut rien dire tant qu'on n'a pas remis
-  // les deux efforts côte à côte.
+  // La bulle INTERROGE, elle n'explique pas. Le constat est dans le titre ; le
+  // reste était de la répétition — l'effort actuel est déjà au profil, et le
+  // mécanisme tient dans les mots « de plus ». Deux questions, dont la
+  // première ne se répond pas à l'écran : elle se répond dans sa tête, et
+  // c'est elle qui décide si la seconde a un sens.
   $('#questionSupplement').textContent = montant;
-  $('#questionTexte').textContent =
-    `Aujourd'hui vous y consacrez ${euros.format(resultat.entrees.enveloppeMensuelle)} par mois ` +
-    `— ${euros.format(profil.loyerActuel)} de loyer et ${euros.format(profil.epargneActuelle)} ` +
-    `d'épargne. Cet achat en demande ${euros.format(resultat.coutMensuelProprio)} : crédit, ` +
-    'assurance, charges et taxe foncière. En achetant, vous n’avez pas le choix, la banque ' +
-    'prélève. En restant locataire, personne ne vous y oblige.';
-  $('#questionDemande').textContent =
-    `En restant locataire, que feriez-vous de ces ${montant} chaque mois ?`;
-  $('#questionAideOui').textContent =
-    'Le même effort des deux côtés : la comparaison la plus juste.';
-  $('#questionAideNon').textContent =
-    `Vous continuez d’épargner ${euros.format(profil.epargneActuelle)}. L’achat vous ` +
-    'aurait forcé à mettre davantage de côté.';
+  // Espace INSÉCABLE avant le « ? » : sans elle, le point d'interrogation tombe
+  // seul à la ligne dès que la bulle se resserre.
+  $('#questionDemande1').textContent =
+    `Êtes-vous prêt à sortir ${montant} de plus chaque mois, pendant ` +
+    `${resultat.entrees.dureeAnnees} ans ?`;
+  $('#questionDemande2').textContent =
+    `Si oui : en restant locataire, placeriez-vous vraiment ces ${montant}, ` +
+    'au lieu de les dépenser ?';
 
   majEnjeu(resultat, horizon);
-  ouvrirSiNecessaire();
+
+  // Une seule fois, jamais par-dessus une bulle zoomée, et jamais pendant
+  // qu'on tape : en remplaçant 25 par 20, on passe par « 2 » — une durée de
+  // 2 ans fait exploser la mensualité, et la question surgirait sur une valeur
+  // que personne n'a voulue. Elle attend la sortie du champ (voir
+  // `saisieEnCours` et l'écouteur `focusout`), puis tout est revérifié.
+  if (!epargneForceeRepondue && !questionOuverte() && bulleZoomee === null && !saisieEnCours()) {
+    ouvrirQuestion(false);
+  }
+  // Le verdict dépend de la réponse : masqué tant que la question est posée
+  // et sans réponse — pas pendant la frappe, où elle n'est pas encore posée.
+  $('#visu').dataset.question = !epargneForceeRepondue && questionOuverte() ? 'attente' : 'repondue';
+}
+
+/**
+ * L'interrupteur dit l'ÉTAT, pas l'action. « Je place le gap » quand il est
+ * allumé décrit ce qui est simulé en ce moment ; un libellé d'action
+ * (« placer le gap ») laisserait ignorer lequel des deux mondes on regarde.
+ */
+function majBascule(place) {
+  const bouton = $('#egalSwitch');
+  bouton.setAttribute('aria-checked', String(place));
+  $('#egalEtat').textContent = place
+    ? 'En restant locataire, je place le gap'
+    : 'En restant locataire, je conserve mon effort actuel';
 }
 
 /**
  * Ce que la réponse déplace, MESURÉ : le moteur tourne une seconde fois avec
- * l'autre réponse, à l'horizon regardé. On ne demande pas de trancher sans
- * dire ce qui est en jeu — et c'est souvent énorme, parfois plus que tout le
- * reste réuni. C'est aussi ce qui remplace « Pourquoi ? » : un chiffre donne
- * une raison de cliquer, un mot interrogatif non.
+ * l'autre réponse. À DIX ANS et non à l'horizon regardé : à vingt-cinq ans
+ * l'écart devient énorme et invraisemblable, et un chiffre qu'on ne croit pas
+ * ne fait pas réfléchir. Dix ans, c'est à mi-crédit — assez pour que l'écart
+ * soit installé, assez court pour rester concret.
  */
+const HORIZON_ENJEU = 10;
+
 function majEnjeu(resultat, horizon) {
-  const appel = $('#questionRouvrir');
+  const an = Math.min(HORIZON_ENJEU, horizon);
   let enjeu = 0;
   try {
     const autre = simuler(
@@ -1717,19 +1726,14 @@ function majEnjeu(resultat, horizon) {
         locatairePlaceDifference: !resultat.entrees.locatairePlaceDifference,
       })
     );
-    enjeu = Math.abs(autre.annees[horizon - 1].ecart - resultat.annees[horizon - 1].ecart);
+    enjeu = Math.abs(autre.annees[an - 1].ecart - resultat.annees[an - 1].ecart);
   } catch (e) {
     enjeu = 0;
   }
-  const dit = Number.isFinite(enjeu) && enjeu >= 1
-    ? `Ce choix déplace le résultat de ${euros.format(enjeu)}. Comprendre.`
-    : 'Ce que ce choix change.';
-  appel.textContent = dit;
-  appel.hidden = false;
-  $('#questionEnjeu').innerHTML = '';
-  $('#questionEnjeu').textContent = Number.isFinite(enjeu) && enjeu >= 1
-    ? `À ${horizon} ans, votre réponse déplace le résultat de ${euros.format(enjeu)}.`
-    : '';
+  $('#questionEnjeu').textContent =
+    Number.isFinite(enjeu) && enjeu >= 1
+      ? `À ${an} ans, votre réponse déplace le résultat de ${euros.format(enjeu)}.`
+      : '';
 }
 
 /** Un champ numérique a le focus : l'utilisateur est en train de taper. */
@@ -1738,109 +1742,16 @@ function saisieEnCours() {
   return !!el && el.tagName === 'INPUT' && el.type === 'number';
 }
 
-/* ------------------------------------------- Faisabilité : hors de portée ? */
-
-/**
- * Le seuil est celui des banques, pas le nôtre : **35 % d'endettement**, limite
- * usuelle fixée par le HCSF. C'est la seule raison pour laquelle on se permet
- * de dire à quelqu'un que son projet ne tient pas — un seuil inventé n'aurait
- * pas ce droit.
- *
- * Sans revenus renseignés, aucun avertissement : on ne sait pas, et on
- * n'invente pas de ratio (même règle que pour le KPI).
- */
-const PLAFOND_ENDETTEMENT = 0.35;
-
-function porteeAPoser() {
-  if (porteeConfirmee || !dernierResultat) return false;
-  const taux = dernierResultat.tauxEndettement;
-  return taux !== null && taux > PLAFOND_ENDETTEMENT;
-}
-
-function epargneAPoser() {
-  return !epargneForceeRepondue && !!dernierResultat && dernierResultat.supplementAchat >= 1;
-}
-
-/**
- * Le texte de la mise en garde. Il ne dit pas « c'est beaucoup » : il donne la
- * mensualité, le ratio, le seuil bancaire et ce qu'il resterait pour vivre.
- * Quatre faits, dont trois déjà calculés ailleurs — aucun jugement.
- */
-function majPortee(resultat) {
-  const taux = resultat.tauxEndettement;
-  if (taux === null) return;
-
-  $('#questionPorteeTitre').textContent =
-    `La mensualité atteint ${euros.format(resultat.mensualiteTotale)}, ` +
-    `soit ${pourcent(taux)} de vos revenus.`;
-
-  // Le texte doit rester JUSTE aux deux extrêmes : à 36 % le dépassement est
-  // léger et dérogeable, à 337 % le projet n'existe pas. Annoncer « aucun
-  // crédit ne serait accordé » dans les deux cas était faux dans le premier — et
-  // se contredisait tout seul, juste avant de dire qu'il resterait 4 600 €
-  // pour vivre. C'est le reste à vivre qui fait la différence, pas un seuil de
-  // plus inventé par nous.
-  const reste = resultat.resteAVivreAchat;
-  const vivre = reste === null
-    ? ''
-    : reste < 0
-    ? ` Ici, une fois l’achat payé, il vous manquerait ${euros.format(-reste)} par mois ` +
-      'pour vivre : aucun financement ne suivra.'
-    : ` Une fois l’achat payé, il vous resterait ${euros.format(reste)} par mois pour vivre.`;
-
-  $('#questionPorteeTexte').textContent =
-    'Les banques s’arrêtent à 35 % (limite du HCSF) et ne dépassent ce seuil que par ' +
-    'dérogation, sur une part limitée de leurs dossiers.' + vivre +
-    ' Le simulateur calcule de la même façon dans tous les cas.';
-}
-
-/**
- * Qui parle, et quand. Deux questions indépendantes, dans cet ordre : à quoi
- * bon demander à quelqu'un ce qu'il ferait d'un supplément de 24 000 € par mois
- * avant de lui avoir dit qu'aucune banque ne le suivra ?
- *
- * Jamais par-dessus une bulle zoomée, et jamais pendant qu'on tape : en
- * remplaçant 25 par 20, on passe par « 2 » — une durée de 2 ans fait exploser
- * la mensualité, et la bulle surgirait sur une valeur que personne n'a voulue.
- * Elle attend la sortie du champ (voir `saisieEnCours` et `focusout`).
- */
-function ouvrirSiNecessaire() {
-  const portee = porteeAPoser();
-  const epargne = epargneAPoser();
-
-  if (!portee && !epargne) {
-    if (questionOuverte() && !questionLibre) fermerQuestion();
-    $('#visu').dataset.question = 'repondue';
-    return;
-  }
-  if (!questionOuverte() && bulleZoomee === null && !saisieEnCours()) {
-    ouvrirQuestion(false, portee ? 'portee' : 'epargne');
-  }
-  // Le verdict dépend de la réponse à l'épargne forcée : masqué tant qu'elle
-  // est posée et sans réponse. La mise en garde de faisabilité, elle, ne change
-  // aucun chiffre — elle ne masque rien.
-  $('#visu').dataset.question =
-    epargne && questionOuverte() && !$('#questionEpargne').hidden ? 'attente' : 'repondue';
-}
-
 /**
  * @param {boolean} libre - rouverte à la demande : voile et Échap la
  *   referment. À la première apparition, seul un choix la ferme.
- * @param {string} temps - 'portee' ou 'epargne'.
  */
-function ouvrirQuestion(libre, temps) {
+function ouvrirQuestion(libre) {
   questionLibre = libre;
-  const portee = temps === 'portee';
-  $('#questionPortee').hidden = !portee;
-  $('#questionEpargne').hidden = portee;
-  // Le titre qui nomme la bulle change avec le temps affiché : sans ça, un
-  // lecteur d'écran annoncerait le titre de l'autre étape.
-  $('#question').setAttribute('aria-labelledby', portee ? 'questionPorteeTitre' : 'questionTitre');
   $('#voileQuestion').hidden = false;
   const q = $('#question');
   q.hidden = false;
-  const premier = q.querySelector('.question__temps:not([hidden]) .question__reponse');
-  if (premier) premier.focus();
+  q.querySelector('.question__reponse').focus();
 }
 
 /**
@@ -1856,8 +1767,10 @@ function fermerQuestion() {
     if (fait) return;
     fait = true;
     q.hidden = true;
-    const choisi = cible.querySelector('.egal__reponse[aria-pressed="true"]');
-    if (choisi && !cible.hidden) choisi.focus({ preventScroll: true });
+    // Le focus atterrit sur l'interrupteur : c'est là que le choix vit
+    // désormais, et c'est de là qu'on peut en changer.
+    const bascule = cible.querySelector('.bascule__interrupteur');
+    if (bascule && !cible.hidden) bascule.focus({ preventScroll: true });
   };
   const depart = q.getBoundingClientRect();
   const arrivee = cible.hidden ? null : cible.getBoundingClientRect();
@@ -2166,7 +2079,6 @@ function initialiser() {
     validees.clear();
     profilValide = false;
     epargneForceeRepondue = false;
-    porteeConfirmee = false;
     if (questionOuverte()) fermerQuestion();
     scenarioActif = null;
     hypothesesUtilisateur = null;
@@ -2190,41 +2102,11 @@ function initialiser() {
     b.addEventListener('click', () => repondre(b.dataset.reponse === 'oui'));
   }
   // « Pourquoi ? » rouvre la bulle, qui se ferme alors librement.
-  $('#questionRouvrir').addEventListener('click', () => ouvrirQuestion(true, 'epargne'));
-  // « Je l'étudie quand même » : on écarte la mise en garde et on enchaîne sur
-  // l'épargne forcée s'il y a lieu — sans refermer, pour que le parcours reste
-  // d'un seul tenant.
-  $('#porteeContinuer').addEventListener('click', () => {
-    porteeConfirmee = true;
-    if (epargneAPoser()) {
-      ouvrirQuestion(false, 'epargne');
-    } else {
-      fermerQuestion();
-    }
-    rafraichir();
-  });
-  // « Je corrige » : on referme et on rouvre la bulle du prix. La mise en garde
-  // n'est PAS écartée — elle reviendra si le projet reste hors de portée, ce
-  // qui est exactement ce qu'on veut. Le zoom de la bulle suffit à la retenir
-  // en attendant (voir `bulleZoomee` dans `ouvrirSiNecessaire`).
-  $('#porteeCorriger').addEventListener('click', () => {
-    fermerQuestion();
-    const prix = document.getElementById('prixNetVendeur');
-    if (prix) {
-      const bulle = prix.closest('.bulle');
-      if (bulle) {
-        const tete = bulle.querySelector('.bulle__entete, .bulle__titre, button');
-        if (tete) tete.click();
-      }
-      // Le focus attend la FIN du zoom, pas la trame suivante : en s'ouvrant, la
-      // bulle est ré-attachée à `<body>` (le rail est `position: sticky`, donc
-      // un contexte d'empilement — voir CLAUDE.md), et un déplacement de nœud
-      // vide le focus. Même délai de sûreté que `fermerQuestion`.
-      setTimeout(() => {
-        prix.focus({ preventScroll: false });
-        prix.select();
-      }, 450);
-    }
+  $('#questionRouvrir').addEventListener('click', () => ouvrirQuestion(true));
+  // L'interrupteur bascule d'un clic, dans les deux sens : c'est ce qui le
+  // distingue de deux boutons — on n'a pas à viser le bon.
+  $('#egalSwitch').addEventListener('click', () => {
+    repondre($('#egalSwitch').getAttribute('aria-checked') !== 'true');
   });
   $('#voileQuestion').addEventListener('click', () => { if (questionLibre) fermerQuestion(); });
 
