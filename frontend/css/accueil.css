@@ -4,10 +4,9 @@
    Même règle que style.css : AUCUNE valeur de couleur, de police, de rayon
    ni d'ombre, uniquement les noms sémantiques du thème (theme-perron.css).
 
-   Parti pris : épuré. Un seul fond (le papier), un seul accent (le bouton),
-   beaucoup d'air. Aucune carte, aucune bordure colorée, aucune texture.
-   Page calibrée pour un portable (MacBook, ~1440 × 900) : l'accroche occupe
-   exactement la hauteur de la fenêtre.
+   Parti pris : épuré. Un fond papier, un second fond creux pour deux
+   sections, un seul accent (les boutons), beaucoup d'air. Page calibrée pour
+   un portable (MacBook, ~1440 × 900) : l'accroche occupe toute la fenêtre.
    ========================================================================= */
 
 *, *::before, *::after { box-sizing: border-box; }
@@ -35,20 +34,21 @@ h1, h2, h3 {
 }
 p { margin: 0; }
 em { font-style: italic; color: var(--encre-3); }
+strong { font-weight: 600; color: var(--encre); }
+
+.tabulaire { font-variant-numeric: tabular-nums lining-nums; }
 
 :focus-visible { outline: none; box-shadow: var(--anneau); border-radius: 8px; }
 ::selection { background: var(--accent-doux); }
 
 /* ---------------------------------------------------------------- Mise en page */
 
-.conteneur { max-width: 1080px; margin: 0 auto; padding: 0 40px; }
+.conteneur { max-width: 1080px; margin-left: auto; margin-right: auto; padding: 0 40px; }
 .conteneur--etroit { max-width: 760px; }
 .centre { text-align: center; }
 
-.section { padding: 160px 0; }
-/* Séparation par un filet fin plutôt qu'un changement de fond. */
+.section { padding: 144px 0; }
 .section--filet { border-top: 1px solid var(--trait); }
-/* Seul second fond de la page, pour le parti pris. */
 .section--creuse { background: var(--surface-creuse); }
 
 .surtitre {
@@ -68,27 +68,40 @@ em { font-style: italic; color: var(--encre-3); }
   color: var(--encre-2);
 }
 
+/* ---------------------------------------------------------------- Apparition
+   Fondu + 12 px, une seule fois, déclenché par accueil.js. La classe `js`
+   est posée sur <html> par le script : sans JavaScript, rien n'est masqué. */
+
+.js .apparait {
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 700ms var(--aise), transform 700ms var(--aise);
+}
+.js .apparait.est-visible { opacity: 1; transform: none; }
+
 /* ---------------------------------------------------------------- Marque */
 
 .marque {
   font-family: var(--police-titre);
-  font-size: 1.375rem;
+  font-size: 1.625rem;
+  line-height: 1;
   letter-spacing: var(--interlettre-titre);
   color: var(--encre);
+  text-decoration: none;
 }
-.marque i { color: var(--accent); }
-.marque--petite { font-size: 1.125rem; }
+.marque--petite { font-size: 1.375rem; }
 
-/* ---------------------------------------------------------------- Bouton
-   Le seul élément coloré de la page. */
+/* ---------------------------------------------------------------- Boutons */
 
 .bouton {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 10px;
-  height: 54px;
+  min-height: 54px;
   padding: 0 28px;
   border-radius: 999px;
+  border: 1px solid transparent;
   background: var(--accent);
   color: var(--sur-accent);
   font-size: 1rem;
@@ -99,11 +112,20 @@ em { font-style: italic; color: var(--encre-3); }
 }
 .bouton:hover { background: var(--accent-fort); }
 .bouton:active { transform: translateY(1px); }
+/* Compact, mais une cible tactile de 44 px. */
+.bouton--compact { min-height: 44px; padding: 0 20px; font-size: .9375rem; }
+.bouton--secondaire {
+  min-height: 48px;
+  background: transparent;
+  border-color: var(--bord-champ);
+  color: var(--encre);
+}
+.bouton--secondaire:hover { background: var(--surface); }
 
-/* Icône Lucide en masque : elle prend la couleur du texte. */
 .icone {
   width: 18px;
   height: 18px;
+  flex: none;
   background-color: currentColor;
   -webkit-mask: url("../img/icones/arrow-right.svg") center / contain no-repeat;
           mask: url("../img/icones/arrow-right.svg") center / contain no-repeat;
@@ -111,15 +133,44 @@ em { font-style: italic; color: var(--encre-3); }
 }
 .bouton:hover .icone { transform: translateX(3px); }
 
+/* ---------------------------------------------------------------- En-tête
+   Posé sur l'accroche, non collant. */
+
+.entete {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px 40px;
+}
+.entete__liens { display: flex; align-items: center; gap: 28px; }
+.entete__lien {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  font-size: .9375rem;
+  color: var(--encre-2);
+  text-decoration: none;
+  transition: color var(--duree-rapide) var(--aise);
+}
+.entete__lien:hover { color: var(--encre); }
+
 /* ---------------------------------------------------------------- Accroche */
 
 .accroche {
   min-height: 100vh;
   min-height: 100svh;
   display: grid;
-  grid-template-rows: auto 1fr auto;
+  grid-template-rows: 1fr auto;
   justify-items: center;
-  padding: 40px 24px 36px;
+  padding: 96px 24px 36px;
   text-align: center;
 }
 .accroche__centre {
@@ -127,13 +178,9 @@ em { font-style: italic; color: var(--encre-3); }
   display: grid;
   justify-items: center;
   gap: 32px;
-  /* Légèrement au-dessus du centre optique. */
   margin-bottom: 4vh;
 }
-.accroche__titre {
-  font-size: clamp(3.5rem, 1.5rem + 7vw, 8rem);
-  line-height: .95;
-}
+.accroche__titre { font-size: clamp(3.5rem, 1.5rem + 7vw, 8rem); line-height: .95; }
 .accroche__phrase {
   font-size: clamp(1.125rem, 1rem + .5vw, 1.5rem);
   line-height: 1.45;
@@ -141,8 +188,10 @@ em { font-style: italic; color: var(--encre-3); }
 }
 .accroche__centre .bouton { margin-top: 12px; }
 .accroche__mention { margin-top: -16px; font-size: .875rem; color: var(--encre-3); }
-
 .accroche__suite {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
   font-size: .875rem;
   color: var(--encre-3);
   text-decoration: none;
@@ -150,9 +199,109 @@ em { font-style: italic; color: var(--encre-3); }
 }
 .accroche__suite:hover { color: var(--encre); }
 
-/* ---------------------------------------------------------------- Trio
-   Trois éléments côte à côte, sans cadre : les trois écueils du problème,
-   puis les trois étapes de la solution (variante numérotée). */
+/* ---------------------------------------------------------------- La question */
+
+.questions {
+  display: grid;
+  gap: 40px;
+  margin-top: 96px;
+  margin-bottom: 0;
+  list-style: none;
+  text-align: center;
+}
+.questions__item {
+  font-family: var(--police-titre);
+  font-size: clamp(1.75rem, 1.1rem + 2.2vw, 3rem);
+  line-height: 1.12;
+  letter-spacing: var(--interlettre-titre);
+  text-wrap: balance;
+}
+/* Échelonnement : chaque question attend la précédente. */
+.js .questions__item {
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 800ms var(--aise), transform 800ms var(--aise);
+}
+.js .questions__item:nth-child(2) { transition-delay: 350ms; }
+.js .questions__item:nth-child(3) { transition-delay: 700ms; }
+.js .questions.est-visible .questions__item { opacity: 1; transform: none; }
+
+.questions__cloture { margin-top: 96px; font-size: 1.1875rem; color: var(--encre-2); }
+
+/* ---------------------------------------------------------------- Enveloppe
+   Au repos : les deux lignes. Avec JS, l'état initial les superpose en une
+   seule barre neutre ; `est-visible` les sépare, puis les colore. */
+
+.enveloppe { max-width: 760px; margin-top: 96px; margin-bottom: 0; }
+.enveloppe__titre {
+  margin-bottom: 16px;
+  text-align: center;
+  font-size: .8125rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: var(--interlettre-caps);
+  color: var(--encre-3);
+}
+.enveloppe__lignes { display: grid; gap: 14px; }
+.enveloppe__ligne {
+  display: grid;
+  grid-template-columns: 88px 1fr;
+  align-items: center;
+  gap: 16px;
+}
+.enveloppe__nom { font-size: .9375rem; font-weight: 500; text-align: right; }
+.enveloppe__ligne--achat .enveloppe__nom { color: var(--achat); }
+.enveloppe__ligne--location .enveloppe__nom { color: var(--location); }
+
+.enveloppe__barre {
+  display: flex;
+  gap: 3px;
+  height: 48px;
+  border-radius: var(--rayon);
+  overflow: hidden;
+}
+.enveloppe__part {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  padding: 0 14px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: .875rem;
+  font-weight: 500;
+}
+/* Proportions illustratives : l'achat mobilise surtout le logement, la
+   location laisse davantage à placer. Aucune valeur n'est affichée. */
+.enveloppe__part--logement { flex: 78 1 0; background: var(--achat); color: var(--sur-accent); }
+.enveloppe__ligne--achat .enveloppe__part--epargne { flex: 22 1 0; }
+.enveloppe__part--loyer { flex: 48 1 0; background: var(--location); color: var(--sur-accent); }
+.enveloppe__ligne--location .enveloppe__part--epargne { flex: 52 1 0; }
+.enveloppe__part--epargne { background: var(--epargne-bande); color: var(--epargne-texte); }
+
+/* État initial (JS actif, pas encore vu) : une seule barre neutre. La ligne
+   « location » est remontée sous la ligne « achat », les couleurs et les
+   libellés sont éteints. */
+.js .enveloppe__ligne,
+.js .enveloppe__barre,
+.js .enveloppe__part,
+.js .enveloppe__nom {
+  transition: transform 800ms var(--aise),
+              background-color 600ms var(--aise) 600ms,
+              color 600ms var(--aise) 600ms,
+              opacity 600ms var(--aise) 600ms,
+              flex-grow 800ms var(--aise) 600ms,
+              padding 800ms var(--aise) 600ms,
+              gap 800ms var(--aise) 600ms;
+}
+.js .enveloppe:not(.est-visible) .enveloppe__ligne--location { transform: translateY(calc(-100% - 14px)); }
+.js .enveloppe:not(.est-visible) .enveloppe__barre { gap: 0; }
+.js .enveloppe:not(.est-visible) .enveloppe__part { padding: 0; background: var(--encre-2); color: transparent; }
+.js .enveloppe:not(.est-visible) .enveloppe__part:first-child { flex-grow: 1; }
+.js .enveloppe:not(.est-visible) .enveloppe__part:last-child { flex-grow: 0; }
+.js .enveloppe:not(.est-visible) .enveloppe__nom { opacity: 0; }
+
+/* ---------------------------------------------------------------- Trio */
 
 .trio {
   display: grid;
@@ -173,21 +322,132 @@ em { font-style: italic; color: var(--encre-3); }
 .trio__titre { font-size: 1.625rem; }
 .trio__element p { max-width: 18em; color: var(--encre-2); }
 
-/* ---------------------------------------------------------------- Citation
-   Le positionnement « sans jugement », en conclusion de la solution. */
+/* ---------------------------------------------------------------- Exemple
+   Reprise du bloc de résultat du simulateur (verdict, graphique, KPI) :
+   mêmes classes, mêmes proportions que style.css, recopiées ici parce que
+   charger style.css importerait tout le simulateur. */
 
-.citation {
-  margin-top: 120px;
-  margin-bottom: 0;
+.resultat { display: grid; gap: 14px; margin-top: 72px; max-width: 960px; }
+.resultat__hypotheses {
+  margin-bottom: 6px;
   text-align: center;
+  font-size: .8125rem;
+  color: var(--encre-3);
 }
-.citation p {
-  font-family: var(--police-titre);
-  font-size: clamp(1.5rem, 1.1rem + 1.2vw, 2.125rem);
-  line-height: 1.3;
-  letter-spacing: var(--interlettre-titre);
-  text-wrap: balance;
+
+.verdict,
+.carte,
+.kpis {
+  background: var(--surface);
+  border: 1px solid var(--trait);
+  border-radius: var(--rayon-large);
+  box-shadow: var(--ombre);
 }
+.verdict { padding: 16px 24px 20px; text-align: center; }
+.verdict__entete {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 18px;
+  margin-bottom: 8px;
+}
+.verdict__question {
+  font-family: var(--police);
+  font-size: .6875rem;
+  font-weight: 600;
+  letter-spacing: var(--interlettre-caps);
+  text-transform: uppercase;
+  color: var(--encre-2);
+}
+.verdict__horizon { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 200px; }
+.verdict__horizon input[type="range"] {
+  flex: 1;
+  min-height: 44px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+.verdict__annees {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  font-size: .9375rem;
+  min-width: 62px;
+  text-align: right;
+}
+.verdict__chiffre {
+  font-family: var(--police-chiffres);
+  font-size: clamp(2rem, 5vw, 2.75rem);
+  font-weight: 650;
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+}
+.verdict__chiffre--achat { color: var(--achat); }
+.verdict__chiffre--location { color: var(--location); }
+.verdict__mesure { margin: 2px auto 0; max-width: 46ch; font-size: .9375rem; color: var(--encre-2); }
+
+.carte { margin: 0; padding: 20px; text-align: left; }
+.carte__entete { margin-bottom: 12px; }
+.carte__titre { font-family: var(--police); font-size: 1rem; font-weight: 600; letter-spacing: 0; }
+.carte__legende { margin-top: 4px; font-size: .8125rem; color: var(--encre-2); max-width: 68ch; }
+
+.legende { display: flex; gap: 18px; flex-wrap: wrap; margin-bottom: 10px; }
+.legende__item { display: flex; align-items: center; gap: 7px; font-size: .8125rem; color: var(--encre-2); }
+.pastille { width: 8px; height: 8px; border-radius: 2px; flex: none; }
+.pastille--achat { background: var(--achat); }
+.pastille--location { background: var(--location); }
+
+.graphique { position: relative; height: 340px; }
+.graphique__absent {
+  padding: 16px;
+  border: 1px dashed var(--trait);
+  border-radius: var(--rayon);
+  font-size: .875rem;
+  color: var(--encre-2);
+}
+
+.kpis {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  padding: 14px 18px;
+}
+.kpi { min-width: 0; padding: 0 18px; border-left: 1px solid var(--trait); }
+.kpi:first-child { border-left: 0; padding-left: 0; }
+.kpi__mot {
+  text-align: center;
+  font-size: .625rem;
+  font-weight: 600;
+  letter-spacing: var(--interlettre-caps);
+  text-transform: uppercase;
+  color: var(--encre-3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.kpi__mot--achat { color: var(--achat); }
+.kpi__mot--location { color: var(--location); }
+.kpi__chiffre {
+  margin-top: 4px;
+  text-align: center;
+  font-size: 1.375rem;
+  font-weight: 600;
+  line-height: 1.15;
+}
+.kpi:first-child .kpi__chiffre { color: var(--achat); }
+.kpi__lignes { display: grid; gap: 2px; margin: 6px 0 0; }
+.kpi__ligne {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: .8125rem;
+  color: var(--encre-2);
+}
+.kpi__ligne dt, .kpi__ligne dd { margin: 0; }
+.kpi__ligne dd { font-weight: 600; color: var(--encre); }
+.kpi__ligne--investi dd { color: var(--supplement); }
+.kpi__note { text-align: center; font-size: .8125rem; color: var(--encre-2); }
+.kpi__note:empty { display: none; }
+
+.exemple__suite { display: grid; justify-items: center; gap: 18px; margin-top: 56px; color: var(--encre-2); }
 
 /* ---------------------------------------------------------------- Piliers */
 
@@ -209,23 +469,93 @@ em { font-style: italic; color: var(--encre-3); }
 .pilier__titre { font-size: clamp(1.75rem, 1.3rem + 1.2vw, 2.375rem); }
 .pilier p { margin-top: 16px; max-width: 36em; font-size: 1.0625rem; color: var(--encre-2); }
 
-/* ---------------------------------------------------------------- Fin */
+/* ---------------------------------------------------------------- Parti pris */
 
-.fin__texte { margin-top: 16px; margin-bottom: 40px; }
+.etiquettes { margin-top: 40px; }
+.etiquettes__libelle { font-size: .875rem; color: var(--encre-3); margin-bottom: 12px; }
+.etiquettes__liste {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.etiquettes__liste li {
+  padding: 5px 12px;
+  border: 1px solid var(--bord-champ);
+  border-radius: 999px;
+  font-size: .8125rem;
+  color: var(--encre-2);
+}
 
-.pied {
+/* ---------------------------------------------------------------- FAQ */
+
+.faq { margin-top: 72px; }
+.faq__item { border-bottom: 1px solid var(--trait); }
+.faq__item:first-child { border-top: 1px solid var(--trait); }
+.faq__item summary {
   display: flex;
   justify-content: space-between;
-  align-items: baseline;
-  flex-wrap: wrap;
-  gap: 12px;
-  /* Même largeur utile que le contenu : le filet s'aligne sur les piliers. */
+  align-items: center;
+  gap: 24px;
+  min-height: 44px;
+  padding: 22px 0;
+  font-size: 1.0625rem;
+  font-weight: 500;
+  cursor: pointer;
+  list-style: none;
+}
+.faq__item summary::-webkit-details-marker { display: none; }
+/* Un « + » dessiné en CSS, qui pivote en « × » à l'ouverture. */
+.faq__item summary::after {
+  content: "";
+  flex: none;
+  width: 14px;
+  height: 14px;
+  background:
+    linear-gradient(var(--encre-3), var(--encre-3)) center / 100% 1.5px no-repeat,
+    linear-gradient(var(--encre-3), var(--encre-3)) center / 1.5px 100% no-repeat;
+  transition: transform var(--duree-base) var(--aise);
+}
+.faq__item[open] summary::after { transform: rotate(45deg); }
+.faq__reponse p { padding: 0 40px 26px 0; color: var(--encre-2); }
+.faq__item[open] .faq__reponse { animation: deplier 480ms var(--aise); }
+@keyframes deplier {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* ---------------------------------------------------------------- Fin */
+
+.fin .bouton { margin-top: 40px; }
+.fin__contact { margin-top: 32px; font-size: .875rem; color: var(--encre-3); }
+.fin__contact a { color: var(--encre-2); }
+
+/* ---------------------------------------------------------------- Pied de page */
+
+.pied {
   max-width: 1000px;
   margin: 0 auto;
   padding: 32px 0 48px;
   border-top: 1px solid var(--trait);
   font-size: .8125rem;
   color: var(--encre-3);
+}
+.pied__ligne { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 20px; }
+.pied__slogan { margin-top: 6px; }
+.pied__droite { display: grid; gap: 6px; text-align: right; }
+.pied__liens a { color: var(--encre-3); text-decoration: none; }
+.pied__liens a:hover { color: var(--encre); text-decoration: underline; }
+.pied__legal { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 40px; }
+.pied__titre {
+  margin-bottom: 4px;
+  font-family: var(--police);
+  font-size: .75rem;
+  font-weight: 500;
+  letter-spacing: 0;
+  color: var(--encre-2);
 }
 
 /* ---------------------------------------------------------------- Écrans étroits */
@@ -234,23 +564,36 @@ em { font-style: italic; color: var(--encre-3); }
   .pied { margin: 0 40px; }
 }
 
-@media (max-width: 820px) {
-  .section { padding: 104px 0; }
+@media (max-width: 768px) {
+  .section { padding: 96px 0; }
   .trio { grid-template-columns: 1fr; gap: 48px; margin-top: 64px; }
-  .citation { margin-top: 80px; }
-  .piliers { margin-top: 64px; }
+  .questions, .enveloppe, .piliers { margin-top: 64px; }
+  .questions__cloture { margin-top: 64px; }
   .pilier { grid-template-columns: 1fr; gap: 16px; padding: 40px 0; }
   .pilier__numero { font-size: 2.5rem; }
+  .kpis { grid-template-columns: 1fr 1fr; gap: 16px 0; }
+  .kpi { border-left: 0; padding: 0 12px; }
+  .graphique { height: 260px; }
+  .pied__droite { text-align: left; }
+  .pied__legal { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 560px) {
   .conteneur { padding-left: 20px; padding-right: 20px; }
+  .entete { padding: 16px 20px; }
+  .entete__liens { gap: 12px; }
+  .entete__lien { font-size: .875rem; }
   .pied { margin: 0 20px; }
   .section { padding: 80px 0; }
   .accroche__phrase br, .section__titre br { display: none; }
+  .enveloppe__ligne { grid-template-columns: 1fr; gap: 6px; }
+  .enveloppe__nom { text-align: left; }
+  .enveloppe__part { padding: 0 10px; font-size: .75rem; }
+  .verdict { padding: 14px 16px 18px; }
+  .carte { padding: 16px 12px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
-  *, *::before, *::after { transition: none !important; }
+  *, *::before, *::after { transition: none !important; animation: none !important; }
 }
