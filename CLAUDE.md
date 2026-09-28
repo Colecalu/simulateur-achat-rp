@@ -86,6 +86,10 @@ le code d'une branche d'expérimentation UI est possible mais coûteux, et rarem
 
 ## 1. Le projet
 
+**Nom : Aequo** (comme *ex aequo* : les deux trajectoires partent à égalité, même budget). Le
+site compare, il ne juge pas : acheter en gagnant moins pour être chez soi est un choix légitime,
+et aucun texte ne doit laisser entendre le contraire.
+
 Site public, en français, pour les **primo-accédants en France** qui hésitent entre acheter
 leur résidence principale et rester locataires en investissant la différence.
 
