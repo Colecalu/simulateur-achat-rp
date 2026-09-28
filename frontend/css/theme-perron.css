@@ -118,21 +118,6 @@
   --alerte:          var(--brick-500);
   --alerte-fond:     var(--brick-100);
 
-  /* ---------- Page d'accueil ----------
-     Rôles propres au site vitrine, absents du simulateur : les grandes
-     surfaces pleines (bandeau terre cuite, pied de page encre) et l'en-tête
-     collant translucide — les deux seuls endroits où le design autorise la
-     transparence et le grain. */
-  --plan-inverse:        var(--warm-700);
-  --sur-inverse:         var(--paper-200);
-  --sur-inverse-doux:    var(--warm-200);
-  --accent-sur-inverse:  var(--clay-200);
-  --filet-inverse:       rgba(251,247,240,.14);
-  --sur-accent-doux:     var(--clay-100);
-  --voile-entete:        rgba(251,247,240,.88);
-  --achat-doux:          var(--clay-100);
-  --location-doux:       var(--olive-100);
-
   /* ---------- Formes ---------- */
   --rayon:           12px;   /* champs et boutons */
   --rayon-large:     20px;   /* cartes */

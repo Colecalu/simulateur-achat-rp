@@ -193,7 +193,7 @@ serveur, pas de migrations automatiques, aucune dépendance qui exige une étape
 
 ```
 frontend/                    servi tel quel, racine web en production
-  accueil.html               page d'accueil / vitrine — ne partage que le thème
+  accueil.html               page d'accueil, statique — ne partage que le thème
   index.html                 le simulateur
   css/  style.css            structure seule : aucune couleur, aucune police
         theme-perron.css     thème de référence — valeurs uniquement
@@ -204,8 +204,7 @@ frontend/                    servi tel quel, racine web en production
         scenarios.js         pilier 2 — données de marché, pas de logique
         sauvegarde.js        brouillon local + migration de schéma (testé)
         app.js               tout le DOM, toute l'interface
-        accueil.js           exemple chiffré de l'accueil — appelle calc.js, ne calcule rien
-  img/                       grain.png et icônes Lucide (masques CSS) du design Perron
+  img/icones/                icônes Lucide du design Perron, posées en masque CSS
 backend/                     vide aujourd'hui — voir docs/backend-spec.md
 docs/                        modèle, conventions UI, spec backend, design, Excel
 tests/                       node --test, 106 tests
