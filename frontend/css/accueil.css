@@ -1,45 +1,27 @@
 /* =========================================================================
    Page d'accueil — structure.
 
-   Même règle que style.css : AUCUNE valeur de couleur, de police, de rayon
-   ni d'ombre, uniquement les noms sémantiques du thème (theme-perron.css).
+   Ce qui est COMMUN aux deux pages (réinitialisation, titres, marque, bouton,
+   en-tête, et le bloc de résultat que cette page reproduit) vit dans
+   css/socle.css, chargé juste avant. Ne rien redéfinir ici sans une raison
+   écrite : c'est exactement ce qui avait produit 33 classes en double.
+
+   Même règle que socle.css et style.css : AUCUNE valeur de couleur, de police,
+   de rayon ni d'ombre, uniquement les noms sémantiques du thème
+   (theme-perron.css).
 
    Parti pris : épuré. Un fond papier, un second fond creux pour deux
    sections, un seul accent (les boutons), beaucoup d'air. Page calibrée pour
    un portable (MacBook, ~1440 × 900) : l'accroche occupe toute la fenêtre.
    ========================================================================= */
 
-*, *::before, *::after { box-sizing: border-box; }
-
 html { scroll-behavior: smooth; }
 
-body {
-  margin: 0;
-  font-family: var(--police);
-  font-size: 17px;
-  line-height: 1.6;
-  color: var(--encre);
-  background: var(--plan);
-  -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
-}
-
-h1, h2, h3 {
-  margin: 0;
-  font-family: var(--police-titre);
-  font-weight: var(--graisse-titre);
-  letter-spacing: var(--interlettre-titre);
-  line-height: 1.08;
-  text-wrap: balance;
-}
+/* Réinitialisations propres à la page : elle est faite de texte courant, le
+   simulateur de composants qui posent tous leurs marges eux-mêmes. */
 p { margin: 0; }
 em { font-style: italic; color: var(--encre-3); }
 strong { font-weight: 600; color: var(--encre); }
-
-.tabulaire { font-variant-numeric: tabular-nums lining-nums; }
-
-:focus-visible { outline: none; box-shadow: var(--anneau); border-radius: 8px; }
-::selection { background: var(--accent-doux); }
 
 /* ---------------------------------------------------------------- Mise en page */
 
@@ -78,89 +60,6 @@ strong { font-weight: 600; color: var(--encre); }
   transition: opacity 700ms var(--aise), transform 700ms var(--aise);
 }
 .js .apparait.est-visible { opacity: 1; transform: none; }
-
-/* ---------------------------------------------------------------- Marque */
-
-.marque {
-  font-family: var(--police-titre);
-  font-size: 1.625rem;
-  line-height: 1;
-  letter-spacing: var(--interlettre-titre);
-  color: var(--encre);
-  text-decoration: none;
-}
-.marque--petite { font-size: 1.375rem; }
-
-/* ---------------------------------------------------------------- Boutons */
-
-.bouton {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  min-height: 54px;
-  padding: 0 28px;
-  border-radius: 999px;
-  border: 1px solid transparent;
-  background: var(--accent);
-  color: var(--sur-accent);
-  font-size: 1rem;
-  font-weight: 500;
-  text-decoration: none;
-  transition: background var(--duree-rapide) var(--aise),
-              transform 80ms var(--aise);
-}
-.bouton:hover { background: var(--accent-fort); }
-.bouton:active { transform: translateY(1px); }
-/* Compact, mais une cible tactile de 44 px. */
-.bouton--compact { min-height: 44px; padding: 0 20px; font-size: .9375rem; }
-.bouton--secondaire {
-  min-height: 48px;
-  background: transparent;
-  border-color: var(--bord-champ);
-  color: var(--encre);
-}
-.bouton--secondaire:hover { background: var(--surface); }
-
-.icone {
-  width: 18px;
-  height: 18px;
-  flex: none;
-  background-color: currentColor;
-  -webkit-mask: url("../img/icones/arrow-right.svg") center / contain no-repeat;
-          mask: url("../img/icones/arrow-right.svg") center / contain no-repeat;
-  transition: transform var(--duree-rapide) var(--aise);
-}
-.bouton:hover .icone { transform: translateX(3px); }
-
-/* ---------------------------------------------------------------- En-tête
-   Posé sur l'accroche, non collant. */
-
-.entete {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 10;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 24px 40px;
-}
-.entete__liens { display: flex; align-items: center; gap: 28px; }
-.entete__lien {
-  display: inline-flex;
-  align-items: center;
-  min-height: 44px;
-  font-size: .9375rem;
-  color: var(--encre-2);
-  text-decoration: none;
-  transition: color var(--duree-rapide) var(--aise);
-}
-.entete__lien:hover { color: var(--encre); }
 
 /* ---------------------------------------------------------------- Accroche */
 
@@ -323,9 +222,9 @@ strong { font-weight: 600; color: var(--encre); }
 .trio__element p { max-width: 18em; color: var(--encre-2); }
 
 /* ---------------------------------------------------------------- Exemple
-   Reprise du bloc de résultat du simulateur (verdict, graphique, KPI) :
-   mêmes classes, mêmes proportions que style.css, recopiées ici parce que
-   charger style.css importerait tout le simulateur. */
+   Le bloc de résultat du simulateur (verdict, graphique, KPI) vit dans
+   socle.css : ce sont les MÊMES composants, c'est tout l'intérêt de la
+   section. Il n'en reste ici que la boîte qui les dispose. */
 
 .resultat { display: grid; gap: 14px; margin-top: 72px; max-width: 960px; }
 .resultat__hypotheses {
@@ -334,118 +233,6 @@ strong { font-weight: 600; color: var(--encre); }
   font-size: .8125rem;
   color: var(--encre-3);
 }
-
-.verdict,
-.carte,
-.kpis {
-  background: var(--surface);
-  border: 1px solid var(--trait);
-  border-radius: var(--rayon-large);
-  box-shadow: var(--ombre);
-}
-.verdict { padding: 16px 24px 20px; text-align: center; }
-.verdict__entete {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 10px 18px;
-  margin-bottom: 8px;
-}
-.verdict__question {
-  font-family: var(--police);
-  font-size: .6875rem;
-  font-weight: 600;
-  letter-spacing: var(--interlettre-caps);
-  text-transform: uppercase;
-  color: var(--encre-2);
-}
-.verdict__horizon { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 200px; }
-.verdict__horizon input[type="range"] {
-  flex: 1;
-  min-height: 44px;
-  accent-color: var(--accent);
-  cursor: pointer;
-}
-.verdict__annees {
-  font-variant-numeric: tabular-nums;
-  font-weight: 600;
-  font-size: .9375rem;
-  min-width: 62px;
-  text-align: right;
-}
-.verdict__chiffre {
-  font-family: var(--police-chiffres);
-  font-size: clamp(2rem, 5vw, 2.75rem);
-  font-weight: 650;
-  line-height: 1.05;
-  letter-spacing: -0.03em;
-  font-variant-numeric: tabular-nums;
-}
-.verdict__chiffre--achat { color: var(--achat); }
-.verdict__chiffre--location { color: var(--location); }
-.verdict__mesure { margin: 2px auto 0; max-width: 46ch; font-size: .9375rem; color: var(--encre-2); }
-
-.carte { margin: 0; padding: 20px; text-align: left; }
-.carte__entete { margin-bottom: 12px; }
-.carte__titre { font-family: var(--police); font-size: 1rem; font-weight: 600; letter-spacing: 0; }
-.carte__legende { margin-top: 4px; font-size: .8125rem; color: var(--encre-2); max-width: 68ch; }
-
-.legende { display: flex; gap: 18px; flex-wrap: wrap; margin-bottom: 10px; }
-.legende__item { display: flex; align-items: center; gap: 7px; font-size: .8125rem; color: var(--encre-2); }
-.pastille { width: 8px; height: 8px; border-radius: 2px; flex: none; }
-.pastille--achat { background: var(--achat); }
-.pastille--location { background: var(--location); }
-
-.graphique { position: relative; height: 340px; }
-.graphique__absent {
-  padding: 16px;
-  border: 1px dashed var(--trait);
-  border-radius: var(--rayon);
-  font-size: .875rem;
-  color: var(--encre-2);
-}
-
-.kpis {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  padding: 14px 18px;
-}
-.kpi { min-width: 0; padding: 0 18px; border-left: 1px solid var(--trait); }
-.kpi:first-child { border-left: 0; padding-left: 0; }
-.kpi__mot {
-  text-align: center;
-  font-size: .625rem;
-  font-weight: 600;
-  letter-spacing: var(--interlettre-caps);
-  text-transform: uppercase;
-  color: var(--encre-3);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.kpi__mot--achat { color: var(--achat); }
-.kpi__mot--location { color: var(--location); }
-.kpi__chiffre {
-  margin-top: 4px;
-  text-align: center;
-  font-size: 1.375rem;
-  font-weight: 600;
-  line-height: 1.15;
-}
-.kpi:first-child .kpi__chiffre { color: var(--achat); }
-.kpi__lignes { display: grid; gap: 2px; margin: 6px 0 0; }
-.kpi__ligne {
-  display: flex;
-  justify-content: space-between;
-  gap: 10px;
-  font-size: .8125rem;
-  color: var(--encre-2);
-}
-.kpi__ligne dt, .kpi__ligne dd { margin: 0; }
-.kpi__ligne dd { font-weight: 600; color: var(--encre); }
-.kpi__ligne--investi dd { color: var(--supplement); }
-.kpi__note { text-align: center; font-size: .8125rem; color: var(--encre-2); }
-.kpi__note:empty { display: none; }
 
 .exemple__suite { display: grid; justify-items: center; gap: 18px; margin-top: 56px; color: var(--encre-2); }
 
@@ -485,7 +272,7 @@ strong { font-weight: 600; color: var(--encre); }
 .etiquettes__liste li {
   padding: 5px 12px;
   border: 1px solid var(--bord-champ);
-  border-radius: 999px;
+  border-radius: var(--rayon-pilule);
   font-size: .8125rem;
   color: var(--encre-2);
 }
@@ -571,26 +358,18 @@ strong { font-weight: 600; color: var(--encre); }
   .questions__cloture { margin-top: 64px; }
   .pilier { grid-template-columns: 1fr; gap: 16px; padding: 40px 0; }
   .pilier__numero { font-size: 2.5rem; }
-  .kpis { grid-template-columns: 1fr 1fr; gap: 16px 0; }
-  .kpi { border-left: 0; padding: 0 12px; }
-  .graphique { height: 260px; }
   .pied__droite { text-align: left; }
   .pied__legal { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 560px) {
   .conteneur { padding-left: 20px; padding-right: 20px; }
-  .entete { padding: 16px 20px; }
-  .entete__liens { gap: 12px; }
-  .entete__lien { font-size: .875rem; }
   .pied { margin: 0 20px; }
   .section { padding: 80px 0; }
   .accroche__phrase br, .section__titre br { display: none; }
   .enveloppe__ligne { grid-template-columns: 1fr; gap: 6px; }
   .enveloppe__nom { text-align: left; }
   .enveloppe__part { padding: 0 10px; font-size: .75rem; }
-  .verdict { padding: 14px 16px 18px; }
-  .carte { padding: 16px 12px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -1,76 +1,61 @@
 /* =========================================================================
    Simulateur achat RP vs location — structure et composants.
 
+   Ce qui est COMMUN aux deux pages du site (réinitialisation, titres, marque,
+   bouton, en-tête, verdict, cartes, légendes, KPI) vit dans css/socle.css,
+   chargé juste avant. Ne rien redéfinir ici sans une raison écrite : c'est
+   exactement ce qui avait produit 33 classes définies deux fois, avec deux
+   apparences différentes.
+
    Ce fichier ne contient AUCUNE valeur de couleur, de police, de rayon ni
    d'ombre : uniquement des noms sémantiques, définis par le fichier de thème
    chargé dans simulateur.html (css/theme-*.css). Changer de thème = changer ce
    fichier-là, jamais celui-ci.
 
    Règle : ne jamais écrire ici de `#hex` ni le nom d'un pas de rampe
-   (`--clay-500`, `--green-700`). Si un rôle manque, l'ajouter aux DEUX
-   thèmes plutôt que de nommer une couleur.
+   (`--clay-500`, `--green-700`). Si un rôle manque, l'ajouter au thème plutôt
+   que de nommer une couleur.
    ========================================================================= */
 
-*, *::before, *::after { box-sizing: border-box; }
+/*
+ * Le simulateur est dense là où l'accueil est aéré : un plateau de bulles à
+ * hauteur bornée, des champs de 38 px, quatre cartes qui doivent tenir dans un
+ * écran sans défilement. Le socle donne la mesure de l'accueil (17 px / 1,6) ;
+ * ici on revient à 15 px / 1,5, qui est la mesure sur laquelle toutes les
+ * hauteurs de bulles ont été calibrées. C'est la SEULE divergence de fond
+ * assumée entre les deux pages — elle porte sur la densité, pas sur le style.
+ */
+body { font-size: 15px; line-height: 1.5; }
 
-body {
-  margin: 0;
-  font-family: var(--police);
-  font-size: 15px;
-  line-height: 1.5;
-  color: var(--encre);
-  background: var(--plan);
-  -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
-}
+/*
+ * L'en-tête s'aligne sur `.page`, et non sur le conteneur plus étroit de
+ * l'accueil : sur cette page-ci la marque doit tomber à l'aplomb du plateau.
+ */
+:root { --contenu-largeur: 1360px; --contenu-gouttiere: 24px; }
 
-h1, h2, h3 {
-  margin: 0;
-  font-family: var(--police-titre);
-  font-weight: var(--graisse-titre);
-  line-height: 1.2;
-  letter-spacing: var(--interlettre-titre);
-}
+/*
+ * Et il respire moins qu'à l'accueil : chaque pixel pris en haut est un pixel
+ * de moins pour le plateau, qui doit tenir dans un écran d'ordinateur. La
+ * hauteur du lien (44 px, cible tactile) reste, elle, intouchée.
+ */
+.entete { padding-top: 14px; padding-bottom: 14px; }
 
-/* Les chiffres s'alignent en colonne, quel que soit le thème. */
-.tabulaire {
-  font-family: var(--police-chiffres);
-  font-variant-numeric: tabular-nums lining-nums;
-}
+/* ----------------------------------------------------------------- Titre */
 
-:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-::selection { background: var(--accent-doux); }
-
-/* ---------------------------------------------------------------- En-tête */
-
-.entete {
-  border-bottom: 1px solid var(--trait);
-  background: var(--surface);
-}
-.entete__contenu {
-  max-width: 1360px;
-  margin: 0 auto;
-  padding: 18px 24px 16px;
-}
-.entete__marque {
-  display: inline-block;
-  margin-bottom: 2px;
-  font-family: var(--police-titre);
-  font-size: 1.125rem;
-  letter-spacing: var(--interlettre-titre);
-  color: var(--encre-2);
-  text-decoration: none;
-}
-.entete__marque:hover { color: var(--encre); }
-.entete h1 { font-size: 1.35rem; line-height: 1.25; }
-.entete__sous-titre {
-  margin: 5px 0 0;
+/*
+ * Le titre de la page quitte la barre d'en-tête, qui ne porte plus que la
+ * marque et la navigation — comme sur l'accueil. Il ouvre le contenu, à
+ * l'échelle des titres de section de l'accueil, un cran plus bas : ici c'est
+ * l'outil qui doit occuper l'écran, pas son titre.
+ */
+.page__intro { margin-bottom: 12px; }
+.page__titre { font-size: clamp(1.5rem, 1.1rem + 1.1vw, 2rem); }
+.page__accroche {
+  margin: 4px 0 0;
+  max-width: 76ch;
   font-size: .875rem;
-  max-width: 62ch;
   color: var(--encre-2);
 }
-
-/* ----------------------------------------------------------------- Layout */
 
 /* ----------------------------------------------------------------- Profil */
 
@@ -218,23 +203,9 @@ h1, h2, h3 {
 
 /* --- Chaque mois ------------------------------------------------------------
    Sous le graphique, hors du détail repliable : les chiffres mensuels et la
-   ligne de choix de l'épargne forcée. Les KPI réutilisent la carte .kpis. */
+   ligne de choix de l'épargne forcée. Les KPI réutilisent la carte `.kpis` du
+   socle, celle-là même que l'accueil montre en exemple. */
 .mensuel { display: grid; gap: 10px; }
-
-/* Un KPI « projet » : deux lignes, le logement puis l'investi. */
-.kpi__mot--achat { color: var(--achat); }
-.kpi__mot--location { color: var(--location); }
-.kpi__lignes { display: grid; gap: 2px; margin: 6px 0 0; }
-.kpi__ligne {
-  display: flex;
-  justify-content: space-between;
-  gap: 10px;
-  font-size: .8125rem;
-  color: var(--encre-2);
-}
-.kpi__ligne dt, .kpi__ligne dd { margin: 0; }
-.kpi__ligne dd { font-weight: 600; color: var(--encre); }
-.kpi__ligne--investi dd { color: var(--supplement); }
 
 /* --- Le choix de l'effort du locataire -----------------------------------
    Les deux options sont ÉCRITES, côte à côte, avec leur montant. Un
@@ -438,10 +409,13 @@ h1, h2, h3 {
 
 /* ---------------------------------------------------------------- Plateau */
 
+/* Mêmes largeur et gouttière que l'en-tête, et par les mêmes variables : deux
+   nombres recopiés finissent toujours par diverger, et la marque se retrouve
+   décalée d'un ou deux pixels au-dessus du plateau. */
 .page {
-  max-width: 1360px;
+  max-width: var(--contenu-largeur);
   margin: 0 auto;
-  padding: 16px 24px 24px;
+  padding: 16px var(--contenu-gouttiere) 24px;
 }
 
 /* Largeur du rail et gouttiere : nommées parce que la bulle de question s'en
@@ -488,7 +462,11 @@ h1, h2, h3 {
   display: grid;
   grid-template-rows: repeat(2, minmax(0, 1fr));
   gap: 14px;
-  height: calc(100vh - 560px);
+  /* La constante retranchée EST la hauteur de tout ce qui précède le rail :
+     en-tête, titre de page, bandeau de profil, rangée du haut. L'en-tête
+     ayant été refait à l'image de l'accueil, ce qui précède a grandi de
+     23 px — sans quoi le rail finirait 23 px plus bas qu'avant. */
+  height: calc(100vh - 583px);
   min-height: 260px;
   max-height: 360px;
 }
@@ -944,54 +922,8 @@ h1, h2, h3 {
 .champ__aide { display: none; font-size: .75rem; color: var(--encre-3); line-height: 1.4; }
 .bulle--zoom .champ__aide { display: none; }
 
-/* ---------------------------------------------------------------- Boutons */
-
-.bouton {
-  font: inherit;
-  font-size: .9375rem;
-  font-weight: 500;
-  line-height: 1;
-  letter-spacing: .005em;
-  height: 44px;
-  padding: 0 18px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: var(--rayon);
-  border: 1px solid var(--bord-champ);
-  background: var(--surface);
-  color: var(--encre);
-  box-shadow: var(--ombre);
-  cursor: pointer;
-  white-space: nowrap;
-  transition: background var(--duree-rapide) var(--aise),
-              border-color var(--duree-rapide) var(--aise),
-              color var(--duree-rapide) var(--aise),
-              box-shadow var(--duree-rapide) var(--aise),
-              transform 80ms var(--aise);
-}
-.bouton:hover { background: var(--survol); }
-.bouton:active { transform: translateY(1px); }
-
-.bouton--primaire {
-  background: var(--accent);
-  border-color: transparent;
-  color: var(--sur-accent);
-  box-shadow: none;
-}
-.bouton--primaire:hover { background: var(--accent-fort); color: var(--sur-accent); }
-
-/* Variante « ghost » du design : ni fond ni bordure au repos. */
-.bouton--discret {
-  height: 34px;
-  padding: 0 12px;
-  font-size: .8125rem;
-  border-color: transparent;
-  background: transparent;
-  box-shadow: none;
-  color: var(--encre-2);
-}
-.bouton--discret:hover { background: var(--survol); color: var(--encre); }
+/* Boutons : socle.css. Le simulateur n'emploie que `--compact` et `--discret`
+   — la pilule pleine hauteur est réservée à l'appel de l'accueil. */
 
 /* ---------------------------------------------------------------- Attente */
 
@@ -1064,67 +996,8 @@ h1, h2, h3 {
   font-size: .875rem;
 }
 
-/* Verdict — la réponse à la question du site */
-.verdict {
-  background: var(--surface);
-  border: 1px solid var(--trait);
-  border-radius: var(--rayon-large);
-  box-shadow: var(--ombre);
-  padding: 16px 24px 20px;
-  text-align: center;
-}
-.verdict__entete {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 10px 18px;
-  margin-bottom: 8px;
-}
-/* Surtitre du design : petites capitales espacées. */
-.verdict__question {
-  font-family: var(--police);
-  font-size: .6875rem;
-  font-weight: 600;
-  letter-spacing: var(--interlettre-caps);
-  text-transform: uppercase;
-  color: var(--encre-2);
-}
-.verdict__horizon { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 220px; }
-.verdict__horizon input[type="range"] { flex: 1; accent-color: var(--accent); cursor: pointer; }
-.verdict__annees {
-  font-variant-numeric: tabular-nums;
-  font-weight: 600;
-  font-size: .9375rem;
-  min-width: 62px;
-  text-align: right;
-}
+/* Verdict, cartes, légendes, graphiques et KPI : socle.css. */
 
-.verdict__chiffre {
-  margin: 0;
-  font-family: var(--police-chiffres);
-  font-size: clamp(2rem, 5vw, 2.75rem);
-  font-weight: 650;
-  line-height: 1.05;
-  letter-spacing: -0.03em;
-  font-variant-numeric: tabular-nums;
-}
-.verdict__chiffre--achat { color: var(--achat); }
-.verdict__chiffre--location { color: var(--location); }
-.verdict__chiffre--indecis { color: var(--encre-3); }
-
-.verdict__mesure {
-  margin: 2px auto 0;
-  max-width: 46ch;
-  font-size: .9375rem;
-  color: var(--encre-2);
-}
-
-
-
-
-.pastille { width: 8px; height: 8px; border-radius: 2px; flex: none; }
-.pastille--achat { background: var(--achat); }
-.pastille--location { background: var(--location); }
 .pastille--achat-location { background: var(--achat-location); }
 /*
  * Une classe par poste, plutôt qu'un `style="background:…"` injecté par le
@@ -1140,40 +1013,6 @@ h1, h2, h3 {
 .pastille--marches     { background: var(--courbe-marches); }
 .pastille--immo        { background: var(--courbe-immo); }
 .pastille--loyer-irl   { background: var(--courbe-loyer); }
-
-/* Cartes graphiques */
-.carte {
-  background: var(--surface);
-  border: 1px solid var(--trait);
-  border-radius: var(--rayon-large);
-  box-shadow: var(--ombre);
-  padding: 20px;
-  margin: 0;
-}
-.carte__entete { margin-bottom: 12px; }
-.carte__titre { font-size: 1rem; }
-.carte__legende { margin: 4px 0 0; font-size: .8125rem; color: var(--encre-2); max-width: 68ch; }
-
-.legende { display: flex; gap: 18px; flex-wrap: wrap; margin-bottom: 10px; }
-.legende__item {
-  display: flex; align-items: center; gap: 7px;
-  font-size: .8125rem; color: var(--encre-2);
-}
-
-.graphique { position: relative; height: 340px; }
-.graphique__absent {
-  margin: 0;
-  padding: 16px;
-  border: 1px dashed var(--trait);
-  border-radius: var(--rayon);
-  color: var(--encre-3);
-  font-size: .8125rem;
-  max-width: 60ch;
-}
-@media (max-width: 560px) {
-  .graphique { height: 260px; }
-  }
-
 
 .avertissement {
   margin: 0;
@@ -1538,58 +1377,7 @@ input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; marg
 }
 .cta[aria-expanded="true"]:hover { background: var(--survol); box-shadow: none; }
 
-/* --- Quatre chiffres sur une ligne ------------------------------------ */
-
-/*
- * Un chiffre n'a pas besoin d'une carte pour exister : pas de fond, pas
- * d'ombre, juste un filet vertical qui sépare les colonnes.
- */
-.kpis {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 0;
-  padding: 14px 18px;
-  background: var(--surface);
-  border: 1px solid var(--trait);
-  border-radius: var(--rayon-large);
-  box-shadow: var(--ombre);
-}
-.kpi { min-width: 0; padding: 0 18px; border-left: 1px solid var(--trait); }
-.kpi:first-child { border-left: 0; padding-left: 0; }
-.kpi__mot {
-  margin: 0;
-  text-align: center;
-  font-size: .625rem;
-  font-weight: 600;
-  letter-spacing: var(--interlettre-caps);
-  text-transform: uppercase;
-  color: var(--encre-3);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.kpi__mot em { font-style: normal; font-weight: 400; text-transform: none; letter-spacing: 0; }
-.kpi__chiffre {
-  margin: 4px 0 0;
-  text-align: center;
-  font-size: 1.375rem;
-  font-weight: 600;
-  color: var(--encre);
-  line-height: 1.15;
-}
-.kpi:first-child .kpi__chiffre { color: var(--achat); }
-.kpi__note { margin: 0; text-align: center; font-size: .8125rem; color: var(--encre-2); }
-.kpi__note:empty { display: none; }
-
-/*
- * En dessous, la grille retombe sur deux colonnes : les filets verticaux
- * deviendraient asymétriques (le premier de chaque rangée n'en a pas). On les
- * retire et on sépare à l'espace.
- */
-@media (max-width: 720px) {
-  .kpis { gap: 16px 12px; }
-  .kpi { padding: 0; border-left: 0; }
-}
+/* Les quatre chiffres sur une ligne (`.kpis`, `.kpi…`) : socle.css. */
 
 /* --- Rappel du curseur ------------------------------------------------- */
 

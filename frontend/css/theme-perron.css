@@ -124,9 +124,13 @@
   --epargne-texte:   var(--warm-600);
 
   /* ---------- Formes ---------- */
-  --rayon:           12px;   /* champs et boutons */
+  --rayon:           12px;   /* champs */
   --rayon-large:     20px;   /* cartes */
   --rayon-feuille:   28px;   /* modales */
+  /* Le bouton du site est une pilule. Un rôle nommé plutôt qu'un `999px` écrit
+     dans la structure : c'est une décision de design, elle vit avec les
+     autres valeurs. */
+  --rayon-pilule:    999px;
 
   /* Ombres longues, très diffuses, teintées brun — jamais du noir. */
   --ombre:    0 1px 2px rgba(58,40,26,.06);

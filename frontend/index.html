@@ -21,8 +21,12 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <!-- Même thème que le simulateur. accueil.css ne porte que la structure. -->
+  <!-- Trois feuilles, dans cet ordre : les valeurs (thème), les composants
+       communs aux deux pages (socle), puis ce qui n'appartient qu'à l'accueil.
+       Le simulateur charge les deux premières à l'identique — c'est ce qui
+       garantit qu'un bouton ou un verdict y est bien le même objet. -->
   <link rel="stylesheet" href="css/theme-perron.css">
+  <link rel="stylesheet" href="css/socle.css">
   <link rel="stylesheet" href="css/accueil.css">
 
   <!-- Chart.js (même version et même CDN que le simulateur) et le moteur en
@@ -88,8 +92,10 @@
 <body>
 
 <!-- ==================================================== 0. En-tête
-     Posé sur l'accroche, pas collant : la page reste la plus nue possible. -->
-<header class="entete">
+     Même barre que le simulateur (socle.css). Le modificateur `--flottante`
+     est ce qui la POSE sur l'accroche plein écran au lieu de la précéder :
+     la page doit s'ouvrir sur le titre, pas sur une barre. -->
+<header class="entete entete--flottante">
   <a class="marque" href="./">Æquo</a>
   <nav class="entete__liens" aria-label="Navigation principale">
     <a class="entete__lien" href="#principe">Comment ça marche</a>
