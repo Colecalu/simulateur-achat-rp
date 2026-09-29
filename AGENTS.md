@@ -126,7 +126,7 @@ même contrôle.
 
 ### Type B — UX et structure : parcours, disposition, composants
 
-Là, il faut toucher `index.html`, `app.js` et `style.css`. Pas d'échappatoire.
+Là, il faut toucher `simulateur.html`, `app.js` et `style.css`. Pas d'échappatoire.
 
 **Branche `codex/<sujet>`, courte, et qui ne sera pas fusionnée.**
 

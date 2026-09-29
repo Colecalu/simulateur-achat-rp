@@ -25,7 +25,7 @@ Pas de build. `frontend/` est servi tel quel.
 pas la sauvegarde locale. Équivalent en ligne de commande :
 `npx http-server frontend -p 4173 -c-1`.
 
-⚠️ **Ne jamais tester en ouvrant `index.html` par double-clic.** L'adresse devient `file://`, où
+⚠️ **Ne jamais tester en ouvrant une page `.html` par double-clic.** L'adresse devient `file://`, où
 le navigateur refuse une partie de ce dont le site a besoin — c'est la même raison qui interdit
 les modules ES dans ce projet.
 
@@ -197,8 +197,8 @@ serveur, pas de migrations automatiques, aucune dépendance qui exige une étape
 
 ```
 frontend/                    servi tel quel, racine web en production
-  accueil.html               page d'accueil (landing, FAQ, contact) — ne partage que le thème
-  index.html                 le simulateur
+  index.html                 page d'accueil (landing, FAQ, contact) — ne partage que le thème
+  simulateur.html            le simulateur
   css/  style.css            structure seule : aucune couleur, aucune police
         theme-perron.css     thème de référence — valeurs uniquement
         theme-foret.css      gelé, conservé comme point de comparaison

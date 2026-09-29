@@ -3,7 +3,7 @@
 
    Ce fichier ne contient AUCUNE valeur de couleur, de police, de rayon ni
    d'ombre : uniquement des noms sémantiques, définis par le fichier de thème
-   chargé dans index.html (css/theme-*.css). Changer de thème = changer ce
+   chargé dans simulateur.html (css/theme-*.css). Changer de thème = changer ce
    fichier-là, jamais celui-ci.
 
    Règle : ne jamais écrire ici de `#hex` ni le nom d'un pas de rampe
@@ -52,6 +52,16 @@ h1, h2, h3 {
   margin: 0 auto;
   padding: 18px 24px 16px;
 }
+.entete__marque {
+  display: inline-block;
+  margin-bottom: 2px;
+  font-family: var(--police-titre);
+  font-size: 1.125rem;
+  letter-spacing: var(--interlettre-titre);
+  color: var(--encre-2);
+  text-decoration: none;
+}
+.entete__marque:hover { color: var(--encre); }
 .entete h1 { font-size: 1.35rem; line-height: 1.25; }
 .entete__sous-titre {
   margin: 5px 0 0;

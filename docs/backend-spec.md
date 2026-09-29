@@ -368,7 +368,8 @@ La mise en correspondance se fait **au déploiement**, ce qui est de toute faço
 
 ```
 frontend/                  → déployé à la racine web OVH (/www/)
-  index.html
+  index.html               ← la page d'accueil
+  simulateur.html
   css/ js/
   api/                     → alias .htaccess vers backend/public/api/index.php
   .htaccess
@@ -392,7 +393,8 @@ Chez OVH mutualisé, le compte FTP arrive sur un répertoire racine qui **contie
 ```
 racine du compte FTP
 ├── www/                          ← RACINE WEB — seul contenu servi par HTTP
-│   ├── index.html                    ← depuis frontend/index.html
+│   ├── index.html                    ← depuis frontend/index.html (accueil)
+│   ├── simulateur.html               ← depuis frontend/simulateur.html
 │   ├── mentions-legales.html
 │   ├── confidentialite.html
 │   ├── css/  js/                     ← depuis frontend/css/ et frontend/js/
