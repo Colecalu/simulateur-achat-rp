@@ -48,7 +48,10 @@
     style: 'currency', currency: 'EUR', maximumFractionDigits: 0,
   });
   var dixieme = new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 1 });
-  var signe = function (v) { return (v >= 0 ? '+' : '−') + euros.format(Math.abs(v)); };
+  /* Sans signe, comme le verdict du simulateur : « −42 618 € de patrimoine en
+     plus » se lisait comme une perte. La couleur dit qui gagne, la phrase
+     dessous l'explicite. */
+  var signe = function (v) { return euros.format(Math.abs(v)); };
   var jeton = function (nom) { return getComputedStyle(document.body).getPropertyValue(nom).trim(); };
   var $ = function (id) { return document.getElementById(id); };
 
