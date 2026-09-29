@@ -86,6 +86,10 @@ le code d'une branche d'expérimentation UI est possible mais coûteux, et rarem
 
 ## 1. Le projet
 
+**Nom : Æquo** (comme *ex aequo* : les deux trajectoires partent à égalité, même budget). Le
+site compare, il ne juge pas : acheter en gagnant moins pour être chez soi est un choix légitime,
+et aucun texte ne doit laisser entendre le contraire.
+
 Site public, en français, pour les **primo-accédants en France** qui hésitent entre acheter
 leur résidence principale et rester locataires en investissant la différence.
 
@@ -193,15 +197,19 @@ serveur, pas de migrations automatiques, aucune dépendance qui exige une étape
 
 ```
 frontend/                    servi tel quel, racine web en production
-  index.html
+  accueil.html               page d'accueil (landing, FAQ, contact) — ne partage que le thème
+  index.html                 le simulateur
   css/  style.css            structure seule : aucune couleur, aucune police
         theme-perron.css     thème de référence — valeurs uniquement
         theme-foret.css      gelé, conservé comme point de comparaison
+        accueil.css          structure de la page d'accueil, mêmes règles que style.css
   js/   calc.js              moteur PUR : window.SimuRP / module.exports
         calc-location.js     pilier 3 — CONSOMME calc.js, ne le modifie jamais
         scenarios.js         pilier 2 — données de marché, pas de logique
         sauvegarde.js        brouillon local + migration de schéma (testé)
         app.js               tout le DOM, toute l'interface
+        accueil.js           apparitions + exemple de l'accueil — appelle calc.js, ne calcule rien
+  img/icones/                icônes Lucide du design Perron, posées en masque CSS
 backend/                     vide aujourd'hui — voir docs/backend-spec.md
 docs/                        modèle, conventions UI, spec backend, design, Excel
 tests/                       node --test, 106 tests

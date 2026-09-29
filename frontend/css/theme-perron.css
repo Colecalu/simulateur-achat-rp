@@ -118,6 +118,11 @@
   --alerte:          var(--brick-500);
   --alerte-fond:     var(--brick-100);
 
+  /* Page d'accueil : la part « épargne » de l'enveloppe, commune aux deux
+     trajectoires. Un papier foncé, neutre : ni achat ni location. */
+  --epargne-bande:   var(--paper-300);
+  --epargne-texte:   var(--warm-600);
+
   /* ---------- Formes ---------- */
   --rayon:           12px;   /* champs et boutons */
   --rayon-large:     20px;   /* cartes */
