@@ -137,14 +137,24 @@ h1, h2, h3 {
 /* ---------------------------------------------------------------- En-tête */
 
 :root {
-  /* Largeur et gouttière de la bande d'en-tête. Une page les redéfinit quand
-     son contenu n'a pas cette largeur-là : la marque doit tomber à l'aplomb
-     de ce qui est dessous, faute de quoi les deux pages se ressemblent sans
-     s'aligner. */
+  /* Largeur et gouttière de la bande de contenu. L'en-tête s'y cale ; une page
+     dont le contenu est plus large les redéfinit (le simulateur le fait) — la
+     marque doit tomber à l'aplomb de ce qui est dessous, faute de quoi les
+     deux pages se ressemblent sans s'aligner. */
   --contenu-largeur: 1200px;
   --contenu-gouttiere: 40px;
+  /* Air au-dessus et au-dessous de la marque. Réglable par page : sur le
+     simulateur chaque pixel pris en haut est un pixel de moins pour le
+     plateau, qui doit tenir dans un écran. */
+  --entete-respiration: 24px;
 }
 
+/*
+ * Un vrai composant partagé : les deux pages chargent CETTE règle, et une page
+ * n'en redéfinit jamais une propriété — elle change les variables ci-dessus.
+ * C'est ce qui rend la séparation vérifiable : aucun sélecteur du socle ne doit
+ * réapparaître en tête de ligne dans accueil.css ou style.css.
+ */
 .entete {
   display: flex;
   align-items: center;
@@ -152,7 +162,7 @@ h1, h2, h3 {
   gap: 16px;
   max-width: var(--contenu-largeur);
   margin: 0 auto;
-  padding: 24px var(--contenu-gouttiere);
+  padding: var(--entete-respiration) var(--contenu-gouttiere);
 }
 
 /* Accueil : l'en-tête est POSÉ sur l'accroche plein écran, il ne la précède
@@ -338,7 +348,7 @@ h1, h2, h3 {
 }
 
 @media (max-width: 560px) {
-  .entete { padding: 16px 20px; }
+  .entete { padding: 16px var(--contenu-gouttiere); }
   .entete__liens { gap: 12px; }
   .entete__lien { font-size: .875rem; }
   .verdict { padding: 14px 16px 18px; }

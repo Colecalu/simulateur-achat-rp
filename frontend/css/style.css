@@ -30,15 +30,21 @@ body { font-size: 15px; line-height: 1.5; }
 /*
  * L'en-tête s'aligne sur `.page`, et non sur le conteneur plus étroit de
  * l'accueil : sur cette page-ci la marque doit tomber à l'aplomb du plateau.
+ *
+ * Et il respire moins : chaque pixel pris en haut est un pixel de moins pour
+ * le plateau, qui doit tenir dans un écran d'ordinateur. La hauteur du lien
+ * (44 px, cible tactile) reste, elle, intouchée.
+ *
+ * Tout cela se règle par jetons, jamais en redéfinissant une règle du socle :
+ * c'est ce qui permet de vérifier d'un `comm` qu'aucun sélecteur n'est décrit
+ * deux fois dans le site.
  */
-:root { --contenu-largeur: 1360px; --contenu-gouttiere: 24px; }
-
-/*
- * Et il respire moins qu'à l'accueil : chaque pixel pris en haut est un pixel
- * de moins pour le plateau, qui doit tenir dans un écran d'ordinateur. La
- * hauteur du lien (44 px, cible tactile) reste, elle, intouchée.
- */
-.entete { padding-top: 14px; padding-bottom: 14px; }
+:root {
+  --contenu-largeur: 1360px;
+  --contenu-gouttiere: 24px;
+  --entete-respiration: 14px;
+}
+@media (max-width: 560px) { :root { --contenu-gouttiere: 20px; } }
 
 /* ----------------------------------------------------------------- Titre */
 
