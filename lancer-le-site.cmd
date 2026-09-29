@@ -5,7 +5,7 @@ rem
 rem  Double-cliquez sur ce fichier. Il ouvre le site dans votre navigateur a
 rem  l'adresse http://localhost:4173 et laisse tourner un petit serveur.
 rem
-rem  POURQUOI un serveur plutot qu'un double-clic sur index.html :
+rem  POURQUOI un serveur plutot qu'un double-clic sur un fichier .html :
 rem  ouvert en double-clic, la page s'affiche a une adresse "file://..." ou le
 rem  navigateur refuse une partie de ce dont le site a besoin. C'est la meme
 rem  raison qui interdit les modules ES dans ce projet (voir CLAUDE.md).
@@ -57,14 +57,15 @@ if errorlevel 1 (
   exit /b 1
 )
 
-echo   Adresse du site : http://localhost:4173
-echo   (c'est TOUJOURS cette adresse, notez-la)
+echo   Page d'accueil : http://localhost:4173
+echo   Simulateur     : http://localhost:4173/simulateur.html
+echo   (ce sont TOUJOURS ces adresses, notez-les)
 echo.
 echo   Pour arreter : fermez cette fenetre.
 echo.
 
 rem Le navigateur s'ouvre apres une seconde, le temps que le serveur demarre.
-start "" /b cmd /c "timeout /t 1 >nul & start "" http://localhost:4173"
+start "" /b cmd /c "timeout /t 1 >nul & start "" http://localhost:4173/simulateur.html"
 
 rem -c-1 desactive le cache : vos modifications sont visibles au rechargement.
 npx --yes http-server frontend -p 4173 -c-1

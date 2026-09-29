@@ -6,7 +6,7 @@ mesuré : la raison est indiquée à chaque fois, parce que c'est elle qui dit s
 la revoir ou la respecter.
 
 Il est séparé de [CLAUDE.md](../CLAUDE.md), qui reste un document de référence court.
-Toute session qui touche à `frontend/index.html`, `frontend/css/` ou `frontend/js/app.js`
+Toute session qui touche à `frontend/simulateur.html`, `frontend/css/` ou `frontend/js/app.js`
 doit le lire.
 
 ---
