@@ -197,12 +197,13 @@ serveur, pas de migrations automatiques, aucune dépendance qui exige une étape
 
 ```
 frontend/                    servi tel quel, racine web en production
-  index.html                 page d'accueil (landing, FAQ, contact) — ne partage que le thème
+  index.html                 page d'accueil (landing, FAQ, contact)
   simulateur.html            le simulateur
-  css/  style.css            structure seule : aucune couleur, aucune police
-        theme-perron.css     thème de référence — valeurs uniquement
+  css/  theme-perron.css     thème de référence — valeurs uniquement
         theme-foret.css      gelé, conservé comme point de comparaison
-        accueil.css          structure de la page d'accueil, mêmes règles que style.css
+        socle.css            COMMUN aux deux pages : base, marque, bouton, en-tête, bloc de résultat
+        style.css            ce qui n'appartient qu'au simulateur
+        accueil.css          ce qui n'appartient qu'à l'accueil
   js/   calc.js              moteur PUR : window.SimuRP / module.exports
         calc-location.js     pilier 3 — CONSOMME calc.js, ne le modifie jamais
         scenarios.js         pilier 2 — données de marché, pas de logique
@@ -220,6 +221,20 @@ migrations/                  à créer : SQL numéroté, appliqué à la main
 
 - Interface, libellés, noms de variables, de fonctions et de classes CSS **en français**.
 - JS en `camelCase`, classes CSS en `bloc__element--modificateur`.
+- **Un nom de classe n'est défini que dans UNE feuille.** Ce qui sert aux deux pages vit dans
+  `socle.css` ; `style.css` et `accueil.css` ne portent que ce qui leur est propre et **ne
+  redéfinissent jamais une règle du socle** — elles règlent ses jetons (`--contenu-largeur`,
+  `--contenu-gouttiere`, `--entete-respiration`). Vérifiable, et à vérifier :
+
+  ```bash
+  comm -12 <(grep -o '^\.[a-zA-Z0-9_-]*' frontend/css/socle.css | sort -u) \
+           <(grep -o '^\.[a-zA-Z0-9_-]*' frontend/css/style.css | sort -u)
+  ```
+
+  doit rester vide, sur les trois paires. Avant le socle, 33 classes étaient définies deux fois
+  avec des valeurs différentes : `.bouton` était une pilule terre cuite ici et un bouton blanc
+  là. Seul `body` diverge, et le dit : 15 px/1,5 au simulateur (densité du plateau) contre
+  17 px/1,6 à l'accueil.
 - **`calc.js` est un module pur** : aucune logique financière ailleurs, aucun accès au DOM
   dedans. C'est ce qui le rend testable sous Node.
 - **Toute variante de scénario suit le patron de `calc-location.js`** : un module isolé qui lit

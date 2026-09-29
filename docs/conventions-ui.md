@@ -18,9 +18,10 @@ est **gelé** : conservé tel quel comme point de comparaison, jamais mis à jou
 Ne pas y passer de temps. Voir [docs/design/README.md](docs/design/README.md) pour les sources et
 les écarts assumés.
 
-- **`frontend/css/style.css` ne contient que de la structure.** Aucun `#hex`, aucun nom de pas
-  de rampe (`--clay-500`, `--green-700`), aucune police, aucun rayon, aucune ombre : uniquement
-  des noms sémantiques français (`--plan`, `--encre`, `--accent`, `--achat`, `--rayon-large`…).
+- **`frontend/css/style.css`, `accueil.css` et `socle.css` ne contiennent que de la structure.**
+  Aucun `#hex`, aucun nom de pas de rampe (`--clay-500`, `--green-700`), aucune police, aucun
+  rayon, aucune ombre : uniquement des noms sémantiques français (`--plan`, `--encre`,
+  `--accent`, `--achat`, `--rayon-large`…).
 - **`frontend/css/theme-perron.css` (défaut) et `theme-foret.css` ne contiennent que des
   valeurs** : les rampes du design recopiées, ses polices importées, puis les noms sémantiques
   qui pointent dessus. Aucune règle de mise en page.
@@ -29,6 +30,39 @@ les écarts assumés.
   accepté, on ne le rattrape pas.
 - C'est cette indirection qui permet au JavaScript, qui lit `--achat` et `--location` pour
   colorer les courbes, de rester inchangé quel que soit le thème.
+
+### Trois feuilles de structure, un nom de classe dans une seule
+
+Le site a deux pages, et elles avaient chacune leur feuille complète : **33 noms de classe
+étaient définis dans les deux, avec des valeurs différentes**. `.bouton` était une pilule terre
+cuite de 54 px sur l'accueil et un bouton blanc de 44 px sur le simulateur ; `.carte__titre` du
+Geist d'un côté, de l'Instrument Serif de l'autre. Rien ne signalait le doublon, et déplacer un
+bloc de HTML d'une page à l'autre en changeait l'apparence.
+
+- **`socle.css` porte ce qui est commun**, chargé par les deux pages entre le thème et leur
+  feuille propre : réinitialisation et typographie de base, `.marque`, `.bouton` et ses variantes,
+  `.entete`, et le **bloc de résultat entier** (`.verdict`, `.carte`, `.legende`, `.pastille`,
+  `.graphique`, `.kpis`).
+- **Le bloc de résultat est partagé parce que c'est réellement le même objet.** La section
+  « Un exemple » de l'accueil EST l'écran de résultat du simulateur — c'est tout son argument.
+  Renommer les classes de l'une des deux pages aurait figé le doublon au lieu de le supprimer.
+- **Une page ne redéfinit jamais une règle du socle**, elle en règle les jetons :
+  `--contenu-largeur`, `--contenu-gouttiere`, `--entete-respiration`. C'est ce qui rend la
+  séparation vérifiable — le `comm` des sélecteurs en début de ligne doit rendre le vide sur les
+  trois paires de feuilles (voir CLAUDE.md §4).
+- **Seule exception, `body`** : 15 px / 1,5 au simulateur contre 17 px / 1,6 à l'accueil. Le
+  plateau de bulles, ses hauteurs bornées et ses champs de 38 px sont calibrés sur la première
+  mesure. La divergence est de densité, pas de style, et elle porte sa raison dans `style.css`.
+- **Arbitrage systématique en faveur de l'accueil**, qui est la vitrine : c'est de là que vient
+  la pilule terre cuite, le titre de carte en Geist, l'anneau de focus (`--anneau` au lieu d'un
+  `outline`) et la cible tactile de 44 px sur le curseur d'horizon.
+- **L'en-tête du simulateur est devenu la même barre** : marque `.marque` (1,625 rem, comme
+  l'accueil) et un lien de navigation. Le `<h1>` et le sous-titre, qui y vivaient, ouvrent
+  maintenant le contenu (`.page__intro`) — une barre ne porte pas deux choses à la fois. Mesuré :
+  la marque tombe au même pixel que le bandeau de profil, à 1440 px comme à 420 px.
+- **La constante de `.rail` (`calc(100vh - 583px)`) EST la hauteur de tout ce qui précède le
+  rail.** L'en-tête ayant changé, elle est passée de 560 à 583 px. La rebouger à chaque fois que
+  quelque chose grandit au-dessus, sinon le plateau déborde de l'écran sans que rien ne le dise.
 - **Thème clair uniquement** : aucun des deux designs ne fournit de palette sombre, et les
   verts y sont trop désaturés pour qu'on en dérive deux séries distinguables sous daltonisme.
 - Le sélecteur en bas de page (`.bascule`, `initialiserBascule()`) est un **outil de
