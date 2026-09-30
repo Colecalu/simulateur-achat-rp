@@ -1,0 +1,58 @@
+/* =========================================================================
+   Horizon — les partis pris de MISE EN FORME de Codex, séparés de ses valeurs.
+
+   Ce fichier n'est chargé par AUCUNE page : c'est un menu, pas un réglage.
+   Chaque règle est une intention à retenir ou à écarter une par une, parce
+   qu'elles ont été écrites pour la mise en page de Codex et non pour la
+   nôtre. Deux d'entre elles ne sont pas anodines et sont signalées.
+
+   Pour essayer l'ensemble : ajouter <link rel="stylesheet" href="css/horizon.css">
+   APRÈS style.css dans simulateur.html.
+   ========================================================================= */
+
+/* ---- Identité : rien de structurel, transposable tel quel ---------------- */
+
+body .entete__marque { font-family: var(--police); font-size: 1.8rem; font-weight: 700; letter-spacing: -.07em; color: var(--encre); }
+body .entete__marque span { font-size: .65rem; vertical-align: top; margin-left: 4px; }
+body .bulle__numero { font-family: var(--police-titre); }
+body .bouton--primaire { box-shadow: 2px 3px 0 var(--papier-lilas); }
+body .profil { border-top: 3px solid var(--accent); }
+body .profil__groupe { border-radius: var(--rayon); }
+body .carte--graphique { border-top-color: var(--accent); }
+body .scenario { border-style: dashed; }
+body .entete h1 { font-size: clamp(1.8rem, 3.3vw, 2.8rem); }
+
+/* ---- Garde-fous de largeur : corrigent de vrais défauts d'étroitesse ----- */
+
+body .profil__resume { min-width: 0; }
+@media (max-width: 640px) {
+  body .profil__item { white-space: normal; }
+  body .verdict__horizon { min-width: 0; width: 100%; }
+  body .verdict__horizon input { min-width: 0; }
+}
+
+/* ---- ⚠️ LES DEUX QUI DEMANDENT UNE DÉCISION ------------------------------
+
+   1. La couverture jaune sur le bandeau ET sur les bulles fermées. Chez Codex
+      les bulles sont petites, le jaune est un accent ; chez nous elles
+      occupent la page, et le simulateur devient un mur jaune. Constaté à
+      l'écran le 30/09/2026. Garder le jaune suppose de réduire les bulles.
+
+   2. `.plateau__visu` en une seule colonne n'est pas de l'habillage : c'est
+      une refonte de la mise en page du résultat. Elle n'a pas sa place dans
+      un fichier de thème, et se décide séparément.
+
+   Les deux sont laissées en commentaire, pas supprimées : c'est une
+   proposition de Codex, elle lui appartient.
+
+body .entete { background: var(--couverture); border-bottom-color: var(--encre); }
+body .bulle--ouvrable { background: var(--couverture); }
+body .bulle--zoom { background: var(--surface); }
+body .plateau__visu { grid-template-columns: minmax(0, 1fr); }
+
+   ---- Non repris : le garde-fou `prefers-reduced-motion` global ------------
+
+   `style.css` et `accueil.css` en portent déjà trois, ciblés. Celui de Codex
+   coupait toute animation du site avec `!important` — redondant chez nous, et
+   plus brutal que ce que les fichiers de structure font déjà.
+   ------------------------------------------------------------------------- */

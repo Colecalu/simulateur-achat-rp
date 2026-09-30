@@ -1,3 +1,24 @@
+/* =========================================================================
+   Thème « Horizon » — papier, encre violette, couverture jaune.
+   Proposé par Codex sur sa branche `codex/interface-horizon`, recopié ici le
+   30/09/2026. Notre exemplaire vit désormais sa vie : il ne se resynchronise
+   pas tout seul avec le sien.
+
+   CE FICHIER NE CONTIENT QUE DES VALEURS, comme theme-perron.css. La version
+   d'origine y mêlait 19 règles de mise en forme visant des composants du
+   simulateur (`.entete`, `.bulle--ouvrable`, `.plateau__visu`…). Elles sont
+   parties dans `horizon.css` : calées sur la mise en page de Codex, posées sur
+   la nôtre elles coloraient les quatre bulles en jaune plein écran. Les
+   séparer rend le thème échangeable d'une ligne — ce que le protocole
+   d'AGENTS.md attend d'une expérimentation de type A.
+
+   Contrôle ΔE fait le 30/09/2026, indépendamment du script d'audit de Codex :
+   le triplet des courbes passe les deux planchers (28,3 en vision normale,
+   19,3 en protanopie, 16,8 en deutéranopie) et, surtout, les trois séries
+   tiennent le 3:1 sur le fond — là où le gris des loyers de Perron tombe à
+   1,74:1, faiblesse que theme-perron.css documente comme assumée.
+   ========================================================================= */
+
 @import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap");
 /* =========================================================================
    Thème « Perron » — terre cuite, olive et papier chaud.
@@ -168,28 +189,4 @@
  --ombre-creux:inset 0 1px 2px rgb(49 44 67 / .05);
  --police:'DM Sans','Segoe UI',sans-serif; --police-chiffres:var(--police);
  --couverture:#f3da78; --papier-lilas:#ded8ed;
-}
-/* Habillage uniquement : aucun déplacement, ordre ou état du parcours changé.
-   Exception au thème de valeurs : la couverture reprend la hiérarchie de l'accueil. */
-body .entete { background:var(--couverture); border-bottom-color:var(--encre); }
-body .entete__marque { font-family:var(--police); font-size:1.8rem; font-weight:700; letter-spacing:-.07em; color:var(--encre); }
-body .entete__marque span { font-size:.65rem; vertical-align:top; margin-left:4px; }
-body .entete h1 { font-size:clamp(1.8rem,3.3vw,2.8rem); }
-body .profil { border-top:3px solid var(--accent); }
-body .profil__groupe { border-radius:var(--rayon); }
-body .bulle__numero { font-family:var(--police-titre); }
-body .bulle--ouvrable { background:var(--couverture); }
-body .bulle--zoom { background:var(--surface); }
-body .scenario { border-style:dashed; }
-body .carte--graphique { border-top-color:var(--accent); }
-body .bouton--primaire { box-shadow:2px 3px 0 var(--papier-lilas); }
-@media (prefers-reduced-motion:reduce) { *, *::before, *::after { animation:none!important; transition:none!important; scroll-behavior:auto!important; } }
-
-/* Garde-fous de largeur : mêmes composants et même ordre sur petit écran. */
-body .plateau__visu { grid-template-columns:minmax(0,1fr); }
-body .profil__resume { min-width:0; }
-@media(max-width:640px) {
- body .profil__item { white-space:normal; }
- body .verdict__horizon { min-width:0; width:100%; }
- body .verdict__horizon input { min-width:0; }
 }
