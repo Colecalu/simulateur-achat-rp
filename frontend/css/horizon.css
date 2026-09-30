@@ -1,0 +1,70 @@
+/* =========================================================================
+   Horizon — les partis pris de MISE EN FORME du thème, séparés de ses valeurs.
+
+   Proposés par Codex avec `theme-codex.css`, qui les portait en son sein. Un
+   thème qui porte des règles n'est plus échangeable : les valeurs sont restées
+   dans le thème, les intentions sont ici. Détail et mesures : CLAUDE.md §12.
+
+   Chargé par les DEUX pages, après le socle et leur feuille propre — il
+   habille, il ne structure pas.
+
+   ⚠️ DEUX SÉLECTEURS ONT ÉTÉ RÉÉCRITS après la fusion du socle commun :
+   `.entete__marque` est devenue `.marque`, et `.bouton--primaire` est devenu
+   `.bouton--compact`. Sans cette adaptation, deux des neuf règles seraient
+   restées muettes sans que rien ne le signale — une règle CSS qui ne vise
+   rien ne produit aucune erreur.
+   ========================================================================= */
+
+/* ---- La couverture jaune, sur le bandeau SEULEMENT ----------------------
+
+   Décision de Lucas (30/09/2026). C'est la couleur signature de la maquette
+   et elle porte bien en bandeau. Posée en plus sur les bulles fermées — ce
+   que faisait la version d'origine — elle rendait le simulateur entièrement
+   jaune : chez Codex les bulles sont petites et le jaune est un accent, chez
+   nous elles occupent la page. */
+
+body .entete { background: var(--couverture); border-bottom-color: var(--encre); }
+
+/* ---- Identité : rien de structurel ------------------------------------- */
+
+body .marque { font-family: var(--police); font-size: 1.8rem; font-weight: 700; letter-spacing: -.07em; color: var(--encre); }
+body .marque span { font-size: .65rem; vertical-align: top; margin-left: 4px; }
+body .entete h1 { font-size: clamp(1.8rem, 3.3vw, 2.8rem); }
+body .bulle__numero { font-family: var(--police-titre); }
+body .bouton--compact { box-shadow: 2px 3px 0 var(--papier-lilas); }
+body .profil { border-top: 3px solid var(--accent); }
+body .profil__groupe { border-radius: var(--rayon); }
+body .carte--graphique { border-top-color: var(--accent); }
+body .scenario { border-style: dashed; }
+
+/* ---- Garde-fous de largeur : corrigent de vrais défauts d'étroitesse ---- */
+
+body .profil__resume { min-width: 0; }
+@media (max-width: 640px) {
+  body .profil__item { white-space: normal; }
+  body .verdict__horizon { min-width: 0; width: 100%; }
+  body .verdict__horizon input { min-width: 0; }
+}
+
+/* ---- ⚠️ LAISSÉES EN COMMENTAIRE : elles ne sont pas de l'habillage -------
+
+   1. La couverture sur les bulles fermées. Écartée le 30/09/2026 : la garder
+      suppose de retravailler d'abord la taille des quatre bulles, ce qui est
+      un chantier de mise en page.
+
+   2. `.plateau__visu` en une seule colonne est une refonte de la mise en page
+      du résultat, pas une couleur. Elle se décide séparément.
+
+   Elles ne sont pas supprimées : c'est une proposition de Codex, elle lui
+   appartient.
+
+body .bulle--ouvrable { background: var(--couverture); }
+body .bulle--zoom { background: var(--surface); }
+body .plateau__visu { grid-template-columns: minmax(0, 1fr); }
+
+   ---- Non repris : le garde-fou `prefers-reduced-motion` global ------------
+
+   `style.css`, `socle.css` et `accueil.css` en portent déjà, ciblés. Celui de
+   Codex coupait toute animation du site avec `!important` — redondant ici, et
+   plus brutal que ce que les feuilles de structure font déjà.
+   ------------------------------------------------------------------------- */

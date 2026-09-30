@@ -7,7 +7,7 @@ Document de référence du projet. Court par nature : le détail vit dans `docs/
 | Modèle de calcul, formules, écarts assumés | [docs/modele-de-calcul.md](docs/modele-de-calcul.md) |
 | Interface, design, visualisation | [docs/conventions-ui.md](docs/conventions-ui.md) |
 | Backend : comptes, sauvegarde, sécurité, RGPD | [docs/backend-spec.md](docs/backend-spec.md) — **en pause** |
-| Design system Perron | [docs/design/README.md](docs/design/README.md) |
+| Design system Perron | [docs/design/README.md](docs/design/README.md) — **le thème en service est désormais « Horizon », voir §12** |
 
 ## Commandes
 
@@ -199,7 +199,9 @@ serveur, pas de migrations automatiques, aucune dépendance qui exige une étape
 frontend/                    servi tel quel, racine web en production
   index.html                 page d'accueil (landing, FAQ, contact)
   simulateur.html            le simulateur
-  css/  theme-perron.css     thème de référence — valeurs uniquement
+  css/  theme-codex.css      THÈME EN SERVICE — « Horizon », valeurs uniquement
+        horizon.css          intentions de mise en forme de Codex — voir §12
+        theme-perron.css     thème précédent, conservé — valeurs uniquement
         theme-foret.css      gelé, conservé comme point de comparaison
         socle.css            COMMUN aux deux pages : base, marque, bouton, en-tête, bloc de résultat
         style.css            ce qui n'appartient qu'au simulateur
@@ -712,3 +714,91 @@ en bulle 1, lié au loyer actuel. Détail dans [docs/conventions-ui.md](docs/con
 | Export PDF | non commencé |
 | Point mort | **déjà fait** — « point d'équilibre », avec garde-fou sur les recroisements |
 | Scénarios historiques | **structure faite**, données provisoires — voir §9 et §10 |
+
+---
+
+## 12. Le thème en service — « Horizon »
+
+**Depuis le 30/09/2026, les deux pages chargent `frontend/css/theme-codex.css`.** Perron n'est
+plus chargé par aucune page ; il reste dans le dépôt, intact, comme point de comparaison.
+
+### D'où il vient
+
+Proposé par **Codex** sur sa branche `codex/interface-horizon`, dans le cadre du protocole
+d'expérimentation de type A (`AGENTS.md`) : un thème qui reprend les noms sémantiques et ne
+change que les valeurs. Il a respecté le contrat — **les 63 jetons de Perron sont présents,
+aucun ne manque** — ce qui a rendu l'essai possible en changeant une seule balise `<link>`.
+
+Papier crème, encre violette, accent violet, DM Sans à la place de Geist. Instrument Serif est
+conservée pour les titres.
+
+### Pourquoi on l'a adopté : il est objectivement meilleur sur l'accessibilité
+
+Contrôle ΔE2000 refait le 30/09/2026, **indépendamment du script d'audit de Codex** (on voulait
+des chiffres obtenus autrement, pas une confirmation par le même outil). Triplet de l'aperçu de
+scénario, pire paire :
+
+| | Perron | **Horizon** | Plancher |
+|---|---|---|---|
+| Vision normale | 28,2 | **28,3** | 15 |
+| Protanopie | 15,5 | **19,3** | 8 |
+| Deutéranopie | 22,4 | **16,8** | 8 |
+
+Les deux passent. Ce qui tranche, c'est le **contraste sur le fond de page** :
+
+| Série | Perron | **Horizon** |
+|---|---|---|
+| Marchés | 4,24:1 | **6,50:1** |
+| Immobilier | 8,68:1 | **4,76:1** |
+| Loyers | **1,74:1** ❌ | **10,47:1** |
+
+Le gris des loyers de Perron est très en dessous du 3:1 — faiblesse que `theme-perron.css`
+documente lui-même comme assumée, et qui obligeait à étiqueter les valeurs sous la courbe.
+Horizon la corrige.
+
+**La crainte initiale ne tenait pas.** Horizon inverse le code couleur (l'achat passe du terre
+cuite au violet, la location de l'olive au rouge brique) et on pouvait redouter que violet contre
+rouge brique se confonde sous daltonisme. C'est l'inverse : la paire se sépare **mieux** que
+terre cuite contre olive, en protanopie comme en deutéranopie.
+
+### Ce qui a dû être séparé — et la règle qui en sort
+
+La version d'origine mêlait **176 lignes de valeurs et 19 règles de mise en forme** visant
+nommément des composants du simulateur (`.entete`, `.bulle--ouvrable`, `.profil`, `.scenario`,
+`.plateau__visu`…). Codex le savait et l'écrivait : « exception au thème de valeurs ».
+
+Posées sur notre mise en page — et non sur la sienne, pour laquelle elles ont été écrites — ces
+règles **coloraient les quatre bulles en jaune plein écran**. Chez lui les bulles sont petites et
+le jaune est un accent ; chez nous elles occupent la page, et le simulateur devenait un mur.
+
+D'où la règle, valable pour toute expérimentation future :
+
+> **Un thème qui porte des règles n'est plus échangeable.** Les valeurs dans le thème, les
+> intentions de mise en forme ailleurs. C'est ce qui permet de reprendre une version suivante sans
+> hériter d'une mise en page qui n'est pas la nôtre.
+
+Les 19 règles vivent dans **`frontend/css/horizon.css`, que personne ne charge**. C'est un menu
+d'intentions à reprendre une par une, trié en trois :
+
+- **neuf règles d'identité** (marque en DM Sans serré, numéros de bulle en sérif, ombre portée
+  dure des boutons, filets d'accent, bordures en tirets) — transposables telles quelles ;
+- **trois garde-fous de largeur** qui corrigent de vrais défauts d'étroitesse sur petit écran ;
+- **deux décisions**, laissées en commentaire parce qu'elles ne sont pas de l'habillage : la
+  couverture jaune sur les bulles, et le passage du plateau de résultat en une seule colonne.
+
+Non repris : son garde-fou `prefers-reduced-motion` global en `!important`. `style.css` et
+`accueil.css` en portent déjà trois, ciblés et plus fins.
+
+### ⚠️ Notre exemplaire est figé
+
+`theme-codex.css` est une **copie** prise le 30/09/2026, avant le premier commit de Codex. Il ne
+se resynchronise pas avec le sien, et c'est délibéré : reprendre automatiquement ses mises à jour
+réintroduirait ses règles de composants à chaque fois.
+
+Pour récupérer une version ultérieure : comparer, prendre les valeurs, **laisser les règles**.
+
+### Deux jetons dormants
+
+`--couverture` (le jaune) et `--papier-lilas` ne sont utilisés que par `horizon.css`, qui n'est
+pas chargé. Ils restent dans le thème pour que les règles commentées fonctionnent le jour où l'on
+en réactive une. Ce ne sont pas des oublis.
