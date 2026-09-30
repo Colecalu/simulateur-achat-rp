@@ -21,12 +21,18 @@ les écarts assumés.
 - **`frontend/css/style.css` ne contient que de la structure.** Aucun `#hex`, aucun nom de pas
   de rampe (`--clay-500`, `--green-700`), aucune police, aucun rayon, aucune ombre : uniquement
   des noms sémantiques français (`--plan`, `--encre`, `--accent`, `--achat`, `--rayon-large`…).
-- **`frontend/css/theme-perron.css` (défaut) et `theme-foret.css` ne contiennent que des
-  valeurs** : les rampes du design recopiées, ses polices importées, puis les noms sémantiques
-  qui pointent dessus. Aucune règle de mise en page.
-- Si un rôle manque, l'ajouter à **`theme-perron.css`** plutôt que d'écrire une couleur dans
-  `style.css`. Forêt étant gelé, il peut manquer le rôle et retomber en valeur par défaut : c'est
-  accepté, on ne le rattrape pas.
+- **Les thèmes ne contiennent que des VALEURS** : les rampes du design recopiées, les polices
+  importées, puis les noms sémantiques qui pointent dessus. Aucune règle de mise en page.
+  `theme-codex.css` est **celui en service** ; `theme-perron.css` et `theme-foret.css` sont
+  conservés.
+- Si un rôle manque, l'ajouter au **thème en service** plutôt que d'écrire une couleur dans
+  `style.css`. Perron et Forêt n'étant plus chargés, ils peuvent manquer le rôle et retomber en
+  valeur par défaut : c'est accepté, on ne les rattrape pas.
+- **Un thème qui porte des règles n'est plus un thème.** La version d'origine de `theme-codex.css`
+  mêlait 176 lignes de valeurs et 19 règles visant des composants du simulateur. Posées sur notre
+  mise en page — et non sur celle pour laquelle elles avaient été écrites — elles coloraient les
+  quatre bulles en jaune plein écran. Les règles vivent donc dans `horizon.css`, que **personne ne
+  charge** : c'est un menu d'intentions à reprendre une par une, pas un réglage.
 - C'est cette indirection qui permet au JavaScript, qui lit `--achat` et `--location` pour
   colorer les courbes, de rester inchangé quel que soit le thème.
 - **Thème clair uniquement** : aucun des deux designs ne fournit de palette sombre, et les
