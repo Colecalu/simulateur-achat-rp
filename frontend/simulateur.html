@@ -7,37 +7,26 @@
   <meta name="description" content="Comparez l'achat de votre résidence principale et la location, à enveloppe budgétaire identique.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <!-- Trois feuilles, dans cet ordre : les valeurs (thème), les composants
-       communs aux deux pages (socle), puis ce qui n'appartient qu'au
-       simulateur. L'accueil charge les deux premières à l'identique — c'est ce
-       qui garantit qu'un bouton ou un verdict y est bien le même objet. -->
+  <!-- Le thème porte toutes les valeurs : couleurs, polices, rayons, ombres.
+       style.css, lui, ne contient que la structure. -->
   <link rel="stylesheet" href="css/theme-codex.css">
-  <link rel="stylesheet" href="css/socle.css">
   <link rel="stylesheet" href="css/style.css">
-  <!-- Habillage du thème : il vient en dernier, après la structure. -->
-  <link rel="stylesheet" href="css/horizon.css">
 </head>
 <body>
 
-<!-- La même barre que l'accueil : la marque, et de quoi revenir à
-     l'explication. Le titre de la page, lui, ouvre le contenu plus bas —
-     l'en-tête ne porte pas deux choses à la fois. -->
 <header class="entete">
-  <a class="marque" href="./">Æquo</a>
-  <nav class="entete__liens" aria-label="Navigation principale">
-    <a class="entete__lien" href="./#principe">Comment ça marche</a>
-  </nav>
-</header>
-
-<main class="page">
-
-  <div class="page__intro">
-    <h1 class="page__titre">Dois-je acheter ma résidence principale&nbsp;?</h1>
-    <p class="page__accroche">
+  <div class="entete__contenu">
+    <!-- Retour à la page d'accueil, qui est désormais la racine du site. -->
+    <a class="entete__marque" href="./">Æquo<span aria-hidden="true">®</span></a>
+    <h1>Dois-je acheter ma résidence principale&nbsp;?</h1>
+    <p class="entete__sous-titre">
       À budget mensuel identique, on compare deux trajectoires patrimoniales&nbsp;: rester
       locataire, ou devenir propriétaire.
     </p>
   </div>
+</header>
+
+<main class="page">
 
   <!-- ========================= MON PROFIL ============================ -->
   <section class="profil" id="profil" data-etat="saisie">
@@ -112,7 +101,7 @@
            vivre) restent calculés par le moteur, pour de futurs indicateurs. -->
 
       <div class="profil__pied">
-        <button type="button" class="bouton bouton--compact" id="profilValider">
+        <button type="button" class="bouton bouton--primaire" id="profilValider">
           Valider mon profil
         </button>
       </div>
@@ -195,7 +184,7 @@
         </label>
             </div>
             <div class="bulle__pied">
-              <button type="button" class="bouton bouton--compact" data-valider="1">Valider</button>
+              <button type="button" class="bouton bouton--primaire" data-valider="1">Valider</button>
             </div>
           </div>
         </article>
@@ -245,7 +234,7 @@
         </label>
             </div>
             <div class="bulle__pied">
-              <button type="button" class="bouton bouton--compact" data-valider="2">Valider</button>
+              <button type="button" class="bouton bouton--primaire" data-valider="2">Valider</button>
             </div>
           </div>
         </article>
@@ -290,7 +279,7 @@
           </label>
               </div>
               <div class="bulle__pied">
-                <button type="button" class="bouton bouton--compact" data-valider="3">Valider</button>
+                <button type="button" class="bouton bouton--primaire" data-valider="3">Valider</button>
               </div>
             </div>
           </article>
@@ -357,7 +346,7 @@
           </label>
               </div>
               <div class="bulle__pied">
-                <button type="button" class="bouton bouton--compact" data-valider="4">Valider</button>
+                <button type="button" class="bouton bouton--primaire" data-valider="4">Valider</button>
               </div>
             </div>
           </article>
@@ -795,7 +784,7 @@
         </div>
 
         <div class="intro__pied">
-          <button type="button" class="bouton bouton--compact" id="introValider">
+          <button type="button" class="bouton bouton--primaire" id="introValider">
             Voir les scénarios
           </button>
         </div>

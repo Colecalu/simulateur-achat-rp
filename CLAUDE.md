@@ -197,22 +197,19 @@ serveur, pas de migrations automatiques, aucune dépendance qui exige une étape
 
 ```
 frontend/                    servi tel quel, racine web en production
-  index.html                 page d'accueil (landing, FAQ, contact)
+  index.html                 page d'accueil « Carnet d'un choix » — copie de Codex, voir §12
   simulateur.html            le simulateur
-  css/  theme-codex.css      THÈME EN SERVICE — « Horizon », valeurs uniquement
-        horizon.css          intentions de mise en forme de Codex — voir §12
+  css/  theme-codex.css      THÈME EN SERVICE — « Horizon », valeurs + habillage de Codex (§12)
         theme-perron.css     thème précédent, conservé — valeurs uniquement
         theme-foret.css      gelé, conservé comme point de comparaison
-        socle.css            COMMUN aux deux pages : base, marque, bouton, en-tête, bloc de résultat
-        style.css            ce qui n'appartient qu'au simulateur
-        accueil.css          ce qui n'appartient qu'à l'accueil
+        style.css            structure du simulateur
+        accueil.css          feuille AUTONOME de l'accueil (ses propres jetons) — copie de Codex
   js/   calc.js              moteur PUR : window.SimuRP / module.exports
         calc-location.js     pilier 3 — CONSOMME calc.js, ne le modifie jamais
         scenarios.js         pilier 2 — données de marché, pas de logique
         sauvegarde.js        brouillon local + migration de schéma (testé)
         app.js               tout le DOM, toute l'interface
-        accueil.js           apparitions + exemple de l'accueil — appelle calc.js, ne calcule rien
-  img/icones/                icônes Lucide du design Perron, posées en masque CSS
+        accueil.js           bascule des deux points de vue de l'accueil — aucun calcul
 backend/                     vide aujourd'hui — voir docs/backend-spec.md
 docs/                        modèle, conventions UI, spec backend, design, Excel
 tests/                       node --test, 106 tests
@@ -223,20 +220,12 @@ migrations/                  à créer : SQL numéroté, appliqué à la main
 
 - Interface, libellés, noms de variables, de fonctions et de classes CSS **en français**.
 - JS en `camelCase`, classes CSS en `bloc__element--modificateur`.
-- **Un nom de classe n'est défini que dans UNE feuille.** Ce qui sert aux deux pages vit dans
-  `socle.css` ; `style.css` et `accueil.css` ne portent que ce qui leur est propre et **ne
-  redéfinissent jamais une règle du socle** — elles règlent ses jetons (`--contenu-largeur`,
-  `--contenu-gouttiere`, `--entete-respiration`). Vérifiable, et à vérifier :
-
-  ```bash
-  comm -12 <(grep -o '^\.[a-zA-Z0-9_-]*' frontend/css/socle.css | sort -u) \
-           <(grep -o '^\.[a-zA-Z0-9_-]*' frontend/css/style.css | sort -u)
-  ```
-
-  doit rester vide, sur les trois paires. Avant le socle, 33 classes étaient définies deux fois
-  avec des valeurs différentes : `.bouton` était une pilule terre cuite ici et un bouton blanc
-  là. Seul `body` diverge, et le dit : 15 px/1,5 au simulateur (densité du plateau) contre
-  17 px/1,6 à l'accueil.
+- **Les deux pages ne partagent aucune feuille de structure** depuis l'alignement sur Codex
+  (§12) : le simulateur charge `theme-codex.css` + `style.css`, l'accueil `accueil.css` seul.
+  L'ancien `socle.css` commun a été retiré avec la page d'accueil qui le justifiait (son exemple
+  chiffré reprenait le bloc de résultat du simulateur). **Exception assumée** : `accueil.css` et
+  `index.html` sont la production de Codex, minifiés, avec des classes et des jetons en anglais
+  et leurs couleurs en dur. On ne les réécrit pas : c'est ce qui garde les deux bases identiques.
 - **`calc.js` est un module pur** : aucune logique financière ailleurs, aucun accès au DOM
   dedans. C'est ce qui le rend testable sous Node.
 - **Toute variante de scénario suit le patron de `calc-location.js`** : un module isolé qui lit
@@ -760,6 +749,29 @@ Horizon la corrige.
 cuite au violet, la location de l'olive au rouge brique) et on pouvait redouter que violet contre
 rouge brique se confonde sous daltonisme. C'est l'inverse : la paire se sépare **mieux** que
 terre cuite contre olive, en protanopie comme en deutéranopie.
+
+### 01/10/2026 — alignement complet sur la branche de Codex
+
+**Décision de Lucas** : main reprend **l'intégralité visuelle** de `codex/interface-horizon`
+(commit `bdb6c02`), accueil et simulateur, pour que les deux worktrees repartent d'une base
+identique. Ont été copiés **octet pour octet** : `index.html`, `simulateur.html`,
+`css/accueil.css`, `css/style.css`, `css/theme-codex.css`, `js/accueil.js`. Retirés :
+`socle.css`, `horizon.css`, `img/icones/`.
+
+- **Seule différence voulue : le nom.** « Horizon » est le nom de la maquette de Codex ; le
+  produit s'appelle **Æquo** (§1). Marque, titre, FAQ, adresse de contact fictive. Vérifier :
+  `diff` des fichiers ci-dessus contre le worktree de Codex ne doit montrer que ces lignes.
+- **Aucun fichier de calcul touché** : `app.js`, `calc.js`, `calc-location.js`, `scenarios.js`
+  et `sauvegarde.js` étaient déjà identiques des deux côtés avant l'alignement. 106 tests verts.
+- **Le thème porte de nouveau des règles de composants** (en-tête jaune, bulles ouvrables en
+  jaune, bordures en tirets, garde-fous de largeur). La règle « un thème = des valeurs » ci-dessous
+  est donc **suspendue** pour `theme-codex.css` : on a préféré l'identité avec Codex à
+  l'échangeabilité du thème.
+- **L'accueil a changé de contenu, pas seulement d'habillage** : la page « Carnet d'un choix »
+  remplace l'ancienne (exemple chiffré via `calc.js`, FAQ en JSON-LD, animations). Celle-ci reste
+  dans l'historique git (`09f7d0c`) si l'on veut en reprendre un élément.
+
+Les sous-sections suivantes décrivent l'étape précédente (30/09) et restent pour mémoire.
 
 ### Ce qui a dû être séparé — et la règle qui en sort
 

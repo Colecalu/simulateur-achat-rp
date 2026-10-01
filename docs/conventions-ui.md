@@ -18,7 +18,12 @@ est **gelé** : conservé tel quel comme point de comparaison, jamais mis à jou
 Ne pas y passer de temps. Voir [docs/design/README.md](docs/design/README.md) pour les sources et
 les écarts assumés.
 
-- **`frontend/css/style.css`, `accueil.css` et `socle.css` ne contiennent que de la structure.**
+> **01/10/2026 — main est aligné octet pour octet sur l'habillage de Codex** (CLAUDE.md §12).
+> `socle.css` et `horizon.css` n'existent plus ; `theme-codex.css` porte de nouveau quelques
+> règles de composants, et l'accueil a sa propre feuille autonome. Les règles ci-dessous qui
+> parlent du socle ou d'un thème « valeurs seulement » décrivent l'état précédent.
+
+- **`frontend/css/style.css` ne contient que de la structure.**
   Aucun `#hex`, aucun nom de pas de rampe (`--clay-500`, `--green-700`), aucune police, aucun
   rayon, aucune ombre : uniquement des noms sémantiques français (`--plan`, `--encre`,
   `--accent`, `--achat`, `--rayon-large`…).
