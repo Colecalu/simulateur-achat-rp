@@ -392,19 +392,19 @@
         </button>
 
         <div class="scenario__liste">
-          <!-- Le bandeau : un objet sombre au milieu de cartes claires. Rien
-               d'autre que le titre — la carte garde toujours la même hauteur. -->
+          <!-- Le bandeau : un objet sombre au milieu de cartes claires. Le
+               bouton « Retirer » y vit, à droite du titre, et n'apparaît que
+               lorsqu'un filtre est posé : la carte garde la même hauteur. -->
           <div class="scenario__bandeau">
             <p class="scenario__titre">Scénarios de marché</p>
+            <button type="button" class="scenario__retirer" id="scenarioRetirer" hidden
+                    title="Retirer le scénario et revenir aux hypothèses de l'étape 4"
+                    aria-label="Retirer le scénario et revenir aux hypothèses de l'étape 4">
+              <span aria-hidden="true">×</span> Retirer
+            </button>
           </div>
           <div class="scenario__choix" id="scenarioChoix" role="radiogroup"
                aria-label="Scénario de marché"></div>
-          <!-- Toujours à la même place, pour que la carte ne change pas de
-               hauteur : une mention discrète sans scénario, un bouton jaune
-               pour revenir aux taux de l'étape 4 quand un filtre est posé. -->
-          <button type="button" class="scenario__base" id="scenarioBase" disabled>
-            Hypothèses de l'étape 4 actives
-          </button>
         </div>
       </div>
     </div>

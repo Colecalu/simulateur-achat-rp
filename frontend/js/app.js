@@ -907,13 +907,12 @@ function ligneScenario(sc) {
 }
 
 function construireScenarios() {
-  // Chaque nature a son propre bloc, avec son pictogramme et son étiquette :
-  // « Historique » = observé, « Hypothèse » = construit. Dans une liste à plat,
-  // deux scénarios de nature opposée se ressemblaient.
-  const groupe = (cle, nom, etiquette, lignes) =>
+  // Chaque famille a son propre bloc et son pictogramme : grisé plein pour le
+  // passé, violet en tirets pour les futurs. Les étiquettes « Historique » /
+  // « Hypothèse » ont été retirées — le bloc le dit déjà, elles chargeaient.
+  const groupe = (cle, nom, lignes) =>
     `<div class="scenario__groupe scenario__groupe--${cle}" role="group" aria-label="${nom}">` +
-      `<p class="scenario__famille"><span class="scenario__picto">${PICTO[cle]}</span>${nom}` +
-        `<span class="scenario__etiquette">${etiquette}</span></p>` +
+      `<p class="scenario__famille"><span class="scenario__picto">${PICTO[cle]}</span>${nom}</p>` +
       lignes.join('') +
     '</div>';
 
@@ -924,7 +923,7 @@ function construireScenarios() {
   for (const famille of FAMILLES) {
     const liste = scenariosParFamille(famille.cle);
     if (!liste.length) continue;
-    morceaux.push(groupe(famille.cle, famille.nom, famille.etiquette, liste.map(ligneScenario)));
+    morceaux.push(groupe(famille.cle, famille.nom, liste.map(ligneScenario)));
   }
   $('#scenarioChoix').innerHTML = morceaux.join('');
   marquerScenarioActif(scenarioActif ? scenarioActif.cle : '');
@@ -949,7 +948,7 @@ function construireScenarios() {
     majScenario();
   });
   $('#apercuFermer').addEventListener('click', fermerApercu);
-  $('#scenarioBase').addEventListener('click', () => appliquerScenario(''));
+  $('#scenarioRetirer').addEventListener('click', () => appliquerScenario(''));
 }
 
 function ouvrirIntro() {
@@ -1181,12 +1180,9 @@ function marquerScenarioActif(cle) {
     b.classList.toggle('scenario__option--actif', actif);
     b.setAttribute('aria-checked', String(actif));
   }
-  // Le recliquer reste possible, mais personne ne le devine : le bouton du bas
-  // le dit. Désactivé sans scénario, il devient une simple mention d'état.
-  $('#scenarioBase').disabled = !cle;
-  $('#scenarioBase').textContent = cle
-    ? "Revenir à mes hypothèses (étape 4)"
-    : "Hypothèses de l'étape 4 actives";
+  // Recliquer le scénario actif le retire aussi, mais personne ne le devine :
+  // le bouton du bandeau le dit, et n'apparaît que s'il y a un filtre à retirer.
+  $('#scenarioRetirer').hidden = !cle;
 }
 
 function appliquerScenario(cle) {

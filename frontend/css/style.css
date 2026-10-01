@@ -1432,51 +1432,40 @@ input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; marg
   border: 1px solid var(--encre);
   box-shadow: 4px 5px 0 var(--encre);
 }
-.scenario[data-etat="ouvert"] .scenario__choix,
-.scenario[data-etat="ouvert"] .scenario__base { margin: 0 12px; }
-.scenario[data-etat="ouvert"] .scenario__base { width: calc(100% - 24px); margin-top: 12px; }
-
-/*
- * Retour aux hypothèses : toujours à la même place, pour que la carte ne
- * bouge pas. Sans scénario, une mention en tirets (rien à faire) ; avec un
- * scénario, le bouton prend l'habit de la carte d'appel — jaune, ombre dure.
- */
-.scenario__base {
-  display: block;
-  overflow: hidden;
-  padding: 9px 12px;
-  /* Une seule ligne dans les deux états : sinon la carte change de hauteur. */
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  font: inherit;
-  font-size: .8125rem;
-  font-weight: 700;
-  text-align: center;
-  color: var(--encre);
-  background: var(--couverture, var(--accent-doux));
-  border: 1px solid var(--encre);
-  border-radius: var(--rayon);
-  box-shadow: 3px 3px 0 var(--encre);
-  cursor: pointer;
-  transition: translate var(--duree-rapide) var(--aise), box-shadow var(--duree-rapide) var(--aise);
-}
-.scenario__base:hover:not(:disabled) { translate: -1px -1px; box-shadow: 4px 4px 0 var(--encre); }
-.scenario__base:disabled {
-  font-weight: 500;
-  color: var(--encre-3);
-  background: transparent;
-  border: 1px dashed var(--trait);
-  box-shadow: none;
-  cursor: default;
-}
-.scenario__base:disabled::before { content: '✓ '; }
+.scenario[data-etat="ouvert"] .scenario__choix { margin: 0 12px; }
 
 .scenario__bandeau {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 52px;
   margin-bottom: 12px;
-  padding: 12px 14px;
+  padding: 10px 12px 10px 14px;
   color: var(--sur-accent);
   background: var(--encre);
 }
+
+/* Retirer le filtre : discret, sur le bandeau, sans couleur de plus. */
+.scenario__retirer {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 9px;
+  font: inherit;
+  font-size: .6875rem;
+  font-weight: 600;
+  color: var(--sur-accent);
+  background: transparent;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background var(--duree-rapide) var(--aise), color var(--duree-rapide) var(--aise);
+}
+.scenario__retirer span { font-size: .9375rem; line-height: 1; }
+.scenario__retirer:hover { color: var(--encre); background: var(--sur-accent); border-color: var(--sur-accent); }
+.scenario__retirer[hidden] { display: none; }
 
 .scenario__titre {
   margin: 0;
@@ -1531,19 +1520,6 @@ input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; marg
   stroke-linecap: round;
   stroke-linejoin: round;
 }
-
-/* Observé ou construit : c'est la distinction qui compte pour lire le groupe.
-   Un cerné plutôt qu'une couleur — la couleur est réservée aux données. */
-.scenario__etiquette {
-  margin-left: auto;
-  padding: 1px 6px;
-  border: 1px solid var(--trait);
-  border-radius: 999px;
-  font-weight: 600;
-  color: var(--encre-3);
-  background: var(--surface);
-}
-.scenario__groupe--prospectif .scenario__etiquette { border-style: dashed; }
 
 /* Le choix et son aperçu : deux actions distinctes sur la même ligne. */
 .scenario__ligne { display: flex; gap: 4px; align-items: stretch; }

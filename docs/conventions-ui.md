@@ -200,19 +200,20 @@ réelles — en cours ; **(3)** la mise en location ultérieure — moteur fait,
   scénario et dans l'avertissement sous le graphique.
 - **Appliquer se fait d'un clic sur la ligne**, l'aperçu s'ouvre par l'icône à droite. Ouvrir un
   aperçu n'applique rien.
-- **Deux blocs dans la liste** : « Le passé · Historique » en **grisé plein**, « Des futurs
-  possibles · Hypothèse » en **violet à tirets** (aplat `--accent-doux`, pas une couleur de série).
+- **Deux blocs dans la liste** : « Le passé » en **grisé plein**, « Des futurs possibles » en
+  **violet à tirets** (aplat `--accent-doux`, pas une couleur de série).
   Chaque bloc a son pictogramme (flèche qui revient, flèche pointillée qui part). Un futur affiche
   « Un choc sur … » là où un historique affiche sa période.
 - **Le scénario linéaire n'a pas de ligne** : c'est l'absence de scénario, les taux de l'étape 4
   appliqués chaque année. On y revient en recliquant sur le scénario actif, mais personne ne le
-  devine : **un bouton sous la liste, toujours à la même place**, le dit. Sans scénario, c'est
-  une mention en tirets désactivée (« ✓ Hypothèses de l'étape 4 actives ») ; avec un scénario,
-  un bouton jaune à ombre dure, l'habit de la carte d'appel (« Revenir à mes hypothèses
-  (étape 4) »). Une seule ligne dans les deux états (`nowrap`) : sinon la carte change de hauteur.
+  devine : une petite pilule **« × Retirer »** à droite du titre, dans le bandeau, le dit. Elle
+  n'apparaît qu'avec un scénario actif ; vivant dans le bandeau, elle ne change pas la hauteur de
+  la carte. Essayé puis écarté : un bouton jaune sous la liste — une couleur de trop, et une
+  carte trop haute.
 - **La liste ouverte garde toujours la même hauteur** : un bandeau d'encre avec le seul titre,
-  les deux blocs, le bouton de retour. Ni note « années observées », ni bandeau qui change de
-  couleur — tout ce qui faisait bouger la carte a été retiré (décision de Lucas). Même
+  les deux blocs et leurs quatre scénarios, rien d'autre. Ni étiquettes « Historique » /
+  « Hypothèse » (le bloc le dit déjà), ni note « années observées », ni bandeau qui change de
+  couleur — tout ce qui chargeait ou faisait bouger la carte a été retiré (décision de Lucas). Même
   bordure d'encre et même ombre dure que la carte jaune : c'est le même objet, déplié.
 - **Trois séries sont tracées** — marchés, immobilier, loyers (IRL). `revalCharges` et
   `revalTaxeFonciere` sont dans `taux` parce que le moteur en a besoin, mais ne sont pas dessinées :
