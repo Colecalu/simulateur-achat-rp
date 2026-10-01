@@ -559,6 +559,14 @@ réelles — en cours ; **(3)** la mise en location ultérieure — moteur fait,
   filet — sur un écran de 768 px de haut, la bulle 5 l'utilise, ce qui est le comportement voulu.
 - Dans les règles de densité, **l'ordre compte** : `.champ input` et `.champ--cle input` ont la
   même spécificité, donc la règle générique doit toujours précéder celle du champ dominant.
+- **« Nouvelle simulation » vit dans une carte, dans le coin du plateau** (oct. 2026). Le coin
+  au-dessus de la colonne de gauche était vide, avec un lien « Réinitialiser » que personne ne
+  voyait. Il porte désormais la carte « Votre simulation » : titre, état de la sauvegarde, et un
+  bouton à contour d'encre et ombre dure au survol, comme la carte des scénarios. **Effacer est
+  irréversible, donc jamais en un clic** : le bouton fait place à « Tout effacer et repartir de
+  zéro ? » avec « Effacer » (rouge brique) et « Annuler », qui reçoit le focus ; Échap annule.
+  Pendant la question, l'état de la sauvegarde s'efface pour que la carte tienne dans sa case de
+  158 px. Sous 1 040 px, la carte devient une barre : titre à gauche, action à droite.
 - **La bulle zoomée sort de son alvéole et va sous `<body>`** le temps du zoom, puis y retourne.
   Le rail de gauche a été en `position: sticky` (retiré en octobre 2026 : il défile désormais
   avec la page), et sticky crée **toujours** un contexte
