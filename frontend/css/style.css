@@ -1634,7 +1634,6 @@ input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; marg
   line-height: 1.5;
   color: var(--encre-2);
   border-radius: var(--rayon);
-  animation: carteEntree .45s var(--aise) both;
 }
 .intro__numero {
   font-size: .625rem;
@@ -1654,16 +1653,10 @@ input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; marg
 .intro__carte--passe {
   background: var(--surface-creuse);
   border: 1px solid var(--bord-champ);
-  animation-delay: 1s;
 }
 .intro__carte--futur {
   background: var(--accent-doux);
   border: 1px dashed var(--accent);
-  animation-delay: 1.15s;
-}
-@keyframes carteEntree {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
 }
 
 .intro__pied { display: flex; justify-content: flex-end; }
@@ -1676,8 +1669,7 @@ input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; marg
 @media (prefers-reduced-motion: reduce) {
   .scenario[data-etat="ferme"],
   .scenario__vague,
-  .intro,
-  .intro__carte { animation: none; }
+  .intro { animation: none; }
   .scenario { transition: none; }
 }
 
