@@ -1346,8 +1346,9 @@ input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; marg
 .scenario[data-etat="ferme"] .scenario__badge { color: var(--encre); }
 .scenario__cadenas { width: 11px; height: 11px; fill: none; stroke: currentColor; stroke-width: 1.6; }
 .scenario__cadenas rect { fill: currentColor; stroke: none; }
-/* Débloqué : le cadenas n'a plus rien à dire. */
-.scenario:not([data-etat="bloque"]) .scenario__cadenas { display: none; }
+/* Débloqué, le surtitre n'a plus rien à dire : le jaune et la question
+   suffisent. Il ne sert qu'à la carte verrouillée. */
+.scenario:not([data-etat="bloque"]) .scenario__badge { display: none; }
 
 /* Le dessin : la droite saisie, et le chemin qu'un marché prend vraiment. */
 .scenario__dessin { width: 100%; height: auto; overflow: visible; }
@@ -1369,12 +1370,11 @@ input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; marg
   stroke-dashoffset: 0;
 }
 .scenario[data-etat="bloque"] .scenario__vague { stroke: var(--bord-champ); }
-.scenario[data-etat="ferme"] .scenario__vague { animation: vagueTrace 1.4s .15s var(--aise) both; }
+/* La courbe se trace au SURVOL, et seulement là. Une animation de base en
+   plus la faisait retracer en quittant la carte : deux animations pour un
+   seul geste. Sans survol, elle est simplement posée. */
+.scenario[data-etat="ferme"]:hover .scenario__vague { animation: vagueTrace 1.4s var(--aise) both; }
 @keyframes vagueTrace { from { stroke-dashoffset: 400; } to { stroke-dashoffset: 0; } }
-/* Au survol, la courbe se redessine. Une animation au nom différent : c'est ce
-   qui la relance — reprendre `vagueTrace` ne rejouerait rien. */
-.scenario[data-etat="ferme"]:hover .scenario__vague { animation: vagueRetrace .9s var(--aise) both; }
-@keyframes vagueRetrace { from { stroke-dashoffset: 400; } to { stroke-dashoffset: 0; } }
 
 .scenario__grand-titre {
   font-family: var(--police-titre);
@@ -1614,7 +1614,6 @@ input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; marg
 }
 
 .intro__dessin { width: 100%; height: auto; overflow: visible; }
-.intro__axe { stroke: var(--trait); stroke-width: 1; }
 .intro__dessin .scenario__droite { stroke-width: 2; }
 .intro__vague { stroke-width: 3.5; stroke-dasharray: 800; animation: vagueTraceLongue 1.8s .25s var(--aise) both; }
 @keyframes vagueTraceLongue { from { stroke-dashoffset: 800; } to { stroke-dashoffset: 0; } }

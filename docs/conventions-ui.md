@@ -169,11 +169,13 @@ réelles — en cours ; **(3)** la mise en location ultérieure — moteur fait,
   reste nette — fond creux, bordure en tirets, cadenas, « À débloquer » et **quatre pastilles,
   une par bulle validée** — au lieu de l'ancienne carte grisée à 45 % que personne ne voyait.
   Débloquée, elle reprend la **présentation proposée par ChatGPT** (arbitrage de Lucas) :
-  surtitre « Débloqué · Scénarios de marché », question « Et si les marchés changeaient ? »,
+  question « Et si les marchés changeaient ? » (le surtitre ne reste qu'à l'état verrouillé),
   une courbe **en segments heurtés** par-dessus la droite pointillée, « Ajoutez un filtre de
   marché à votre projet et observez son effet sur les résultats », et un bouton pleine largeur
   « Explorer les scénarios », sans flèche. Couverture jaune et ombre dure ; **au survol**, la carte
-  se soulève, la courbe se redessine et le bouton passe à l'accent. Le
+  se soulève, la courbe se trace (1,4 s) et le bouton passe à l'accent. **La courbe ne s'anime
+  qu'au survol** : une animation de base la faisait retracer en quittant la carte.
+  L'explication reprend **exactement les mêmes points**, mis à l'échelle. Le
   bouton est `disabled` tant que c'est verrouillé : `pointer-events` seul laissait passer le
   clavier.
 - **La découverte se fait en DEUX TEMPS**, portés par `data-etat` sur `#scenario` :

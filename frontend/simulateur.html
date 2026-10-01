@@ -371,7 +371,7 @@
               <rect x="3" y="7" width="10" height="7.5" rx="1.5"/>
               <path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2"/>
             </svg>
-            <span id="scenarioBadgeTexte">À débloquer</span> · Scénarios de marché
+            À débloquer · Scénarios de marché
           </span>
           <span class="scenario__grand-titre">Et si les marchés changeaient&nbsp;?</span>
           <!-- Une droite et un chemin heurté : tout le propos du pilier en un
@@ -781,16 +781,16 @@
                   aria-label="Fermer">×</button>
         </div>
 
-        <!-- Le même dessin que la carte, en grand : la droite que vous avez
-             saisie, et le chemin qu'un marché prend vraiment. Il se trace sous
-             les yeux — c'est le seul moment où l'animation dit quelque chose. -->
-        <svg class="intro__dessin" viewBox="0 0 520 150" aria-hidden="true">
-          <path class="intro__axe" d="M10 140 H510"/>
+        <!-- Le même dessin que la carte, en grand (mêmes points, mis à
+             l'échelle) : la droite que vous avez saisie, et le chemin heurté
+             qu'un marché prend vraiment. Il se trace sous les yeux. Pas d'axe :
+             il coupait l'étiquette du chemin. -->
+<svg class="intro__dessin" viewBox="0 0 520 128" aria-hidden="true">
           <path class="scenario__droite" d="M10 118 L510 30"/>
           <path class="scenario__vague intro__vague"
-                d="M10 118 C50 108 60 52 100 64 S150 140 196 120 S250 18 296 40 S340 112 384 94 S460 22 510 30"/>
-          <text class="intro__etiquette" x="420" y="30">linéaire</text>
-          <text class="intro__etiquette intro__etiquette--vague" x="168" y="146">un vrai chemin</text>
+                d="M10 118 L93 96 L142 102 L212 36 L278 68 L343 52 L400 85 L466 8 L510 24"/>
+          <text class="intro__etiquette" x="226" y="104">linéaire</text>
+          <text class="intro__etiquette intro__etiquette--vague" x="300" y="28">un vrai chemin</text>
         </svg>
 
         <!-- Deux familles, deux habits : grisé pour ce qui a eu lieu, violet en
