@@ -1292,15 +1292,63 @@ input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; marg
 /* ------------------------------------------------- Mise en location (module) */
 
 /*
- * Une carte d'appel, puis un panneau. La question est celle d'un propriétaire :
- * « je revends, ou je loue ? ». D'où l'ordre du panneau — les quatre réglages
- * qui comptent, trois chiffres qui répondent, la courbe, le détail replié.
- *
- * Même famille que la carte des scénarios : contour d'encre, ombre dure,
- * bandeau d'encre une fois ouvert. Pas de jaune : une couleur de plus, c'est
- * une couleur de trop.
+ * Le pilier 3 en trois morceaux. La carte vit dans le rail, sous celle des
+ * scénarios, et en porte les classes (`.scenario--location`). La saisie se fait
+ * dans une fenêtre. Les résultats s'affichent sous le graphique principal, dans
+ * `.mel` : la question est celle d'un propriétaire, « je revends ou je loue ? ».
  */
-.mel { display: grid; }
+.mel {
+  overflow: hidden;
+  background: var(--surface);
+  border: 1px solid var(--encre);
+  border-radius: var(--rayon-large);
+  box-shadow: 4px 5px 0 var(--encre);
+}
+.mel[hidden] { display: none; }
+
+/* Le résumé de la carte une fois la location appliquée : hauteur fixe. */
+.mel-resume { display: grid; gap: 2px; margin: 0 12px; }
+.mel-resume__annee {
+  margin: 0;
+  font-family: var(--police-titre);
+  font-size: 1.5rem;
+  line-height: 1.15;
+  color: var(--encre);
+}
+.mel-resume__detail { margin: 0 0 10px; font-size: .8125rem; color: var(--encre-2); }
+.mel-resume__modifier {
+  padding: 8px 12px;
+  font: inherit;
+  font-size: .8125rem;
+  font-weight: 700;
+  color: var(--encre);
+  background: transparent;
+  border: 1px solid var(--encre);
+  border-radius: var(--rayon);
+  cursor: pointer;
+  transition: translate var(--duree-rapide) var(--aise), box-shadow var(--duree-rapide) var(--aise);
+}
+.mel-resume__modifier:hover { translate: -1px -1px; box-shadow: 3px 3px 0 var(--encre); }
+
+/* La fenêtre de saisie : mêmes habits que l'explication des scénarios. */
+.mel-fenetre {
+  display: grid;
+  gap: 18px;
+  width: min(640px, calc(100vw - 32px));
+  padding: 22px 26px 20px;
+  border-color: var(--encre);
+}
+.mel-fenetre__entete { display: flex; align-items: start; justify-content: space-between; gap: 16px; }
+.mel-fenetre__titre {
+  margin: 0;
+  font-family: var(--police-titre);
+  font-weight: var(--graisse-titre);
+  font-size: clamp(1.5rem, 4vw, 2rem);
+  line-height: 1.1;
+  letter-spacing: var(--interlettre-titre);
+}
+.mel-fenetre__intro { margin: 6px 0 0; font-size: .9375rem; color: var(--encre-2); }
+.mel-fenetre__pied { display: flex; justify-content: flex-end; }
 
 /* Les fenêtres d'aperçu et d'explication réutilisent ce bouton de fermeture. */
 .mel__fermer {
@@ -1316,65 +1364,6 @@ input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; marg
 }
 .mel__fermer:hover { background: var(--surface-creuse); color: var(--encre); }
 
-/* --- L'appel ------------------------------------------------------------ */
-.mel__appel {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  width: 100%;
-  padding: 18px 20px;
-  font: inherit;
-  text-align: left;
-  color: var(--encre);
-  background: var(--surface);
-  border: 1px solid var(--encre);
-  border-radius: var(--rayon-large);
-  box-shadow: 4px 5px 0 var(--encre);
-  cursor: pointer;
-  transition: translate var(--duree-base) var(--aise), box-shadow var(--duree-base) var(--aise);
-}
-.mel__appel:hover { translate: -2px -2px; box-shadow: 6px 7px 0 var(--encre); }
-.mel__appel[hidden] { display: none; }
-.mel__picto {
-  flex: none;
-  width: 40px;
-  height: 40px;
-  fill: none;
-  stroke: var(--accent);
-  stroke-width: 1.8;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-.mel__appel-texte { display: grid; gap: 3px; flex: 1; min-width: 0; }
-.mel__appel-titre {
-  font-family: var(--police-titre);
-  font-weight: var(--graisse-titre);
-  font-size: 1.625rem;
-  line-height: 1.1;
-  letter-spacing: var(--interlettre-titre);
-}
-.mel__appel-accroche { font-size: .875rem; color: var(--encre-2); }
-.mel__appel-cta {
-  flex: none;
-  padding: 10px 18px;
-  font-size: .875rem;
-  font-weight: 700;
-  color: var(--sur-accent);
-  background: var(--encre);
-  border-radius: var(--rayon);
-  transition: background var(--duree-rapide) var(--aise);
-}
-.mel__appel:hover .mel__appel-cta { background: var(--accent); }
-
-/* --- Le panneau ---------------------------------------------------------- */
-.mel__panneau {
-  overflow: hidden;
-  background: var(--surface);
-  border: 1px solid var(--encre);
-  border-radius: var(--rayon-large);
-  box-shadow: 4px 5px 0 var(--encre);
-}
-.mel__panneau[hidden] { display: none; }
 .mel__bandeau {
   display: flex;
   align-items: center;
@@ -1393,7 +1382,7 @@ input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; marg
   letter-spacing: var(--interlettre-titre);
 }
 
-.mel__reglages { display: grid; gap: 18px; padding: 20px 20px 0; }
+.mel__reglages { display: grid; gap: 18px; }
 .mel__ligne {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1527,11 +1516,9 @@ input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; marg
 @media (max-width: 760px) {
   .mel__ligne,
   .mel__chiffres { grid-template-columns: minmax(0, 1fr); }
-  .mel__appel { flex-wrap: wrap; }
-  .mel__appel-cta { margin-left: 56px; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .mel__appel { transition: none; }
+  .mel-resume__modifier { transition: none; }
 }
 
 /* ---------------------------------------------------- Scénarios de marché */
@@ -1837,7 +1824,8 @@ input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; marg
 /* --- Premier temps : l'explication, et rien d'autre --------------------- */
 
 .intro,
-.apercu {
+.apercu,
+.mel-fenetre {
   position: fixed;
   z-index: 50;
   top: 50%;
@@ -1851,7 +1839,8 @@ input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; marg
   box-shadow: 0 24px 64px rgba(11, 11, 11, .28);
 }
 .intro[hidden],
-.apercu[hidden] { display: none; }
+.apercu[hidden],
+.mel-fenetre[hidden] { display: none; }
 
 /*
  * L'explication tient en un écran et se lit en dix secondes : un titre, un

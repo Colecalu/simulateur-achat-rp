@@ -570,8 +570,18 @@ réelles — en cours ; **(3)** la mise en location ultérieure — moteur fait,
   158 px. Sous 1 040 px, la carte devient une barre : titre à gauche, action à droite.
 - **Le module de mise en location** (refonte d'octobre 2026, aucun changement du moteur). Il pose
   la question d'un propriétaire : **« je revends, ou je loue ? »**.
-  - **Une carte d'appel** au contour d'encre et à l'ombre dure (« Et si vous le mettiez en
-    location ? »), qui ouvre un **panneau à bandeau d'encre** avec une pilule « × Fermer ».
+  - **Le pilier 3 est à côté du pilier 2** (décision de Lucas) : une carte « Et si vous le
+    mettiez en location ? » dans le rail, **juste sous celle des scénarios**, sur le même modèle —
+    elle en porte les classes (`.scenario.scenario--location`) : verrouillée avec ses quatre
+    pastilles, puis jaune avec une maison et une clé qui se tracent au survol, puis, une fois la
+    location appliquée, un **résumé à hauteur fixe** (bandeau d'encre, « Dès l'année 12 »,
+    « Meublé · 2 200 €/mois », « Modifier », pilule « × Retirer »).
+  - **La saisie se fait dans une fenêtre** (`#melFenetre`), comme l'explication des scénarios ;
+    « Voir le résultat » applique (`melActif`), referme et fait défiler jusqu'aux résultats.
+    Fermer par ×, Échap ou le voile ne retire rien. Une fois appliquée, toute modification dans
+    la fenêtre se répercute en direct.
+  - **Les résultats s'affichent sous le graphique principal** (`#mel`, après les chiffres du
+    mois), plus en bas de page : le rail est trop étroit pour trois chiffres et une courbe.
   - **Quatre réglages, pas plus, en haut** : l'année de mise en location au **curseur** (affichée
     en grand), **Meublé / Nu en deux boutons** (sorti des paramètres avancés : c'est le choix qui
     pèse le plus sur l'impôt ; la liste `#melRegime` reste cachée et sert de source à la valeur),
@@ -589,9 +599,9 @@ réelles — en cours ; **(3)** la mise en location ultérieure — moteur fait,
   - **Un graphique à trois courbes** : acheter puis revendre, acheter puis louer, rester
     locataire, avec un trait « mise en location ». L'ancien graphique n'avait pas la courbe de
     revente — c'était pourtant la comparaison qui compte.
-  - **L'année n'est sauvegardée que module ouvert** : un curseur a toujours une valeur, or c'est
-    d'elle que se déduit la réouverture au rechargement. « Nouvelle simulation » referme le module
-    et vide ses loyers.
+  - **L'année n'est sauvegardée que location appliquée** : un curseur a toujours une valeur, or
+    c'est d'elle que se déduit `melActif` au rechargement. « Nouvelle simulation » retire la
+    location et vide ses loyers.
 - **La bulle zoomée sort de son alvéole et va sous `<body>`** le temps du zoom, puis y retourne.
   Le rail de gauche a été en `position: sticky` (retiré en octobre 2026 : il défile désormais
   avec la page), et sticky crée **toujours** un contexte

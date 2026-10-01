@@ -429,6 +429,59 @@
                aria-label="Scénario de marché"></div>
         </div>
       </div>
+
+      <!-- Pilier 3, à côté du pilier 2 : la mise en location. Même carte que
+           les scénarios — verrouillée, puis jaune, puis résumé à hauteur fixe
+           une fois appliquée. Les résultats, eux, s'affichent à droite sous le
+           graphique : le rail est trop étroit pour des chiffres et une courbe.
+           Elle porte les classes de la carte des scénarios : c'est le même
+           objet, une variante qui se pose par-dessus le projet. -->
+      <div class="scenario scenario--location" id="melCarte" data-etat="bloque">
+        <button type="button" class="scenario__appel" id="melOuvrir"
+                aria-haspopup="dialog" aria-controls="melFenetre">
+          <span class="scenario__badge">
+            <svg class="scenario__cadenas" viewBox="0 0 16 16" aria-hidden="true">
+              <rect x="3" y="7" width="10" height="7.5" rx="1.5"/>
+              <path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2"/>
+            </svg>
+            À débloquer · Mise en location
+          </span>
+          <span class="scenario__grand-titre">Et si vous le mettiez en location&nbsp;?</span>
+          <!-- Une maison et sa clé : elles se tracent au survol, comme la
+               courbe des scénarios. -->
+          <svg class="scenario__dessin" viewBox="0 0 240 64" aria-hidden="true">
+            <path class="scenario__droite" d="M6 60 H234"/>
+            <path class="scenario__vague" d="M78 60 V30 L118 8 L158 30 V60"/>
+            <path class="scenario__vague" d="M108 60 V42 H128 V60"/>
+            <circle class="scenario__vague" cx="182" cy="44" r="7"/>
+            <path class="scenario__vague" d="M189 44 H218 M208 44 V51 M216 44 V49"/>
+          </svg>
+          <span class="scenario__accroche" id="melAccroche">
+            Validez les quatre étapes pour débloquer.
+          </span>
+          <span class="scenario__progression" id="melProgression" aria-hidden="true">
+            <span></span><span></span><span></span><span></span>
+          </span>
+          <span class="scenario__cta" aria-hidden="true">Simuler la location</span>
+        </button>
+
+        <div class="scenario__liste">
+          <div class="scenario__bandeau">
+            <p class="scenario__titre">Mise en location</p>
+            <button type="button" class="pilule" id="melRetirer"
+                    title="Retirer la mise en location"
+                    aria-label="Retirer la mise en location">
+              <span aria-hidden="true">×</span> Retirer
+            </button>
+          </div>
+          <div class="mel-resume">
+            <p class="mel-resume__annee" id="melResumeAnnee"></p>
+            <p class="mel-resume__detail" id="melResumeDetail"></p>
+            <button type="button" class="mel-resume__modifier" id="melModifier"
+                    aria-haspopup="dialog" aria-controls="melFenetre">Modifier</button>
+          </div>
+        </div>
+      </div>
     </div>
 
     <section class="plateau__visu" id="visu" data-etat="attente" aria-live="polite">
@@ -534,6 +587,55 @@
         <p class="alerte" id="alerteApport" hidden></p>
       </section>
 
+      <!-- ========== MISE EN LOCATION : CE QUI RÉPOND ==========
+           Visible dès qu'elle est appliquée depuis la carte du rail, juste sous
+           le graphique principal : c'est la suite de la réponse, pas une annexe
+           de bas de page. -->
+      <section class="mel" id="mel" hidden>
+        <div class="mel__bandeau">
+          <h3 class="mel__titre" id="melTitre">Si vous le mettez en location</h3>
+          <button type="button" class="pilule" id="melModifierBis"
+                  aria-haspopup="dialog" aria-controls="melFenetre">Modifier</button>
+        </div>
+
+        <p class="mel__incomplet" id="melIncomplet">
+          Indiquez les deux loyers pour afficher la comparaison.
+        </p>
+
+        <div class="mel__resultats" id="melResultats" hidden>
+          <!-- Trois chiffres, du plus décisif au plus concret. La première
+               question d'un propriétaire : revendre ou louer. -->
+          <div class="mel__chiffres">
+            <div class="mel__chiffre mel__chiffre--principal">
+              <p class="mel__chiffre-mot">Louer plutôt que revendre</p>
+              <p class="mel__chiffre-valeur" id="melVsRevente"></p>
+              <p class="mel__chiffre-aide" id="melVsReventeAide"></p>
+            </div>
+            <div class="mel__chiffre">
+              <p class="mel__chiffre-mot">Face à rester locataire</p>
+              <p class="mel__chiffre-valeur" id="melVsLocataire"></p>
+              <p class="mel__chiffre-aide" id="melVsLocataireAide"></p>
+            </div>
+            <div class="mel__chiffre">
+              <p class="mel__chiffre-mot">Chaque mois, une fois loué</p>
+              <p class="mel__chiffre-valeur" id="melMensuel"></p>
+              <p class="mel__chiffre-aide" id="melMensuelAide"></p>
+            </div>
+          </div>
+
+          <figure class="mel__graphique">
+            <div class="legende legende--compacte" id="legendeMel"></div>
+            <div class="graphique graphique--court"><canvas id="graphMiseEnLocation"></canvas></div>
+          </figure>
+
+          <details class="mel__detail">
+            <summary>Le détail du mois et de la revente</summary>
+            <dl class="mel__postes" id="melPostes"></dl>
+            <p class="mel__note" id="melNote"></p>
+          </details>
+        </div>
+      </section>
+
     <!-- ========== D'OÙ VIENT CET ÉCART ? ==========
          Déplié par défaut (décision de Lucas) : ce qu'il explique fait partie
          de la réponse. Le bouton le replie pour qui veut une vue courte. -->
@@ -622,32 +724,66 @@
       </div>
     </div>
 
-    <!-- ========== MISE EN LOCATION (divulgation progressive) ==========
-         Une carte d'appel, puis un seul panneau : les réglages essentiels en
-         haut (année, loyers, meublé ou nu), trois chiffres qui répondent, la
-         courbe, et le détail replié. La question qu'il pose est celle d'un
-         propriétaire : « je revends, ou je loue ? ». -->
-    <section class="mel" id="mel">
-      <button type="button" class="mel__appel" id="melOuvrir"
-              aria-expanded="false" aria-controls="melPanneau">
-        <svg class="mel__picto" viewBox="0 0 32 32" aria-hidden="true">
-          <path d="M4 15 16 5l12 10"/><path d="M7 13v14h18V13"/>
-          <circle cx="16" cy="19" r="2.5"/><path d="M16 21.5V25"/>
-        </svg>
-        <span class="mel__appel-texte">
-          <span class="mel__appel-titre">Et si vous le mettiez en location&nbsp;?</span>
-          <span class="mel__appel-accroche">Gardez le bien, louez-le, logez-vous ailleurs — et comparez avec une revente.</span>
-        </span>
-        <span class="mel__appel-cta" aria-hidden="true">Simuler</span>
-      </button>
+      <!-- Le texte change selon qu'un scénario est appliqué ou non : « hypothèses
+           constantes » devient faux dès qu'une série année par année tourne. -->
+      <p class="avertissement" id="avertissement"></p>
+    </section>
 
-      <div class="mel__panneau" id="melPanneau" hidden>
-        <div class="mel__bandeau">
-          <h3 class="mel__titre">Mise en location</h3>
-          <button type="button" class="pilule" id="melFermer"
-                  aria-label="Fermer le module de mise en location">
-            <span aria-hidden="true">×</span> Fermer
-          </button>
+  </div>
+
+  <div class="voile" id="voile" hidden></div>
+
+  <!-- ===== La question de l'épargne forcée =====
+       Surgit UNE fois, quand le parcours est complet et que l'achat demande
+       plus que l'effort d'aujourd'hui. Choix obligatoire : pas de croix, ni
+       voile ni Échap ne la ferment tant qu'on n'a pas répondu. Le verdict
+       reste masqué jusque-là — il dépend de la réponse. Ensuite elle redescend
+       vers la petite ligne de « À effort égal », d'où « Pourquoi ? » la rouvre
+       (et là, elle se ferme librement). Son propre voile : celui des bulles
+       ferme la bulle zoomée au clic, ce qu'on ne veut pas ici. -->
+  <div class="voile" id="voileQuestion" hidden></div>
+  <section class="question" id="question" role="dialog" aria-modal="true"
+           aria-labelledby="questionTitre" hidden>
+
+    <!-- Une seule question, et elle INTERROGE au lieu d'expliquer. Le constat
+         tient dans le titre. Les deux premières questions n'ont pas de bouton :
+         elles se répondent dans sa tête, et la seconde est celle qui dérange —
+         c'est elle qui fait la valeur de la réponse suivante. -->
+    <div class="question__temps" id="questionEpargne">
+      <h2 class="question__titre" id="questionTitre">
+        Cet achat demande <b class="tabulaire" id="questionSupplement"></b> de plus par mois
+        que votre effort actuel.
+      </h2>
+      <p class="question__demande">Êtes-vous vraiment prêt à faire cet effort supplémentaire&nbsp;?</p>
+      <p class="question__demande question__demande--gene" id="questionDemande2"></p>
+      <p class="question__texte" id="questionTexte"></p>
+      <p class="question__franchise">
+        Répondez franchement, même si la réponse ne vous arrange pas&nbsp;: c'est souvent
+        elle qui décide du résultat.
+      </p>
+      <div class="question__reponses">
+        <button type="button" class="question__reponse" data-reponse="oui">Je place le gap</button>
+        <button type="button" class="question__reponse" data-reponse="non">Je conserve mon effort actuel</button>
+      </div>
+      <p class="question__enjeu" id="questionEnjeu"></p>
+    </div>
+  </section>
+
+      <!-- Aperçu d'un scénario : il vit ici, hors du rail de gauche, et non
+           dans la carte scénario. Le rail est `position: sticky`, donc un
+           contexte d'empilement : une fenêtre qui y resterait passerait sous
+           le voile. -->
+      <!-- Saisie de la mise en location : une fenêtre, comme l'explication des
+           scénarios. Elle vit hors du rail pour passer au-dessus du voile. -->
+      <div class="mel-fenetre" id="melFenetre" role="dialog" aria-modal="true"
+           aria-labelledby="melFenetreTitre" hidden>
+        <div class="mel-fenetre__entete">
+          <div>
+            <h3 class="mel-fenetre__titre" id="melFenetreTitre">Et si vous le mettiez en location&nbsp;?</h3>
+            <p class="mel-fenetre__intro">Vous gardez le bien, vous le louez, et vous vous logez ailleurs.</p>
+          </div>
+          <button type="button" class="mel__fermer" id="melFermer"
+                  aria-label="Fermer">×</button>
         </div>
 
         <form class="mel__reglages" id="melFormulaire" autocomplete="off">
@@ -737,94 +873,11 @@
           </details>
         </form>
 
-        <p class="mel__incomplet" id="melIncomplet">
-          Indiquez les deux loyers pour afficher la comparaison.
-        </p>
-
-        <div class="mel__resultats" id="melResultats" hidden>
-          <!-- Trois chiffres, du plus décisif au plus concret. La première
-               question d'un propriétaire : revendre ou louer. -->
-          <div class="mel__chiffres">
-            <div class="mel__chiffre mel__chiffre--principal">
-              <p class="mel__chiffre-mot">Louer plutôt que revendre</p>
-              <p class="mel__chiffre-valeur" id="melVsRevente"></p>
-              <p class="mel__chiffre-aide" id="melVsReventeAide"></p>
-            </div>
-            <div class="mel__chiffre">
-              <p class="mel__chiffre-mot">Face à rester locataire</p>
-              <p class="mel__chiffre-valeur" id="melVsLocataire"></p>
-              <p class="mel__chiffre-aide" id="melVsLocataireAide"></p>
-            </div>
-            <div class="mel__chiffre">
-              <p class="mel__chiffre-mot">Chaque mois, une fois loué</p>
-              <p class="mel__chiffre-valeur" id="melMensuel"></p>
-              <p class="mel__chiffre-aide" id="melMensuelAide"></p>
-            </div>
-          </div>
-
-          <figure class="mel__graphique">
-            <div class="legende legende--compacte" id="legendeMel"></div>
-            <div class="graphique graphique--court"><canvas id="graphMiseEnLocation"></canvas></div>
-          </figure>
-
-          <details class="mel__detail">
-            <summary>Le détail du mois et de la revente</summary>
-            <dl class="mel__postes" id="melPostes"></dl>
-            <p class="mel__note" id="melNote"></p>
-          </details>
+        <div class="mel-fenetre__pied">
+          <button type="button" class="bouton bouton--primaire" id="melValider">Voir le résultat</button>
         </div>
       </div>
-    </section>
 
-      <!-- Le texte change selon qu'un scénario est appliqué ou non : « hypothèses
-           constantes » devient faux dès qu'une série année par année tourne. -->
-      <p class="avertissement" id="avertissement"></p>
-    </section>
-
-  </div>
-
-  <div class="voile" id="voile" hidden></div>
-
-  <!-- ===== La question de l'épargne forcée =====
-       Surgit UNE fois, quand le parcours est complet et que l'achat demande
-       plus que l'effort d'aujourd'hui. Choix obligatoire : pas de croix, ni
-       voile ni Échap ne la ferment tant qu'on n'a pas répondu. Le verdict
-       reste masqué jusque-là — il dépend de la réponse. Ensuite elle redescend
-       vers la petite ligne de « À effort égal », d'où « Pourquoi ? » la rouvre
-       (et là, elle se ferme librement). Son propre voile : celui des bulles
-       ferme la bulle zoomée au clic, ce qu'on ne veut pas ici. -->
-  <div class="voile" id="voileQuestion" hidden></div>
-  <section class="question" id="question" role="dialog" aria-modal="true"
-           aria-labelledby="questionTitre" hidden>
-
-    <!-- Une seule question, et elle INTERROGE au lieu d'expliquer. Le constat
-         tient dans le titre. Les deux premières questions n'ont pas de bouton :
-         elles se répondent dans sa tête, et la seconde est celle qui dérange —
-         c'est elle qui fait la valeur de la réponse suivante. -->
-    <div class="question__temps" id="questionEpargne">
-      <h2 class="question__titre" id="questionTitre">
-        Cet achat demande <b class="tabulaire" id="questionSupplement"></b> de plus par mois
-        que votre effort actuel.
-      </h2>
-      <p class="question__demande">Êtes-vous vraiment prêt à faire cet effort supplémentaire&nbsp;?</p>
-      <p class="question__demande question__demande--gene" id="questionDemande2"></p>
-      <p class="question__texte" id="questionTexte"></p>
-      <p class="question__franchise">
-        Répondez franchement, même si la réponse ne vous arrange pas&nbsp;: c'est souvent
-        elle qui décide du résultat.
-      </p>
-      <div class="question__reponses">
-        <button type="button" class="question__reponse" data-reponse="oui">Je place le gap</button>
-        <button type="button" class="question__reponse" data-reponse="non">Je conserve mon effort actuel</button>
-      </div>
-      <p class="question__enjeu" id="questionEnjeu"></p>
-    </div>
-  </section>
-
-      <!-- Aperçu d'un scénario : il vit ici, hors du rail de gauche, et non
-           dans la carte scénario. Le rail est `position: sticky`, donc un
-           contexte d'empilement : une fenêtre qui y resterait passerait sous
-           le voile. -->
       <!-- Premier temps : ce qu'on cherche à faire, et comment lire le
            résultat. Rien d'autre — pas un seul nom de scénario. Elles vivent
            ici, hors du rail : le rail est `position: sticky`, donc un contexte

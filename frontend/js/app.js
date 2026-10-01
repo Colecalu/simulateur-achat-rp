@@ -918,6 +918,21 @@ function construireScenarios() {
   $('#scenarioRetirer').addEventListener('click', () => appliquerScenario(''));
 }
 
+const fenetreMelOuverte = () => !$('#melFenetre').hidden;
+
+function ouvrirFenetreMel() {
+  proposerLoyers();
+  majReglagesMel();
+  $('#melFenetre').hidden = false;
+  $('#voile').hidden = false;
+  $('#melAnneeBascule').focus();
+}
+
+function fermerFenetreMel() {
+  $('#melFenetre').hidden = true;
+  if (bulleZoomee === null && !apercuOuvert() && !introOuverte()) $('#voile').hidden = true;
+}
+
 function ouvrirIntro() {
   $('#intro').hidden = false;
   $('#voile').hidden = false;
@@ -1229,6 +1244,24 @@ function majAvertissement() {
     commun;
 }
 
+/** La carte « mise en location » du rail : verrouillée, appel, ou résumé. */
+function majCarteMel(pret) {
+  $('#melCarte').dataset.etat = !pret ? 'bloque' : melActif ? 'ouvert' : 'ferme';
+  $('#melOuvrir').disabled = !pret;
+  $('#melAccroche').textContent = pret
+    ? 'Gardez le bien, louez-le, et comparez avec une revente.'
+    : 'Validez les quatre étapes pour débloquer.';
+  const pastilles = $('#melProgression').children;
+  for (let i = 0; i < pastilles.length; i++) {
+    pastilles[i].classList.toggle('scenario__pas--fait', validees.has(BULLES[i]));
+  }
+  const loyer = parseFloat($('#melLoyerPercu').value);
+  $('#melResumeAnnee').textContent = `Dès l'année ${$('#melAnneeBascule').value}`;
+  $('#melResumeDetail').textContent =
+    ($('#melRegime').value === 'nu' ? 'Location nue' : 'Meublé') +
+    (Number.isFinite(loyer) ? ` · ${euros.format(loyer)}/mois` : '');
+}
+
 function majScenario() {
   const pret = profilValide && validees.size === BULLES.length;
   $('#scenario').dataset.etat = !pret
@@ -1242,6 +1275,7 @@ function majScenario() {
   // Verrouillée, la carte reste lisible mais ne s'active pas — y compris au
   // clavier, ce que `pointer-events` seul ne garantissait pas.
   $('#scenarioOuvrir').disabled = !pret;
+  majCarteMel(pret);
 
   // Quatre pastilles, une par bulle : on voit ce qui reste à faire pour
   // débloquer, au lieu d'une carte grisée qui ne dit rien.
@@ -1295,7 +1329,7 @@ function paramsCourants() {
   };
   // Un curseur a toujours une valeur : l'année n'est sauvegardée que module
   // ouvert, puisque c'est d'elle que se déduit sa réouverture.
-  p.location.anneeBascule = $('#melPanneau').hidden ? null : nombre('melAnneeBascule');
+  p.location.anneeBascule = melActif ? nombre('melAnneeBascule') : null;
   p.location.loyerPercu = nombre('melLoyerPercu');
   p.location.loyerFutur = nombre('melLoyerFutur');
   for (const [id, def] of Object.entries(CHAMPS_MEL_AVANCES)) {
@@ -1380,11 +1414,7 @@ function restaurerBrouillon() {
 
   // Le module de mise en location se rouvre s'il portait une saisie : son état
   // d'ouverture se DÉDUIT des paramètres, il n'a pas à être stocké.
-  if (brouillon.params.location.anneeBascule !== null) {
-    $('#melPanneau').hidden = false;
-    $('#melOuvrir').hidden = true;
-    $('#melOuvrir').setAttribute('aria-expanded', 'true');
-  }
+  if (brouillon.params.location.anneeBascule !== null) melActif = true;
 
   // L'avancement est restauré AVANT le scénario : `appliquerScenario` appelle
   // `recalculer`, qui lit `profilValide` et `validees` pour décider ce qui
@@ -1445,6 +1475,12 @@ function initialiserBrouillon() {
 let dernierResultat = null;
 /** Options de mise en location du dernier calcul, ou null si le module est fermé ou incomplet. */
 let dernieresOptionsMel = null;
+/**
+ * La mise en location est-elle appliquée ? Elle l'est après « Voir le
+ * résultat », jusqu'à « Retirer ». Se déduit au rechargement de la présence
+ * d'une année de bascule dans `params` — elle n'est pas stockée à part.
+ */
+let melActif = false;
 
 function recalculer() {
   const saisie = lireFormulaire();
@@ -1454,7 +1490,7 @@ function recalculer() {
   // identique le locataire de la comparaison doit pouvoir placer la même
   // somme. calc-location.js fournit ces planchers ; calc.js les applique sans
   // savoir d'où ils viennent.
-  dernieresOptionsMel = $('#melPanneau').hidden ? null : lireFormulaireMel();
+  dernieresOptionsMel = melActif ? lireFormulaireMel() : null;
   saisie.planchersEnveloppe = dernieresOptionsMel
     ? planchersEnveloppe(saisie, dernieresOptionsMel, saisie.horizon)
     : null;
@@ -1547,6 +1583,8 @@ function afficherMel(mel, horizon) {
   const N = mel.anneeBascule;
   const base = dernierResultat.annees;
   const ligne = mel.annees[horizon - 1];
+  const regime = mel.options.regime === 'nu' ? 'location nue' : 'meublé';
+  $('#melTitre').textContent = `Si vous le louez dès l'année ${N}, en ${regime}`;
   const apresHorizon = N > horizon;
 
   // 1 et 2 : comparaisons de patrimoine, à l'horizon du curseur principal.
@@ -1658,7 +1696,8 @@ function rafraichir() {
   const horizon = parseInt($('#horizon').value, 10);
 
   const mel = dernieresOptionsMel ? simulerMiseEnLocation(dernierResultat, dernieresOptionsMel) : null;
-  $('#melIncomplet').hidden = !!mel || $('#melPanneau').hidden;
+  $('#mel').hidden = !melActif;
+  $('#melIncomplet').hidden = !!mel;
   $('#melResultats').hidden = !mel;
   majReglagesMel();
 
@@ -2186,6 +2225,7 @@ function initialiserBulles() {
   // Le voile sert deux fenêtres : l'aperçu de scénario et la bulle zoomée.
   // Le voile sert trois vues : l'explication, l'aperçu et la bulle zoomée.
   $('#voile').addEventListener('click', () => {
+    if (fenetreMelOuverte()) return fermerFenetreMel();
     if (apercuOuvert()) return fermerApercu();
     if (introOuverte()) return fermerIntro();
     if (bulleZoomee !== null) validerBulle(bulleZoomee);
@@ -2194,6 +2234,7 @@ function initialiserBulles() {
     if (e.key !== 'Escape') return;
     // Choix obligatoire : Échap ne ferme la question que rouverte à la demande.
     if (questionOuverte()) { if (questionLibre) fermerQuestion(); return; }
+    if (fenetreMelOuverte()) return fermerFenetreMel();
     if (apercuOuvert()) return fermerApercu();
     if (introOuverte()) return fermerIntro();
     if (bulleZoomee !== null) validerBulle(bulleZoomee);
@@ -2297,9 +2338,7 @@ function initialiser() {
     appliquerScenario('');
     // Le module de mise en location repart fermé et vide : ses loyers
     // décrivaient l'ancien projet.
-    $('#melPanneau').hidden = true;
-    $('#melOuvrir').hidden = false;
-    $('#melOuvrir').setAttribute('aria-expanded', 'false');
+    melActif = false;
     $('#melAnneeBascule').value = 10;
     for (const id of ['#melLoyerPercu', '#melLoyerFutur']) {
       $(id).value = '';
@@ -2335,12 +2374,19 @@ function initialiser() {
   initialiserBulles();
 
   // Divulgation progressive : le module n'existe qu'après un clic explicite.
-  $('#melOuvrir').addEventListener('click', () => {
-    $('#melPanneau').hidden = false;
-    $('#melOuvrir').hidden = true;
-    $('#melOuvrir').setAttribute('aria-expanded', 'true');
-    proposerLoyers();
-    $('#melAnneeBascule').focus();
+  for (const id of ['#melOuvrir', '#melModifier', '#melModifierBis']) {
+    $(id).addEventListener('click', ouvrirFenetreMel);
+  }
+  $('#melFermer').addEventListener('click', fermerFenetreMel);
+  $('#melValider').addEventListener('click', () => {
+    melActif = true;
+    fermerFenetreMel();
+    recalculer();
+    enregistrerBrouillon();
+    $('#mel').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+  $('#melRetirer').addEventListener('click', () => {
+    melActif = false;
     recalculer();
     enregistrerBrouillon();
   });
@@ -2357,14 +2403,6 @@ function initialiser() {
       $('#melRegime').dispatchEvent(new Event('change', { bubbles: true }));
     });
   }
-  $('#melFermer').addEventListener('click', () => {
-    $('#melPanneau').hidden = true;
-    $('#melOuvrir').hidden = false;
-    $('#melOuvrir').setAttribute('aria-expanded', 'false');
-    $('#melOuvrir').focus();
-    recalculer();
-    enregistrerBrouillon();
-  });
   // `recalculer` et non plus `rafraichir` : le loyer payé après la bascule
   // peut relever l'enveloppe du moteur de base (voir `recalculer`).
   $('#melFormulaire').addEventListener('input', surSaisie);
