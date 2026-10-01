@@ -353,33 +353,58 @@
         </div>
       </div>
 
-      <!-- Filtre de scénarios : il s'applique PAR-DESSUS les quatre bulles,
-           ce n'est pas une cinquième étape. D'où l'absence de numéro. -->
       <!-- Le filtre de scénarios s'applique PAR-DESSUS les quatre bulles : ce
            n'est pas une cinquième étape, d'où l'absence de numéro.
            Trois états : verrouillé tant qu'il n'y a pas de résultat à filtrer,
            fermé (un appel qui ouvre l'explication), puis ouvert (la liste). La
            liste n'apparaît qu'après l'explication : « Acheter en 1992 » ne veut
-           rien dire tant qu'on n'a pas dit ce qu'on en fait. -->
+           rien dire tant qu'on n'a pas dit ce qu'on en fait.
+           Verrouillé, la carte reste VISIBLE et dit ce qui la débloque : c'est
+           une fonctionnalité à gagner, pas une case grisée qu'on ignore. -->
       <div class="scenario" id="scenario" data-etat="bloque">
         <button type="button" class="scenario__appel" id="scenarioOuvrir"
                 aria-haspopup="dialog" aria-controls="intro">
-          <span class="scenario__titre">Scénarios de marché</span>
-          <span class="scenario__accroche" id="scenarioAccroche">
-            Disponible une fois votre simulation complète.
+          <!-- Présentation reprise de la proposition de ChatGPT (arbitrage de
+               Lucas) : surtitre, question, courbe, une phrase, un bouton. -->
+          <span class="scenario__badge">
+            <svg class="scenario__cadenas" viewBox="0 0 16 16" aria-hidden="true">
+              <rect x="3" y="7" width="10" height="7.5" rx="1.5"/>
+              <path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2"/>
+            </svg>
+            À débloquer · Scénarios de marché
           </span>
+          <span class="scenario__grand-titre">Et si les marchés changeaient&nbsp;?</span>
+          <!-- Une droite et un chemin heurté : tout le propos du pilier en un
+               dessin. Des segments plutôt que des courbes : un marché ne
+               glisse pas, il casse et repart. -->
+          <svg class="scenario__dessin" viewBox="0 0 240 64" aria-hidden="true">
+            <path class="scenario__droite" d="M6 52 L234 20"/>
+            <path class="scenario__vague"
+                  d="M6 52 L44 44 L66 46 L98 22 L128 34 L158 28 L184 40 L214 12 L234 18"/>
+          </svg>
+          <span class="scenario__accroche" id="scenarioAccroche">
+            Validez les quatre étapes pour débloquer.
+          </span>
+          <span class="scenario__progression" id="scenarioProgression" aria-hidden="true">
+            <span></span><span></span><span></span><span></span>
+          </span>
+          <span class="scenario__cta" aria-hidden="true">Explorer les scénarios</span>
         </button>
 
         <div class="scenario__liste">
-          <p class="scenario__titre">
-            Scénarios de marché
-            <button type="button" class="scenario__aide" id="scenarioAide"
-                    aria-label="Comment lire ces scénarios ?"
-                    title="Comment lire ces scénarios ?">?</button>
-          </p>
+          <!-- Le bandeau : un objet sombre au milieu de cartes claires. Le
+               bouton « Retirer » y vit, à droite du titre, et n'apparaît que
+               lorsqu'un filtre est posé : la carte garde la même hauteur. -->
+          <div class="scenario__bandeau">
+            <p class="scenario__titre">Scénarios de marché</p>
+            <button type="button" class="scenario__retirer" id="scenarioRetirer" hidden
+                    title="Retirer le scénario et revenir aux hypothèses de l'étape 4"
+                    aria-label="Retirer le scénario et revenir aux hypothèses de l'étape 4">
+              <span aria-hidden="true">×</span> Retirer
+            </button>
+          </div>
           <div class="scenario__choix" id="scenarioChoix" role="radiogroup"
                aria-label="Scénario de marché"></div>
-          <p class="scenario__note" id="scenarioNote"></p>
         </div>
       </div>
     </div>
@@ -748,40 +773,40 @@
            aria-labelledby="introTitre" hidden>
         <div class="intro__entete">
           <h3 class="intro__titre" id="introTitre">
-            Et si vous rejouiez vingt ans qui ont vraiment eu lieu&nbsp;?
+            La vraie vie n'est pas une ligne droite.
           </h3>
           <button type="button" class="mel__fermer" id="introFermer"
                   aria-label="Fermer">×</button>
         </div>
 
-        <div class="intro__texte">
-          <p>
-            Sans scénario, le simulateur applique déjà une <strong>tendance longue sourcée</strong>,
-            la même chaque année. Les scénarios servent à autre chose&nbsp;: éprouver votre projet
-            contre un <strong>chemin</strong>, parce qu'encaisser une baisse la première année,
-            quand la dette est au plus haut, n'a rien à voir avec l'encaisser la quinzième.
-          </p>
-          <p>
-            <strong>« Le passé »</strong> applique à votre projet ce que les marchés, l'immobilier
-            et les loyers ont <strong>réellement fait</strong> pendant vingt années datées&nbsp;:
-            la fenêtre la plus favorable à l'achat, et la moins favorable. Vingt ans de données,
-            puis cinq années prolongées au rythme de la période&nbsp;— cette partie passe en
-            pointillé, et ne se lit pas comme une prévision.
-          </p>
-          <p>
-            <strong>« Des futurs possibles »</strong> ne prétend rien observer. Chaque scénario y
-            teste <strong>un seul risque</strong>&nbsp;— une correction immobilière, ou une longue
-            stagnation des marchés&nbsp;— l'autre marché restant sur la tendance longue. C'est ce
-            qui permet de savoir ce qui est testé.
-          </p>
-          <p>
-            Dans les deux cas, votre taux de crédit reste le vôtre&nbsp;: on rejoue les marchés,
-            pas les conditions d'emprunt de l'époque. Et vingt années ne se rejouent pas à
-            l'identique&nbsp;: l'immobilier français part aujourd'hui d'un niveau de prix qui
-            interdit mécaniquement de refaire les hausses des années 2000. C'est un terrain
-            d'essai, pas une boule de cristal.
-          </p>
-        </div>
+        <!-- Le même dessin que la carte, en grand (mêmes points, mis à
+             l'échelle) : la droite que vous avez saisie, et le chemin heurté
+             qu'un marché prend vraiment. Il se trace sous les yeux. Pas d'axe :
+             il coupait l'étiquette du chemin. -->
+<svg class="intro__dessin" viewBox="0 0 520 128" aria-hidden="true">
+          <path class="scenario__droite" d="M10 118 L510 30"/>
+          <path class="scenario__vague intro__vague"
+                d="M10 118 L93 96 L142 102 L212 36 L278 68 L343 52 L400 85 L466 8 L510 24"/>
+          <text class="intro__etiquette" x="226" y="104">linéaire</text>
+          <text class="intro__etiquette intro__etiquette--vague" x="300" y="28">un vrai chemin</text>
+        </svg>
+
+        <!-- Deux familles, deux habits : grisé pour ce qui a eu lieu, violet en
+             tirets pour ce qu'on suppose. Les mêmes que dans la liste. Le
+             linéaire n'y figure pas : c'est ce que l'utilisateur a déjà sous
+             les yeux, pas une option à découvrir. -->
+        <ul class="intro__deux">
+          <li class="intro__carte intro__carte--passe">
+            <span class="intro__numero">01 / Le passé</span>
+            <strong>Rejouer l'histoire</strong>
+            <span>Deux périodes de vingt ans pour mettre votre projet à l'épreuve.</span>
+          </li>
+          <li class="intro__carte intro__carte--futur">
+            <span class="intro__numero">02 / Futurs possibles</span>
+            <strong>Tester un choc</strong>
+            <span>Une baisse de l'immobilier ou une stagnation de la bourse. Des hypothèses, pas des prévisions.</span>
+          </li>
+        </ul>
 
         <div class="intro__pied">
           <button type="button" class="bouton bouton--primaire" id="introValider">
@@ -795,18 +820,24 @@
            aria-labelledby="apercuTitre" hidden>
         <div class="apercu__entete">
           <div>
-            <h3 class="carte__titre" id="apercuTitre"></h3>
-            <p class="carte__legende" id="apercuResume"></p>
+            <h3 class="apercu__titre" id="apercuTitre"></h3>
+            <p class="apercu__resume" id="apercuResume"></p>
           </div>
           <button type="button" class="mel__fermer" id="apercuFermer"
                   aria-label="Fermer l'aperçu">×</button>
         </div>
+        <!-- La légende dit où chaque courbe arrive : c'est la seule lecture
+             qu'on attend au premier regard. -->
+        <ul class="apercu__legende" id="apercuLegende"></ul>
         <div class="graphique graphique--court"><canvas id="graphApercu"></canvas></div>
-        <!-- Les taux annuels sous la courbe : la base 100 montre où l'on
-             arrive, la suite montre par quoi on y passe. -->
-        <div class="suites" id="apercuSuites"></div>
-        <p class="apercu__note" id="apercuNote"></p>
-        <ul class="apercu__sources" id="apercuSources"></ul>
+        <!-- Le détail se déplie à la demande : taux année par année, note de
+             lecture, réserves et sources. Affiché d'emblée, il faisait peur. -->
+        <details class="apercu__details" id="apercuDetails">
+          <summary>Le détail année par année</summary>
+          <div class="suites" id="apercuSuites"></div>
+          <p class="apercu__note" id="apercuNote"></p>
+          <ul class="apercu__sources" id="apercuSources"></ul>
+        </details>
       </div>
 </main>
 

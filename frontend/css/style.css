@@ -470,11 +470,12 @@ h1, h2, h3 {
 }
 .plateau__visu { grid-area: visu; display: grid; gap: 16px; min-width: 0; }
 
-/* Les quatre bulles de gauche tiennent dans un écran, sans défilement. */
+/* La colonne de gauche défile avec la page. Elle a longtemps été figée
+   (`position: sticky`) ; décision de Lucas, oct. 2026 : une colonne qui reste
+   en place pendant qu'on lit les graphiques surprend plus qu'elle n'aide. */
 .plateau__gauche {
   grid-area: gauche;
-  position: sticky;
-  top: 16px;
+  align-self: start;
   display: grid;
   grid-template-rows: auto auto;
   gap: 14px;
@@ -518,7 +519,7 @@ h1, h2, h3 {
     grid-template-columns: minmax(0, 1fr);
     grid-template-areas: "coin" "haut" "gauche" "visu";
   }
-  .plateau__gauche { position: static; grid-template-rows: none; }
+  .plateau__gauche { grid-template-rows: none; }
   .rail {
     height: auto;
     min-height: 0;
@@ -1267,14 +1268,18 @@ input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; marg
 
 /*
  * Le filtre s'applique par-dessus les quatre bulles : ce n'est pas une
- * cinquième étape, d'où l'absence de numéro et d'anneau d'invite.
+ * cinquième étape, d'où l'absence de numéro.
  *
  * Trois états, portés par `data-etat` :
  *   bloque — tant qu'il n'y a pas de résultat à filtrer ;
  *   ferme  — un appel qui ouvre l'explication ;
  *   ouvert — la liste des scénarios.
- * La liste n'apparaît qu'après l'explication : sept noms de décennies ne
- * veulent rien dire tant qu'on n'a pas dit ce qu'on en fait.
+ *
+ * La carte est une FONCTIONNALITÉ À DÉBLOQUER, et doit se lire comme telle :
+ * verrouillée, elle reste nette et dit ce qui manque (cadenas, quatre
+ * pastilles) ; débloquée, elle passe en couverture jaune — la couleur des
+ * appels du carnet — et devient la chose la plus visible du rail. L'ancienne
+ * carte grisée à 45 % se confondait avec le fond : personne ne la cherchait.
  */
 .scenario {
   padding: 12px 14px;
@@ -1282,79 +1287,239 @@ input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; marg
   border: 1px solid var(--trait);
   border-radius: var(--rayon-large);
   box-shadow: var(--ombre);
+  transition: box-shadow var(--duree-base) var(--aise),
+              translate var(--duree-base) var(--aise);
 }
-.scenario[data-etat="bloque"] { opacity: .45; pointer-events: none; }
 .scenario[data-etat="ouvert"] .scenario__appel { display: none; }
 .scenario:not([data-etat="ouvert"]) .scenario__liste { display: none; }
 
+/* --- L'appel : verrouillé, puis débloqué -------------------------------- */
+
+.scenario:not([data-etat="ouvert"]) { padding: 16px 16px 14px; }
+.scenario[data-etat="bloque"] {
+  background: var(--surface-creuse);
+  border: 1px dashed var(--bord-champ);
+  box-shadow: none;
+}
+.scenario[data-etat="ferme"] {
+  background: var(--couverture, var(--accent-doux));
+  border: 1px solid var(--encre);
+  box-shadow: 4px 5px 0 var(--encre);
+  animation: scenarioDeblocage .6s cubic-bezier(.22, .8, .28, 1.2);
+}
+.scenario[data-etat="ferme"]:hover,
+.scenario[data-etat="ferme"]:focus-within {
+  translate: -2px -2px;
+  box-shadow: 6px 7px 0 var(--encre);
+}
+@keyframes scenarioDeblocage {
+  0%   { transform: scale(.94); }
+  60%  { transform: scale(1.03); }
+  100% { transform: scale(1); }
+}
+
 .scenario__appel {
   display: grid;
-  gap: 3px;
+  gap: 10px;
   width: 100%;
   font: inherit;
+  color: var(--encre);
   text-align: left;
   padding: 0;
   background: transparent;
   border: 0;
   cursor: pointer;
 }
-.scenario[data-etat="ferme"]:hover { border-color: var(--accent); box-shadow: var(--ombre-2); }
+.scenario__appel:disabled { cursor: default; }
 
-.scenario__titre {
+/* Un surtitre en capitales, pas une pastille : le jaune de la carte suffit
+   à signaler qu'elle est débloquée. */
+.scenario__badge {
   display: flex;
   align-items: center;
-  gap: 6px;
-  margin: 0 0 8px;
-  font-size: .625rem;
-  font-weight: 600;
-  letter-spacing: var(--interlettre-caps);
-  text-transform: uppercase;
-  color: var(--encre-3);
-}
-.scenario__appel .scenario__titre { margin-bottom: 3px; }
-.scenario__accroche { font-size: .75rem; color: var(--encre-2); line-height: 1.35; }
-
-/* Relire l'explication : discret, mais toujours accessible. */
-.scenario__aide {
-  margin-left: auto;
-  display: grid;
-  place-items: center;
-  width: 16px;
-  height: 16px;
-  padding: 0;
-  font: inherit;
+  gap: 5px;
   font-size: .625rem;
   font-weight: 700;
-  color: var(--encre-3);
-  background: transparent;
-  border: 1px solid var(--trait);
-  border-radius: 50%;
-  cursor: pointer;
+  letter-spacing: var(--interlettre-caps);
+  text-transform: uppercase;
+  color: var(--encre-2);
 }
-.scenario__aide:hover { color: var(--accent); border-color: var(--accent); }
+.scenario[data-etat="ferme"] .scenario__badge { color: var(--encre); }
+.scenario__cadenas { width: 11px; height: 11px; fill: none; stroke: currentColor; stroke-width: 1.6; }
+.scenario__cadenas rect { fill: currentColor; stroke: none; }
+/* Débloqué, le surtitre n'a plus rien à dire : le jaune et la question
+   suffisent. Il ne sert qu'à la carte verrouillée. */
+.scenario:not([data-etat="bloque"]) .scenario__badge { display: none; }
 
-.scenario__choix { display: grid; gap: 4px; }
+/* Le dessin : la droite saisie, et le chemin qu'un marché prend vraiment. */
+.scenario__dessin { width: 100%; height: auto; overflow: visible; }
+.scenario__droite {
+  fill: none;
+  stroke: var(--encre-3);
+  stroke-width: 1.5;
+  stroke-dasharray: 4 4;
+}
+.scenario__vague {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  /* 400 couvre la longueur réelle du tracé : c'est ce qui permet de le
+     « dessiner » en faisant glisser le décalage du tiret. */
+  stroke-dasharray: 400;
+  stroke-dashoffset: 0;
+}
+.scenario[data-etat="bloque"] .scenario__vague { stroke: var(--bord-champ); }
+/* La courbe se trace au SURVOL, et seulement là. Une animation de base en
+   plus la faisait retracer en quittant la carte : deux animations pour un
+   seul geste. Sans survol, elle est simplement posée. */
+.scenario[data-etat="ferme"]:hover .scenario__vague { animation: vagueTrace 1.4s var(--aise) both; }
+@keyframes vagueTrace { from { stroke-dashoffset: 400; } to { stroke-dashoffset: 0; } }
+
+.scenario__grand-titre {
+  font-family: var(--police-titre);
+  font-weight: var(--graisse-titre);
+  font-size: 2rem;
+  line-height: 1;
+  letter-spacing: var(--interlettre-titre);
+}
+.scenario[data-etat="bloque"] .scenario__grand-titre { color: var(--encre-2); }
+.scenario__accroche { font-size: .8125rem; color: var(--encre-2); line-height: 1.4; }
+.scenario[data-etat="ferme"] .scenario__accroche { color: var(--encre); }
+
+/* Une pastille par bulle validée : ce qu'il reste à faire pour débloquer. */
+.scenario__progression { display: flex; gap: 5px; margin-top: 2px; }
+.scenario__progression > span {
+  flex: 1;
+  height: 5px;
+  background: var(--trait);
+  border-radius: 999px;
+  transition: background var(--duree-base) var(--aise);
+}
+.scenario__progression > .scenario__pas--fait { background: var(--accent); }
+.scenario:not([data-etat="bloque"]) .scenario__progression { display: none; }
+
+.scenario__cta {
+  display: none;
+  justify-content: center;
+  margin-top: 4px;
+  padding: 11px 14px;
+  font-size: .8125rem;
+  font-weight: 700;
+  color: var(--sur-accent);
+  background: var(--encre);
+  border-radius: var(--rayon);
+}
+.scenario[data-etat="ferme"] .scenario__cta { display: flex; }
+.scenario__cta { transition: background var(--duree-rapide) var(--aise); }
+.scenario[data-etat="ferme"]:hover .scenario__cta { background: var(--accent); }
+
+/* --- La liste : un tableau de commande --------------------------------- */
+
+/*
+ * Ouverte, la carte reste de la même famille que la carte jaune — bordure
+ * d'encre pleine, ombre dure — pour qu'on la lise comme le même objet, déplié.
+ * Son bandeau sombre est le seul de la colonne : c'est ce qui la sort du rang
+ * des quatre étapes, sans couleur criarde.
+ *
+ * Rien d'autre que le titre et les quatre scénarios : pas de note, pas de
+ * bouton de retour. La carte garde la même hauteur quoi qu'on choisisse ; on
+ * revient au linéaire en recliquant sur le scénario actif.
+ */
+.scenario[data-etat="ouvert"] {
+  padding: 0 0 12px;
+  overflow: hidden;
+  border: 1px solid var(--encre);
+  box-shadow: 4px 5px 0 var(--encre);
+}
+.scenario[data-etat="ouvert"] .scenario__choix { margin: 0 12px; }
+
+.scenario__bandeau {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 52px;
+  margin-bottom: 12px;
+  padding: 10px 12px 10px 14px;
+  color: var(--sur-accent);
+  background: var(--encre);
+}
+
+/* Retirer le filtre : discret, sur le bandeau, sans couleur de plus. */
+.scenario__retirer {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 9px;
+  font: inherit;
+  font-size: .6875rem;
+  font-weight: 600;
+  color: var(--sur-accent);
+  background: transparent;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background var(--duree-rapide) var(--aise), color var(--duree-rapide) var(--aise);
+}
+.scenario__retirer span { font-size: .9375rem; line-height: 1; }
+.scenario__retirer:hover { color: var(--encre); background: var(--sur-accent); border-color: var(--sur-accent); }
+.scenario__retirer[hidden] { display: none; }
+
+.scenario__titre {
+  margin: 0;
+  font-family: var(--police-titre);
+  font-weight: var(--graisse-titre);
+  font-size: 1.375rem;
+  line-height: 1.1;
+  letter-spacing: var(--interlettre-titre);
+  color: inherit;
+}
+.scenario__choix { display: grid; gap: 10px; }
+
+/*
+ * Deux familles, deux blocs. Le passé est un bloc grisé plein (des années qui
+ * ont eu lieu), les futurs un bloc violet en tirets (rien n'est observé). Le
+ * violet est un aplat d'accent, pas une couleur de série : il ne se confond
+ * avec aucune courbe.
+ */
+.scenario__groupe {
+  display: grid;
+  gap: 4px;
+  padding: 8px;
+  border-radius: var(--rayon-large);
+}
+.scenario__groupe--historique {
+  background: var(--surface-creuse);
+  border: 1px solid var(--trait);
+}
+.scenario__groupe--prospectif {
+  background: var(--accent-doux);
+  border: 1px dashed var(--accent);
+}
+
 .scenario__famille {
   display: flex;
   gap: 6px;
   align-items: center;
-  margin: 8px 0 2px;
-  font-size: .5625rem;
-  font-weight: 600;
+  margin: 0 0 2px;
+  font-size: .625rem;
+  font-weight: 700;
   letter-spacing: var(--interlettre-caps);
   text-transform: uppercase;
-  color: var(--encre-3);
+  color: var(--encre-2);
 }
-.scenario__famille:first-child { margin-top: 0; }
-
-/* Observé ou construit : c'est la distinction qui compte pour lire le groupe.
-   Un cerné plutôt qu'une couleur — la couleur est réservée aux données. */
-.scenario__etiquette {
-  padding: 1px 5px;
-  border: 1px solid var(--trait);
-  border-radius: var(--rayon);
-  font-weight: 500;
-  color: var(--encre-3);
+.scenario__picto { display: grid; place-items: center; width: 16px; height: 16px; }
+.scenario__picto svg {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 /* Le choix et son aperçu : deux actions distinctes sur la même ligne. */
@@ -1364,8 +1529,8 @@ input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; marg
   min-width: 0;
   font: inherit;
   text-align: left;
-  padding: 6px 9px;
-  background: transparent;
+  padding: 7px 10px;
+  background: var(--surface);
   border: 1px solid var(--trait);
   border-radius: var(--rayon);
   cursor: pointer;
@@ -1373,7 +1538,11 @@ input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; marg
               border-color var(--duree-rapide) var(--aise);
 }
 .scenario__option:hover { background: var(--survol); border-color: var(--bord-champ); }
-.scenario__option--actif { background: var(--accent-doux); border-color: var(--accent); }
+.scenario__option--actif {
+  background: var(--accent-doux);
+  border-color: var(--accent);
+  box-shadow: inset 3px 0 0 var(--accent);
+}
 .scenario__nom { display: block; font-size: .8125rem; font-weight: 600; color: var(--encre); }
 .scenario__option--actif .scenario__nom { color: var(--accent-fort); }
 .scenario__periode { display: block; font-size: .6875rem; color: var(--encre-3); }
@@ -1385,7 +1554,7 @@ input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; marg
   width: 30px;
   padding: 0;
   color: var(--encre-3);
-  background: transparent;
+  background: var(--surface);
   border: 1px solid var(--trait);
   border-radius: var(--rayon);
   cursor: pointer;
@@ -1393,14 +1562,6 @@ input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; marg
 }
 .scenario__apercu:hover { background: var(--survol); color: var(--accent); }
 .scenario__apercu svg { width: 15px; height: 15px; display: block; }
-
-.scenario__note {
-  margin: 9px 0 0;
-  font-size: .6875rem;
-  color: var(--encre-3);
-  line-height: 1.4;
-}
-.scenario__note:empty { display: none; }
 
 /* --- Premier temps : l'explication, et rien d'autre --------------------- */
 
@@ -1421,39 +1582,160 @@ input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; marg
 .intro[hidden],
 .apercu[hidden] { display: none; }
 
+/*
+ * L'explication tient en un écran et se lit en dix secondes : un titre, un
+ * dessin qui se trace, trois cartes d'une ligne. Les réserves sont repliées
+ * dans « Les petites lignes » — présentes, mais plus imposées.
+ */
 .intro {
   display: grid;
-  gap: 14px;
-  width: min(580px, calc(100vw - 32px));
+  gap: 16px;
+  width: min(620px, calc(100vw - 32px));
   padding: 22px 26px 20px;
+  border-color: var(--encre);
+  animation: questionEntree .32s cubic-bezier(.22, .8, .28, 1);
 }
 .intro__entete { display: flex; align-items: start; justify-content: space-between; gap: 16px; }
 .intro__titre {
   margin: 0;
   font-family: var(--police-titre);
   font-weight: var(--graisse-titre);
-  font-size: 1.1875rem;
-  line-height: 1.25;
+  font-size: clamp(1.5rem, 4vw, 2rem);
+  line-height: 1.1;
   letter-spacing: var(--interlettre-titre);
 }
-.intro__texte { display: grid; gap: 10px; }
-.intro__texte p { margin: 0; font-size: .875rem; color: var(--encre-2); line-height: 1.55; }
-.intro__texte strong { color: var(--encre); }
+
+.intro__dessin { width: 100%; height: auto; overflow: visible; }
+.intro__dessin .scenario__droite { stroke-width: 2; }
+.intro__vague { stroke-width: 3.5; stroke-dasharray: 800; animation: vagueTraceLongue 1.8s .25s var(--aise) both; }
+@keyframes vagueTraceLongue { from { stroke-dashoffset: 800; } to { stroke-dashoffset: 0; } }
+.intro__etiquette { font-family: var(--police); font-size: 13px; font-weight: 600; fill: var(--encre-3); }
+.intro__etiquette--vague { fill: var(--accent); }
+
+/*
+ * Deux cases, deux familles, et le même code que dans la liste : grisé plein
+ * pour le passé (des années qui ont eu lieu), violet en tirets pour les
+ * futurs (rien n'est observé). On les reconnaîtra en refermant la fenêtre.
+ */
+.intro__deux {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.intro__carte {
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  padding: 16px 16px 18px;
+  font-size: .875rem;
+  line-height: 1.5;
+  color: var(--encre-2);
+  border-radius: var(--rayon);
+  animation: carteEntree .45s var(--aise) both;
+}
+.intro__numero {
+  font-size: .625rem;
+  font-weight: 700;
+  letter-spacing: var(--interlettre-caps);
+  text-transform: uppercase;
+  color: var(--encre-2);
+}
+.intro__carte strong {
+  font-family: var(--police-titre);
+  font-weight: var(--graisse-titre);
+  font-size: 1.625rem;
+  line-height: 1.1;
+  letter-spacing: var(--interlettre-titre);
+  color: var(--encre);
+}
+.intro__carte--passe {
+  background: var(--surface-creuse);
+  border: 1px solid var(--bord-champ);
+  animation-delay: 1s;
+}
+.intro__carte--futur {
+  background: var(--accent-doux);
+  border: 1px dashed var(--accent);
+  animation-delay: 1.15s;
+}
+@keyframes carteEntree {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 .intro__pied { display: flex; justify-content: flex-end; }
+
+@media (max-width: 560px) {
+  .intro__deux { grid-template-columns: 1fr; }
+}
+
+/* Mouvement réduit : tout est déjà à sa place, rien ne se trace. */
+@media (prefers-reduced-motion: reduce) {
+  .scenario[data-etat="ferme"],
+  .scenario__vague,
+  .intro,
+  .intro__carte { animation: none; }
+  .scenario { transition: none; }
+}
 
 /* --- Second temps : l'aperçu d'un scénario ----------------------------- */
 
+/*
+ * Aperçu allégé : un titre lisible, une légende qui dit où chaque courbe
+ * arrive, la courbe. Le reste — taux année par année, réserves, sources — se
+ * déplie à la demande. Tout montrer d'emblée faisait peur plus qu'il
+ * n'informait.
+ */
 .apercu {
-  width: min(760px, calc(100vw - 32px));
-  padding: 20px 24px 22px;
+  width: min(560px, calc(100vw - 32px));
+  padding: 22px 24px 20px;
 }
 .apercu__entete {
   display: flex;
   align-items: start;
   justify-content: space-between;
   gap: 16px;
-  margin-bottom: 14px;
+  margin-bottom: 12px;
 }
+.apercu__titre {
+  margin: 0 0 6px;
+  font-family: var(--police-titre);
+  font-weight: var(--graisse-titre);
+  font-size: 1.75rem;
+  line-height: 1.1;
+  letter-spacing: var(--interlettre-titre);
+}
+.apercu__resume { margin: 0; font-size: .9375rem; line-height: 1.5; color: var(--encre-2); }
+
+.apercu__legende {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  margin: 0 0 8px;
+  padding: 0;
+  list-style: none;
+  font-size: .8125rem;
+  color: var(--encre-2);
+}
+.apercu__legende li { display: flex; align-items: center; gap: 6px; }
+.apercu__legende strong {
+  font-family: var(--police-chiffres);
+  font-variant-numeric: tabular-nums;
+  color: var(--encre);
+}
+.apercu .graphique--court { height: 200px; }
+
+.apercu__details { margin-top: 12px; border-top: 1px solid var(--trait); padding-top: 10px; }
+.apercu__details summary {
+  cursor: pointer;
+  font-size: .8125rem;
+  font-weight: 600;
+  color: var(--encre-2);
+}
+.apercu__details summary:hover { color: var(--accent); }
 .apercu__note { margin: 10px 0 0; font-size: .75rem; color: var(--encre-3); line-height: 1.45; }
 .apercu__sources {
   margin: 8px 0 0;

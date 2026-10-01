@@ -862,14 +862,39 @@ const ICONE_COURBE =
   'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
   '<path d="M1.5 11.5 5 7l3 2.5 5.5-6"/><path d="M1.5 14.5h13"/></svg>';
 
+/** Le nom de l'absence de scénario : les taux de la bulle 4, en ligne droite. */
+const NOM_LINEAIRE = 'Scénario linéaire';
+
 /** L'explication a-t-elle déjà été lue ? Tant que non, la liste reste cachée. */
 let scenariosDecouverts = false;
 
 const introOuverte = () => !$('#intro').hidden;
 const apercuOuvert = () => !$('#apercu').hidden;
 
+/*
+ * Pictogrammes des deux familles : une flèche qui revient pour le passé, une
+ * flèche pointillée qui part pour les futurs. La forme distingue avant même
+ * qu'on lise l'étiquette.
+ */
+const PICTO = {
+  historique:
+    '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8a5 5 0 1 0 1.5-3.6"/>' +
+    '<path d="M3 2.5v2.8h2.8"/><path d="M8 5.5V8l1.8 1.2"/></svg>',
+  prospectif:
+    '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 8h9" stroke-dasharray="2 2"/>' +
+    '<path d="M10 4.5 13.5 8 10 11.5"/></svg>',
+};
+
+/** Le sous-titre d'une ligne : la période observée, ou le marché choqué. */
+function sousTitreScenario(sc) {
+  if (sc.periode) return sc.periode;
+  if (sc.choque) return `Un choc sur ${sc.choque.nom}`;
+  return sc.sousTitre || '';
+}
+
 function ligneScenario(sc) {
-  const date = sc.periode ? `<span class="scenario__periode">${sc.periode}</span>` : '';
+  const sous = sousTitreScenario(sc);
+  const date = sous ? `<span class="scenario__periode">${sous}</span>` : '';
   return (
     '<div class="scenario__ligne">' +
     `<button type="button" class="scenario__option" data-scenario="${sc.cle}" ` +
@@ -882,29 +907,40 @@ function ligneScenario(sc) {
 }
 
 function construireScenarios() {
-  const morceaux = [ligneScenario({ cle: '', nom: 'Mes hypothèses', periode: null })];
+  // Chaque famille a son propre bloc et son pictogramme : grisé plein pour le
+  // passé, violet en tirets pour les futurs. Les étiquettes « Historique » /
+  // « Hypothèse » ont été retirées — le bloc le dit déjà, elles chargeaient.
+  const groupe = (cle, nom, lignes) =>
+    `<div class="scenario__groupe scenario__groupe--${cle}" role="group" aria-label="${nom}">` +
+      `<p class="scenario__famille"><span class="scenario__picto">${PICTO[cle]}</span>${nom}</p>` +
+      lignes.join('') +
+    '</div>';
+
+  // Le linéaire n'a pas de ligne : c'est l'absence de scénario, les taux de
+  // la bulle 4 appliqués tels quels chaque année — ce que l'utilisateur voit
+  // déjà. On y revient en recliquant sur le scénario actif.
+  const morceaux = [];
   for (const famille of FAMILLES) {
     const liste = scenariosParFamille(famille.cle);
     if (!liste.length) continue;
-    // L'étiquette dit l'essentiel : « Historique » = observé, « Hypothèse » =
-    // construit. Sans elle, deux scénarios de nature opposée se ressemblent.
-    morceaux.push(
-      `<p class="scenario__famille">${famille.nom}` +
-        `<span class="scenario__etiquette">${famille.etiquette}</span></p>`
-    );
-    for (const sc of liste) morceaux.push(ligneScenario(sc));
+    morceaux.push(groupe(famille.cle, famille.nom, liste.map(ligneScenario)));
   }
   $('#scenarioChoix').innerHTML = morceaux.join('');
+  marquerScenarioActif(scenarioActif ? scenarioActif.cle : '');
 
+  // Un clic applique ; un second clic sur le même retire le filtre et rend
+  // le linéaire. Pas de bouton dédié : la carte garde la même hauteur.
   for (const b of document.querySelectorAll('.scenario__option')) {
-    b.addEventListener('click', () => appliquerScenario(b.dataset.scenario));
+    b.addEventListener('click', () => {
+      const dejaActif = scenarioActif && scenarioActif.cle === b.dataset.scenario;
+      appliquerScenario(dejaActif ? '' : b.dataset.scenario);
+    });
   }
   for (const b of document.querySelectorAll('.scenario__apercu')) {
     b.addEventListener('click', () => ouvrirApercu(b.dataset.apercu));
   }
 
   $('#scenarioOuvrir').addEventListener('click', ouvrirIntro);
-  $('#scenarioAide').addEventListener('click', ouvrirIntro);
   $('#introFermer').addEventListener('click', fermerIntro);
   $('#introValider').addEventListener('click', () => {
     scenariosDecouverts = true;
@@ -912,6 +948,7 @@ function construireScenarios() {
     majScenario();
   });
   $('#apercuFermer').addEventListener('click', fermerApercu);
+  $('#scenarioRetirer').addEventListener('click', () => appliquerScenario(''));
 }
 
 function ouvrirIntro() {
@@ -951,7 +988,7 @@ function ouvrirApercu(cle) {
   const sc = cle ? scenarioParCle(cle) : null;
   const horizon = dernierResultat ? dernierResultat.annees.length : 25;
 
-  // « Mes hypothèses » n'a pas de série : on lit les champs, ce qui donne trois
+  // Le scénario linéaire n'a pas de série : on lit les champs, ce qui donne trois
   // droites. La comparaison avec une décennie réelle est tout l'argument.
   const lire = (champ) => {
     if (sc) return sc.taux[champ];
@@ -983,10 +1020,10 @@ function ouvrirApercu(cle) {
   ];
   for (const serie of series) serie.taux = lire(serie.champ);
 
-  $('#apercuTitre').textContent = sc ? sc.nom : 'Mes hypothèses';
+  $('#apercuTitre').textContent = sc ? sc.nom : NOM_LINEAIRE;
   $('#apercuResume').textContent = sc
     ? sc.resume
-    : 'Vos taux, appliqués tels quels chaque année. Aucune donnée de marché.';
+    : "Vos taux de l'étape 4, appliqués tels quels chaque année. Aucune donnée de marché.";
 
   // On n'affiche que les années EXPLICITEMENT DÉFINIES, suivies du taux qui
   // prolonge. Lister vingt-cinq valeurs dont treize identiques ferait passer un
@@ -1025,8 +1062,25 @@ function ouvrirApercu(cle) {
     .join('');
 
   const arrivee = (taux) => Math.round(base100(taux)[horizon]);
+
+  // Légende : pastille, nom, et où la courbe arrive. Construite en DOM —
+  // textContent seulement.
+  const legende = $('#apercuLegende');
+  legende.replaceChildren();
+  for (const serie of series) {
+    const li = document.createElement('li');
+    const pastille = document.createElement('span');
+    pastille.className = `pastille pastille--${serie.classe}`;
+    const nom = document.createElement('span');
+    nom.textContent = serie.nom;
+    const valeur = document.createElement('strong');
+    valeur.textContent = arrivee(serie.taux);
+    li.append(pastille, nom, valeur);
+    legende.append(li);
+  }
+  $('#apercuDetails').open = false;
   $('#apercuNote').textContent =
-    `Taux annuels en %. Base 100 au départ : après ${horizon} ans, ` +
+    `Taux annuels en %. Les valeurs de la légende partent de 100 et se lisent après ${horizon} ans : ` +
     series.map((x) => `${arrivee(x.taux)} pour « ${x.nom} »`).join(', ') +
     '.' +
     // Le texte doit dire ce qui est observé et ce qui ne l'est pas. Un scénario
@@ -1119,6 +1173,18 @@ function fermerApercu() {
  * afficher les valeurs de l'utilisateur pendant qu'un scénario calcule autre
  * chose serait un mensonge à l'écran.
  */
+/** Coche la ligne du scénario en vigueur ; sans scénario, aucune ne l'est. */
+function marquerScenarioActif(cle) {
+  for (const b of document.querySelectorAll('.scenario__option')) {
+    const actif = b.dataset.scenario === (cle || '');
+    b.classList.toggle('scenario__option--actif', actif);
+    b.setAttribute('aria-checked', String(actif));
+  }
+  // Recliquer le scénario actif le retire aussi, mais personne ne le devine :
+  // le bouton du bandeau le dit, et n'apparaît que s'il y a un filtre à retirer.
+  $('#scenarioRetirer').hidden = !cle;
+}
+
 function appliquerScenario(cle) {
   const scenario = cle ? scenarioParCle(cle) : null;
 
@@ -1144,26 +1210,11 @@ function appliquerScenario(cle) {
   }
   if (!scenario) hypothesesUtilisateur = null;
 
-  for (const b of document.querySelectorAll('.scenario__option')) {
-    const actif = b.dataset.scenario === (cle || '');
-    b.classList.toggle('scenario__option--actif', actif);
-    b.setAttribute('aria-checked', String(actif));
-  }
+  marquerScenarioActif(cle);
 
-  // Deux natures, deux phrases : une fenêtre du passé annonce ses années
-  // observées, un stress test annonce qu'il n'en a aucune. Écrire
-  // « 0 années observées » serait exact et incompréhensible.
-  $('#scenarioNote').textContent = !scenario
-    ? ''
-    : scenario.reel === 0
-    ? `Hypothèse : ${scenario.definies} années de choc sur ${scenario.choque.nom}, ` +
-      `puis la tendance longue (${pourcentDixieme.format(scenario.suite[scenario.choque.cle])} par an).`
-    : `${scenario.reel} années observées` +
-      (scenario.periode ? ` (${scenario.periode})` : '') +
-      (scenario.reel < 25
-        ? `, puis ${pourcentDixieme.format(scenario.suiteBourse)} par an — extrapolé.`
-        : ', soit tout l\u2019horizon. Rien n\u2019est extrapolé.');
-
+  // Ce qui est observé et ce qui est prolongé n'est plus écrit sous la liste
+  // (la carte garde la même hauteur) : l'avertissement sous le graphique et
+  // l'aperçu de chaque scénario le disent.
   recalculer();
 }
 
@@ -1219,8 +1270,18 @@ function majScenario() {
     ? 'ouvert'
     : 'ferme';
   $('#scenarioAccroche').textContent = pret
-    ? 'Rejouez vingt ans qui ont vraiment eu lieu, ou testez un choc.'
-    : 'Disponible une fois votre simulation complète.';
+    ? 'Ajoutez un filtre de marché à votre projet et observez son effet sur les résultats.'
+    : 'Validez les quatre étapes pour débloquer.';
+  // Verrouillée, la carte reste lisible mais ne s'active pas — y compris au
+  // clavier, ce que `pointer-events` seul ne garantissait pas.
+  $('#scenarioOuvrir').disabled = !pret;
+
+  // Quatre pastilles, une par bulle : on voit ce qui reste à faire pour
+  // débloquer, au lieu d'une carte grisée qui ne dit rien.
+  const pastilles = $('#scenarioProgression').children;
+  for (let i = 0; i < pastilles.length; i++) {
+    pastilles[i].classList.toggle('scenario__pas--fait', validees.has(BULLES[i]));
+  }
 }
 
 /* ------------------------------------------------------- Brouillon local */
@@ -1243,6 +1304,17 @@ function paramsCourants() {
   const saisie = lireFormulaire();
   for (const champ of Object.keys(p.moteur)) {
     if (champ in saisie) p.moteur[champ] = saisie[champ];
+  }
+  // Un scénario est un filtre posé sur le projet, pas une partie du projet :
+  // on sauvegarde les taux de l'utilisateur (mis de côté) et la clé du
+  // scénario, jamais ses séries. Sinon, au rechargement, les séries étaient
+  // prises pour les hypothèses de l'utilisateur, et retirer le filtre rendait
+  // la première année du scénario (−5,2 % en bourse) au lieu de ses 5 %.
+  if (scenarioActif && hypothesesUtilisateur) {
+    for (const champ of TAUX_SCENARISES) {
+      const v = parseFloat(hypothesesUtilisateur[champ]);
+      p.moteur[champ] = Number.isFinite(v) ? v / 100 : DEFAUTS[champ];
+    }
   }
   // La décomposition, pas la somme : l'effort se déduit, il ne se stocke pas.
   p.profil = lireProfil();
@@ -1904,16 +1976,19 @@ function majBulles() {
       champ.disabled = pilote || (!estValidee && n !== bulleZoomee);
     }
   }
+  // La carte des scénarios suit la progression des bulles, résultat ou non.
+  majScenario();
 }
 
 /**
  * Alvéole d'origine de la bulle actuellement zoomée, le temps du zoom.
  *
- * Le rail de gauche est en `position: sticky`, ce qui crée un contexte
- * d'empilement — toujours, même sans `z-index`. Une bulle qui y reste ne peut
- * donc pas passer au-dessus du voile, quel que soit son `z-index` : les bulles
- * 3 et 4 s'ouvraient bien au centre mais sous l'écran grisé, hors d'atteinte.
- * On les sort donc du rail pendant le zoom, et on les y remet après. Le FLIP
+ * Le rail de gauche a été en `position: sticky`, ce qui crée un contexte
+ * d'empilement — toujours, même sans `z-index`. Une bulle qui y restait ne
+ * pouvait donc pas passer au-dessus du voile : les bulles 3 et 4 s'ouvraient
+ * au centre mais sous l'écran grisé, hors d'atteinte. Le rail ne colle plus,
+ * mais on garde la sortie pendant le zoom : elle protège de tout contexte
+ * d'empilement qu'un parent pourrait recréer (sticky, transform, filter…). Le FLIP
  * absorbe le déplacement sans qu'on ait à le lui dire : il mesure la position
  * avant et après, quel que soit le parent.
  */

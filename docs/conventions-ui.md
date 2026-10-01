@@ -162,30 +162,59 @@ réelles — en cours ; **(3)** la mise en location ultérieure — moteur fait,
 - **Deux familles, huit options** : `historique` (Krach immobilier 1991-2001, Internet et
   subprimes 2000-2010, Krach de 2008 2008-2018, Taux bas puis inflation 2012-2022, Trente ans réels
   1991-2022), `prospectif` (deux trajectoires construites, explicitement non observées) et
-  « Mes hypothèses », qui n'est pas dans le fichier — c'est l'absence de scénario, et elle lit les
+  le « Scénario linéaire » (ex-« Mes hypothèses »), qui n'est pas dans le fichier — c'est l'absence de scénario, et elle lit les
   champs de la bulle 4. Les noms désignent l'ÉVÉNEMENT de marché, jamais l'issue pour l'acheteur.
+- **La carte est une fonctionnalité à débloquer, et se présente comme telle** (01/10/2026,
+  demande de Lucas : « un cadre plus visible, qui donne envie de cliquer »). Verrouillée, elle
+  reste nette — fond creux, bordure en tirets, cadenas, « À débloquer » et **quatre pastilles,
+  une par bulle validée** — au lieu de l'ancienne carte grisée à 45 % que personne ne voyait.
+  Débloquée, elle reprend la **présentation proposée par ChatGPT** (arbitrage de Lucas) :
+  question « Et si les marchés changeaient ? » (le surtitre ne reste qu'à l'état verrouillé),
+  une courbe **en segments heurtés** par-dessus la droite pointillée, « Ajoutez un filtre de
+  marché à votre projet et observez son effet sur les résultats », et un bouton pleine largeur
+  « Explorer les scénarios », sans flèche. Couverture jaune et ombre dure ; **au survol**, la carte
+  se soulève, la courbe se trace (1,4 s) et le bouton passe à l'accent. **La courbe ne s'anime
+  qu'au survol** : une animation de base la faisait retracer en quittant la carte.
+  L'explication reprend **exactement les mêmes points**, mis à l'échelle. Le
+  bouton est `disabled` tant que c'est verrouillé : `pointer-events` seul laissait passer le
+  clavier.
 - **La découverte se fait en DEUX TEMPS**, portés par `data-etat` sur `#scenario` :
   1. `bloque` — tant que les quatre bulles ne sont pas validées. L'accroche dit pourquoi.
-  2. `ferme` — un simple appel. Le clic ouvre une fenêtre qui explique **ce qu'on cherche à
+  2. `ferme` — l'appel décrit ci-dessus. Le clic ouvre une fenêtre qui explique **ce qu'on cherche à
      faire, et rien d'autre** : pas un seul nom de scénario. Sept noms de décennies ne veulent
      rien dire tant qu'on n'a pas dit ce qu'on en fait, ni prévenu que la seconde moitié des
      courbes est extrapolée.
   3. `ouvert` — la liste remplace l'appel dans le rail et y reste. Chaque ligne porte son nom, sa
      période, et un bouton qui ouvre l'aperçu des courbes.
-- **L'explication reste relisible** par le « ? » à côté du titre. Ne pas la réduire à un affichage
-  unique qu'on ne peut plus rappeler.
-- **L'accueil tient en trois paragraphes** : ce que fait le module ; le fait que chaque décennie ne
-  fournit qu'une dizaine d'années et que le reste est extrapolé ; et pourquoi ces décennies ne se
-  reproduiront pas — l'immobilier français part d'un niveau de prix qui interdit mécaniquement de
-  refaire les hausses des années 2000. Les sources et réserves restent par scénario, dans son
-  aperçu : les remonter ici serait exactement la surcharge qu'on cherche à éviter.
+- **L'explication ne se relit plus depuis la liste** : le « ? » a été retiré à la demande de Lucas
+  (place prise pour rien). Elle reste ouverte au premier clic sur la carte jaune.
+- **L'explication se lit en dix secondes** (refonte du 01/10/2026 — les quatre paragraphes
+  précédents n'étaient pas lus). Un titre (« La vraie vie n'est pas une ligne droite. »), le
+  dessin de la carte en grand — la droite « linéaire » et un vrai chemin qui se trace — puis
+  **deux cases** : « 01 / Le passé — Rejouer l'histoire » en grisé, « 02 / Futurs possibles —
+  Tester un choc » en violet à tirets, habillées comme leurs blocs dans la liste. Mise en page
+  reprise d'une proposition de ChatGPT, titre et dessin de Claude — arbitrage de Lucas. Pas de
+  case « Linéaire » : c'est ce que l'utilisateur a déjà sous les yeux. Pas de flèche sur « Voir
+  les scénarios ». Rien d'autre : ni rappel sur le taux de crédit, ni réserves repliées —
+  Lucas a voulu l'écran le plus simple possible. Les réserves vivent dans l'aperçu de chaque
+  scénario et dans l'avertissement sous le graphique.
 - **Appliquer se fait d'un clic sur la ligne**, l'aperçu s'ouvre par l'icône à droite. Ouvrir un
   aperçu n'applique rien.
-- **Trois groupes dans la liste** : « Décennies observées », « Sans aucune projection » (le seul
-  scénario dont rien n'est projeté — d'où sa famille `continu` et sa bordure pointillée),
-  « Scénarios construits ». « Mes hypothèses » est en tête, hors groupe.
-- **La note sous la liste dit ce qui est observé et ce qui est extrapolé** pour le scénario
-  appliqué : « 11 années observées (2008-2018), puis 8,2 % par an — extrapolé ».
+- **Deux blocs dans la liste** : « Le passé » en **grisé plein**, « Des futurs possibles » en
+  **violet à tirets** (aplat `--accent-doux`, pas une couleur de série).
+  Chaque bloc a son pictogramme (flèche qui revient, flèche pointillée qui part). Un futur affiche
+  « Un choc sur … » là où un historique affiche sa période.
+- **Le scénario linéaire n'a pas de ligne** : c'est l'absence de scénario, les taux de l'étape 4
+  appliqués chaque année. On y revient en recliquant sur le scénario actif, mais personne ne le
+  devine : une petite pilule **« × Retirer »** à droite du titre, dans le bandeau, le dit. Elle
+  n'apparaît qu'avec un scénario actif ; vivant dans le bandeau, elle ne change pas la hauteur de
+  la carte. Essayé puis écarté : un bouton jaune sous la liste — une couleur de trop, et une
+  carte trop haute.
+- **La liste ouverte garde toujours la même hauteur** : un bandeau d'encre avec le seul titre,
+  les deux blocs et leurs quatre scénarios, rien d'autre. Ni étiquettes « Historique » /
+  « Hypothèse » (le bloc le dit déjà), ni note « années observées », ni bandeau qui change de
+  couleur — tout ce qui chargeait ou faisait bouger la carte a été retiré (décision de Lucas). Même
+  bordure d'encre et même ombre dure que la carte jaune : c'est le même objet, déplié.
 - **Trois séries sont tracées** — marchés, immobilier, loyers (IRL). `revalCharges` et
   `revalTaxeFonciere` sont dans `taux` parce que le moteur en a besoin, mais ne sont pas dessinées :
   elles suivent l'inflation générale et n'intéressent pas le lecteur au même titre.
@@ -210,10 +239,16 @@ réelles — en cours ; **(3)** la mise en location ultérieure — moteur fait,
   +5 %) et sont désactivés. Les laisser montrer les valeurs de l'utilisateur pendant que le moteur
   calcule autre chose serait un mensonge à l'écran. `majBulles()` doit respecter ce verrouillage,
   sinon chaque recalcul rouvrirait les champs.
-- **« Mes hypothèses » rend les valeurs intactes** : elles sont mises de côté au premier scénario
+- **Le scénario linéaire rend les valeurs intactes** : elles sont mises de côté au premier scénario
   appliqué, jamais écrasées.
 - **L'avertissement de bas de page change avec le scénario** : « hypothèses constantes » devient
   faux dès qu'une série tourne.
+- **L'aperçu est allégé** (01/10/2026 — « c'est terrifiant de voir tout ça ») : 560 px de large,
+  titre en sérif 1,75 rem, résumé en 15 px, une **légende** qui donne où chaque courbe arrive
+  (base 100), une courbe de 200 px. Tout le reste — taux année par année, note de lecture,
+  réserves et sources — est dans un `<details>` « Le détail année par année », **refermé à
+  chaque ouverture**. Les réserves ne sont donc plus visibles d'emblée : arbitrage assumé de
+  Lucas, la lisibilité d'abord.
 - **L'aperçu est une fenêtre à part**, ouverte par l'icône de courbe d'une ligne : une fenêtre qui
   trace ses trois séries (marchés, immobilier, loyers) **en base 100**, sur l'horizon complet. On trace la
   VALEUR, pas le taux : une suite de pourcentages est une dérivée, on la lit mal et on ne voit pas
@@ -222,13 +257,13 @@ réelles — en cours ; **(3)** la mise en location ultérieure — moteur fait,
   rappelés sous la courbe (`.suites`) : la courbe dit où l'on arrive, la suite par quoi on y
   passe. Ces deux lignes tiennent lieu de légende, il n'y en a pas d'autre.
 - La répétition de la série est **visible** sur la courbe : c'est une propriété du modèle, pas un
-  détail à cacher. « Mes hypothèses » a son aperçu aussi — deux courbes lisses et « +5 chaque
+  détail à cacher. Le scénario linéaire a son aperçu aussi — deux courbes lisses et « +5 chaque
   année » sous le graphique ; la comparaison avec une décennie réelle est tout l'argument.
 - **Un seul axe, même quand les échelles divergent** (marchés à 1 043 contre immobilier à 313 sur
   le scénario porteur). Deux axes Y mentiraient sur l'écart réel.
 - **Ouvrir un aperçu n'applique rien.** Regarder et choisir sont deux gestes distincts.
 - **Les deux fenêtres vivent hors du rail de gauche**, à côté du voile. Le rail est
-  `position: sticky`, donc un contexte d'empilement : une fenêtre qui y resterait passerait sous
+  (ou a été) `position: sticky`, donc un contexte d'empilement : une fenêtre qui y resterait passerait sous
   le voile — même piège que les bulles 3 et 4 en leur temps.
 - **Le voile sert trois vues** : l'explication, l'aperçu et la bulle zoomée. L'aperçu passe
   devant l'explication dans les écouteurs de clic et d'Échap — c'est lui qui est au-dessus. Son écouteur et celui d'Échap
@@ -525,7 +560,8 @@ réelles — en cours ; **(3)** la mise en location ultérieure — moteur fait,
 - Dans les règles de densité, **l'ordre compte** : `.champ input` et `.champ--cle input` ont la
   même spécificité, donc la règle générique doit toujours précéder celle du champ dominant.
 - **La bulle zoomée sort de son alvéole et va sous `<body>`** le temps du zoom, puis y retourne.
-  Le rail de gauche est en `position: sticky`, et sticky crée **toujours** un contexte
+  Le rail de gauche a été en `position: sticky` (retiré en octobre 2026 : il défile désormais
+  avec la page), et sticky crée **toujours** un contexte
   d'empilement, même sans `z-index`. Une bulle qui y reste ne peut donc pas passer au-dessus du
   voile quel que soit son `z-index` : les bulles 3 et 4 s'ouvraient bien au centre, mais sous
   l'écran grisé, bouton « Valider » hors d'atteinte. Les bulles 1 et 2, qui vivent dans
