@@ -1460,9 +1460,10 @@ input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; marg
 .scenario__choix { display: grid; gap: 10px; }
 
 /*
- * Trois natures, trois blocs. Le passé est un bloc plein (des années qui ont
- * eu lieu), les futurs un bloc en tirets (rien n'est observé). La différence
- * se voit avant de lire — et sans couleur : la couleur reste aux données.
+ * Deux familles, deux blocs. Le passé est un bloc grisé plein (des années qui
+ * ont eu lieu), les futurs un bloc violet en tirets (rien n'est observé). Le
+ * violet est un aplat d'accent, pas une couleur de série : il ne se confond
+ * avec aucune courbe.
  */
 .scenario__groupe {
   display: grid;
@@ -1470,14 +1471,13 @@ input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; marg
   padding: 8px;
   border-radius: var(--rayon-large);
 }
-.scenario__groupe--lineaire { padding: 0; }
 .scenario__groupe--historique {
   background: var(--surface-creuse);
   border: 1px solid var(--trait);
 }
 .scenario__groupe--prospectif {
-  background: transparent;
-  border: 1.5px dashed var(--bord-champ);
+  background: var(--accent-doux);
+  border: 1px dashed var(--accent);
 }
 
 .scenario__famille {
@@ -1564,6 +1564,23 @@ input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; marg
 }
 .scenario__note:empty { display: none; }
 
+/* Retour au linéaire : présent seulement quand un scénario est appliqué. */
+.scenario__retirer {
+  width: 100%;
+  margin-top: 10px;
+  padding: 7px 10px;
+  font: inherit;
+  font-size: .75rem;
+  font-weight: 600;
+  color: var(--encre-2);
+  background: transparent;
+  border: 1px solid var(--trait);
+  border-radius: var(--rayon);
+  cursor: pointer;
+}
+.scenario__retirer:hover { color: var(--accent-fort); border-color: var(--accent); background: var(--survol); }
+.scenario__retirer[hidden] { display: none; }
+
 /* --- Premier temps : l'explication, et rien d'autre --------------------- */
 
 .intro,
@@ -1626,10 +1643,15 @@ input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; marg
 .intro__etiquette { font-family: var(--police); font-size: 13px; font-weight: 600; fill: var(--encre-3); }
 .intro__etiquette--vague { fill: var(--accent); }
 
-.intro__trois {
+/*
+ * Deux cases, deux familles, et le même code que dans la liste : grisé plein
+ * pour le passé (des années qui ont eu lieu), violet en tirets pour les
+ * futurs (rien n'est observé). On les reconnaîtra en refermant la fenêtre.
+ */
+.intro__deux {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 10px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -1637,19 +1659,39 @@ input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; marg
 .intro__carte {
   display: grid;
   align-content: start;
-  gap: 4px;
-  padding: 12px;
-  font-size: .8125rem;
-  line-height: 1.4;
+  gap: 8px;
+  padding: 16px 16px 18px;
+  font-size: .875rem;
+  line-height: 1.5;
   color: var(--encre-2);
-  border-radius: var(--rayon-large);
+  border-radius: var(--rayon);
   animation: carteEntree .45s var(--aise) both;
 }
-.intro__carte strong { font-size: .875rem; color: var(--encre); }
-/* Les trois mêmes habits que dans la liste : on reconnaîtra les blocs. */
-.intro__carte--lineaire { background: var(--surface); border: 1px solid var(--trait); animation-delay: .9s; }
-.intro__carte--passe { background: var(--surface-creuse); border: 1px solid var(--trait); animation-delay: 1.05s; }
-.intro__carte--futur { border: 1.5px dashed var(--bord-champ); animation-delay: 1.2s; }
+.intro__numero {
+  font-size: .625rem;
+  font-weight: 700;
+  letter-spacing: var(--interlettre-caps);
+  text-transform: uppercase;
+  color: var(--encre-2);
+}
+.intro__carte strong {
+  font-family: var(--police-titre);
+  font-weight: var(--graisse-titre);
+  font-size: 1.625rem;
+  line-height: 1.1;
+  letter-spacing: var(--interlettre-titre);
+  color: var(--encre);
+}
+.intro__carte--passe {
+  background: var(--surface-creuse);
+  border: 1px solid var(--bord-champ);
+  animation-delay: 1s;
+}
+.intro__carte--futur {
+  background: var(--accent-doux);
+  border: 1px dashed var(--accent);
+  animation-delay: 1.15s;
+}
 @keyframes carteEntree {
   from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }
@@ -1670,7 +1712,7 @@ input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; marg
 .intro__pied { display: flex; justify-content: flex-end; }
 
 @media (max-width: 560px) {
-  .intro__trois { grid-template-columns: 1fr; }
+  .intro__deux { grid-template-columns: 1fr; }
 }
 
 /* Mouvement réduit : tout est déjà à sa place, rien ne se trace. */

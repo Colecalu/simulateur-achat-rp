@@ -185,21 +185,24 @@ réelles — en cours ; **(3)** la mise en location ultérieure — moteur fait,
 - **L'explication se lit en dix secondes** (refonte du 01/10/2026 — les quatre paragraphes
   précédents n'étaient pas lus). Un titre (« La vraie vie n'est pas une ligne droite. »), le
   dessin de la carte en grand — la droite « linéaire » et un vrai chemin qui se trace — puis
-  **trois cartes d'une ligne** : Linéaire, Le passé, Des futurs possibles, habillées comme leurs
-  blocs dans la liste pour qu'on les reconnaisse. Une phrase rappelle que le taux de crédit reste
+  **deux cases** : « 01 / Le passé — Rejouer l'histoire » en grisé, « 02 / Futurs possibles —
+  Tester un choc » en violet à tirets, habillées comme leurs blocs dans la liste. Mise en page
+  reprise d'une proposition de ChatGPT, titre et dessin de Claude — arbitrage de Lucas. Pas de
+  case « Linéaire » : c'est ce que l'utilisateur a déjà sous les yeux. Pas de flèche sur « Voir
+  les scénarios ». Une phrase rappelle que le taux de crédit reste
   le sien. **Les réserves ne disparaissent pas, elles se replient** dans « Les petites lignes »
   (`<details>`) : vingt ans observés puis cinq prolongés en pointillé, un seul marché choqué par
   futur, et l'impossibilité de refaire les hausses des années 2000. Les sources restent par
   scénario, dans son aperçu.
 - **Appliquer se fait d'un clic sur la ligne**, l'aperçu s'ouvre par l'icône à droite. Ouvrir un
   aperçu n'applique rien.
-- **Trois blocs dans la liste, trois natures** : « Votre base » (le **Scénario linéaire**, les taux
-  de l'étape 4 appliqués chaque année — coché par défaut, puisque c'est lui qui s'applique sans
-  choix), « Le passé · Historique » en **bloc plein**, « Des futurs possibles · Hypothèse » en
-  **bloc en tirets**. Chaque bloc a son pictogramme (droite, flèche qui revient, flèche pointillée
-  qui part). Plein = observé, tirets = construit : la différence se voit avant de lire, et sans
-  couleur, la couleur restant aux données. Un futur affiche « Un choc sur … » là où un historique
-  affiche sa période.
+- **Deux blocs dans la liste** : « Le passé · Historique » en **grisé plein**, « Des futurs
+  possibles · Hypothèse » en **violet à tirets** (aplat `--accent-doux`, pas une couleur de série).
+  Chaque bloc a son pictogramme (flèche qui revient, flèche pointillée qui part). Un futur affiche
+  « Un choc sur … » là où un historique affiche sa période.
+- **Le scénario linéaire n'a pas de ligne** : c'est l'absence de scénario, les taux de l'étape 4
+  appliqués chaque année. On y revient par **« Revenir au scénario linéaire »**, sous la liste,
+  visible seulement quand un scénario est appliqué.
 - **La note sous la liste dit ce qui est observé et ce qui est extrapolé** pour le scénario
   appliqué : « 11 années observées (2008-2018), puis 8,2 % par an — extrapolé ».
 - **Trois séries sont tracées** — marchés, immobilier, loyers (IRL). `revalCharges` et

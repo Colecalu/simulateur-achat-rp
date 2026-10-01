@@ -872,13 +872,11 @@ const introOuverte = () => !$('#intro').hidden;
 const apercuOuvert = () => !$('#apercu').hidden;
 
 /*
- * Pictogrammes des trois natures de scénario. Une droite pour le linéaire, une
- * flèche qui revient pour le passé, une flèche pointillée qui part pour les
- * futurs : la forme distingue avant même qu'on lise l'étiquette.
+ * Pictogrammes des deux familles : une flèche qui revient pour le passé, une
+ * flèche pointillée qui part pour les futurs. La forme distingue avant même
+ * qu'on lise l'étiquette.
  */
 const PICTO = {
-  lineaire:
-    '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 12.5 14 3.5"/></svg>',
   historique:
     '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8a5 5 0 1 0 1.5-3.6"/>' +
     '<path d="M3 2.5v2.8h2.8"/><path d="M8 5.5V8l1.8 1.2"/></svg>',
@@ -919,20 +917,16 @@ function construireScenarios() {
       lignes.join('') +
     '</div>';
 
-  // Le linéaire n'est pas un scénario du fichier : c'est l'absence de
-  // scénario, les taux de la bulle 4 appliqués tels quels chaque année. Son
-  // nom dit cette forme — une droite — plutôt que « mes hypothèses », qui ne
-  // disait pas en quoi il diffère des autres.
-  const morceaux = [groupe('lineaire', 'Votre base', 'Étape 4', [
-    ligneScenario({ cle: '', nom: NOM_LINEAIRE, sousTitre: "Vos taux de l'étape 4, chaque année" }),
-  ])];
+  // Le linéaire n'a pas de ligne : c'est l'absence de scénario, les taux de
+  // la bulle 4 appliqués tels quels chaque année — ce que l'utilisateur voit
+  // déjà. On y revient par `#scenarioRetirer`.
+  const morceaux = [];
   for (const famille of FAMILLES) {
     const liste = scenariosParFamille(famille.cle);
     if (!liste.length) continue;
     morceaux.push(groupe(famille.cle, famille.nom, famille.etiquette, liste.map(ligneScenario)));
   }
   $('#scenarioChoix').innerHTML = morceaux.join('');
-  // Sans scénario choisi, c'est le linéaire qui s'applique : il doit le dire.
   marquerScenarioActif(scenarioActif ? scenarioActif.cle : '');
 
   for (const b of document.querySelectorAll('.scenario__option')) {
@@ -944,6 +938,7 @@ function construireScenarios() {
 
   $('#scenarioOuvrir').addEventListener('click', ouvrirIntro);
   $('#scenarioAide').addEventListener('click', ouvrirIntro);
+  $('#scenarioRetirer').addEventListener('click', () => appliquerScenario(''));
   $('#introFermer').addEventListener('click', fermerIntro);
   $('#introValider').addEventListener('click', () => {
     scenariosDecouverts = true;
@@ -1158,13 +1153,14 @@ function fermerApercu() {
  * afficher les valeurs de l'utilisateur pendant qu'un scénario calcule autre
  * chose serait un mensonge à l'écran.
  */
-/** Coche la ligne du scénario en vigueur — le linéaire quand il n'y en a pas. */
+/** Coche la ligne du scénario en vigueur ; sans scénario, aucune ne l'est. */
 function marquerScenarioActif(cle) {
   for (const b of document.querySelectorAll('.scenario__option')) {
     const actif = b.dataset.scenario === (cle || '');
     b.classList.toggle('scenario__option--actif', actif);
     b.setAttribute('aria-checked', String(actif));
   }
+  $('#scenarioRetirer').hidden = !cle;
 }
 
 function appliquerScenario(cle) {

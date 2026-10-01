@@ -397,6 +397,12 @@
           <div class="scenario__choix" id="scenarioChoix" role="radiogroup"
                aria-label="Scénario de marché"></div>
           <p class="scenario__note" id="scenarioNote"></p>
+          <!-- Sans scénario, ce sont les taux de l'étape 4 qui s'appliquent, en
+               ligne droite. Le retour n'a donc pas de ligne dans la liste : un
+               bouton, visible seulement quand il y a quelque chose à retirer. -->
+          <button type="button" class="scenario__retirer" id="scenarioRetirer" hidden>
+            Revenir au scénario linéaire
+          </button>
         </div>
       </div>
     </div>
@@ -786,18 +792,20 @@
           <text class="intro__etiquette intro__etiquette--vague" x="168" y="146">un vrai chemin</text>
         </svg>
 
-        <ul class="intro__trois">
-          <li class="intro__carte intro__carte--lineaire">
-            <strong>Linéaire</strong>
-            <span>Vos taux de l'étape&nbsp;4, les mêmes chaque année.</span>
-          </li>
+        <!-- Deux familles, deux habits : grisé pour ce qui a eu lieu, violet en
+             tirets pour ce qu'on suppose. Les mêmes que dans la liste. Le
+             linéaire n'y figure pas : c'est ce que l'utilisateur a déjà sous
+             les yeux, pas une option à découvrir. -->
+        <ul class="intro__deux">
           <li class="intro__carte intro__carte--passe">
-            <strong>Le passé</strong>
-            <span>Vingt ans qui ont vraiment eu lieu, rejoués sur votre projet.</span>
+            <span class="intro__numero">01 / Le passé</span>
+            <strong>Rejouer l'histoire</strong>
+            <span>Deux périodes de vingt ans pour mettre votre projet à l'épreuve.</span>
           </li>
           <li class="intro__carte intro__carte--futur">
-            <strong>Des futurs possibles</strong>
-            <span>Un choc, un seul&nbsp;: l'immobilier ou la bourse.</span>
+            <span class="intro__numero">02 / Futurs possibles</span>
+            <strong>Tester un choc</strong>
+            <span>Une baisse de l'immobilier ou une stagnation de la bourse. Des hypothèses, pas des prévisions.</span>
           </li>
         </ul>
 
@@ -824,7 +832,7 @@
 
         <div class="intro__pied">
           <button type="button" class="bouton bouton--primaire" id="introValider">
-            Voir les scénarios&nbsp;<span aria-hidden="true">→</span>
+            Voir les scénarios
           </button>
         </div>
       </div>
