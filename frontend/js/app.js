@@ -2132,7 +2132,19 @@ function initialiser() {
     $('#horizon').value = $('#horizonBis').value;
     rafraichir();
   });
-  $('#reinitialiser').addEventListener('click', () => {
+  // Nouvelle simulation en deux temps : effacer la saisie et le brouillon est
+  // irréversible, un clic égaré ne doit pas suffire.
+  const confirmerNouvelle = (oui) => {
+    $('#nouvelle').dataset.etat = oui ? 'confirmer' : 'repos';
+    (oui ? $('#reinitialiserNon') : $('#reinitialiser')).focus();
+  };
+  $('#reinitialiser').addEventListener('click', () => confirmerNouvelle(true));
+  $('#reinitialiserNon').addEventListener('click', () => confirmerNouvelle(false));
+  $('#nouvelle').addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && $('#nouvelle').dataset.etat === 'confirmer') confirmerNouvelle(false);
+  });
+  $('#reinitialiserOui').addEventListener('click', () => {
+    $('#nouvelle').dataset.etat = 'repos';
     remplirFormulaire(VALEURS_DE_TRAVAIL);
     remplirProfil(Sauvegarde.DEFAUTS_PROFIL);
     $('#horizon').value = 20;

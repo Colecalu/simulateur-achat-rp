@@ -111,11 +111,33 @@
 
   <div class="plateau" id="formulaire">
 
+    <!-- Le coin vide du plateau devient la carte de la simulation : où en est
+         la sauvegarde, et de quoi en commencer une autre. Effacer est
+         irréversible : le bouton ne le fait qu'après confirmation. -->
     <div class="plateau__coin">
-      <button type="button" class="bouton bouton--discret" id="reinitialiser">Réinitialiser</button>
-      <!-- État de la sauvegarde locale. Discret, mais présent : une sauvegarde
-           silencieuse qui échoue est indiscernable d'une sauvegarde qui marche. -->
-      <p class="brouillon" id="brouillonEtat" role="status" aria-live="polite"></p>
+      <div class="nouvelle" id="nouvelle" data-etat="repos">
+        <div>
+          <p class="nouvelle__titre">Votre simulation</p>
+          <!-- État de la sauvegarde locale. Discret, mais présent : une sauvegarde
+               silencieuse qui échoue est indiscernable d'une sauvegarde qui marche. -->
+          <p class="brouillon" id="brouillonEtat" role="status" aria-live="polite"></p>
+        </div>
+
+        <button type="button" class="nouvelle__bouton" id="reinitialiser">
+          <svg viewBox="0 0 16 16" aria-hidden="true">
+            <path d="M2.5 8a5.5 5.5 0 1 0 1.6-3.9"/><path d="M2.5 2.5v3h3"/>
+          </svg>
+          Nouvelle simulation
+        </button>
+
+        <div class="nouvelle__confirmation" role="group" aria-labelledby="nouvelleQuestion">
+          <p class="nouvelle__question" id="nouvelleQuestion">Tout effacer et repartir de zéro&nbsp;?</p>
+          <div class="nouvelle__choix">
+            <button type="button" class="nouvelle__oui" id="reinitialiserOui">Effacer</button>
+            <button type="button" class="nouvelle__non" id="reinitialiserNon">Annuler</button>
+          </div>
+        </div>
+      </div>
     </div>
 
     <div class="plateau__haut">

@@ -458,7 +458,7 @@ h1, h2, h3 {
   align-items: start;
 }
 
-.plateau__coin { grid-area: coin; display: flex; align-items: end; height: 100%; padding-bottom: 4px; }
+.plateau__coin { grid-area: coin; height: 100%; }
 .plateau__haut {
   grid-area: haut;
   display: grid;
@@ -505,13 +505,110 @@ h1, h2, h3 {
  * est indisponible.
  */
 .brouillon {
-  margin: 6px 0 0;
+  margin: 4px 0 0;
   font-size: .6875rem;
   line-height: 1.35;
   color: var(--encre-3);
 }
 .brouillon:empty { display: none; }
 .brouillon--alerte { color: var(--alerte); }
+
+/*
+ * La carte « Votre simulation », dans le coin du plateau : l'état de la
+ * sauvegarde et le bouton pour en commencer une autre. Même famille que la
+ * carte des scénarios — contour d'encre, ombre dure au survol.
+ *
+ * Deux états, portés par `data-etat` : `repos` (le bouton) et `confirmer`
+ * (la question). Effacer est irréversible : jamais en un seul clic.
+ */
+.nouvelle {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 10px;
+  height: 100%;
+  padding: 14px 16px;
+  background: var(--surface);
+  border: 1px solid var(--trait);
+  border-radius: var(--rayon-large);
+  box-shadow: var(--ombre);
+}
+.nouvelle__titre {
+  margin: 0;
+  font-family: var(--police-titre);
+  font-weight: var(--graisse-titre);
+  font-size: 1.375rem;
+  line-height: 1.1;
+  letter-spacing: var(--interlettre-titre);
+  color: var(--encre);
+}
+
+.nouvelle__bouton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 10px 12px;
+  font: inherit;
+  font-size: .8125rem;
+  font-weight: 700;
+  color: var(--encre);
+  background: transparent;
+  border: 1px solid var(--encre);
+  border-radius: var(--rayon);
+  cursor: pointer;
+  transition: translate var(--duree-rapide) var(--aise),
+              box-shadow var(--duree-rapide) var(--aise),
+              background var(--duree-rapide) var(--aise);
+}
+.nouvelle__bouton:hover {
+  translate: -2px -2px;
+  background: var(--surface);
+  box-shadow: 3px 3px 0 var(--encre);
+}
+.nouvelle__bouton svg {
+  width: 15px;
+  height: 15px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: transform var(--duree-base) var(--aise);
+}
+/* Au survol, la flèche fait un quart de tour en arrière : « on rembobine ». */
+.nouvelle__bouton:hover svg { transform: rotate(-90deg); }
+
+.nouvelle__question { margin: 0 0 8px; font-size: .8125rem; font-weight: 600; color: var(--encre); }
+.nouvelle__choix { display: flex; gap: 6px; }
+.nouvelle__oui,
+.nouvelle__non {
+  flex: 1;
+  padding: 9px 8px;
+  font: inherit;
+  font-size: .75rem;
+  font-weight: 700;
+  border-radius: var(--rayon);
+  white-space: nowrap;
+  cursor: pointer;
+}
+/* Rouge brique : c'est une destruction, elle doit se reconnaître comme telle. */
+.nouvelle__oui { color: var(--sur-accent); background: var(--alerte); border: 1px solid var(--alerte); }
+.nouvelle__oui:hover { filter: brightness(.92); }
+.nouvelle__non { color: var(--encre-2); background: transparent; border: 1px solid var(--trait); }
+.nouvelle__non:hover { color: var(--encre); background: var(--survol); }
+
+.nouvelle[data-etat="repos"] .nouvelle__confirmation,
+.nouvelle[data-etat="confirmer"] .nouvelle__bouton { display: none; }
+.nouvelle[data-etat="confirmer"] { border-color: var(--alerte); }
+/* Pendant la question, l'état de la sauvegarde s'efface : la carte doit tenir
+   dans la même case, et la question est la seule chose à lire. */
+.nouvelle[data-etat="confirmer"] .brouillon { display: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .nouvelle__bouton, .nouvelle__bouton svg { transition: none; }
+}
 
 
 @media (max-width: 1040px) {
@@ -527,7 +624,10 @@ h1, h2, h3 {
     grid-template-rows: none;
     grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   }
-  .plateau__coin { justify-content: flex-end; }
+  /* Une colonne : la carte devient une barre, titre à gauche, action à droite. */
+  .nouvelle { flex-direction: row; align-items: center; flex-wrap: wrap; }
+  .nouvelle__bouton,
+  .nouvelle__confirmation { width: auto; margin-left: auto; }
   .plateau__haut { grid-auto-rows: minmax(140px, auto); }
 }
 

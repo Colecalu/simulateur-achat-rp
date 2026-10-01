@@ -266,7 +266,7 @@ demi-seconde. Fermer l'onglet ne fait rien perdre, sans compte ni réseau.
 - **Piège vérifié** : un champ dont le défaut est `null` (`anneeBascule`) ne dit rien de son type.
   Se fier au type du défaut pour valider fait perdre la valeur au rechargement — silencieusement.
   Deux tests le verrouillent, dont un aller-retour sur tous les champs.
-- **L'état de la sauvegarde est VISIBLE** (`#brouillonEtat`, sous « Réinitialiser ») : « Brouillon
+- **L'état de la sauvegarde est VISIBLE** (`#brouillonEtat`, dans la carte « Votre simulation ») : « Brouillon
   enregistré à 11:57 », « Simulation restaurée », ou l'avertissement franc quand le navigateur
   refuse le stockage. Une sauvegarde silencieuse qui échoue est indiscernable d'une sauvegarde qui
   marche — jusqu'au moment où l'utilisateur perd son travail. Ne pas la faire taire.
