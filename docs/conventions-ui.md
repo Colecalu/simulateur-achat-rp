@@ -168,8 +168,12 @@ réelles — en cours ; **(3)** la mise en location ultérieure — moteur fait,
   demande de Lucas : « un cadre plus visible, qui donne envie de cliquer »). Verrouillée, elle
   reste nette — fond creux, bordure en tirets, cadenas, « À débloquer » et **quatre pastilles,
   une par bulle validée** — au lieu de l'ancienne carte grisée à 45 % que personne ne voyait.
-  Débloquée, elle passe en **couverture jaune avec ombre dure**, le cadenas s'ouvre, une courbe
-  se trace par-dessus la droite pointillée, et un bouton « Découvrir » invite au clic. Le
+  Débloquée, elle reprend la **présentation proposée par ChatGPT** (arbitrage de Lucas) :
+  surtitre « Débloqué · Scénarios de marché », question « Et si les marchés changeaient ? »,
+  une courbe **en segments heurtés** par-dessus la droite pointillée, « Ajoutez un filtre de
+  marché à votre projet et observez son effet sur les résultats », et un bouton pleine largeur
+  « Explorer les scénarios », sans flèche. Couverture jaune et ombre dure ; **au survol**, la carte
+  se soulève, la courbe se redessine et le bouton passe à l'accent. Le
   bouton est `disabled` tant que c'est verrouillé : `pointer-events` seul laissait passer le
   clavier.
 - **La découverte se fait en DEUX TEMPS**, portés par `data-etat` sur `#scenario` :
@@ -189,11 +193,9 @@ réelles — en cours ; **(3)** la mise en location ultérieure — moteur fait,
   Tester un choc » en violet à tirets, habillées comme leurs blocs dans la liste. Mise en page
   reprise d'une proposition de ChatGPT, titre et dessin de Claude — arbitrage de Lucas. Pas de
   case « Linéaire » : c'est ce que l'utilisateur a déjà sous les yeux. Pas de flèche sur « Voir
-  les scénarios ». Une phrase rappelle que le taux de crédit reste
-  le sien. **Les réserves ne disparaissent pas, elles se replient** dans « Les petites lignes »
-  (`<details>`) : vingt ans observés puis cinq prolongés en pointillé, un seul marché choqué par
-  futur, et l'impossibilité de refaire les hausses des années 2000. Les sources restent par
-  scénario, dans son aperçu.
+  les scénarios ». Rien d'autre : ni rappel sur le taux de crédit, ni réserves repliées —
+  Lucas a voulu l'écran le plus simple possible. Les réserves vivent dans l'aperçu de chaque
+  scénario et dans la note sous la liste.
 - **Appliquer se fait d'un clic sur la ligne**, l'aperçu s'ouvre par l'icône à droite. Ouvrir un
   aperçu n'applique rien.
 - **Deux blocs dans la liste** : « Le passé · Historique » en **grisé plein**, « Des futurs

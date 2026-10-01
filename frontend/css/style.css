@@ -1319,7 +1319,7 @@ input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; marg
 
 .scenario__appel {
   display: grid;
-  gap: 6px;
+  gap: 10px;
   width: 100%;
   font: inherit;
   color: var(--encre);
@@ -1331,31 +1331,23 @@ input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; marg
 }
 .scenario__appel:disabled { cursor: default; }
 
+/* Un surtitre en capitales, pas une pastille : le jaune de la carte suffit
+   à signaler qu'elle est débloquée. */
 .scenario__badge {
-  justify-self: start;
-  display: inline-flex;
+  display: flex;
   align-items: center;
   gap: 5px;
-  padding: 3px 8px;
   font-size: .625rem;
   font-weight: 700;
   letter-spacing: var(--interlettre-caps);
   text-transform: uppercase;
   color: var(--encre-2);
-  background: var(--surface);
-  border: 1px solid var(--trait);
-  border-radius: 999px;
 }
-.scenario[data-etat="ferme"] .scenario__badge {
-  color: var(--sur-accent);
-  background: var(--encre);
-  border-color: var(--encre);
-}
+.scenario[data-etat="ferme"] .scenario__badge { color: var(--encre); }
 .scenario__cadenas { width: 11px; height: 11px; fill: none; stroke: currentColor; stroke-width: 1.6; }
 .scenario__cadenas rect { fill: currentColor; stroke: none; }
-/* Débloqué : l'anse s'ouvre — une rotation, rien de plus. */
-.scenario__anse { transform-origin: 10.5px 7px; transition: transform var(--duree-base) var(--aise); }
-.scenario[data-etat="ferme"] .scenario__anse { transform: rotate(35deg) translateY(-1px); }
+/* Débloqué : le cadenas n'a plus rien à dire. */
+.scenario:not([data-etat="bloque"]) .scenario__cadenas { display: none; }
 
 /* Le dessin : la droite saisie, et le chemin qu'un marché prend vraiment. */
 .scenario__dessin { width: 100%; height: auto; overflow: visible; }
@@ -1370,6 +1362,7 @@ input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; marg
   stroke: var(--accent);
   stroke-width: 2.5;
   stroke-linecap: round;
+  stroke-linejoin: round;
   /* 400 couvre la longueur réelle du tracé : c'est ce qui permet de le
      « dessiner » en faisant glisser le décalage du tiret. */
   stroke-dasharray: 400;
@@ -1378,12 +1371,16 @@ input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; marg
 .scenario[data-etat="bloque"] .scenario__vague { stroke: var(--bord-champ); }
 .scenario[data-etat="ferme"] .scenario__vague { animation: vagueTrace 1.4s .15s var(--aise) both; }
 @keyframes vagueTrace { from { stroke-dashoffset: 400; } to { stroke-dashoffset: 0; } }
+/* Au survol, la courbe se redessine. Une animation au nom différent : c'est ce
+   qui la relance — reprendre `vagueTrace` ne rejouerait rien. */
+.scenario[data-etat="ferme"]:hover .scenario__vague { animation: vagueRetrace .9s var(--aise) both; }
+@keyframes vagueRetrace { from { stroke-dashoffset: 400; } to { stroke-dashoffset: 0; } }
 
 .scenario__grand-titre {
   font-family: var(--police-titre);
   font-weight: var(--graisse-titre);
-  font-size: 1.5rem;
-  line-height: 1.05;
+  font-size: 2rem;
+  line-height: 1;
   letter-spacing: var(--interlettre-titre);
 }
 .scenario[data-etat="bloque"] .scenario__grand-titre { color: var(--encre-2); }
@@ -1404,25 +1401,18 @@ input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; marg
 
 .scenario__cta {
   display: none;
-  justify-self: start;
-  align-items: center;
-  gap: 8px;
+  justify-content: center;
   margin-top: 4px;
-  padding: 8px 14px;
+  padding: 11px 14px;
   font-size: .8125rem;
   font-weight: 700;
   color: var(--sur-accent);
   background: var(--encre);
   border-radius: var(--rayon);
 }
-.scenario[data-etat="ferme"] .scenario__cta { display: inline-flex; }
-/* Une invite qui revient de temps en temps, pas un clignotement continu. */
-.scenario__fleche { display: inline-block; animation: flecheInvite 2.8s 1.6s ease-in-out infinite; }
-@keyframes flecheInvite {
-  0%, 70%, 100% { transform: translateX(0); }
-  80% { transform: translateX(4px); }
-  90% { transform: translateX(0); }
-}
+.scenario[data-etat="ferme"] .scenario__cta { display: flex; }
+.scenario__cta { transition: background var(--duree-rapide) var(--aise); }
+.scenario[data-etat="ferme"]:hover .scenario__cta { background: var(--accent); }
 
 /* --- La liste ----------------------------------------------------------- */
 
@@ -1614,18 +1604,6 @@ input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; marg
   animation: questionEntree .32s cubic-bezier(.22, .8, .28, 1);
 }
 .intro__entete { display: flex; align-items: start; justify-content: space-between; gap: 16px; }
-.intro__surtitre {
-  display: inline-block;
-  margin: 0 0 6px;
-  padding: 3px 8px;
-  font-size: .625rem;
-  font-weight: 700;
-  letter-spacing: var(--interlettre-caps);
-  text-transform: uppercase;
-  color: var(--encre);
-  background: var(--couverture, var(--accent-doux));
-  border-radius: 999px;
-}
 .intro__titre {
   margin: 0;
   font-family: var(--police-titre);
@@ -1697,18 +1675,6 @@ input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; marg
   to { opacity: 1; transform: translateY(0); }
 }
 
-.intro__rappel { margin: 0; font-size: .875rem; color: var(--encre-2); }
-.intro__rappel strong { color: var(--encre); }
-
-.intro__details { font-size: .8125rem; color: var(--encre-2); }
-.intro__details summary {
-  cursor: pointer;
-  font-weight: 600;
-  color: var(--encre-3);
-}
-.intro__details summary:hover { color: var(--accent); }
-.intro__details p { margin: 8px 0 0; line-height: 1.5; }
-
 .intro__pied { display: flex; justify-content: flex-end; }
 
 @media (max-width: 560px) {
@@ -1719,7 +1685,6 @@ input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; marg
 @media (prefers-reduced-motion: reduce) {
   .scenario[data-etat="ferme"],
   .scenario__vague,
-  .scenario__fleche,
   .intro,
   .intro__carte { animation: none; }
   .scenario { transition: none; }

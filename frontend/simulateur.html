@@ -364,27 +364,31 @@
       <div class="scenario" id="scenario" data-etat="bloque">
         <button type="button" class="scenario__appel" id="scenarioOuvrir"
                 aria-haspopup="dialog" aria-controls="intro">
-          <span class="scenario__badge" id="scenarioBadge">
+          <!-- Présentation reprise de la proposition de ChatGPT (arbitrage de
+               Lucas) : surtitre, question, courbe, une phrase, un bouton. -->
+          <span class="scenario__badge">
             <svg class="scenario__cadenas" viewBox="0 0 16 16" aria-hidden="true">
               <rect x="3" y="7" width="10" height="7.5" rx="1.5"/>
-              <path class="scenario__anse" d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2"/>
+              <path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2"/>
             </svg>
-            <span id="scenarioBadgeTexte">À débloquer</span>
+            <span id="scenarioBadgeTexte">À débloquer</span> · Scénarios de marché
           </span>
-          <!-- Une droite et un chemin : tout le propos du pilier en un dessin. -->
+          <span class="scenario__grand-titre">Et si les marchés changeaient&nbsp;?</span>
+          <!-- Une droite et un chemin heurté : tout le propos du pilier en un
+               dessin. Des segments plutôt que des courbes : un marché ne
+               glisse pas, il casse et repart. -->
           <svg class="scenario__dessin" viewBox="0 0 240 64" aria-hidden="true">
-            <path class="scenario__droite" d="M6 52 L234 14"/>
+            <path class="scenario__droite" d="M6 52 L234 20"/>
             <path class="scenario__vague"
-                  d="M6 52 C26 46 30 20 48 26 S70 60 92 48 S120 6 140 18 S162 50 182 38 S214 8 234 14"/>
+                  d="M6 52 L44 44 L66 46 L98 22 L128 34 L158 28 L184 40 L214 12 L234 18"/>
           </svg>
-          <span class="scenario__grand-titre">Scénarios de marché</span>
           <span class="scenario__accroche" id="scenarioAccroche">
             Validez les quatre étapes pour débloquer.
           </span>
           <span class="scenario__progression" id="scenarioProgression" aria-hidden="true">
             <span></span><span></span><span></span><span></span>
           </span>
-          <span class="scenario__cta" aria-hidden="true">Découvrir <span class="scenario__fleche">→</span></span>
+          <span class="scenario__cta" aria-hidden="true">Explorer les scénarios</span>
         </button>
 
         <div class="scenario__liste">
@@ -770,12 +774,9 @@
       <div class="intro" id="intro" role="dialog" aria-modal="true"
            aria-labelledby="introTitre" hidden>
         <div class="intro__entete">
-          <div>
-            <p class="intro__surtitre">Nouveau · débloqué</p>
-            <h3 class="intro__titre" id="introTitre">
-              La vraie vie n'est pas une ligne droite.
-            </h3>
-          </div>
+          <h3 class="intro__titre" id="introTitre">
+            La vraie vie n'est pas une ligne droite.
+          </h3>
           <button type="button" class="mel__fermer" id="introFermer"
                   aria-label="Fermer">×</button>
         </div>
@@ -808,27 +809,6 @@
             <span>Une baisse de l'immobilier ou une stagnation de la bourse. Des hypothèses, pas des prévisions.</span>
           </li>
         </ul>
-
-        <p class="intro__rappel">
-          Votre crédit garde <strong>votre</strong> taux&nbsp;: on rejoue les marchés, pas la banque.
-        </p>
-
-        <!-- Les réserves ne disparaissent pas : elles se replient. Qui veut
-             savoir ce qui est observé et ce qui est prolongé le trouve ici. -->
-        <details class="intro__details">
-          <summary>Les petites lignes</summary>
-          <p>
-            Un scénario du passé, ce sont vingt années observées, puis cinq prolongées au
-            rythme de la période&nbsp;: cette fin est en pointillé, ce n'est plus une donnée.
-            Un futur possible n'observe rien&nbsp;: il choque un seul marché et laisse
-            l'autre sur la tendance longue.
-          </p>
-          <p>
-            Rien ne se rejoue à l'identique&nbsp;: l'immobilier part aujourd'hui de prix qui
-            interdisent de refaire les hausses des années 2000. Un terrain d'essai, pas une
-            boule de cristal.
-          </p>
-        </details>
 
         <div class="intro__pied">
           <button type="button" class="bouton bouton--primaire" id="introValider">

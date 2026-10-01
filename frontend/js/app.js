@@ -1259,9 +1259,9 @@ function majScenario() {
     ? 'ouvert'
     : 'ferme';
   $('#scenarioAccroche').textContent = pret
-    ? 'Rejouez vingt ans qui ont vraiment eu lieu, ou testez un choc.'
+    ? 'Ajoutez un filtre de marché à votre projet et observez son effet sur les résultats.'
     : 'Validez les quatre étapes pour débloquer.';
-  $('#scenarioBadgeTexte').textContent = pret ? 'Nouveau · débloqué' : 'À débloquer';
+  $('#scenarioBadgeTexte').textContent = pret ? 'Débloqué' : 'À débloquer';
   // Verrouillée, la carte reste lisible mais ne s'active pas — y compris au
   // clavier, ce que `pointer-events` seul ne garantissait pas.
   $('#scenarioOuvrir').disabled = !pret;
