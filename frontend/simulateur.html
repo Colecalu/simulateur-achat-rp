@@ -353,21 +353,38 @@
         </div>
       </div>
 
-      <!-- Filtre de scénarios : il s'applique PAR-DESSUS les quatre bulles,
-           ce n'est pas une cinquième étape. D'où l'absence de numéro. -->
       <!-- Le filtre de scénarios s'applique PAR-DESSUS les quatre bulles : ce
            n'est pas une cinquième étape, d'où l'absence de numéro.
            Trois états : verrouillé tant qu'il n'y a pas de résultat à filtrer,
            fermé (un appel qui ouvre l'explication), puis ouvert (la liste). La
            liste n'apparaît qu'après l'explication : « Acheter en 1992 » ne veut
-           rien dire tant qu'on n'a pas dit ce qu'on en fait. -->
+           rien dire tant qu'on n'a pas dit ce qu'on en fait.
+           Verrouillé, la carte reste VISIBLE et dit ce qui la débloque : c'est
+           une fonctionnalité à gagner, pas une case grisée qu'on ignore. -->
       <div class="scenario" id="scenario" data-etat="bloque">
         <button type="button" class="scenario__appel" id="scenarioOuvrir"
                 aria-haspopup="dialog" aria-controls="intro">
-          <span class="scenario__titre">Scénarios de marché</span>
-          <span class="scenario__accroche" id="scenarioAccroche">
-            Disponible une fois votre simulation complète.
+          <span class="scenario__badge" id="scenarioBadge">
+            <svg class="scenario__cadenas" viewBox="0 0 16 16" aria-hidden="true">
+              <rect x="3" y="7" width="10" height="7.5" rx="1.5"/>
+              <path class="scenario__anse" d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2"/>
+            </svg>
+            <span id="scenarioBadgeTexte">À débloquer</span>
           </span>
+          <!-- Une droite et un chemin : tout le propos du pilier en un dessin. -->
+          <svg class="scenario__dessin" viewBox="0 0 240 64" aria-hidden="true">
+            <path class="scenario__droite" d="M6 52 L234 14"/>
+            <path class="scenario__vague"
+                  d="M6 52 C26 46 30 20 48 26 S70 60 92 48 S120 6 140 18 S162 50 182 38 S214 8 234 14"/>
+          </svg>
+          <span class="scenario__grand-titre">Scénarios de marché</span>
+          <span class="scenario__accroche" id="scenarioAccroche">
+            Validez les quatre étapes pour débloquer.
+          </span>
+          <span class="scenario__progression" id="scenarioProgression" aria-hidden="true">
+            <span></span><span></span><span></span><span></span>
+          </span>
+          <span class="scenario__cta" aria-hidden="true">Découvrir <span class="scenario__fleche">→</span></span>
         </button>
 
         <div class="scenario__liste">
@@ -747,45 +764,67 @@
       <div class="intro" id="intro" role="dialog" aria-modal="true"
            aria-labelledby="introTitre" hidden>
         <div class="intro__entete">
-          <h3 class="intro__titre" id="introTitre">
-            Et si vous rejouiez vingt ans qui ont vraiment eu lieu&nbsp;?
-          </h3>
+          <div>
+            <p class="intro__surtitre">Nouveau · débloqué</p>
+            <h3 class="intro__titre" id="introTitre">
+              La vraie vie n'est pas une ligne droite.
+            </h3>
+          </div>
           <button type="button" class="mel__fermer" id="introFermer"
                   aria-label="Fermer">×</button>
         </div>
 
-        <div class="intro__texte">
+        <!-- Le même dessin que la carte, en grand : la droite que vous avez
+             saisie, et le chemin qu'un marché prend vraiment. Il se trace sous
+             les yeux — c'est le seul moment où l'animation dit quelque chose. -->
+        <svg class="intro__dessin" viewBox="0 0 520 150" aria-hidden="true">
+          <path class="intro__axe" d="M10 140 H510"/>
+          <path class="scenario__droite" d="M10 118 L510 30"/>
+          <path class="scenario__vague intro__vague"
+                d="M10 118 C50 108 60 52 100 64 S150 140 196 120 S250 18 296 40 S340 112 384 94 S460 22 510 30"/>
+          <text class="intro__etiquette" x="420" y="30">linéaire</text>
+          <text class="intro__etiquette intro__etiquette--vague" x="168" y="146">un vrai chemin</text>
+        </svg>
+
+        <ul class="intro__trois">
+          <li class="intro__carte intro__carte--lineaire">
+            <strong>Linéaire</strong>
+            <span>Vos taux de l'étape&nbsp;4, les mêmes chaque année.</span>
+          </li>
+          <li class="intro__carte intro__carte--passe">
+            <strong>Le passé</strong>
+            <span>Vingt ans qui ont vraiment eu lieu, rejoués sur votre projet.</span>
+          </li>
+          <li class="intro__carte intro__carte--futur">
+            <strong>Des futurs possibles</strong>
+            <span>Un choc, un seul&nbsp;: l'immobilier ou la bourse.</span>
+          </li>
+        </ul>
+
+        <p class="intro__rappel">
+          Votre crédit garde <strong>votre</strong> taux&nbsp;: on rejoue les marchés, pas la banque.
+        </p>
+
+        <!-- Les réserves ne disparaissent pas : elles se replient. Qui veut
+             savoir ce qui est observé et ce qui est prolongé le trouve ici. -->
+        <details class="intro__details">
+          <summary>Les petites lignes</summary>
           <p>
-            Sans scénario, le simulateur applique déjà une <strong>tendance longue sourcée</strong>,
-            la même chaque année. Les scénarios servent à autre chose&nbsp;: éprouver votre projet
-            contre un <strong>chemin</strong>, parce qu'encaisser une baisse la première année,
-            quand la dette est au plus haut, n'a rien à voir avec l'encaisser la quinzième.
+            Un scénario du passé, ce sont vingt années observées, puis cinq prolongées au
+            rythme de la période&nbsp;: cette fin est en pointillé, ce n'est plus une donnée.
+            Un futur possible n'observe rien&nbsp;: il choque un seul marché et laisse
+            l'autre sur la tendance longue.
           </p>
           <p>
-            <strong>« Le passé »</strong> applique à votre projet ce que les marchés, l'immobilier
-            et les loyers ont <strong>réellement fait</strong> pendant vingt années datées&nbsp;:
-            la fenêtre la plus favorable à l'achat, et la moins favorable. Vingt ans de données,
-            puis cinq années prolongées au rythme de la période&nbsp;— cette partie passe en
-            pointillé, et ne se lit pas comme une prévision.
+            Rien ne se rejoue à l'identique&nbsp;: l'immobilier part aujourd'hui de prix qui
+            interdisent de refaire les hausses des années 2000. Un terrain d'essai, pas une
+            boule de cristal.
           </p>
-          <p>
-            <strong>« Des futurs possibles »</strong> ne prétend rien observer. Chaque scénario y
-            teste <strong>un seul risque</strong>&nbsp;— une correction immobilière, ou une longue
-            stagnation des marchés&nbsp;— l'autre marché restant sur la tendance longue. C'est ce
-            qui permet de savoir ce qui est testé.
-          </p>
-          <p>
-            Dans les deux cas, votre taux de crédit reste le vôtre&nbsp;: on rejoue les marchés,
-            pas les conditions d'emprunt de l'époque. Et vingt années ne se rejouent pas à
-            l'identique&nbsp;: l'immobilier français part aujourd'hui d'un niveau de prix qui
-            interdit mécaniquement de refaire les hausses des années 2000. C'est un terrain
-            d'essai, pas une boule de cristal.
-          </p>
-        </div>
+        </details>
 
         <div class="intro__pied">
           <button type="button" class="bouton bouton--primaire" id="introValider">
-            Voir les scénarios
+            Voir les scénarios&nbsp;<span aria-hidden="true">→</span>
           </button>
         </div>
       </div>

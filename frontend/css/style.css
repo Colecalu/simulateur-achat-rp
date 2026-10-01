@@ -1267,14 +1267,18 @@ input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; marg
 
 /*
  * Le filtre s'applique par-dessus les quatre bulles : ce n'est pas une
- * cinquième étape, d'où l'absence de numéro et d'anneau d'invite.
+ * cinquième étape, d'où l'absence de numéro.
  *
  * Trois états, portés par `data-etat` :
  *   bloque — tant qu'il n'y a pas de résultat à filtrer ;
  *   ferme  — un appel qui ouvre l'explication ;
  *   ouvert — la liste des scénarios.
- * La liste n'apparaît qu'après l'explication : sept noms de décennies ne
- * veulent rien dire tant qu'on n'a pas dit ce qu'on en fait.
+ *
+ * La carte est une FONCTIONNALITÉ À DÉBLOQUER, et doit se lire comme telle :
+ * verrouillée, elle reste nette et dit ce qui manque (cadenas, quatre
+ * pastilles) ; débloquée, elle passe en couverture jaune — la couleur des
+ * appels du carnet — et devient la chose la plus visible du rail. L'ancienne
+ * carte grisée à 45 % se confondait avec le fond : personne ne la cherchait.
  */
 .scenario {
   padding: 12px 14px;
@@ -1282,48 +1286,168 @@ input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; marg
   border: 1px solid var(--trait);
   border-radius: var(--rayon-large);
   box-shadow: var(--ombre);
+  transition: box-shadow var(--duree-base) var(--aise),
+              translate var(--duree-base) var(--aise);
 }
-.scenario[data-etat="bloque"] { opacity: .45; pointer-events: none; }
 .scenario[data-etat="ouvert"] .scenario__appel { display: none; }
 .scenario:not([data-etat="ouvert"]) .scenario__liste { display: none; }
 
+/* --- L'appel : verrouillé, puis débloqué -------------------------------- */
+
+.scenario:not([data-etat="ouvert"]) { padding: 16px 16px 14px; }
+.scenario[data-etat="bloque"] {
+  background: var(--surface-creuse);
+  border: 1px dashed var(--bord-champ);
+  box-shadow: none;
+}
+.scenario[data-etat="ferme"] {
+  background: var(--couverture, var(--accent-doux));
+  border: 1px solid var(--encre);
+  box-shadow: 4px 5px 0 var(--encre);
+  animation: scenarioDeblocage .6s cubic-bezier(.22, .8, .28, 1.2);
+}
+.scenario[data-etat="ferme"]:hover,
+.scenario[data-etat="ferme"]:focus-within {
+  translate: -2px -2px;
+  box-shadow: 6px 7px 0 var(--encre);
+}
+@keyframes scenarioDeblocage {
+  0%   { transform: scale(.94); }
+  60%  { transform: scale(1.03); }
+  100% { transform: scale(1); }
+}
+
 .scenario__appel {
   display: grid;
-  gap: 3px;
+  gap: 6px;
   width: 100%;
   font: inherit;
+  color: var(--encre);
   text-align: left;
   padding: 0;
   background: transparent;
   border: 0;
   cursor: pointer;
 }
-.scenario[data-etat="ferme"]:hover { border-color: var(--accent); box-shadow: var(--ombre-2); }
+.scenario__appel:disabled { cursor: default; }
+
+.scenario__badge {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 8px;
+  font-size: .625rem;
+  font-weight: 700;
+  letter-spacing: var(--interlettre-caps);
+  text-transform: uppercase;
+  color: var(--encre-2);
+  background: var(--surface);
+  border: 1px solid var(--trait);
+  border-radius: 999px;
+}
+.scenario[data-etat="ferme"] .scenario__badge {
+  color: var(--sur-accent);
+  background: var(--encre);
+  border-color: var(--encre);
+}
+.scenario__cadenas { width: 11px; height: 11px; fill: none; stroke: currentColor; stroke-width: 1.6; }
+.scenario__cadenas rect { fill: currentColor; stroke: none; }
+/* Débloqué : l'anse s'ouvre — une rotation, rien de plus. */
+.scenario__anse { transform-origin: 10.5px 7px; transition: transform var(--duree-base) var(--aise); }
+.scenario[data-etat="ferme"] .scenario__anse { transform: rotate(35deg) translateY(-1px); }
+
+/* Le dessin : la droite saisie, et le chemin qu'un marché prend vraiment. */
+.scenario__dessin { width: 100%; height: auto; overflow: visible; }
+.scenario__droite {
+  fill: none;
+  stroke: var(--encre-3);
+  stroke-width: 1.5;
+  stroke-dasharray: 4 4;
+}
+.scenario__vague {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  /* 400 couvre la longueur réelle du tracé : c'est ce qui permet de le
+     « dessiner » en faisant glisser le décalage du tiret. */
+  stroke-dasharray: 400;
+  stroke-dashoffset: 0;
+}
+.scenario[data-etat="bloque"] .scenario__vague { stroke: var(--bord-champ); }
+.scenario[data-etat="ferme"] .scenario__vague { animation: vagueTrace 1.4s .15s var(--aise) both; }
+@keyframes vagueTrace { from { stroke-dashoffset: 400; } to { stroke-dashoffset: 0; } }
+
+.scenario__grand-titre {
+  font-family: var(--police-titre);
+  font-weight: var(--graisse-titre);
+  font-size: 1.5rem;
+  line-height: 1.05;
+  letter-spacing: var(--interlettre-titre);
+}
+.scenario[data-etat="bloque"] .scenario__grand-titre { color: var(--encre-2); }
+.scenario__accroche { font-size: .8125rem; color: var(--encre-2); line-height: 1.4; }
+.scenario[data-etat="ferme"] .scenario__accroche { color: var(--encre); }
+
+/* Une pastille par bulle validée : ce qu'il reste à faire pour débloquer. */
+.scenario__progression { display: flex; gap: 5px; margin-top: 2px; }
+.scenario__progression > span {
+  flex: 1;
+  height: 5px;
+  background: var(--trait);
+  border-radius: 999px;
+  transition: background var(--duree-base) var(--aise);
+}
+.scenario__progression > .scenario__pas--fait { background: var(--accent); }
+.scenario:not([data-etat="bloque"]) .scenario__progression { display: none; }
+
+.scenario__cta {
+  display: none;
+  justify-self: start;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+  padding: 8px 14px;
+  font-size: .8125rem;
+  font-weight: 700;
+  color: var(--sur-accent);
+  background: var(--encre);
+  border-radius: var(--rayon);
+}
+.scenario[data-etat="ferme"] .scenario__cta { display: inline-flex; }
+/* Une invite qui revient de temps en temps, pas un clignotement continu. */
+.scenario__fleche { display: inline-block; animation: flecheInvite 2.8s 1.6s ease-in-out infinite; }
+@keyframes flecheInvite {
+  0%, 70%, 100% { transform: translateX(0); }
+  80% { transform: translateX(4px); }
+  90% { transform: translateX(0); }
+}
+
+/* --- La liste ----------------------------------------------------------- */
 
 .scenario__titre {
   display: flex;
   align-items: center;
   gap: 6px;
-  margin: 0 0 8px;
-  font-size: .625rem;
-  font-weight: 600;
-  letter-spacing: var(--interlettre-caps);
-  text-transform: uppercase;
-  color: var(--encre-3);
+  margin: 0 0 10px;
+  font-family: var(--police-titre);
+  font-weight: var(--graisse-titre);
+  font-size: 1.1875rem;
+  letter-spacing: var(--interlettre-titre);
+  color: var(--encre);
 }
-.scenario__appel .scenario__titre { margin-bottom: 3px; }
-.scenario__accroche { font-size: .75rem; color: var(--encre-2); line-height: 1.35; }
 
 /* Relire l'explication : discret, mais toujours accessible. */
 .scenario__aide {
   margin-left: auto;
   display: grid;
   place-items: center;
-  width: 16px;
-  height: 16px;
+  width: 20px;
+  height: 20px;
   padding: 0;
-  font: inherit;
-  font-size: .625rem;
+  font-family: var(--police);
+  font-size: .6875rem;
   font-weight: 700;
   color: var(--encre-3);
   background: transparent;
@@ -1333,29 +1457,63 @@ input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; marg
 }
 .scenario__aide:hover { color: var(--accent); border-color: var(--accent); }
 
-.scenario__choix { display: grid; gap: 4px; }
+.scenario__choix { display: grid; gap: 10px; }
+
+/*
+ * Trois natures, trois blocs. Le passé est un bloc plein (des années qui ont
+ * eu lieu), les futurs un bloc en tirets (rien n'est observé). La différence
+ * se voit avant de lire — et sans couleur : la couleur reste aux données.
+ */
+.scenario__groupe {
+  display: grid;
+  gap: 4px;
+  padding: 8px;
+  border-radius: var(--rayon-large);
+}
+.scenario__groupe--lineaire { padding: 0; }
+.scenario__groupe--historique {
+  background: var(--surface-creuse);
+  border: 1px solid var(--trait);
+}
+.scenario__groupe--prospectif {
+  background: transparent;
+  border: 1.5px dashed var(--bord-champ);
+}
+
 .scenario__famille {
   display: flex;
   gap: 6px;
   align-items: center;
-  margin: 8px 0 2px;
-  font-size: .5625rem;
-  font-weight: 600;
+  margin: 0 0 2px;
+  font-size: .625rem;
+  font-weight: 700;
   letter-spacing: var(--interlettre-caps);
   text-transform: uppercase;
-  color: var(--encre-3);
+  color: var(--encre-2);
 }
-.scenario__famille:first-child { margin-top: 0; }
+.scenario__picto { display: grid; place-items: center; width: 16px; height: 16px; }
+.scenario__picto svg {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
 
 /* Observé ou construit : c'est la distinction qui compte pour lire le groupe.
    Un cerné plutôt qu'une couleur — la couleur est réservée aux données. */
 .scenario__etiquette {
-  padding: 1px 5px;
+  margin-left: auto;
+  padding: 1px 6px;
   border: 1px solid var(--trait);
-  border-radius: var(--rayon);
-  font-weight: 500;
+  border-radius: 999px;
+  font-weight: 600;
   color: var(--encre-3);
+  background: var(--surface);
 }
+.scenario__groupe--prospectif .scenario__etiquette { border-style: dashed; }
 
 /* Le choix et son aperçu : deux actions distinctes sur la même ligne. */
 .scenario__ligne { display: flex; gap: 4px; align-items: stretch; }
@@ -1364,8 +1522,8 @@ input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; marg
   min-width: 0;
   font: inherit;
   text-align: left;
-  padding: 6px 9px;
-  background: transparent;
+  padding: 7px 10px;
+  background: var(--surface);
   border: 1px solid var(--trait);
   border-radius: var(--rayon);
   cursor: pointer;
@@ -1373,7 +1531,11 @@ input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; marg
               border-color var(--duree-rapide) var(--aise);
 }
 .scenario__option:hover { background: var(--survol); border-color: var(--bord-champ); }
-.scenario__option--actif { background: var(--accent-doux); border-color: var(--accent); }
+.scenario__option--actif {
+  background: var(--accent-doux);
+  border-color: var(--accent);
+  box-shadow: inset 3px 0 0 var(--accent);
+}
 .scenario__nom { display: block; font-size: .8125rem; font-weight: 600; color: var(--encre); }
 .scenario__option--actif .scenario__nom { color: var(--accent-fort); }
 .scenario__periode { display: block; font-size: .6875rem; color: var(--encre-3); }
@@ -1385,7 +1547,7 @@ input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; marg
   width: 30px;
   padding: 0;
   color: var(--encre-3);
-  background: transparent;
+  background: var(--surface);
   border: 1px solid var(--trait);
   border-radius: var(--rayon);
   cursor: pointer;
@@ -1421,25 +1583,105 @@ input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; marg
 .intro[hidden],
 .apercu[hidden] { display: none; }
 
+/*
+ * L'explication tient en un écran et se lit en dix secondes : un titre, un
+ * dessin qui se trace, trois cartes d'une ligne. Les réserves sont repliées
+ * dans « Les petites lignes » — présentes, mais plus imposées.
+ */
 .intro {
   display: grid;
-  gap: 14px;
-  width: min(580px, calc(100vw - 32px));
+  gap: 16px;
+  width: min(620px, calc(100vw - 32px));
   padding: 22px 26px 20px;
+  border-color: var(--encre);
+  animation: questionEntree .32s cubic-bezier(.22, .8, .28, 1);
 }
 .intro__entete { display: flex; align-items: start; justify-content: space-between; gap: 16px; }
+.intro__surtitre {
+  display: inline-block;
+  margin: 0 0 6px;
+  padding: 3px 8px;
+  font-size: .625rem;
+  font-weight: 700;
+  letter-spacing: var(--interlettre-caps);
+  text-transform: uppercase;
+  color: var(--encre);
+  background: var(--couverture, var(--accent-doux));
+  border-radius: 999px;
+}
 .intro__titre {
   margin: 0;
   font-family: var(--police-titre);
   font-weight: var(--graisse-titre);
-  font-size: 1.1875rem;
-  line-height: 1.25;
+  font-size: clamp(1.5rem, 4vw, 2rem);
+  line-height: 1.1;
   letter-spacing: var(--interlettre-titre);
 }
-.intro__texte { display: grid; gap: 10px; }
-.intro__texte p { margin: 0; font-size: .875rem; color: var(--encre-2); line-height: 1.55; }
-.intro__texte strong { color: var(--encre); }
+
+.intro__dessin { width: 100%; height: auto; overflow: visible; }
+.intro__axe { stroke: var(--trait); stroke-width: 1; }
+.intro__dessin .scenario__droite { stroke-width: 2; }
+.intro__vague { stroke-width: 3.5; stroke-dasharray: 800; animation: vagueTraceLongue 1.8s .25s var(--aise) both; }
+@keyframes vagueTraceLongue { from { stroke-dashoffset: 800; } to { stroke-dashoffset: 0; } }
+.intro__etiquette { font-family: var(--police); font-size: 13px; font-weight: 600; fill: var(--encre-3); }
+.intro__etiquette--vague { fill: var(--accent); }
+
+.intro__trois {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.intro__carte {
+  display: grid;
+  align-content: start;
+  gap: 4px;
+  padding: 12px;
+  font-size: .8125rem;
+  line-height: 1.4;
+  color: var(--encre-2);
+  border-radius: var(--rayon-large);
+  animation: carteEntree .45s var(--aise) both;
+}
+.intro__carte strong { font-size: .875rem; color: var(--encre); }
+/* Les trois mêmes habits que dans la liste : on reconnaîtra les blocs. */
+.intro__carte--lineaire { background: var(--surface); border: 1px solid var(--trait); animation-delay: .9s; }
+.intro__carte--passe { background: var(--surface-creuse); border: 1px solid var(--trait); animation-delay: 1.05s; }
+.intro__carte--futur { border: 1.5px dashed var(--bord-champ); animation-delay: 1.2s; }
+@keyframes carteEntree {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.intro__rappel { margin: 0; font-size: .875rem; color: var(--encre-2); }
+.intro__rappel strong { color: var(--encre); }
+
+.intro__details { font-size: .8125rem; color: var(--encre-2); }
+.intro__details summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--encre-3);
+}
+.intro__details summary:hover { color: var(--accent); }
+.intro__details p { margin: 8px 0 0; line-height: 1.5; }
+
 .intro__pied { display: flex; justify-content: flex-end; }
+
+@media (max-width: 560px) {
+  .intro__trois { grid-template-columns: 1fr; }
+}
+
+/* Mouvement réduit : tout est déjà à sa place, rien ne se trace. */
+@media (prefers-reduced-motion: reduce) {
+  .scenario[data-etat="ferme"],
+  .scenario__vague,
+  .scenario__fleche,
+  .intro,
+  .intro__carte { animation: none; }
+  .scenario { transition: none; }
+}
 
 /* --- Second temps : l'aperçu d'un scénario ----------------------------- */
 

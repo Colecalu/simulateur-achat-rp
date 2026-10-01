@@ -162,11 +162,19 @@ réelles — en cours ; **(3)** la mise en location ultérieure — moteur fait,
 - **Deux familles, huit options** : `historique` (Krach immobilier 1991-2001, Internet et
   subprimes 2000-2010, Krach de 2008 2008-2018, Taux bas puis inflation 2012-2022, Trente ans réels
   1991-2022), `prospectif` (deux trajectoires construites, explicitement non observées) et
-  « Mes hypothèses », qui n'est pas dans le fichier — c'est l'absence de scénario, et elle lit les
+  le « Scénario linéaire » (ex-« Mes hypothèses »), qui n'est pas dans le fichier — c'est l'absence de scénario, et elle lit les
   champs de la bulle 4. Les noms désignent l'ÉVÉNEMENT de marché, jamais l'issue pour l'acheteur.
+- **La carte est une fonctionnalité à débloquer, et se présente comme telle** (01/10/2026,
+  demande de Lucas : « un cadre plus visible, qui donne envie de cliquer »). Verrouillée, elle
+  reste nette — fond creux, bordure en tirets, cadenas, « À débloquer » et **quatre pastilles,
+  une par bulle validée** — au lieu de l'ancienne carte grisée à 45 % que personne ne voyait.
+  Débloquée, elle passe en **couverture jaune avec ombre dure**, le cadenas s'ouvre, une courbe
+  se trace par-dessus la droite pointillée, et un bouton « Découvrir » invite au clic. Le
+  bouton est `disabled` tant que c'est verrouillé : `pointer-events` seul laissait passer le
+  clavier.
 - **La découverte se fait en DEUX TEMPS**, portés par `data-etat` sur `#scenario` :
   1. `bloque` — tant que les quatre bulles ne sont pas validées. L'accroche dit pourquoi.
-  2. `ferme` — un simple appel. Le clic ouvre une fenêtre qui explique **ce qu'on cherche à
+  2. `ferme` — l'appel décrit ci-dessus. Le clic ouvre une fenêtre qui explique **ce qu'on cherche à
      faire, et rien d'autre** : pas un seul nom de scénario. Sept noms de décennies ne veulent
      rien dire tant qu'on n'a pas dit ce qu'on en fait, ni prévenu que la seconde moitié des
      courbes est extrapolée.
@@ -174,16 +182,24 @@ réelles — en cours ; **(3)** la mise en location ultérieure — moteur fait,
      période, et un bouton qui ouvre l'aperçu des courbes.
 - **L'explication reste relisible** par le « ? » à côté du titre. Ne pas la réduire à un affichage
   unique qu'on ne peut plus rappeler.
-- **L'accueil tient en trois paragraphes** : ce que fait le module ; le fait que chaque décennie ne
-  fournit qu'une dizaine d'années et que le reste est extrapolé ; et pourquoi ces décennies ne se
-  reproduiront pas — l'immobilier français part d'un niveau de prix qui interdit mécaniquement de
-  refaire les hausses des années 2000. Les sources et réserves restent par scénario, dans son
-  aperçu : les remonter ici serait exactement la surcharge qu'on cherche à éviter.
+- **L'explication se lit en dix secondes** (refonte du 01/10/2026 — les quatre paragraphes
+  précédents n'étaient pas lus). Un titre (« La vraie vie n'est pas une ligne droite. »), le
+  dessin de la carte en grand — la droite « linéaire » et un vrai chemin qui se trace — puis
+  **trois cartes d'une ligne** : Linéaire, Le passé, Des futurs possibles, habillées comme leurs
+  blocs dans la liste pour qu'on les reconnaisse. Une phrase rappelle que le taux de crédit reste
+  le sien. **Les réserves ne disparaissent pas, elles se replient** dans « Les petites lignes »
+  (`<details>`) : vingt ans observés puis cinq prolongés en pointillé, un seul marché choqué par
+  futur, et l'impossibilité de refaire les hausses des années 2000. Les sources restent par
+  scénario, dans son aperçu.
 - **Appliquer se fait d'un clic sur la ligne**, l'aperçu s'ouvre par l'icône à droite. Ouvrir un
   aperçu n'applique rien.
-- **Trois groupes dans la liste** : « Décennies observées », « Sans aucune projection » (le seul
-  scénario dont rien n'est projeté — d'où sa famille `continu` et sa bordure pointillée),
-  « Scénarios construits ». « Mes hypothèses » est en tête, hors groupe.
+- **Trois blocs dans la liste, trois natures** : « Votre base » (le **Scénario linéaire**, les taux
+  de l'étape 4 appliqués chaque année — coché par défaut, puisque c'est lui qui s'applique sans
+  choix), « Le passé · Historique » en **bloc plein**, « Des futurs possibles · Hypothèse » en
+  **bloc en tirets**. Chaque bloc a son pictogramme (droite, flèche qui revient, flèche pointillée
+  qui part). Plein = observé, tirets = construit : la différence se voit avant de lire, et sans
+  couleur, la couleur restant aux données. Un futur affiche « Un choc sur … » là où un historique
+  affiche sa période.
 - **La note sous la liste dit ce qui est observé et ce qui est extrapolé** pour le scénario
   appliqué : « 11 années observées (2008-2018), puis 8,2 % par an — extrapolé ».
 - **Trois séries sont tracées** — marchés, immobilier, loyers (IRL). `revalCharges` et
@@ -210,7 +226,7 @@ réelles — en cours ; **(3)** la mise en location ultérieure — moteur fait,
   +5 %) et sont désactivés. Les laisser montrer les valeurs de l'utilisateur pendant que le moteur
   calcule autre chose serait un mensonge à l'écran. `majBulles()` doit respecter ce verrouillage,
   sinon chaque recalcul rouvrirait les champs.
-- **« Mes hypothèses » rend les valeurs intactes** : elles sont mises de côté au premier scénario
+- **Le scénario linéaire rend les valeurs intactes** : elles sont mises de côté au premier scénario
   appliqué, jamais écrasées.
 - **L'avertissement de bas de page change avec le scénario** : « hypothèses constantes » devient
   faux dès qu'une série tourne.
@@ -222,7 +238,7 @@ réelles — en cours ; **(3)** la mise en location ultérieure — moteur fait,
   rappelés sous la courbe (`.suites`) : la courbe dit où l'on arrive, la suite par quoi on y
   passe. Ces deux lignes tiennent lieu de légende, il n'y en a pas d'autre.
 - La répétition de la série est **visible** sur la courbe : c'est une propriété du modèle, pas un
-  détail à cacher. « Mes hypothèses » a son aperçu aussi — deux courbes lisses et « +5 chaque
+  détail à cacher. Le scénario linéaire a son aperçu aussi — deux courbes lisses et « +5 chaque
   année » sous le graphique ; la comparaison avec une décennie réelle est tout l'argument.
 - **Un seul axe, même quand les échelles divergent** (marchés à 1 043 contre immobilier à 313 sur
   le scénario porteur). Deux axes Y mentiraient sur l'écart réel.
