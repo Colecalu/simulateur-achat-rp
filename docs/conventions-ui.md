@@ -186,8 +186,8 @@ réelles — en cours ; **(3)** la mise en location ultérieure — moteur fait,
      courbes est extrapolée.
   3. `ouvert` — la liste remplace l'appel dans le rail et y reste. Chaque ligne porte son nom, sa
      période, et un bouton qui ouvre l'aperçu des courbes.
-- **L'explication reste relisible** par le « ? » à côté du titre. Ne pas la réduire à un affichage
-  unique qu'on ne peut plus rappeler.
+- **L'explication ne se relit plus depuis la liste** : le « ? » a été retiré à la demande de Lucas
+  (place prise pour rien). Elle reste ouverte au premier clic sur la carte jaune.
 - **L'explication se lit en dix secondes** (refonte du 01/10/2026 — les quatre paragraphes
   précédents n'étaient pas lus). Un titre (« La vraie vie n'est pas une ligne droite. »), le
   dessin de la carte en grand — la droite « linéaire » et un vrai chemin qui se trace — puis
@@ -197,7 +197,7 @@ réelles — en cours ; **(3)** la mise en location ultérieure — moteur fait,
   case « Linéaire » : c'est ce que l'utilisateur a déjà sous les yeux. Pas de flèche sur « Voir
   les scénarios ». Rien d'autre : ni rappel sur le taux de crédit, ni réserves repliées —
   Lucas a voulu l'écran le plus simple possible. Les réserves vivent dans l'aperçu de chaque
-  scénario et dans la note sous la liste.
+  scénario et dans l'avertissement sous le graphique.
 - **Appliquer se fait d'un clic sur la ligne**, l'aperçu s'ouvre par l'icône à droite. Ouvrir un
   aperçu n'applique rien.
 - **Deux blocs dans la liste** : « Le passé · Historique » en **grisé plein**, « Des futurs
@@ -205,10 +205,12 @@ réelles — en cours ; **(3)** la mise en location ultérieure — moteur fait,
   Chaque bloc a son pictogramme (flèche qui revient, flèche pointillée qui part). Un futur affiche
   « Un choc sur … » là où un historique affiche sa période.
 - **Le scénario linéaire n'a pas de ligne** : c'est l'absence de scénario, les taux de l'étape 4
-  appliqués chaque année. On y revient par **« Revenir au scénario linéaire »**, sous la liste,
-  visible seulement quand un scénario est appliqué.
-- **La note sous la liste dit ce qui est observé et ce qui est extrapolé** pour le scénario
-  appliqué : « 11 années observées (2008-2018), puis 8,2 % par an — extrapolé ».
+  appliqués chaque année. **On y revient en recliquant sur le scénario actif** — un interrupteur,
+  pas de bouton dédié.
+- **La liste ouverte garde toujours la même hauteur** : un bandeau d'encre avec le seul titre,
+  les deux blocs, rien d'autre. Ni note « années observées », ni bouton de retour, ni bandeau qui
+  change de couleur — tout ce qui faisait bouger la carte a été retiré (décision de Lucas). Même
+  bordure d'encre et même ombre dure que la carte jaune : c'est le même objet, déplié.
 - **Trois séries sont tracées** — marchés, immobilier, loyers (IRL). `revalCharges` et
   `revalTaxeFonciere` sont dans `taux` parce que le moteur en a besoin, mais ne sont pas dessinées :
   elles suivent l'inflation générale et n'intéressent pas le lecteur au même titre.

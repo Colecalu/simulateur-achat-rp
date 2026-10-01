@@ -1420,8 +1420,11 @@ input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; marg
  * Ouverte, la carte reste de la même famille que la carte jaune — bordure
  * d'encre pleine, ombre dure — pour qu'on la lise comme le même objet, déplié.
  * Son bandeau sombre est le seul de la colonne : c'est ce qui la sort du rang
- * des quatre étapes, sans couleur criarde. Il passe au jaune quand un filtre
- * est posé : on voit d'un coup d'œil que le résultat n'est plus le linéaire.
+ * des quatre étapes, sans couleur criarde.
+ *
+ * Rien d'autre que le titre et les quatre scénarios : pas de note, pas de
+ * bouton de retour. La carte garde la même hauteur quoi qu'on choisisse ; on
+ * revient au linéaire en recliquant sur le scénario actif.
  */
 .scenario[data-etat="ouvert"] {
   padding: 0 0 12px;
@@ -1429,31 +1432,16 @@ input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; marg
   border: 1px solid var(--encre);
   box-shadow: 4px 5px 0 var(--encre);
 }
-.scenario[data-etat="ouvert"] .scenario__choix,
-.scenario[data-etat="ouvert"] .scenario__note,
-.scenario[data-etat="ouvert"] .scenario__retirer { margin-left: 12px; margin-right: 12px; }
-.scenario[data-etat="ouvert"] .scenario__retirer { width: calc(100% - 24px); }
+.scenario[data-etat="ouvert"] .scenario__choix { margin: 0 12px; }
 
 .scenario__bandeau {
-  position: relative;
   margin-bottom: 12px;
-  padding: 12px 14px 10px;
+  padding: 12px 14px;
   color: var(--sur-accent);
   background: var(--encre);
-  transition: background var(--duree-base) var(--aise), color var(--duree-base) var(--aise);
-}
-.scenario--filtre .scenario__bandeau {
-  color: var(--encre);
-  background: var(--couverture, var(--accent-doux));
-  border-bottom: 1px solid var(--encre);
 }
 
 .scenario__titre {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  align-items: center;
-  gap: 6px;
   margin: 0;
   font-family: var(--police-titre);
   font-weight: var(--graisse-titre);
@@ -1462,54 +1450,6 @@ input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; marg
   letter-spacing: var(--interlettre-titre);
   color: inherit;
 }
-.scenario__etat {
-  position: relative;
-  z-index: 1;
-  margin: 3px 0 0;
-  font-size: .6875rem;
-  font-weight: 600;
-  letter-spacing: .02em;
-  opacity: .85;
-}
-.scenario--filtre .scenario__etat { opacity: 1; }
-
-/* La courbe de la carte, en filigrane dans le bandeau : le fil entre les deux états. */
-.scenario__mini {
-  position: absolute;
-  right: 10px;
-  bottom: 6px;
-  width: 92px;
-  height: auto;
-  fill: none;
-  stroke: var(--couverture, var(--accent));
-  stroke-width: 4;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  opacity: .5;
-}
-.scenario--filtre .scenario__mini { stroke: var(--encre); opacity: .25; }
-
-/* Relire l'explication : discret, mais toujours accessible. */
-.scenario__aide {
-  margin-left: auto;
-  display: grid;
-  place-items: center;
-  width: 20px;
-  height: 20px;
-  padding: 0;
-  font-family: var(--police);
-  font-size: .6875rem;
-  font-weight: 700;
-  color: var(--encre-3);
-  background: transparent;
-  border: 1px solid var(--trait);
-  border-radius: 50%;
-  cursor: pointer;
-}
-.scenario__aide:hover { color: var(--accent); border-color: var(--accent); }
-.scenario__bandeau .scenario__aide { color: inherit; border-color: currentColor; opacity: .75; }
-.scenario__bandeau .scenario__aide:hover { opacity: 1; color: inherit; }
-
 .scenario__choix { display: grid; gap: 10px; }
 
 /*
@@ -1608,31 +1548,6 @@ input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; marg
 }
 .scenario__apercu:hover { background: var(--survol); color: var(--accent); }
 .scenario__apercu svg { width: 15px; height: 15px; display: block; }
-
-.scenario__note {
-  margin: 9px 0 0;
-  font-size: .6875rem;
-  color: var(--encre-3);
-  line-height: 1.4;
-}
-.scenario__note:empty { display: none; }
-
-/* Retour au linéaire : présent seulement quand un scénario est appliqué. */
-.scenario__retirer {
-  width: 100%;
-  margin-top: 10px;
-  padding: 7px 10px;
-  font: inherit;
-  font-size: .75rem;
-  font-weight: 600;
-  color: var(--encre-2);
-  background: transparent;
-  border: 1px solid var(--trait);
-  border-radius: var(--rayon);
-  cursor: pointer;
-}
-.scenario__retirer:hover { color: var(--accent-fort); border-color: var(--accent); background: var(--survol); }
-.scenario__retirer[hidden] { display: none; }
 
 /* --- Premier temps : l'explication, et rien d'autre --------------------- */
 

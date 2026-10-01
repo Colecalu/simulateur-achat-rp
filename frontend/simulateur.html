@@ -392,30 +392,13 @@
         </button>
 
         <div class="scenario__liste">
-          <!-- Le bandeau : un objet sombre au milieu de cartes claires, et qui
-               dit l'état du filtre. Il passe au jaune quand un scénario est
-               posé par-dessus les quatre étapes. -->
+          <!-- Le bandeau : un objet sombre au milieu de cartes claires. Rien
+               d'autre que le titre — la carte garde toujours la même hauteur. -->
           <div class="scenario__bandeau">
-            <p class="scenario__titre">
-              Scénarios de marché
-              <button type="button" class="scenario__aide" id="scenarioAide"
-                      aria-label="Comment lire ces scénarios ?"
-                      title="Comment lire ces scénarios ?">?</button>
-            </p>
-            <p class="scenario__etat" id="scenarioEtat" aria-live="polite">Aucun filtre · scénario linéaire</p>
-            <svg class="scenario__mini" viewBox="0 0 240 64" aria-hidden="true">
-              <path d="M6 52 L44 44 L66 46 L98 22 L128 34 L158 28 L184 40 L214 12 L234 18"/>
-            </svg>
+            <p class="scenario__titre">Scénarios de marché</p>
           </div>
           <div class="scenario__choix" id="scenarioChoix" role="radiogroup"
                aria-label="Scénario de marché"></div>
-          <p class="scenario__note" id="scenarioNote"></p>
-          <!-- Sans scénario, ce sont les taux de l'étape 4 qui s'appliquent, en
-               ligne droite. Le retour n'a donc pas de ligne dans la liste : un
-               bouton, visible seulement quand il y a quelque chose à retirer. -->
-          <button type="button" class="scenario__retirer" id="scenarioRetirer" hidden>
-            Revenir au scénario linéaire
-          </button>
         </div>
       </div>
     </div>

@@ -919,7 +919,7 @@ function construireScenarios() {
 
   // Le linéaire n'a pas de ligne : c'est l'absence de scénario, les taux de
   // la bulle 4 appliqués tels quels chaque année — ce que l'utilisateur voit
-  // déjà. On y revient par `#scenarioRetirer`.
+  // déjà. On y revient en recliquant sur le scénario actif.
   const morceaux = [];
   for (const famille of FAMILLES) {
     const liste = scenariosParFamille(famille.cle);
@@ -929,16 +929,19 @@ function construireScenarios() {
   $('#scenarioChoix').innerHTML = morceaux.join('');
   marquerScenarioActif(scenarioActif ? scenarioActif.cle : '');
 
+  // Un clic applique ; un second clic sur le même retire le filtre et rend
+  // le linéaire. Pas de bouton dédié : la carte garde la même hauteur.
   for (const b of document.querySelectorAll('.scenario__option')) {
-    b.addEventListener('click', () => appliquerScenario(b.dataset.scenario));
+    b.addEventListener('click', () => {
+      const dejaActif = scenarioActif && scenarioActif.cle === b.dataset.scenario;
+      appliquerScenario(dejaActif ? '' : b.dataset.scenario);
+    });
   }
   for (const b of document.querySelectorAll('.scenario__apercu')) {
     b.addEventListener('click', () => ouvrirApercu(b.dataset.apercu));
   }
 
   $('#scenarioOuvrir').addEventListener('click', ouvrirIntro);
-  $('#scenarioAide').addEventListener('click', ouvrirIntro);
-  $('#scenarioRetirer').addEventListener('click', () => appliquerScenario(''));
   $('#introFermer').addEventListener('click', fermerIntro);
   $('#introValider').addEventListener('click', () => {
     scenariosDecouverts = true;
@@ -1160,14 +1163,6 @@ function marquerScenarioActif(cle) {
     b.classList.toggle('scenario__option--actif', actif);
     b.setAttribute('aria-checked', String(actif));
   }
-  $('#scenarioRetirer').hidden = !cle;
-
-  // Le bandeau dit d'un coup d'œil si un filtre est posé, et lequel.
-  const sc = cle ? scenarioParCle(cle) : null;
-  $('#scenario').classList.toggle('scenario--filtre', !!sc);
-  $('#scenarioEtat').textContent = sc
-    ? `Filtre actif : ${sc.nom}`
-    : 'Aucun filtre · scénario linéaire';
 }
 
 function appliquerScenario(cle) {
@@ -1197,20 +1192,9 @@ function appliquerScenario(cle) {
 
   marquerScenarioActif(cle);
 
-  // Deux natures, deux phrases : une fenêtre du passé annonce ses années
-  // observées, un stress test annonce qu'il n'en a aucune. Écrire
-  // « 0 années observées » serait exact et incompréhensible.
-  $('#scenarioNote').textContent = !scenario
-    ? ''
-    : scenario.reel === 0
-    ? `Hypothèse : ${scenario.definies} années de choc sur ${scenario.choque.nom}, ` +
-      `puis la tendance longue (${pourcentDixieme.format(scenario.suite[scenario.choque.cle])} par an).`
-    : `${scenario.reel} années observées` +
-      (scenario.periode ? ` (${scenario.periode})` : '') +
-      (scenario.reel < 25
-        ? `, puis ${pourcentDixieme.format(scenario.suiteBourse)} par an — extrapolé.`
-        : ', soit tout l\u2019horizon. Rien n\u2019est extrapolé.');
-
+  // Ce qui est observé et ce qui est prolongé n'est plus écrit sous la liste
+  // (la carte garde la même hauteur) : l'avertissement sous le graphique et
+  // l'aperçu de chaque scénario le disent.
   recalculer();
 }
 
