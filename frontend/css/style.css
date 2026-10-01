@@ -1291,36 +1291,18 @@ input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; marg
 
 /* ------------------------------------------------- Mise en location (module) */
 
-.mel { display: grid; gap: 12px; }
+/*
+ * Une carte d'appel, puis un panneau. La question est celle d'un propriétaire :
+ * « je revends, ou je loue ? ». D'où l'ordre du panneau — les quatre réglages
+ * qui comptent, trois chiffres qui répondent, la courbe, le détail replié.
+ *
+ * Même famille que la carte des scénarios : contour d'encre, ombre dure,
+ * bandeau d'encre une fois ouvert. Pas de jaune : une couleur de plus, c'est
+ * une couleur de trop.
+ */
+.mel { display: grid; }
 
-.mel__declencheur {
-  justify-self: start;
-  font: inherit;
-  font-size: .875rem;
-  font-weight: 500;
-  color: var(--achat);
-  background: none;
-  border: 0;
-  border-bottom: 1px solid color-mix(in srgb, var(--achat) 40%, transparent);
-  padding: 2px 0;
-  cursor: pointer;
-}
-.mel__declencheur:hover { border-bottom-color: var(--achat); }
-.mel__declencheur[hidden] { display: none; }
-
-.mel__panneau {
-  background: var(--surface);
-  border: 1px solid var(--trait);
-  border-radius: var(--rayon-large);
-  box-shadow: var(--ombre);
-  padding: 20px;
-}
-.mel__entete {
-  display: flex;
-  align-items: start;
-  justify-content: space-between;
-  gap: 12px;
-}
+/* Les fenêtres d'aperçu et d'explication réutilisent ce bouton de fermeture. */
 .mel__fermer {
   font: inherit;
   font-size: 1.25rem;
@@ -1334,35 +1316,223 @@ input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; marg
 }
 .mel__fermer:hover { background: var(--surface-creuse); color: var(--encre); }
 
-.mel__champs {
-  margin-top: 16px;
+/* --- L'appel ------------------------------------------------------------ */
+.mel__appel {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  padding: 18px 20px;
+  font: inherit;
+  text-align: left;
+  color: var(--encre);
+  background: var(--surface);
+  border: 1px solid var(--encre);
+  border-radius: var(--rayon-large);
+  box-shadow: 4px 5px 0 var(--encre);
+  cursor: pointer;
+  transition: translate var(--duree-base) var(--aise), box-shadow var(--duree-base) var(--aise);
+}
+.mel__appel:hover { translate: -2px -2px; box-shadow: 6px 7px 0 var(--encre); }
+.mel__appel[hidden] { display: none; }
+.mel__picto {
+  flex: none;
+  width: 40px;
+  height: 40px;
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.mel__appel-texte { display: grid; gap: 3px; flex: 1; min-width: 0; }
+.mel__appel-titre {
+  font-family: var(--police-titre);
+  font-weight: var(--graisse-titre);
+  font-size: 1.625rem;
+  line-height: 1.1;
+  letter-spacing: var(--interlettre-titre);
+}
+.mel__appel-accroche { font-size: .875rem; color: var(--encre-2); }
+.mel__appel-cta {
+  flex: none;
+  padding: 10px 18px;
+  font-size: .875rem;
+  font-weight: 700;
+  color: var(--sur-accent);
+  background: var(--encre);
+  border-radius: var(--rayon);
+  transition: background var(--duree-rapide) var(--aise);
+}
+.mel__appel:hover .mel__appel-cta { background: var(--accent); }
+
+/* --- Le panneau ---------------------------------------------------------- */
+.mel__panneau {
+  overflow: hidden;
+  background: var(--surface);
+  border: 1px solid var(--encre);
+  border-radius: var(--rayon-large);
+  box-shadow: 4px 5px 0 var(--encre);
+}
+.mel__panneau[hidden] { display: none; }
+.mel__bandeau {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 20px;
+  color: var(--sur-accent);
+  background: var(--encre);
+}
+.mel__titre {
+  margin: 0;
+  font-family: var(--police-titre);
+  font-weight: var(--graisse-titre);
+  font-size: 1.5rem;
+  line-height: 1.1;
+  letter-spacing: var(--interlettre-titre);
+}
+
+.mel__reglages { display: grid; gap: 18px; padding: 20px 20px 0; }
+.mel__ligne {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
-  gap: 14px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px 28px;
   align-items: start;
 }
-
-.mel__avance {
-  grid-column: 1 / -1;
-  border-top: 1px solid var(--trait);
-  padding-top: 4px;
-}
-.mel__avance > .groupe__titre { padding: 10px 0; }
-.mel__avance-corps {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
-  gap: 14px;
-  padding-bottom: 6px;
-}
-
-.mel__incomplet {
-  margin: 14px 0 0;
-  font-size: .8125rem;
+.mel__libelle {
+  display: block;
+  font-size: .6875rem;
+  font-weight: 700;
+  letter-spacing: var(--interlettre-caps);
+  text-transform: uppercase;
   color: var(--encre-3);
 }
+
+/* L'année se lit en grand : c'est le réglage qu'on fait bouger. */
+.mel__curseur { display: grid; gap: 2px; }
+.mel__annee {
+  font-family: var(--police-titre);
+  font-size: 1.75rem;
+  line-height: 1.15;
+  color: var(--encre);
+}
+.mel__curseur input { width: 100%; margin: 6px 0 0; accent-color: var(--accent); cursor: pointer; }
+
+/* Meublé ou nu : deux boutons plutôt qu'une liste, c'est le choix qui pèse. */
+.mel__regime { display: grid; gap: 8px; }
+.mel__bascule {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  padding: 3px;
+  background: var(--surface-creuse);
+  border: 1px solid var(--trait);
+  border-radius: var(--rayon);
+}
+.mel__option {
+  padding: 9px 10px;
+  font: inherit;
+  font-size: .875rem;
+  font-weight: 600;
+  color: var(--encre-2);
+  background: transparent;
+  border: 0;
+  border-radius: calc(var(--rayon) - 2px);
+  cursor: pointer;
+}
+.mel__option:hover { color: var(--encre); }
+.mel__option--actif { color: var(--sur-accent); background: var(--encre); }
+.mel__option--actif:hover { color: var(--sur-accent); }
+
+.mel__aide { font-size: .75rem; color: var(--encre-3); }
+.mel__aide:empty { display: none; }
+
+.mel__avance { border-top: 1px solid var(--trait); padding-top: 10px; }
+.mel__avance summary,
+.mel__detail summary {
+  cursor: pointer;
+  font-size: .8125rem;
+  font-weight: 600;
+  color: var(--encre-2);
+}
+.mel__avance summary:hover,
+.mel__detail summary:hover { color: var(--accent); }
+.mel__avance-corps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 14px;
+  padding: 12px 0 4px;
+}
+
+.mel__incomplet { margin: 0; padding: 16px 20px 20px; font-size: .8125rem; color: var(--encre-3); }
 .mel__incomplet[hidden] { display: none; }
 
-#melNote { margin-top: 12px; }
+/* --- Ce qui répond -------------------------------------------------------- */
+.mel__resultats { display: grid; gap: 16px; padding: 20px; }
+.mel__resultats[hidden] { display: none; }
+
+.mel__chiffres { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.mel__chiffre {
+  padding: 14px 16px;
+  background: var(--surface-creuse);
+  border: 1px solid var(--trait);
+  border-radius: var(--rayon);
+}
+/* La première question d'un propriétaire : revendre ou louer. */
+.mel__chiffre--principal { background: var(--accent-doux); border-color: var(--accent); }
+.mel__chiffre-mot {
+  margin: 0;
+  font-size: .6875rem;
+  font-weight: 700;
+  letter-spacing: var(--interlettre-caps);
+  text-transform: uppercase;
+  color: var(--encre-2);
+}
+.mel__chiffre-valeur {
+  margin: 6px 0 2px;
+  font-family: var(--police-chiffres);
+  font-variant-numeric: tabular-nums;
+  font-size: 1.625rem;
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--encre);
+}
+.mel__chiffre-valeur--negatif { color: var(--alerte); }
+.mel__chiffre-aide { margin: 0; font-size: .75rem; line-height: 1.4; color: var(--encre-3); }
+
+.mel__graphique { margin: 0; }
+
+.mel__detail { border-top: 1px solid var(--trait); padding-top: 10px; }
+.mel__postes {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 4px 24px;
+  max-width: 420px;
+  margin: 12px 0 0;
+  font-size: .8125rem;
+}
+.mel__postes dt { color: var(--encre-2); }
+.mel__postes dd {
+  margin: 0;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  color: var(--encre);
+}
+/* La dernière ligne est le résultat : elle se sépare des postes. */
+.mel__postes dt:last-of-type,
+.mel__postes dd:last-of-type { padding-top: 6px; border-top: 1px solid var(--trait); font-weight: 700; color: var(--encre); }
+.mel__note { margin: 12px 0 0; font-size: .75rem; line-height: 1.5; color: var(--encre-3); }
+
+@media (max-width: 760px) {
+  .mel__ligne,
+  .mel__chiffres { grid-template-columns: minmax(0, 1fr); }
+  .mel__appel { flex-wrap: wrap; }
+  .mel__appel-cta { margin-left: 56px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mel__appel { transition: none; }
+}
 
 /* ---------------------------------------------------- Scénarios de marché */
 
@@ -1547,8 +1717,9 @@ input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; marg
   background: var(--encre);
 }
 
-/* Retirer le filtre : discret, sur le bandeau, sans couleur de plus. */
-.scenario__retirer {
+/* Pilule de bandeau d'encre (« × Retirer », « × Fermer ») : discrète, sans
+   couleur de plus. Partagée par la carte des scénarios et le module location. */
+.pilule {
   flex: none;
   display: inline-flex;
   align-items: center;
@@ -1564,9 +1735,9 @@ input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; marg
   cursor: pointer;
   transition: background var(--duree-rapide) var(--aise), color var(--duree-rapide) var(--aise);
 }
-.scenario__retirer span { font-size: .9375rem; line-height: 1; }
-.scenario__retirer:hover { color: var(--encre); background: var(--sur-accent); border-color: var(--sur-accent); }
-.scenario__retirer[hidden] { display: none; }
+.pilule span { font-size: .9375rem; line-height: 1; }
+.pilule:hover { color: var(--encre); background: var(--sur-accent); border-color: var(--sur-accent); }
+.pilule[hidden] { display: none; }
 
 .scenario__titre {
   margin: 0;

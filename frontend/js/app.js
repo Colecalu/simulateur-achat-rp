@@ -452,39 +452,6 @@ function dessinerGraphiques(resultat, horizon, mel) {
     });
   }
 
-  // --- Graphique « achat + mise en location » vs location de référence ---
-  $('#carteMel').hidden = !mel;
-  if (mel) {
-    const cMel = jeton('--achat-location');
-    const donneesMel = {
-      labels: etiquettes,
-      datasets: [
-        serie(`Achat + mise en location dès l'année ${mel.anneeBascule}`, melPatrimoine, cMel),
-        serie('Location (référence)', location, cLocation),
-      ],
-    };
-
-    const optionsMel = optionsCommunes();
-    Object.assign(optionsMel.scales.y, bornes);
-
-    if (graphMel) {
-      graphMel.data = donneesMel;
-      graphMel.options = optionsMel;
-      graphMel.update('none');
-    } else {
-      graphMel = new Chart($('#graphMiseEnLocation'), {
-        type: 'line',
-        data: donneesMel,
-        options: optionsMel,
-      });
-    }
-
-    $('#legendeMel').innerHTML = `
-      <span class="legende__item"><span class="pastille pastille--achat-location"></span>Achat + mise en location dès l'année ${mel.anneeBascule}</span>
-      <span class="legende__item"><span class="pastille pastille--location"></span>Location (référence)</span>
-    `;
-  }
-
   // Légende maison : l'identité des séries ne repose jamais sur la seule couleur.
   $('#legendePatrimoine').innerHTML = `
     <span class="legende__item"><span class="pastille pastille--achat"></span>Achat</span>
@@ -1326,7 +1293,9 @@ function paramsCourants() {
     const v = parseFloat(document.getElementById(id).value);
     return Number.isFinite(v) ? v : null;
   };
-  p.location.anneeBascule = nombre('melAnneeBascule');
+  // Un curseur a toujours une valeur : l'année n'est sauvegardée que module
+  // ouvert, puisque c'est d'elle que se déduit sa réouverture.
+  p.location.anneeBascule = $('#melPanneau').hidden ? null : nombre('melAnneeBascule');
   p.location.loyerPercu = nombre('melLoyerPercu');
   p.location.loyerFutur = nombre('melLoyerFutur');
   for (const [id, def] of Object.entries(CHAMPS_MEL_AVANCES)) {
@@ -1494,26 +1463,194 @@ function recalculer() {
   rafraichir();
 }
 
-/** Texte d'accompagnement du deuxième graphique. */
-function afficherTexteMel(mel, horizon) {
+/* --------------------------------------------------- Mise en location */
+
+/** Trait vertical à l'année de mise en location, sur le graphique du module. */
+const traitBascule = {
+  id: 'traitBascule',
+  afterDatasetsDraw(chart) {
+    const i = chart.options.bascule;
+    if (i === undefined || i === null) return;
+    const x = chart.scales.x.getPixelForValue(i);
+    const { top, bottom, right } = chart.chartArea;
+    const ctx = chart.ctx;
+
+    ctx.save();
+    ctx.setLineDash([4, 4]);
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = jeton('--encre-3');
+    ctx.beginPath();
+    ctx.moveTo(x, top);
+    ctx.lineTo(x, bottom);
+    ctx.stroke();
+
+    ctx.setLineDash([]);
+    ctx.fillStyle = jeton('--encre-2');
+    ctx.font = '600 11px ' + jeton('--police');
+    const aDroite = right - x > 110;
+    ctx.textAlign = aDroite ? 'left' : 'right';
+    ctx.fillText('mise en location', x + (aDroite ? 6 : -6), top + 12);
+    ctx.restore();
+  },
+};
+
+/**
+ * Loyer d'un logement équivalent l'année donnée, en €/mois arrondis à 10 € :
+ * celui de la bulle 3, tel que le moteur l'a déjà indexé. Simple lecture —
+ * l'indexation reste dans calc.js.
+ */
+function loyerEquivalent(annee) {
+  if (!dernierResultat) return null;
+  const ligne = dernierResultat.annees[Math.min(annee, dernierResultat.annees.length) - 1];
+  return ligne ? Math.round(ligne.loyerAnnuel / 12 / 10) * 10 : null;
+}
+
+/**
+ * Les loyers proposés suivent l'année choisie TANT QUE l'utilisateur ne les a
+ * pas touchés. `data-auto` est un état d'interface : il ne part jamais dans
+ * `params`, qui ne garde que la valeur.
+ */
+function proposerLoyers() {
+  const annee = parseInt($('#melAnneeBascule').value, 10);
+  const propose = loyerEquivalent(annee);
+  for (const id of ['#melLoyerPercu', '#melLoyerFutur']) {
+    const el = $(id);
+    if (propose !== null && (el.value === '' || el.dataset.auto === 'oui')) {
+      el.value = propose;
+      el.dataset.auto = 'oui';
+    }
+  }
+}
+
+/** Synchronise le libellé du curseur et la bascule meublé / nu avec leurs sources. */
+function majReglagesMel() {
+  const annee = parseInt($('#melAnneeBascule').value, 10);
+  $('#melAnneeValeur').textContent = `l'année ${annee}`;
+  const propose = loyerEquivalent(annee);
+  const aide = propose === null ? '' : `Logement équivalent en année ${annee} : ${euros.format(propose)}/mois`;
+  $('#melLoyerPercuAide').textContent = aide;
+  $('#melLoyerFuturAide').textContent = aide;
+
+  const regime = $('#melRegime').value;
+  for (const b of document.querySelectorAll('.mel__option')) {
+    const actif = b.dataset.regime === regime;
+    b.classList.toggle('mel__option--actif', actif);
+    b.setAttribute('aria-checked', String(actif));
+  }
+}
+
+/** €/mois signés : « +312 € » ou « −450 € ». */
+const mensuelSigne = (annuel) => signe(Math.round(annuel / 12));
+
+/** Les trois chiffres, le graphique et le détail du module. */
+function afficherMel(mel, horizon) {
+  const N = mel.anneeBascule;
+  const base = dernierResultat.annees;
   const ligne = mel.annees[horizon - 1];
-  const reference = dernierResultat.annees[horizon - 1].patrimoineTotalLocation;
-  const ecart = ligne.patrimoineTotal - reference;
-  const regime = mel.options.regime === 'nu' ? 'location nue' : 'meublé (LMNP réel)';
+  const apresHorizon = N > horizon;
 
-  $('#melLegendeTexte').textContent =
-    `Le bien n'est plus revendu : à partir de l'année ${mel.anneeBascule} il est loué en ` +
-    `${regime}, et vous vous logez ailleurs. Jusqu'à la bascule, la courbe est celle du ` +
-    'scénario d\'achat.';
+  // 1 et 2 : comparaisons de patrimoine, à l'horizon du curseur principal.
+  const vsRevente = ligne.patrimoineTotal - base[horizon - 1].patrimoineTotalAchat;
+  const vsLocataire = ligne.patrimoineTotal - base[horizon - 1].patrimoineTotalLocation;
+  $('#melVsRevente').textContent = apresHorizon ? '—' : signe(vsRevente);
+  $('#melVsLocataire').textContent = apresHorizon ? '—' : signe(vsLocataire);
+  $('#melVsRevente').classList.toggle('mel__chiffre-valeur--negatif', !apresHorizon && vsRevente < 0);
+  $('#melVsLocataire').classList.toggle('mel__chiffre-valeur--negatif', !apresHorizon && vsLocataire < 0);
+  const aHorizon = `de patrimoine à ${horizon} ans`;
+  $('#melVsReventeAide').textContent = apresHorizon
+    ? `La location commence après ${horizon} ans : rien à comparer à cet horizon.`
+    : `${aHorizon}, face à une revente`;
+  $('#melVsLocataireAide').textContent = apresHorizon ? '' : `${aHorizon}, face à la location`;
 
-  const sens = ecart >= 0 ? 'devant' : 'derrière';
-  $('#melNote').textContent =
-    `À ${horizon} ans : ${euros.format(ligne.patrimoineTotal)} contre ` +
-    `${euros.format(reference)} en restant locataire, soit ${signe(ecart)} — ${sens}. ` +
-    `Impôt de plus-value déduit : ${euros.format(ligne.impotPlusValue)} ` +
-    `(abattement de ${Math.round(ligne.abattementIR * 100)} % sur l'IR et ` +
-    `${Math.round(ligne.abattementPS * 100)} % sur les prélèvements sociaux, ` +
-    `pour ${horizon} ans de détention).`;
+  // 3 : la première année de location, au mois. Le moteur la calcule déjà.
+  const premiere = mel.annees[N - 1];
+  const flux = premiere.cashFlowNet;
+  $('#melMensuel').textContent = `${mensuelSigne(flux)}/mois`;
+  $('#melMensuel').classList.toggle('mel__chiffre-valeur--negatif', flux < 0);
+  $('#melMensuelAide').textContent = flux >= 0
+    ? `encaissés en année ${N}, crédit, charges et impôt payés`
+    : `à compléter de votre poche en année ${N}`;
+
+  // Le détail du mois : la même année, poste par poste. DOM et textContent.
+  const postes = [
+    ['Loyer perçu', premiere.revenusBruts],
+    ['Crédit et assurance', -premiere.mensualiteAnnuelle],
+    ['Charges, taxe foncière et frais', -premiere.chargesAnnuelles],
+    ['Impôt sur les loyers', -premiere.impotLocatif + premiere.economieDeficit],
+    ['Reste chaque mois', flux],
+  ];
+  const liste = $('#melPostes');
+  liste.replaceChildren();
+  for (const [nom, annuel] of postes) {
+    const dt = document.createElement('dt');
+    dt.textContent = nom;
+    const dd = document.createElement('dd');
+    dd.textContent = mensuelSigne(annuel);
+    liste.append(dt, dd);
+  }
+
+  $('#melNote').textContent = apresHorizon
+    ? ''
+    : `Montants de l'année ${N}, indexés ensuite. Si vous revendez à ${horizon} ans, ` +
+      `l'impôt de plus-value est déjà déduit : ${euros.format(ligne.impotPlusValue)} ` +
+      `(abattement de ${Math.round(ligne.abattementIR * 100)} % sur l'impôt et ` +
+      `${Math.round(ligne.abattementPS * 100)} % sur les prélèvements sociaux).`;
+
+  dessinerMel(mel, horizon);
+}
+
+/** Trois courbes : revendre, louer, rester locataire — et le trait de bascule. */
+function dessinerMel(mel, horizon) {
+  if (typeof Chart === 'undefined') return;
+  const base = dernierResultat.annees;
+  const series = [
+    { nom: 'Acheter puis revendre', donnees: base.map((a) => a.patrimoineTotalAchat),
+      couleur: jeton('--achat'), classe: 'achat' },
+    { nom: 'Acheter puis louer', donnees: mel.annees.map((a) => a.patrimoineTotal),
+      couleur: jeton('--achat-location'), classe: 'achat-location' },
+    { nom: 'Rester locataire', donnees: base.map((a) => a.patrimoineTotalLocation),
+      couleur: jeton('--location'), classe: 'location' },
+  ];
+
+  const donnees = {
+    labels: base.map((a) => a.annee),
+    datasets: series.map((x) => ({
+      label: x.nom,
+      data: x.donnees,
+      borderColor: x.couleur,
+      backgroundColor: x.couleur,
+      borderWidth: x.classe === 'achat-location' ? 2.5 : 2,
+      pointRadius: (ctx) => (ctx.dataIndex === horizon - 1 ? 5 : 0),
+      pointHoverRadius: 5,
+      pointBackgroundColor: x.couleur,
+      pointBorderColor: jeton('--surface'),
+      pointBorderWidth: 2,
+      tension: 0.25,
+    })),
+  };
+  const options = optionsCommunes();
+  options.bascule = mel.anneeBascule - 1;
+
+  if (graphMel) {
+    graphMel.data = donnees;
+    graphMel.options = options;
+    graphMel.update('none');
+  } else {
+    graphMel = new Chart($('#graphMiseEnLocation'), {
+      type: 'line', data: donnees, options, plugins: [traitBascule],
+    });
+  }
+
+  const legende = $('#legendeMel');
+  legende.replaceChildren();
+  for (const x of series) {
+    const item = document.createElement('span');
+    item.className = 'legende__item';
+    const pastille = document.createElement('span');
+    pastille.className = `pastille pastille--${x.classe}`;
+    item.append(pastille, x.nom);
+    legende.append(item);
+  }
 }
 
 function rafraichir() {
@@ -1522,6 +1659,8 @@ function rafraichir() {
 
   const mel = dernieresOptionsMel ? simulerMiseEnLocation(dernierResultat, dernieresOptionsMel) : null;
   $('#melIncomplet').hidden = !!mel || $('#melPanneau').hidden;
+  $('#melResultats').hidden = !mel;
+  majReglagesMel();
 
   majBulles();
   majScenario();
@@ -1540,7 +1679,7 @@ function rafraichir() {
   afficherVerdict(dernierResultat, horizon);
   dessinerGraphiques(dernierResultat, horizon, mel);
   dessinerDetail(dernierResultat, horizon);
-  if (mel) afficherTexteMel(mel, horizon);
+  if (mel) afficherMel(mel, horizon);
 }
 
 /* -------------------------------------------------- Plateau de bulles */
@@ -2156,6 +2295,17 @@ function initialiser() {
     hypothesesUtilisateur = null;
     scenariosDecouverts = false;
     appliquerScenario('');
+    // Le module de mise en location repart fermé et vide : ses loyers
+    // décrivaient l'ancien projet.
+    $('#melPanneau').hidden = true;
+    $('#melOuvrir').hidden = false;
+    $('#melOuvrir').setAttribute('aria-expanded', 'false');
+    $('#melAnneeBascule').value = 10;
+    for (const id of ['#melLoyerPercu', '#melLoyerFutur']) {
+      $(id).value = '';
+      delete $(id).dataset.auto;
+    }
+    remplirFormulaireMel();
     ouvrirProfil();
     majBulles();
     // Réinitialiser, c'est repartir de zéro : le brouillon part avec.
@@ -2189,14 +2339,31 @@ function initialiser() {
     $('#melPanneau').hidden = false;
     $('#melOuvrir').hidden = true;
     $('#melOuvrir').setAttribute('aria-expanded', 'true');
+    proposerLoyers();
     $('#melAnneeBascule').focus();
     recalculer();
+    enregistrerBrouillon();
   });
+  // Le curseur fait suivre les loyers proposés, tant qu'ils n'ont pas été touchés.
+  $('#melAnneeBascule').addEventListener('input', proposerLoyers);
+  for (const id of ['#melLoyerPercu', '#melLoyerFutur']) {
+    $(id).addEventListener('input', () => { delete $(id).dataset.auto; });
+  }
+  for (const b of document.querySelectorAll('.mel__option')) {
+    b.addEventListener('click', () => {
+      $('#melRegime').value = b.dataset.regime;
+      // Même chemin qu'une saisie : recalcul et brouillon.
+      $('#melRegime').dispatchEvent(new Event('input', { bubbles: true }));
+      $('#melRegime').dispatchEvent(new Event('change', { bubbles: true }));
+    });
+  }
   $('#melFermer').addEventListener('click', () => {
     $('#melPanneau').hidden = true;
     $('#melOuvrir').hidden = false;
     $('#melOuvrir').setAttribute('aria-expanded', 'false');
+    $('#melOuvrir').focus();
     recalculer();
+    enregistrerBrouillon();
   });
   // `recalculer` et non plus `rafraichir` : le loyer payé après la bascule
   // peut relever l'enveloppe du moteur de base (voir `recalculer`).
