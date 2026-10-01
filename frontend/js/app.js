@@ -949,6 +949,7 @@ function construireScenarios() {
     majScenario();
   });
   $('#apercuFermer').addEventListener('click', fermerApercu);
+  $('#scenarioBase').addEventListener('click', () => appliquerScenario(''));
 }
 
 function ouvrirIntro() {
@@ -1062,8 +1063,25 @@ function ouvrirApercu(cle) {
     .join('');
 
   const arrivee = (taux) => Math.round(base100(taux)[horizon]);
+
+  // Légende : pastille, nom, et où la courbe arrive. Construite en DOM —
+  // textContent seulement.
+  const legende = $('#apercuLegende');
+  legende.replaceChildren();
+  for (const serie of series) {
+    const li = document.createElement('li');
+    const pastille = document.createElement('span');
+    pastille.className = `pastille pastille--${serie.classe}`;
+    const nom = document.createElement('span');
+    nom.textContent = serie.nom;
+    const valeur = document.createElement('strong');
+    valeur.textContent = arrivee(serie.taux);
+    li.append(pastille, nom, valeur);
+    legende.append(li);
+  }
+  $('#apercuDetails').open = false;
   $('#apercuNote').textContent =
-    `Taux annuels en %. Base 100 au départ : après ${horizon} ans, ` +
+    `Taux annuels en %. Les valeurs de la légende partent de 100 et se lisent après ${horizon} ans : ` +
     series.map((x) => `${arrivee(x.taux)} pour « ${x.nom} »`).join(', ') +
     '.' +
     // Le texte doit dire ce qui est observé et ce qui ne l'est pas. Un scénario
@@ -1163,6 +1181,12 @@ function marquerScenarioActif(cle) {
     b.classList.toggle('scenario__option--actif', actif);
     b.setAttribute('aria-checked', String(actif));
   }
+  // Le recliquer reste possible, mais personne ne le devine : le bouton du bas
+  // le dit. Désactivé sans scénario, il devient une simple mention d'état.
+  $('#scenarioBase').disabled = !cle;
+  $('#scenarioBase').textContent = cle
+    ? "Revenir à mes hypothèses (étape 4)"
+    : "Hypothèses de l'étape 4 actives";
 }
 
 function appliquerScenario(cle) {

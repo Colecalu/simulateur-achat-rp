@@ -205,11 +205,14 @@ réelles — en cours ; **(3)** la mise en location ultérieure — moteur fait,
   Chaque bloc a son pictogramme (flèche qui revient, flèche pointillée qui part). Un futur affiche
   « Un choc sur … » là où un historique affiche sa période.
 - **Le scénario linéaire n'a pas de ligne** : c'est l'absence de scénario, les taux de l'étape 4
-  appliqués chaque année. **On y revient en recliquant sur le scénario actif** — un interrupteur,
-  pas de bouton dédié.
+  appliqués chaque année. On y revient en recliquant sur le scénario actif, mais personne ne le
+  devine : **un bouton sous la liste, toujours à la même place**, le dit. Sans scénario, c'est
+  une mention en tirets désactivée (« ✓ Hypothèses de l'étape 4 actives ») ; avec un scénario,
+  un bouton jaune à ombre dure, l'habit de la carte d'appel (« Revenir à mes hypothèses
+  (étape 4) »). Une seule ligne dans les deux états (`nowrap`) : sinon la carte change de hauteur.
 - **La liste ouverte garde toujours la même hauteur** : un bandeau d'encre avec le seul titre,
-  les deux blocs, rien d'autre. Ni note « années observées », ni bouton de retour, ni bandeau qui
-  change de couleur — tout ce qui faisait bouger la carte a été retiré (décision de Lucas). Même
+  les deux blocs, le bouton de retour. Ni note « années observées », ni bandeau qui change de
+  couleur — tout ce qui faisait bouger la carte a été retiré (décision de Lucas). Même
   bordure d'encre et même ombre dure que la carte jaune : c'est le même objet, déplié.
 - **Trois séries sont tracées** — marchés, immobilier, loyers (IRL). `revalCharges` et
   `revalTaxeFonciere` sont dans `taux` parce que le moteur en a besoin, mais ne sont pas dessinées :
@@ -239,6 +242,12 @@ réelles — en cours ; **(3)** la mise en location ultérieure — moteur fait,
   appliqué, jamais écrasées.
 - **L'avertissement de bas de page change avec le scénario** : « hypothèses constantes » devient
   faux dès qu'une série tourne.
+- **L'aperçu est allégé** (01/10/2026 — « c'est terrifiant de voir tout ça ») : 560 px de large,
+  titre en sérif 1,75 rem, résumé en 15 px, une **légende** qui donne où chaque courbe arrive
+  (base 100), une courbe de 200 px. Tout le reste — taux année par année, note de lecture,
+  réserves et sources — est dans un `<details>` « Le détail année par année », **refermé à
+  chaque ouverture**. Les réserves ne sont donc plus visibles d'emblée : arbitrage assumé de
+  Lucas, la lisibilité d'abord.
 - **L'aperçu est une fenêtre à part**, ouverte par l'icône de courbe d'une ligne : une fenêtre qui
   trace ses trois séries (marchés, immobilier, loyers) **en base 100**, sur l'horizon complet. On trace la
   VALEUR, pas le taux : une suite de pourcentages est une dérivée, on la lit mal et on ne voit pas

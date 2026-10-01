@@ -1432,7 +1432,44 @@ input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; marg
   border: 1px solid var(--encre);
   box-shadow: 4px 5px 0 var(--encre);
 }
-.scenario[data-etat="ouvert"] .scenario__choix { margin: 0 12px; }
+.scenario[data-etat="ouvert"] .scenario__choix,
+.scenario[data-etat="ouvert"] .scenario__base { margin: 0 12px; }
+.scenario[data-etat="ouvert"] .scenario__base { width: calc(100% - 24px); margin-top: 12px; }
+
+/*
+ * Retour aux hypothèses : toujours à la même place, pour que la carte ne
+ * bouge pas. Sans scénario, une mention en tirets (rien à faire) ; avec un
+ * scénario, le bouton prend l'habit de la carte d'appel — jaune, ombre dure.
+ */
+.scenario__base {
+  display: block;
+  overflow: hidden;
+  padding: 9px 12px;
+  /* Une seule ligne dans les deux états : sinon la carte change de hauteur. */
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font: inherit;
+  font-size: .8125rem;
+  font-weight: 700;
+  text-align: center;
+  color: var(--encre);
+  background: var(--couverture, var(--accent-doux));
+  border: 1px solid var(--encre);
+  border-radius: var(--rayon);
+  box-shadow: 3px 3px 0 var(--encre);
+  cursor: pointer;
+  transition: translate var(--duree-rapide) var(--aise), box-shadow var(--duree-rapide) var(--aise);
+}
+.scenario__base:hover:not(:disabled) { translate: -1px -1px; box-shadow: 4px 4px 0 var(--encre); }
+.scenario__base:disabled {
+  font-weight: 500;
+  color: var(--encre-3);
+  background: transparent;
+  border: 1px dashed var(--trait);
+  box-shadow: none;
+  cursor: default;
+}
+.scenario__base:disabled::before { content: '✓ '; }
 
 .scenario__bandeau {
   margin-bottom: 12px;
@@ -1669,17 +1706,59 @@ input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; marg
 
 /* --- Second temps : l'aperçu d'un scénario ----------------------------- */
 
+/*
+ * Aperçu allégé : un titre lisible, une légende qui dit où chaque courbe
+ * arrive, la courbe. Le reste — taux année par année, réserves, sources — se
+ * déplie à la demande. Tout montrer d'emblée faisait peur plus qu'il
+ * n'informait.
+ */
 .apercu {
-  width: min(760px, calc(100vw - 32px));
-  padding: 20px 24px 22px;
+  width: min(560px, calc(100vw - 32px));
+  padding: 22px 24px 20px;
 }
 .apercu__entete {
   display: flex;
   align-items: start;
   justify-content: space-between;
   gap: 16px;
-  margin-bottom: 14px;
+  margin-bottom: 12px;
 }
+.apercu__titre {
+  margin: 0 0 6px;
+  font-family: var(--police-titre);
+  font-weight: var(--graisse-titre);
+  font-size: 1.75rem;
+  line-height: 1.1;
+  letter-spacing: var(--interlettre-titre);
+}
+.apercu__resume { margin: 0; font-size: .9375rem; line-height: 1.5; color: var(--encre-2); }
+
+.apercu__legende {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  margin: 0 0 8px;
+  padding: 0;
+  list-style: none;
+  font-size: .8125rem;
+  color: var(--encre-2);
+}
+.apercu__legende li { display: flex; align-items: center; gap: 6px; }
+.apercu__legende strong {
+  font-family: var(--police-chiffres);
+  font-variant-numeric: tabular-nums;
+  color: var(--encre);
+}
+.apercu .graphique--court { height: 200px; }
+
+.apercu__details { margin-top: 12px; border-top: 1px solid var(--trait); padding-top: 10px; }
+.apercu__details summary {
+  cursor: pointer;
+  font-size: .8125rem;
+  font-weight: 600;
+  color: var(--encre-2);
+}
+.apercu__details summary:hover { color: var(--accent); }
 .apercu__note { margin: 10px 0 0; font-size: .75rem; color: var(--encre-3); line-height: 1.45; }
 .apercu__sources {
   margin: 8px 0 0;
