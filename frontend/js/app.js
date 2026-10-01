@@ -1285,6 +1285,17 @@ function paramsCourants() {
   for (const champ of Object.keys(p.moteur)) {
     if (champ in saisie) p.moteur[champ] = saisie[champ];
   }
+  // Un scénario est un filtre posé sur le projet, pas une partie du projet :
+  // on sauvegarde les taux de l'utilisateur (mis de côté) et la clé du
+  // scénario, jamais ses séries. Sinon, au rechargement, les séries étaient
+  // prises pour les hypothèses de l'utilisateur, et retirer le filtre rendait
+  // la première année du scénario (−5,2 % en bourse) au lieu de ses 5 %.
+  if (scenarioActif && hypothesesUtilisateur) {
+    for (const champ of TAUX_SCENARISES) {
+      const v = parseFloat(hypothesesUtilisateur[champ]);
+      p.moteur[champ] = Number.isFinite(v) ? v / 100 : DEFAUTS[champ];
+    }
+  }
   // La décomposition, pas la somme : l'effort se déduit, il ne se stocke pas.
   p.profil = lireProfil();
 
