@@ -446,7 +446,7 @@
             </svg>
             À débloquer · Mise en location
           </span>
-          <span class="scenario__grand-titre">Et si vous le mettiez en location&nbsp;?</span>
+          <span class="scenario__grand-titre">Et si vous la mettiez en location&nbsp;?</span>
           <!-- Une maison et sa clé : elles se tracent au survol, comme la
                courbe des scénarios. -->
           <svg class="scenario__dessin" viewBox="0 0 240 64" aria-hidden="true">
@@ -596,6 +596,16 @@
           <h3 class="mel__titre" id="melTitre">Si vous le mettez en location</h3>
           <button type="button" class="pilule" id="melModifierBis"
                   aria-haspopup="dialog" aria-controls="melFenetre">Modifier</button>
+        </div>
+
+        <!-- Rappel du curseur d'horizon : les deux premiers chiffres se lisent
+             à cette date. Même valeur que « Si vous revendez dans », comme le
+             rappel des cumuls — jamais une seconde date. -->
+        <div class="rappel mel__rappel">
+          <label class="rappel__mot" for="horizonMel">Bilan dans</label>
+          <input type="range" id="horizonMel" min="1" max="25" step="1" value="20"
+                 aria-label="Horizon du bilan en années">
+          <output class="rappel__annees" id="horizonMelLabel">20 ans</output>
         </div>
 
         <p class="mel__incomplet" id="melIncomplet">
@@ -779,8 +789,8 @@
            aria-labelledby="melFenetreTitre" hidden>
         <div class="mel-fenetre__entete">
           <div>
-            <h3 class="mel-fenetre__titre" id="melFenetreTitre">Et si vous le mettiez en location&nbsp;?</h3>
-            <p class="mel-fenetre__intro">Vous gardez le bien, vous le louez, et vous vous logez ailleurs.</p>
+            <h3 class="mel-fenetre__titre" id="melFenetreTitre">Et si vous la mettiez en location&nbsp;?</h3>
+            <p class="mel-fenetre__intro">Vous gardez votre résidence principale, vous la louez, et vous vous logez ailleurs.</p>
           </div>
           <button type="button" class="mel__fermer" id="melFermer"
                   aria-label="Fermer">×</button>

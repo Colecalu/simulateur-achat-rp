@@ -216,6 +216,8 @@ function afficherVerdict(resultat, horizon) {
   // Le rappel du curseur, dans la section dépliée, affiche la même date.
   $('#horizonBis').value = horizon;
   $('#horizonBisLabel').textContent = ans;
+  $('#horizonMel').value = horizon;
+  $('#horizonMelLabel').textContent = ans;
 
   const chiffre = $('#verdictChiffre');
   const mesure = $('#verdictMesure');
@@ -1459,7 +1461,7 @@ function initialiserBrouillon() {
     $(zone).addEventListener('input', enregistrerBrouillon);
     $(zone).addEventListener('change', enregistrerBrouillon);
   }
-  for (const id of ['#horizon', '#horizonBis']) {
+  for (const id of ['#horizon', '#horizonBis', '#horizonMel']) {
     $(id).addEventListener('input', enregistrerBrouillon);
   }
 
@@ -1584,7 +1586,7 @@ function afficherMel(mel, horizon) {
   const base = dernierResultat.annees;
   const ligne = mel.annees[horizon - 1];
   const regime = mel.options.regime === 'nu' ? 'location nue' : 'meublé';
-  $('#melTitre').textContent = `Si vous le louez dès l'année ${N}, en ${regime}`;
+  $('#melTitre').textContent = `Si vous la louez dès l'année ${N}, en ${regime}`;
   const apresHorizon = N > horizon;
 
   // 1 et 2 : comparaisons de patrimoine, à l'horizon du curseur principal.
@@ -1594,11 +1596,14 @@ function afficherMel(mel, horizon) {
   $('#melVsLocataire').textContent = apresHorizon ? '—' : signe(vsLocataire);
   $('#melVsRevente').classList.toggle('mel__chiffre-valeur--negatif', !apresHorizon && vsRevente < 0);
   $('#melVsLocataire').classList.toggle('mel__chiffre-valeur--negatif', !apresHorizon && vsLocataire < 0);
-  const aHorizon = `de patrimoine à ${horizon} ans`;
+  // Les deux premiers chiffres se lisent au curseur « Bilan dans » : il faut
+  // dire à quelle date, et contre quoi.
   $('#melVsReventeAide').textContent = apresHorizon
     ? `La location commence après ${horizon} ans : rien à comparer à cet horizon.`
-    : `${aHorizon}, face à une revente`;
-  $('#melVsLocataireAide').textContent = apresHorizon ? '' : `${aHorizon}, face à la location`;
+    : `à ${horizon} ans, face à une revente du bien à ${horizon} ans`;
+  $('#melVsLocataireAide').textContent = apresHorizon
+    ? ''
+    : `à ${horizon} ans, face à la comparaison de départ`;
 
   // 3 : la première année de location, au mois. Le moteur la calcule déjà.
   const premiere = mel.annees[N - 1];
@@ -1606,8 +1611,8 @@ function afficherMel(mel, horizon) {
   $('#melMensuel').textContent = `${mensuelSigne(flux)}/mois`;
   $('#melMensuel').classList.toggle('mel__chiffre-valeur--negatif', flux < 0);
   $('#melMensuelAide').textContent = flux >= 0
-    ? `encaissés en année ${N}, crédit, charges et impôt payés`
-    : `à compléter de votre poche en année ${N}`;
+    ? `encaissés en année ${N} : loyer − crédit − charges − impôt`
+    : `à compléter de votre poche en année ${N} : loyer − crédit − charges − impôt`;
 
   // Le détail du mois : la même année, poste par poste. DOM et textContent.
   const postes = [
@@ -2308,10 +2313,12 @@ function initialiser() {
   $('#horizon').addEventListener('input', rafraichir);
   // Deux contrôles, un seul état : le rappel écrit dans le curseur principal,
   // qui reste la source de vérité. Jamais deux dates à l'écran.
-  $('#horizonBis').addEventListener('input', () => {
-    $('#horizon').value = $('#horizonBis').value;
-    rafraichir();
-  });
+  for (const id of ['#horizonBis', '#horizonMel']) {
+    $(id).addEventListener('input', () => {
+      $('#horizon').value = $(id).value;
+      rafraichir();
+    });
+  }
   // Nouvelle simulation en deux temps : effacer la saisie et le brouillon est
   // irréversible, un clic égaré ne doit pas suffire.
   const confirmerNouvelle = (oui) => {

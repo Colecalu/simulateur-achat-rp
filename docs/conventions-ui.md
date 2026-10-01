@@ -573,7 +573,8 @@ réelles — en cours ; **(3)** la mise en location ultérieure — moteur fait,
   - **Le pilier 3 est à côté du pilier 2** (décision de Lucas) : une carte « Et si vous le
     mettiez en location ? » dans le rail, **juste sous celle des scénarios**, sur le même modèle —
     elle en porte les classes (`.scenario.scenario--location`) : verrouillée avec ses quatre
-    pastilles, puis jaune avec une maison et une clé qui se tracent au survol, puis, une fois la
+    pastilles, puis **lilas** (`--papier-lilas` ; deux cartes jaunes empilées se confondaient)
+    avec une maison et une clé qui se tracent au survol, puis, une fois la
     location appliquée, un **résumé à hauteur fixe** (bandeau d'encre, « Dès l'année 12 »,
     « Meublé · 2 200 €/mois », « Modifier », pilule « × Retirer »).
   - **La saisie se fait dans une fenêtre** (`#melFenetre`), comme l'explication des scénarios ;
@@ -582,6 +583,9 @@ réelles — en cours ; **(3)** la mise en location ultérieure — moteur fait,
     la fenêtre se répercute en direct.
   - **Les résultats s'affichent sous le graphique principal** (`#mel`, après les chiffres du
     mois), plus en bas de page : le rail est trop étroit pour trois chiffres et une courbe.
+    Un **rappel du curseur d'horizon** (« Bilan dans », `#horizonMel`) ouvre le bloc : les deux
+    premiers chiffres se lisent à cette date, et il fallait le rendre visible. Il écrit dans
+    `#horizon`, comme le rappel des cumuls — trois contrôles, une seule date.
   - **Quatre réglages, pas plus, en haut** : l'année de mise en location au **curseur** (affichée
     en grand), **Meublé / Nu en deux boutons** (sorti des paramètres avancés : c'est le choix qui
     pèse le plus sur l'impôt ; la liste `#melRegime` reste cachée et sert de source à la valeur),

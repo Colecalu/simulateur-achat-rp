@@ -1306,6 +1306,17 @@ input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; marg
 }
 .mel[hidden] { display: none; }
 
+/*
+ * Même carte que les scénarios, autre couleur : deux piliers côte à côte en
+ * jaune se confondaient. Le lilas est la deuxième teinte de papier du thème
+ * Horizon (`--papier-lilas`), prévue pour cet usage et jusqu'ici dormante.
+ */
+/* Deux classes : la règle jaune de `.scenario` est plus bas dans la feuille. */
+.scenario.scenario--location[data-etat="ferme"] { background: var(--papier-lilas, var(--accent-doux)); }
+
+/* Le rappel du curseur d'horizon, sous le bandeau des résultats. */
+.mel__rappel { margin: 16px 20px 0; }
+
 /* Le résumé de la carte une fois la location appliquée : hauteur fixe. */
 .mel-resume { display: grid; gap: 2px; margin: 0 12px; }
 .mel-resume__annee {
