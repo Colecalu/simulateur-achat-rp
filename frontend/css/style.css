@@ -1414,19 +1414,80 @@ input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; marg
 .scenario__cta { transition: background var(--duree-rapide) var(--aise); }
 .scenario[data-etat="ferme"]:hover .scenario__cta { background: var(--accent); }
 
-/* --- La liste ----------------------------------------------------------- */
+/* --- La liste : un tableau de commande --------------------------------- */
+
+/*
+ * Ouverte, la carte reste de la même famille que la carte jaune — bordure
+ * d'encre pleine, ombre dure — pour qu'on la lise comme le même objet, déplié.
+ * Son bandeau sombre est le seul de la colonne : c'est ce qui la sort du rang
+ * des quatre étapes, sans couleur criarde. Il passe au jaune quand un filtre
+ * est posé : on voit d'un coup d'œil que le résultat n'est plus le linéaire.
+ */
+.scenario[data-etat="ouvert"] {
+  padding: 0 0 12px;
+  overflow: hidden;
+  border: 1px solid var(--encre);
+  box-shadow: 4px 5px 0 var(--encre);
+}
+.scenario[data-etat="ouvert"] .scenario__choix,
+.scenario[data-etat="ouvert"] .scenario__note,
+.scenario[data-etat="ouvert"] .scenario__retirer { margin-left: 12px; margin-right: 12px; }
+.scenario[data-etat="ouvert"] .scenario__retirer { width: calc(100% - 24px); }
+
+.scenario__bandeau {
+  position: relative;
+  margin-bottom: 12px;
+  padding: 12px 14px 10px;
+  color: var(--sur-accent);
+  background: var(--encre);
+  transition: background var(--duree-base) var(--aise), color var(--duree-base) var(--aise);
+}
+.scenario--filtre .scenario__bandeau {
+  color: var(--encre);
+  background: var(--couverture, var(--accent-doux));
+  border-bottom: 1px solid var(--encre);
+}
 
 .scenario__titre {
+  position: relative;
+  z-index: 1;
   display: flex;
   align-items: center;
   gap: 6px;
-  margin: 0 0 10px;
+  margin: 0;
   font-family: var(--police-titre);
   font-weight: var(--graisse-titre);
-  font-size: 1.1875rem;
+  font-size: 1.375rem;
+  line-height: 1.1;
   letter-spacing: var(--interlettre-titre);
-  color: var(--encre);
+  color: inherit;
 }
+.scenario__etat {
+  position: relative;
+  z-index: 1;
+  margin: 3px 0 0;
+  font-size: .6875rem;
+  font-weight: 600;
+  letter-spacing: .02em;
+  opacity: .85;
+}
+.scenario--filtre .scenario__etat { opacity: 1; }
+
+/* La courbe de la carte, en filigrane dans le bandeau : le fil entre les deux états. */
+.scenario__mini {
+  position: absolute;
+  right: 10px;
+  bottom: 6px;
+  width: 92px;
+  height: auto;
+  fill: none;
+  stroke: var(--couverture, var(--accent));
+  stroke-width: 4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: .5;
+}
+.scenario--filtre .scenario__mini { stroke: var(--encre); opacity: .25; }
 
 /* Relire l'explication : discret, mais toujours accessible. */
 .scenario__aide {
@@ -1446,6 +1507,8 @@ input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; marg
   cursor: pointer;
 }
 .scenario__aide:hover { color: var(--accent); border-color: var(--accent); }
+.scenario__bandeau .scenario__aide { color: inherit; border-color: currentColor; opacity: .75; }
+.scenario__bandeau .scenario__aide:hover { opacity: 1; color: inherit; }
 
 .scenario__choix { display: grid; gap: 10px; }
 

@@ -1161,6 +1161,13 @@ function marquerScenarioActif(cle) {
     b.setAttribute('aria-checked', String(actif));
   }
   $('#scenarioRetirer').hidden = !cle;
+
+  // Le bandeau dit d'un coup d'œil si un filtre est posé, et lequel.
+  const sc = cle ? scenarioParCle(cle) : null;
+  $('#scenario').classList.toggle('scenario--filtre', !!sc);
+  $('#scenarioEtat').textContent = sc
+    ? `Filtre actif : ${sc.nom}`
+    : 'Aucun filtre · scénario linéaire';
 }
 
 function appliquerScenario(cle) {
