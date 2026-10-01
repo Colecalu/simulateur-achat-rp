@@ -470,11 +470,12 @@ h1, h2, h3 {
 }
 .plateau__visu { grid-area: visu; display: grid; gap: 16px; min-width: 0; }
 
-/* Les quatre bulles de gauche tiennent dans un écran, sans défilement. */
+/* La colonne de gauche défile avec la page. Elle a longtemps été figée
+   (`position: sticky`) ; décision de Lucas, oct. 2026 : une colonne qui reste
+   en place pendant qu'on lit les graphiques surprend plus qu'elle n'aide. */
 .plateau__gauche {
   grid-area: gauche;
-  position: sticky;
-  top: 16px;
+  align-self: start;
   display: grid;
   grid-template-rows: auto auto;
   gap: 14px;
@@ -518,7 +519,7 @@ h1, h2, h3 {
     grid-template-columns: minmax(0, 1fr);
     grid-template-areas: "coin" "haut" "gauche" "visu";
   }
-  .plateau__gauche { position: static; grid-template-rows: none; }
+  .plateau__gauche { grid-template-rows: none; }
   .rail {
     height: auto;
     min-height: 0;

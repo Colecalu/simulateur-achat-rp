@@ -1983,11 +1983,12 @@ function majBulles() {
 /**
  * Alvéole d'origine de la bulle actuellement zoomée, le temps du zoom.
  *
- * Le rail de gauche est en `position: sticky`, ce qui crée un contexte
- * d'empilement — toujours, même sans `z-index`. Une bulle qui y reste ne peut
- * donc pas passer au-dessus du voile, quel que soit son `z-index` : les bulles
- * 3 et 4 s'ouvraient bien au centre mais sous l'écran grisé, hors d'atteinte.
- * On les sort donc du rail pendant le zoom, et on les y remet après. Le FLIP
+ * Le rail de gauche a été en `position: sticky`, ce qui crée un contexte
+ * d'empilement — toujours, même sans `z-index`. Une bulle qui y restait ne
+ * pouvait donc pas passer au-dessus du voile : les bulles 3 et 4 s'ouvraient
+ * au centre mais sous l'écran grisé, hors d'atteinte. Le rail ne colle plus,
+ * mais on garde la sortie pendant le zoom : elle protège de tout contexte
+ * d'empilement qu'un parent pourrait recréer (sticky, transform, filter…). Le FLIP
  * absorbe le déplacement sans qu'on ait à le lui dire : il mesure la position
  * avant et après, quel que soit le parent.
  */

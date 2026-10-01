@@ -263,7 +263,7 @@ réelles — en cours ; **(3)** la mise en location ultérieure — moteur fait,
   le scénario porteur). Deux axes Y mentiraient sur l'écart réel.
 - **Ouvrir un aperçu n'applique rien.** Regarder et choisir sont deux gestes distincts.
 - **Les deux fenêtres vivent hors du rail de gauche**, à côté du voile. Le rail est
-  `position: sticky`, donc un contexte d'empilement : une fenêtre qui y resterait passerait sous
+  (ou a été) `position: sticky`, donc un contexte d'empilement : une fenêtre qui y resterait passerait sous
   le voile — même piège que les bulles 3 et 4 en leur temps.
 - **Le voile sert trois vues** : l'explication, l'aperçu et la bulle zoomée. L'aperçu passe
   devant l'explication dans les écouteurs de clic et d'Échap — c'est lui qui est au-dessus. Son écouteur et celui d'Échap
@@ -560,7 +560,8 @@ réelles — en cours ; **(3)** la mise en location ultérieure — moteur fait,
 - Dans les règles de densité, **l'ordre compte** : `.champ input` et `.champ--cle input` ont la
   même spécificité, donc la règle générique doit toujours précéder celle du champ dominant.
 - **La bulle zoomée sort de son alvéole et va sous `<body>`** le temps du zoom, puis y retourne.
-  Le rail de gauche est en `position: sticky`, et sticky crée **toujours** un contexte
+  Le rail de gauche a été en `position: sticky` (retiré en octobre 2026 : il défile désormais
+  avec la page), et sticky crée **toujours** un contexte
   d'empilement, même sans `z-index`. Une bulle qui y reste ne peut donc pas passer au-dessus du
   voile quel que soit son `z-index` : les bulles 3 et 4 s'ouvraient bien au centre, mais sous
   l'écran grisé, bouton « Valider » hors d'atteinte. Les bulles 1 et 2, qui vivent dans
