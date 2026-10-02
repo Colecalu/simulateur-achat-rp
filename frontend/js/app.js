@@ -921,6 +921,24 @@ function construireScenarios() {
 }
 
 const fenetreMelOuverte = () => !$('#melFenetre').hidden;
+const resultatMelOuvert = () => !$('#mel').hidden;
+
+function ouvrirResultatMel() {
+  $('#mel').hidden = false;
+  $('#voile').hidden = false;
+  // Un graphique créé dans une fenêtre cachée garde une largeur nulle, et
+  // `resize()` ne replace pas ses points : on le recrée une fois visible.
+  if (graphMel) { graphMel.destroy(); graphMel = null; }
+  rafraichir();
+  $('#melResultatFermer').focus();
+}
+
+function fermerResultatMel() {
+  $('#mel').hidden = true;
+  if (bulleZoomee === null && !apercuOuvert() && !introOuverte() && !fenetreMelOuverte()) {
+    $('#voile').hidden = true;
+  }
+}
 
 function ouvrirFenetreMel() {
   proposerLoyers();
@@ -932,7 +950,9 @@ function ouvrirFenetreMel() {
 
 function fermerFenetreMel() {
   $('#melFenetre').hidden = true;
-  if (bulleZoomee === null && !apercuOuvert() && !introOuverte()) $('#voile').hidden = true;
+  if (bulleZoomee === null && !apercuOuvert() && !introOuverte() && !resultatMelOuvert()) {
+    $('#voile').hidden = true;
+  }
 }
 
 function ouvrirIntro() {
@@ -1701,7 +1721,8 @@ function rafraichir() {
   const horizon = parseInt($('#horizon').value, 10);
 
   const mel = dernieresOptionsMel ? simulerMiseEnLocation(dernierResultat, dernieresOptionsMel) : null;
-  $('#mel').hidden = !melActif;
+  // La fenêtre de résultats ne s'ouvre qu'à la demande ; retirée, elle se ferme.
+  if (!melActif && resultatMelOuvert()) fermerResultatMel();
   $('#melIncomplet').hidden = !!mel;
   $('#melResultats').hidden = !mel;
   majReglagesMel();
@@ -2230,6 +2251,7 @@ function initialiserBulles() {
   // Le voile sert deux fenêtres : l'aperçu de scénario et la bulle zoomée.
   // Le voile sert trois vues : l'explication, l'aperçu et la bulle zoomée.
   $('#voile').addEventListener('click', () => {
+    if (resultatMelOuvert()) return fermerResultatMel();
     if (fenetreMelOuverte()) return fermerFenetreMel();
     if (apercuOuvert()) return fermerApercu();
     if (introOuverte()) return fermerIntro();
@@ -2239,6 +2261,7 @@ function initialiserBulles() {
     if (e.key !== 'Escape') return;
     // Choix obligatoire : Échap ne ferme la question que rouverte à la demande.
     if (questionOuverte()) { if (questionLibre) fermerQuestion(); return; }
+    if (resultatMelOuvert()) return fermerResultatMel();
     if (fenetreMelOuverte()) return fermerFenetreMel();
     if (apercuOuvert()) return fermerApercu();
     if (introOuverte()) return fermerIntro();
@@ -2381,16 +2404,23 @@ function initialiser() {
   initialiserBulles();
 
   // Divulgation progressive : le module n'existe qu'après un clic explicite.
-  for (const id of ['#melOuvrir', '#melModifier', '#melModifierBis']) {
+  for (const id of ['#melOuvrir', '#melModifier']) {
     $(id).addEventListener('click', ouvrirFenetreMel);
   }
+  // Depuis les résultats : on referme, puis on rouvre la saisie.
+  $('#melModifierBis').addEventListener('click', () => {
+    fermerResultatMel();
+    ouvrirFenetreMel();
+  });
+  $('#melVoir').addEventListener('click', ouvrirResultatMel);
+  $('#melResultatFermer').addEventListener('click', fermerResultatMel);
   $('#melFermer').addEventListener('click', fermerFenetreMel);
   $('#melValider').addEventListener('click', () => {
     melActif = true;
     fermerFenetreMel();
     recalculer();
     enregistrerBrouillon();
-    $('#mel').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    ouvrirResultatMel();
   });
   $('#melRetirer').addEventListener('click', () => {
     melActif = false;

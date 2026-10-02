@@ -576,13 +576,18 @@ réelles — en cours ; **(3)** la mise en location ultérieure — moteur fait,
     pastilles, puis **lilas** (`--papier-lilas` ; deux cartes jaunes empilées se confondaient)
     avec une maison et une clé qui se tracent au survol, puis, une fois la
     location appliquée, un **résumé à hauteur fixe** (bandeau d'encre, « Dès l'année 12 »,
-    « Meublé · 2 200 €/mois », « Modifier », pilule « × Retirer »).
+    « Meublé · 2 200 €/mois », « Voir le résultat », « Modifier », pilule « × Retirer »).
   - **La saisie se fait dans une fenêtre** (`#melFenetre`), comme l'explication des scénarios ;
-    « Voir le résultat » applique (`melActif`), referme et fait défiler jusqu'aux résultats.
+    « Voir le résultat » applique (`melActif`), referme la saisie et ouvre les résultats.
     Fermer par ×, Échap ou le voile ne retire rien. Une fois appliquée, toute modification dans
     la fenêtre se répercute en direct.
-  - **Les résultats s'affichent sous le graphique principal** (`#mel`, après les chiffres du
-    mois), plus en bas de page : le rail est trop étroit pour trois chiffres et une courbe.
+  - **Les résultats s'ouvrent dans une grande fenêtre par-dessus l'analyse** (`#mel.mel-resultat`),
+    **jamais dans le corps de la page** (décision de Lucas, oct. 2026) : la mise en location est un
+    complément de fin de parcours — « et si je la louais ? » —, pas la réponse principale. Essayé
+    puis écarté : le bloc sous le graphique principal, qui chargeait la visualisation. Bandeau :
+    « Modifier » (retour à la saisie) et « × Fermer ». Le graphique est **recréé** à chaque
+    ouverture : créé dans une fenêtre cachée, il garde une largeur nulle que `resize()` ne
+    corrige pas.
     Un **rappel du curseur d'horizon** (« Bilan dans », `#horizonMel`) ouvre le bloc : les deux
     premiers chiffres se lisent à cette date, et il fallait le rendre visible. Il écrit dans
     `#horizon`, comme le rappel des cumuls — trois contrôles, une seule date.

@@ -477,8 +477,12 @@
           <div class="mel-resume">
             <p class="mel-resume__annee" id="melResumeAnnee"></p>
             <p class="mel-resume__detail" id="melResumeDetail"></p>
-            <button type="button" class="mel-resume__modifier" id="melModifier"
-                    aria-haspopup="dialog" aria-controls="melFenetre">Modifier</button>
+            <div class="mel-resume__actions">
+              <button type="button" class="mel-resume__bouton mel-resume__bouton--plein" id="melVoir"
+                      aria-haspopup="dialog" aria-controls="mel">Voir le résultat</button>
+              <button type="button" class="mel-resume__bouton" id="melModifier"
+                      aria-haspopup="dialog" aria-controls="melFenetre">Modifier</button>
+            </div>
           </div>
         </div>
       </div>
@@ -587,64 +591,6 @@
         <p class="alerte" id="alerteApport" hidden></p>
       </section>
 
-      <!-- ========== MISE EN LOCATION : CE QUI RÉPOND ==========
-           Visible dès qu'elle est appliquée depuis la carte du rail, juste sous
-           le graphique principal : c'est la suite de la réponse, pas une annexe
-           de bas de page. -->
-      <section class="mel" id="mel" hidden>
-        <div class="mel__bandeau">
-          <h3 class="mel__titre" id="melTitre">Si vous le mettez en location</h3>
-          <button type="button" class="pilule" id="melModifierBis"
-                  aria-haspopup="dialog" aria-controls="melFenetre">Modifier</button>
-        </div>
-
-        <!-- Rappel du curseur d'horizon : les deux premiers chiffres se lisent
-             à cette date. Même valeur que « Si vous revendez dans », comme le
-             rappel des cumuls — jamais une seconde date. -->
-        <div class="rappel mel__rappel">
-          <label class="rappel__mot" for="horizonMel">Bilan dans</label>
-          <input type="range" id="horizonMel" min="1" max="25" step="1" value="20"
-                 aria-label="Horizon du bilan en années">
-          <output class="rappel__annees" id="horizonMelLabel">20 ans</output>
-        </div>
-
-        <p class="mel__incomplet" id="melIncomplet">
-          Indiquez les deux loyers pour afficher la comparaison.
-        </p>
-
-        <div class="mel__resultats" id="melResultats" hidden>
-          <!-- Trois chiffres, du plus décisif au plus concret. La première
-               question d'un propriétaire : revendre ou louer. -->
-          <div class="mel__chiffres">
-            <div class="mel__chiffre mel__chiffre--principal">
-              <p class="mel__chiffre-mot">Louer plutôt que revendre</p>
-              <p class="mel__chiffre-valeur" id="melVsRevente"></p>
-              <p class="mel__chiffre-aide" id="melVsReventeAide"></p>
-            </div>
-            <div class="mel__chiffre">
-              <p class="mel__chiffre-mot">Face à rester locataire</p>
-              <p class="mel__chiffre-valeur" id="melVsLocataire"></p>
-              <p class="mel__chiffre-aide" id="melVsLocataireAide"></p>
-            </div>
-            <div class="mel__chiffre">
-              <p class="mel__chiffre-mot">Chaque mois, une fois loué</p>
-              <p class="mel__chiffre-valeur" id="melMensuel"></p>
-              <p class="mel__chiffre-aide" id="melMensuelAide"></p>
-            </div>
-          </div>
-
-          <figure class="mel__graphique">
-            <div class="legende legende--compacte" id="legendeMel"></div>
-            <div class="graphique graphique--court"><canvas id="graphMiseEnLocation"></canvas></div>
-          </figure>
-
-          <details class="mel__detail">
-            <summary>Le détail du mois et de la revente</summary>
-            <dl class="mel__postes" id="melPostes"></dl>
-            <p class="mel__note" id="melNote"></p>
-          </details>
-        </div>
-      </section>
 
     <!-- ========== D'OÙ VIENT CET ÉCART ? ==========
          Déplié par défaut (décision de Lucas) : ce qu'il explique fait partie
@@ -887,6 +833,72 @@
           <button type="button" class="bouton bouton--primaire" id="melValider">Voir le résultat</button>
         </div>
       </div>
+
+      <!-- Résultats de la mise en location : une grande fenêtre par-dessus
+           l'analyse, jamais dans son corps. La location est un complément de
+           fin de parcours (« et si je la louais ? »), pas la réponse principale
+           — décision de Lucas. -->
+      <section class="mel mel-resultat" id="mel" role="dialog" aria-modal="true"
+               aria-labelledby="melTitre" hidden>
+        <div class="mel__bandeau">
+          <h3 class="mel__titre" id="melTitre">Si vous le mettez en location</h3>
+          <div class="mel__actions">
+            <button type="button" class="pilule" id="melModifierBis"
+                    aria-haspopup="dialog" aria-controls="melFenetre">Modifier</button>
+            <button type="button" class="pilule" id="melResultatFermer"
+                    aria-label="Fermer les résultats">
+              <span aria-hidden="true">×</span> Fermer
+            </button>
+          </div>
+        </div>
+
+        <!-- Rappel du curseur d'horizon : les deux premiers chiffres se lisent
+             à cette date. Même valeur que « Si vous revendez dans », comme le
+             rappel des cumuls — jamais une seconde date. -->
+        <div class="rappel mel__rappel">
+          <label class="rappel__mot" for="horizonMel">Bilan dans</label>
+          <input type="range" id="horizonMel" min="1" max="25" step="1" value="20"
+                 aria-label="Horizon du bilan en années">
+          <output class="rappel__annees" id="horizonMelLabel">20 ans</output>
+        </div>
+
+        <p class="mel__incomplet" id="melIncomplet">
+          Indiquez les deux loyers pour afficher la comparaison.
+        </p>
+
+        <div class="mel__resultats" id="melResultats" hidden>
+          <!-- Trois chiffres, du plus décisif au plus concret. La première
+               question d'un propriétaire : revendre ou louer. -->
+          <div class="mel__chiffres">
+            <div class="mel__chiffre mel__chiffre--principal">
+              <p class="mel__chiffre-mot">Louer plutôt que revendre</p>
+              <p class="mel__chiffre-valeur" id="melVsRevente"></p>
+              <p class="mel__chiffre-aide" id="melVsReventeAide"></p>
+            </div>
+            <div class="mel__chiffre">
+              <p class="mel__chiffre-mot">Face à rester locataire</p>
+              <p class="mel__chiffre-valeur" id="melVsLocataire"></p>
+              <p class="mel__chiffre-aide" id="melVsLocataireAide"></p>
+            </div>
+            <div class="mel__chiffre">
+              <p class="mel__chiffre-mot">Chaque mois, une fois loué</p>
+              <p class="mel__chiffre-valeur" id="melMensuel"></p>
+              <p class="mel__chiffre-aide" id="melMensuelAide"></p>
+            </div>
+          </div>
+
+          <figure class="mel__graphique">
+            <div class="legende legende--compacte" id="legendeMel"></div>
+            <div class="graphique graphique--court"><canvas id="graphMiseEnLocation"></canvas></div>
+          </figure>
+
+          <details class="mel__detail">
+            <summary>Le détail du mois et de la revente</summary>
+            <dl class="mel__postes" id="melPostes"></dl>
+            <p class="mel__note" id="melNote"></p>
+          </details>
+        </div>
+      </section>
 
       <!-- Premier temps : ce qu'on cherche à faire, et comment lire le
            résultat. Rien d'autre — pas un seul nom de scénario. Elles vivent

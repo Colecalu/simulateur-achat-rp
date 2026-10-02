@@ -1327,7 +1327,8 @@ input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; marg
   color: var(--encre);
 }
 .mel-resume__detail { margin: 0 0 10px; font-size: .8125rem; color: var(--encre-2); }
-.mel-resume__modifier {
+.mel-resume__actions { display: grid; grid-template-columns: 1fr auto; gap: 6px; }
+.mel-resume__bouton {
   padding: 8px 12px;
   font: inherit;
   font-size: .8125rem;
@@ -1339,7 +1340,8 @@ input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; marg
   cursor: pointer;
   transition: translate var(--duree-rapide) var(--aise), box-shadow var(--duree-rapide) var(--aise);
 }
-.mel-resume__modifier:hover { translate: -1px -1px; box-shadow: 3px 3px 0 var(--encre); }
+.mel-resume__bouton:hover { translate: -1px -1px; box-shadow: 3px 3px 0 var(--encre); }
+.mel-resume__bouton--plein { color: var(--sur-accent); background: var(--encre); }
 
 /* La fenêtre de saisie : mêmes habits que l'explication des scénarios. */
 .mel-fenetre {
@@ -1529,7 +1531,7 @@ input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; marg
   .mel__chiffres { grid-template-columns: minmax(0, 1fr); }
 }
 @media (prefers-reduced-motion: reduce) {
-  .mel-resume__modifier { transition: none; }
+  .mel-resume__bouton { transition: none; }
 }
 
 /* ---------------------------------------------------- Scénarios de marché */
@@ -1836,7 +1838,8 @@ input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; marg
 
 .intro,
 .apercu,
-.mel-fenetre {
+.mel-fenetre,
+.mel-resultat {
   position: fixed;
   z-index: 50;
   top: 50%;
@@ -1851,7 +1854,12 @@ input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; marg
 }
 .intro[hidden],
 .apercu[hidden],
-.mel-fenetre[hidden] { display: none; }
+.mel-fenetre[hidden],
+.mel-resultat[hidden] { display: none; }
+
+/* La grande fenêtre des résultats de mise en location : par-dessus l'analyse. */
+.mel-resultat { width: min(940px, calc(100vw - 32px)); border-color: var(--encre); }
+.mel__actions { display: flex; gap: 6px; }
 
 /*
  * L'explication tient en un écran et se lit en dix secondes : un titre, un
