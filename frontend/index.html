@@ -71,21 +71,35 @@
       <div class="cover-bottom">
         <p>La question n’est pas seulement <br><strong>« combien ça coûte ? »</strong> <br>Mais aussi <strong>« qu’est-ce qu’il me reste ? »</strong></p>
         <a class="round-cta" href="simulateur.html"><span>Explorer <br>mon projet</span><span aria-hidden="true">↗</span></a>
-        <a class="read-on" href="#regle">Tourner la page <span aria-hidden="true">↓</span></a>
+        <a class="read-on" href="#deux-camps">Tourner la page <span aria-hidden="true">↓</span></a>
       </div>
     </section>
 
-    <section class="manifesto" id="regle">
+    <!-- Les deux idées reçues, renvoyées dos à dos. Les deux cartes sont
+         strictement identiques (taille, fond, barre) : seule l'inclinaison
+         change de sens. Un poids visuel inégal ferait pencher la page. -->
+    <section class="camps" id="deux-camps" aria-labelledby="campsTitre">
       <div class="section-label">
-        <span>01 — CHANGER DE QUESTION</span>
+        <span>01 — DEUX CAMPS, DEUX CERTITUDES</span>
         <span aria-hidden="true">↙</span>
       </div>
-      <p class="big-quote">« Louer, c’est <br>jeter son argent <br><span class="crossed">par les fenêtres.</span> »</p>
-      <div class="margin-note">Vraiment ?</div>
-      <div class="reframe">
-        <h2>Les intérêts aussi <br>passent par la fenêtre.</h2>
-        <p>Loyer, intérêts, frais d’acquisition, charges… Chaque chemin a ses dépenses. Pour les comparer, regardons le patrimoine qui reste à l’arrivée.</p>
+      <div class="camps__duel">
+        <blockquote class="camps__carte camps__carte--gauche">
+          <p class="camps__numero">CERTITUDE N° 1</p>
+          <p class="camps__citation">« Louer, c’est jeter son argent <span class="camps__barre">par les fenêtres.</span> »</p>
+          <p class="camps__camp">— Le camp de l’achat</p>
+        </blockquote>
+        <div class="camps__pivot">
+          <h2 id="campsTitre">Les deux ont raison. <em>Parfois.</em></h2>
+          <svg class="camps__trait" viewBox="0 0 180 22" aria-hidden="true"><path d="M4 14C40 6 70 18 104 10S160 6 176 12"/></svg>
+        </div>
+        <blockquote class="camps__carte camps__carte--droite">
+          <p class="camps__numero">CERTITUDE N° 2</p>
+          <p class="camps__citation">« Acheter, c’est <span class="camps__barre">un mauvais placement.</span> Louez et investissez. »</p>
+          <p class="camps__camp">— Le camp de la location</p>
+        </blockquote>
       </div>
+      <p class="camps__texte">Tout dépend de votre prix, de votre loyer, du temps que vous resterez et de ce que feront les marchés. Æquo ne choisit pas de camp&nbsp;: il vous donne de quoi trancher.</p>
     </section>
 
     <section class="time-story">
