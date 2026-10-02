@@ -133,7 +133,7 @@ et dit de combien il bouge. Détail : [docs/modele-de-calcul.md](docs/modele-de-
 2. **Scénarios de marché réels** — des séries année par année, observées et sourcées, plutôt
    qu'un taux constant. *Fait, données à consolider.*
 3. **Mise en location de la RP** — et si, au lieu de revendre, vous la louiez ? *Moteur fait,
-   visualisation à reprendre.*
+   interface refaite en octobre 2026 — voir docs/conventions-ui.md.*
 
 **Décision produit validée : les trois piliers sont accessibles à tous, sans compte ni
 connexion.** Aucune fonctionnalité de calcul n'est jamais bloquée derrière la connexion. Le

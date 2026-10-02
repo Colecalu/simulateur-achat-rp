@@ -419,7 +419,7 @@
                lorsqu'un filtre est posé : la carte garde la même hauteur. -->
           <div class="scenario__bandeau">
             <p class="scenario__titre">Scénarios de marché</p>
-            <button type="button" class="scenario__retirer" id="scenarioRetirer" hidden
+            <button type="button" class="pilule" id="scenarioRetirer" hidden
                     title="Retirer le scénario et revenir aux hypothèses de l'étape 4"
                     aria-label="Retirer le scénario et revenir aux hypothèses de l'étape 4">
               <span aria-hidden="true">×</span> Retirer
@@ -427,6 +427,63 @@
           </div>
           <div class="scenario__choix" id="scenarioChoix" role="radiogroup"
                aria-label="Scénario de marché"></div>
+        </div>
+      </div>
+
+      <!-- Pilier 3, à côté du pilier 2 : la mise en location. Même carte que
+           les scénarios — verrouillée, puis jaune, puis résumé à hauteur fixe
+           une fois appliquée. Les résultats, eux, s'affichent à droite sous le
+           graphique : le rail est trop étroit pour des chiffres et une courbe.
+           Elle porte les classes de la carte des scénarios : c'est le même
+           objet, une variante qui se pose par-dessus le projet. -->
+      <div class="scenario scenario--location" id="melCarte" data-etat="bloque">
+        <button type="button" class="scenario__appel" id="melOuvrir"
+                aria-haspopup="dialog" aria-controls="melFenetre">
+          <span class="scenario__badge">
+            <svg class="scenario__cadenas" viewBox="0 0 16 16" aria-hidden="true">
+              <rect x="3" y="7" width="10" height="7.5" rx="1.5"/>
+              <path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2"/>
+            </svg>
+            À débloquer · Mise en location
+          </span>
+          <span class="scenario__grand-titre">Et si vous la mettiez en location&nbsp;?</span>
+          <!-- Une maison et sa clé : elles se tracent au survol, comme la
+               courbe des scénarios. -->
+          <svg class="scenario__dessin" viewBox="0 0 240 64" aria-hidden="true">
+            <path class="scenario__droite" d="M6 60 H234"/>
+            <path class="scenario__vague" d="M78 60 V30 L118 8 L158 30 V60"/>
+            <path class="scenario__vague" d="M108 60 V42 H128 V60"/>
+            <circle class="scenario__vague" cx="182" cy="44" r="7"/>
+            <path class="scenario__vague" d="M189 44 H218 M208 44 V51 M216 44 V49"/>
+          </svg>
+          <span class="scenario__accroche" id="melAccroche">
+            Validez les quatre étapes pour débloquer.
+          </span>
+          <span class="scenario__progression" id="melProgression" aria-hidden="true">
+            <span></span><span></span><span></span><span></span>
+          </span>
+          <span class="scenario__cta" aria-hidden="true">Simuler la location</span>
+        </button>
+
+        <div class="scenario__liste">
+          <div class="scenario__bandeau">
+            <p class="scenario__titre">Mise en location</p>
+            <button type="button" class="pilule" id="melRetirer"
+                    title="Retirer la mise en location"
+                    aria-label="Retirer la mise en location">
+              <span aria-hidden="true">×</span> Retirer
+            </button>
+          </div>
+          <div class="mel-resume">
+            <p class="mel-resume__annee" id="melResumeAnnee"></p>
+            <p class="mel-resume__detail" id="melResumeDetail"></p>
+            <div class="mel-resume__actions">
+              <button type="button" class="mel-resume__bouton mel-resume__bouton--plein" id="melVoir"
+                      aria-haspopup="dialog" aria-controls="mel">Voir le résultat</button>
+              <button type="button" class="mel-resume__bouton" id="melModifier"
+                      aria-haspopup="dialog" aria-controls="melFenetre">Modifier</button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -534,6 +591,7 @@
         <p class="alerte" id="alerteApport" hidden></p>
       </section>
 
+
     <!-- ========== D'OÙ VIENT CET ÉCART ? ==========
          Déplié par défaut (décision de Lucas) : ce qu'il explique fait partie
          de la réponse. Le bouton le replie pour qui veut une vue courte. -->
@@ -622,122 +680,6 @@
       </div>
     </div>
 
-    <!-- ========== MISE EN LOCATION (divulgation progressive) ========== -->
-    <div class="mel">
-      <button type="button" class="mel__declencheur" id="melOuvrir"
-              aria-expanded="false" aria-controls="melPanneau">
-        Et si vous mettiez ce bien en location plus tard&nbsp;?
-      </button>
-
-      <div class="mel__panneau" id="melPanneau" hidden>
-        <div class="mel__entete">
-          <h3 class="carte__titre">Mise en location à partir d'une certaine année</h3>
-          <button type="button" class="mel__fermer" id="melFermer"
-                  aria-label="Fermer le module de mise en location">×</button>
-        </div>
-        <p class="carte__legende">
-          Au lieu de revendre, vous gardez le bien, vous le louez, et vous vous logez ailleurs.
-          Le loyer encaissé (net d'impôt et de charges) et ce qui reste de votre enveloppe
-          alimentent le portefeuille.
-        </p>
-
-        <form class="mel__champs" id="melFormulaire" autocomplete="off">
-          <label class="champ">
-            <span class="champ__libelle">Année de mise en location</span>
-            <span class="champ__saisie">
-              <input type="number" id="melAnneeBascule" min="1" max="25" step="1"
-                     placeholder="ex. 10">
-              <span class="champ__unite">e année</span>
-            </span>
-          </label>
-          <label class="champ">
-            <span class="champ__libelle">Loyer que vous percevrez</span>
-            <span class="champ__saisie">
-              <input type="number" id="melLoyerPercu" min="0" step="50" placeholder="ex. 1800">
-              <span class="champ__unite">€/mois</span>
-            </span>
-            <span class="champ__aide">Montant au moment de la bascule, indexé à l'IRL ensuite.</span>
-          </label>
-          <label class="champ">
-            <span class="champ__libelle">Loyer que vous paierez pour vous loger</span>
-            <span class="champ__saisie">
-              <input type="number" id="melLoyerFutur" min="0" step="50" placeholder="ex. 1600">
-              <span class="champ__unite">€/mois</span>
-            </span>
-            <span class="champ__aide">Idem&nbsp;: montant à la bascule. Il peut être plus bas que votre loyer actuel si vous prévoyez de déménager moins cher.</span>
-          </label>
-
-          <details class="mel__avance">
-            <summary class="groupe__titre">Paramètres avancés</summary>
-            <div class="mel__avance-corps">
-              <label class="champ">
-                <span class="champ__libelle">Régime fiscal</span>
-                <span class="champ__saisie">
-                  <select id="melRegime">
-                    <option value="meuble">Meublé — LMNP réel</option>
-                    <option value="nu">Nu — foncier réel</option>
-                  </select>
-                </span>
-                <span class="champ__aide">Le meublé amortit le bien&nbsp;; le nu peut créer du déficit foncier.</span>
-              </label>
-              <label class="champ">
-                <span class="champ__libelle">Tranche marginale d'imposition</span>
-                <span class="champ__saisie">
-                  <input type="number" id="melTmi" min="0" max="60" step="1" data-pourcentage>
-                  <span class="champ__unite">%</span>
-                </span>
-              </label>
-              <label class="champ">
-                <span class="champ__libelle">Frais annexes</span>
-                <span class="champ__saisie">
-                  <input type="number" id="melFraisAnnexes" min="0" step="50">
-                  <span class="champ__unite">€/an</span>
-                </span>
-                <span class="champ__aide">Forfait&nbsp;: gestion locative, assurance PNO, comptable.</span>
-              </label>
-              <label class="champ">
-                <span class="champ__libelle">Achat de meubles</span>
-                <span class="champ__saisie">
-                  <input type="number" id="melAchatMeubles" min="0" step="500">
-                  <span class="champ__unite">€</span>
-                </span>
-                <span class="champ__aide">Dépensé une fois, à la mise en location. Obligatoire en meublé&nbsp;: amorti sur 7&nbsp;ans et ponctionné sur le portefeuille.</span>
-              </label>
-              <label class="champ">
-                <span class="champ__libelle">Vacance locative</span>
-                <span class="champ__saisie">
-                  <input type="number" id="melTauxVacance" min="0" max="100" step="1" data-pourcentage>
-                  <span class="champ__unite">%</span>
-                </span>
-              </label>
-              <label class="champ">
-                <span class="champ__libelle">Prélèvements sociaux</span>
-                <span class="champ__saisie">
-                  <input type="number" id="melPrelevementsSociaux" min="0" max="100" step="0.1" data-pourcentage>
-                  <span class="champ__unite">%</span>
-                </span>
-                <span class="champ__aide">18,6&nbsp;% à compter de 2026.</span>
-              </label>
-            </div>
-          </details>
-        </form>
-
-        <p class="mel__incomplet" id="melIncomplet">
-          Renseignez les trois champs ci-dessus pour afficher la comparaison.
-        </p>
-      </div>
-    </div>
-
-    <figure class="carte carte--graphique" id="carteMel" hidden>
-      <figcaption class="carte__entete">
-        <h3 class="carte__titre">Si vous mettez le bien en location au lieu de le revendre</h3>
-        <p class="carte__legende" id="melLegendeTexte"></p>
-      </figcaption>
-      <div class="legende" id="legendeMel"></div>
-      <div class="graphique"><canvas id="graphMiseEnLocation"></canvas></div>
-      <p class="carte__legende" id="melNote"></p>
-    </figure>
-
       <!-- Le texte change selon qu'un scénario est appliqué ou non : « hypothèses
            constantes » devient faux dès qu'une série année par année tourne. -->
       <p class="avertissement" id="avertissement"></p>
@@ -787,6 +729,177 @@
            dans la carte scénario. Le rail est `position: sticky`, donc un
            contexte d'empilement : une fenêtre qui y resterait passerait sous
            le voile. -->
+      <!-- Saisie de la mise en location : une fenêtre, comme l'explication des
+           scénarios. Elle vit hors du rail pour passer au-dessus du voile. -->
+      <div class="mel-fenetre" id="melFenetre" role="dialog" aria-modal="true"
+           aria-labelledby="melFenetreTitre" hidden>
+        <div class="mel-fenetre__entete">
+          <div>
+            <h3 class="mel-fenetre__titre" id="melFenetreTitre">Et si vous la mettiez en location&nbsp;?</h3>
+            <p class="mel-fenetre__intro">Vous gardez votre résidence principale, vous la louez, et vous vous logez ailleurs.</p>
+          </div>
+          <button type="button" class="mel__fermer" id="melFermer"
+                  aria-label="Fermer">×</button>
+        </div>
+
+        <form class="mel__reglages" id="melFormulaire" autocomplete="off">
+          <div class="mel__ligne">
+            <label class="mel__curseur" for="melAnneeBascule">
+              <span class="mel__libelle">Vous le louez à partir de</span>
+              <output class="mel__annee" id="melAnneeValeur" for="melAnneeBascule">l'année 10</output>
+              <input type="range" id="melAnneeBascule" min="1" max="25" step="1" value="10">
+            </label>
+
+            <!-- Le régime est le choix qui pèse le plus sur l'impôt : il sort des
+                 paramètres avancés. La liste cachée reste la source de la valeur. -->
+            <div class="mel__regime">
+              <span class="mel__libelle" id="melRegimeLibelle">Type de location</span>
+              <div class="mel__bascule" role="radiogroup" aria-labelledby="melRegimeLibelle">
+                <button type="button" class="mel__option" data-regime="meuble" role="radio">Meublé</button>
+                <button type="button" class="mel__option" data-regime="nu" role="radio">Nu</button>
+              </div>
+              <select id="melRegime" hidden>
+                <option value="meuble">Meublé — LMNP réel</option>
+                <option value="nu">Nu — foncier réel</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="mel__ligne">
+            <label class="champ mel__champ">
+              <span class="champ__libelle">Loyer que vous percevrez</span>
+              <span class="champ__saisie">
+                <input type="number" id="melLoyerPercu" min="0" step="50" placeholder="ex. 1800">
+                <span class="champ__unite">€/mois</span>
+              </span>
+              <span class="mel__aide" id="melLoyerPercuAide"></span>
+            </label>
+            <label class="champ mel__champ">
+              <span class="champ__libelle">Votre loyer pour vous reloger</span>
+              <span class="champ__saisie">
+                <input type="number" id="melLoyerFutur" min="0" step="50" placeholder="ex. 1600">
+                <span class="champ__unite">€/mois</span>
+              </span>
+              <span class="mel__aide" id="melLoyerFuturAide"></span>
+            </label>
+          </div>
+
+          <details class="mel__avance">
+            <summary>Fiscalité et frais</summary>
+            <div class="mel__avance-corps">
+              <label class="champ">
+                <span class="champ__libelle">Tranche marginale d'imposition</span>
+                <span class="champ__saisie">
+                  <input type="number" id="melTmi" min="0" max="60" step="1" data-pourcentage>
+                  <span class="champ__unite">%</span>
+                </span>
+              </label>
+              <label class="champ">
+                <span class="champ__libelle">Frais annexes</span>
+                <span class="champ__saisie">
+                  <input type="number" id="melFraisAnnexes" min="0" step="50">
+                  <span class="champ__unite">€/an</span>
+                </span>
+                <span class="champ__aide">Forfait&nbsp;: gestion locative, assurance PNO, comptable.</span>
+              </label>
+              <label class="champ">
+                <span class="champ__libelle">Achat de meubles</span>
+                <span class="champ__saisie">
+                  <input type="number" id="melAchatMeubles" min="0" step="500">
+                  <span class="champ__unite">€</span>
+                </span>
+                <span class="champ__aide">Dépensé une fois, à la mise en location. Obligatoire en meublé.</span>
+              </label>
+              <label class="champ">
+                <span class="champ__libelle">Vacance locative</span>
+                <span class="champ__saisie">
+                  <input type="number" id="melTauxVacance" min="0" max="100" step="1" data-pourcentage>
+                  <span class="champ__unite">%</span>
+                </span>
+              </label>
+              <label class="champ">
+                <span class="champ__libelle">Prélèvements sociaux</span>
+                <span class="champ__saisie">
+                  <input type="number" id="melPrelevementsSociaux" min="0" max="100" step="0.1" data-pourcentage>
+                  <span class="champ__unite">%</span>
+                </span>
+                <span class="champ__aide">18,6&nbsp;% à compter de 2026.</span>
+              </label>
+            </div>
+          </details>
+        </form>
+
+        <div class="mel-fenetre__pied">
+          <button type="button" class="bouton bouton--primaire" id="melValider">Voir le résultat</button>
+        </div>
+      </div>
+
+      <!-- Résultats de la mise en location : une grande fenêtre par-dessus
+           l'analyse, jamais dans son corps. La location est un complément de
+           fin de parcours (« et si je la louais ? »), pas la réponse principale
+           — décision de Lucas. -->
+      <section class="mel mel-resultat" id="mel" role="dialog" aria-modal="true"
+               aria-labelledby="melTitre" hidden>
+        <div class="mel__bandeau">
+          <h3 class="mel__titre" id="melTitre">Si vous le mettez en location</h3>
+          <div class="mel__actions">
+            <button type="button" class="pilule" id="melModifierBis"
+                    aria-haspopup="dialog" aria-controls="melFenetre">Modifier</button>
+            <button type="button" class="pilule" id="melResultatFermer"
+                    aria-label="Fermer les résultats">
+              <span aria-hidden="true">×</span> Fermer
+            </button>
+          </div>
+        </div>
+
+        <!-- Rappel du curseur d'horizon : les deux premiers chiffres se lisent
+             à cette date. Même valeur que « Si vous revendez dans », comme le
+             rappel des cumuls — jamais une seconde date. -->
+        <div class="rappel mel__rappel">
+          <label class="rappel__mot" for="horizonMel">Bilan dans</label>
+          <input type="range" id="horizonMel" min="1" max="25" step="1" value="20"
+                 aria-label="Horizon du bilan en années">
+          <output class="rappel__annees" id="horizonMelLabel">20 ans</output>
+        </div>
+
+        <p class="mel__incomplet" id="melIncomplet">
+          Indiquez les deux loyers pour afficher la comparaison.
+        </p>
+
+        <div class="mel__resultats" id="melResultats" hidden>
+          <!-- Trois chiffres, du plus décisif au plus concret. La première
+               question d'un propriétaire : revendre ou louer. -->
+          <div class="mel__chiffres">
+            <div class="mel__chiffre mel__chiffre--principal">
+              <p class="mel__chiffre-mot">Louer plutôt que revendre</p>
+              <p class="mel__chiffre-valeur" id="melVsRevente"></p>
+              <p class="mel__chiffre-aide" id="melVsReventeAide"></p>
+            </div>
+            <div class="mel__chiffre">
+              <p class="mel__chiffre-mot">Face à rester locataire</p>
+              <p class="mel__chiffre-valeur" id="melVsLocataire"></p>
+              <p class="mel__chiffre-aide" id="melVsLocataireAide"></p>
+            </div>
+            <div class="mel__chiffre">
+              <p class="mel__chiffre-mot">Chaque mois, une fois loué</p>
+              <p class="mel__chiffre-valeur" id="melMensuel"></p>
+              <p class="mel__chiffre-aide" id="melMensuelAide"></p>
+            </div>
+          </div>
+
+          <figure class="mel__graphique">
+            <div class="legende legende--compacte" id="legendeMel"></div>
+            <div class="graphique graphique--court"><canvas id="graphMiseEnLocation"></canvas></div>
+          </figure>
+
+          <details class="mel__detail">
+            <summary>Le détail du mois et de la revente</summary>
+            <dl class="mel__postes" id="melPostes"></dl>
+            <p class="mel__note" id="melNote"></p>
+          </details>
+        </div>
+      </section>
+
       <!-- Premier temps : ce qu'on cherche à faire, et comment lire le
            résultat. Rien d'autre — pas un seul nom de scénario. Elles vivent
            ici, hors du rail : le rail est `position: sticky`, donc un contexte

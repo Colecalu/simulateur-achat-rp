@@ -90,7 +90,8 @@ bloc de HTML d'une page à l'autre en changeait l'apparence.
 
 Le simulateur repose sur trois piliers différenciants : **(1)** comparer deux trajectoires
 complètes pour capter le coût d'opportunité — fait ; **(2)** des scénarios adossés à des séries
-réelles — en cours ; **(3)** la mise en location ultérieure — moteur fait, visualisation à faire.
+réelles — en cours ; **(3)** la mise en location ultérieure — moteur fait, visualisation refaite en octobre 2026 (voir
+« Le module de mise en location » plus bas).
 
 - **Un taux du moteur est un nombre OU une série année par année.** `tauxAnnee(valeur, a)` et
   `facteur(valeur, de, a)` dans `calc.js` remplacent les `Math.pow(1 + r, n)`. Un test vérifie
@@ -567,6 +568,49 @@ réelles — en cours ; **(3)** la mise en location ultérieure — moteur fait,
   zéro ? » avec « Effacer » (rouge brique) et « Annuler », qui reçoit le focus ; Échap annule.
   Pendant la question, l'état de la sauvegarde s'efface pour que la carte tienne dans sa case de
   158 px. Sous 1 040 px, la carte devient une barre : titre à gauche, action à droite.
+- **Le module de mise en location** (refonte d'octobre 2026, aucun changement du moteur). Il pose
+  la question d'un propriétaire : **« je revends, ou je loue ? »**.
+  - **Le pilier 3 est à côté du pilier 2** (décision de Lucas) : une carte « Et si vous le
+    mettiez en location ? » dans le rail, **juste sous celle des scénarios**, sur le même modèle —
+    elle en porte les classes (`.scenario.scenario--location`) : verrouillée avec ses quatre
+    pastilles, puis **lilas** (`--papier-lilas` ; deux cartes jaunes empilées se confondaient)
+    avec une maison et une clé qui se tracent au survol, puis, une fois la
+    location appliquée, un **résumé à hauteur fixe** (bandeau d'encre, « Dès l'année 12 »,
+    « Meublé · 2 200 €/mois », « Voir le résultat », « Modifier », pilule « × Retirer »).
+  - **La saisie se fait dans une fenêtre** (`#melFenetre`), comme l'explication des scénarios ;
+    « Voir le résultat » applique (`melActif`), referme la saisie et ouvre les résultats.
+    Fermer par ×, Échap ou le voile ne retire rien. Une fois appliquée, toute modification dans
+    la fenêtre se répercute en direct.
+  - **Les résultats s'ouvrent dans une grande fenêtre par-dessus l'analyse** (`#mel.mel-resultat`),
+    **jamais dans le corps de la page** (décision de Lucas, oct. 2026) : la mise en location est un
+    complément de fin de parcours — « et si je la louais ? » —, pas la réponse principale. Essayé
+    puis écarté : le bloc sous le graphique principal, qui chargeait la visualisation. Bandeau :
+    « Modifier » (retour à la saisie) et « × Fermer ». Le graphique est **recréé** à chaque
+    ouverture : créé dans une fenêtre cachée, il garde une largeur nulle que `resize()` ne
+    corrige pas.
+    Un **rappel du curseur d'horizon** (« Bilan dans », `#horizonMel`) ouvre le bloc : les deux
+    premiers chiffres se lisent à cette date, et il fallait le rendre visible. Il écrit dans
+    `#horizon`, comme le rappel des cumuls — trois contrôles, une seule date.
+  - **Quatre réglages, pas plus, en haut** : l'année de mise en location au **curseur** (affichée
+    en grand), **Meublé / Nu en deux boutons** (sorti des paramètres avancés : c'est le choix qui
+    pèse le plus sur l'impôt ; la liste `#melRegime` reste cachée et sert de source à la valeur),
+    et les deux loyers. Le reste — tranche, frais, meubles, vacance, prélèvements — est replié
+    dans « Fiscalité et frais ».
+  - **Les loyers sont pré-remplis** avec le loyer d'un logement équivalent (bulle 3) l'année de
+    la mise en location, tel que le moteur l'a indexé (`annees[N-1].loyerAnnuel`, simple lecture).
+    Ils **suivent le curseur tant qu'on ne les a pas touchés** (`data-auto`, état d'interface qui
+    ne part jamais dans `params`). Le repère reste affiché sous chaque champ.
+  - **Trois chiffres répondent** : « Louer plutôt que revendre » (mis en avant, la vraie
+    question), « Face à rester locataire », et « Chaque mois, une fois loué » — le flux net de la
+    première année de location (`cashFlowNet / 12`), détaillé poste par poste dans le repli.
+    Les deux premiers se lisent à l'horizon du curseur principal ; si la location commence après
+    cet horizon, ils affichent « — » et le disent.
+  - **Un graphique à trois courbes** : acheter puis revendre, acheter puis louer, rester
+    locataire, avec un trait « mise en location ». L'ancien graphique n'avait pas la courbe de
+    revente — c'était pourtant la comparaison qui compte.
+  - **L'année n'est sauvegardée que location appliquée** : un curseur a toujours une valeur, or
+    c'est d'elle que se déduit `melActif` au rechargement. « Nouvelle simulation » retire la
+    location et vide ses loyers.
 - **La bulle zoomée sort de son alvéole et va sous `<body>`** le temps du zoom, puis y retourne.
   Le rail de gauche a été en `position: sticky` (retiré en octobre 2026 : il défile désormais
   avec la page), et sticky crée **toujours** un contexte

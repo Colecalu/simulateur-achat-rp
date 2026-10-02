@@ -1291,36 +1291,81 @@ input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; marg
 
 /* ------------------------------------------------- Mise en location (module) */
 
-.mel { display: grid; gap: 12px; }
-
-.mel__declencheur {
-  justify-self: start;
-  font: inherit;
-  font-size: .875rem;
-  font-weight: 500;
-  color: var(--achat);
-  background: none;
-  border: 0;
-  border-bottom: 1px solid color-mix(in srgb, var(--achat) 40%, transparent);
-  padding: 2px 0;
-  cursor: pointer;
-}
-.mel__declencheur:hover { border-bottom-color: var(--achat); }
-.mel__declencheur[hidden] { display: none; }
-
-.mel__panneau {
+/*
+ * Le pilier 3 en trois morceaux. La carte vit dans le rail, sous celle des
+ * scénarios, et en porte les classes (`.scenario--location`). La saisie se fait
+ * dans une fenêtre. Les résultats s'affichent sous le graphique principal, dans
+ * `.mel` : la question est celle d'un propriétaire, « je revends ou je loue ? ».
+ */
+.mel {
+  overflow: hidden;
   background: var(--surface);
-  border: 1px solid var(--trait);
+  border: 1px solid var(--encre);
   border-radius: var(--rayon-large);
-  box-shadow: var(--ombre);
-  padding: 20px;
+  box-shadow: 4px 5px 0 var(--encre);
 }
-.mel__entete {
-  display: flex;
-  align-items: start;
-  justify-content: space-between;
-  gap: 12px;
+.mel[hidden] { display: none; }
+
+/*
+ * Même carte que les scénarios, autre couleur : deux piliers côte à côte en
+ * jaune se confondaient. Le lilas est la deuxième teinte de papier du thème
+ * Horizon (`--papier-lilas`), prévue pour cet usage et jusqu'ici dormante.
+ */
+/* Deux classes : la règle jaune de `.scenario` est plus bas dans la feuille. */
+/* Le lilas reste une fois la location appliquée : la carte garde son identité. */
+.scenario.scenario--location[data-etat="ferme"],
+.scenario.scenario--location[data-etat="ouvert"] { background: var(--papier-lilas, var(--accent-doux)); }
+
+/* Le rappel du curseur d'horizon, sous le bandeau des résultats. */
+.mel__rappel { margin: 16px 20px 0; }
+
+/* Le résumé de la carte une fois la location appliquée : hauteur fixe. */
+.mel-resume { display: grid; gap: 2px; margin: 0 12px; }
+.mel-resume__annee {
+  margin: 0;
+  font-family: var(--police-titre);
+  font-size: 1.5rem;
+  line-height: 1.15;
+  color: var(--encre);
 }
+.mel-resume__detail { margin: 0 0 10px; font-size: .8125rem; color: var(--encre-2); }
+.mel-resume__actions { display: grid; grid-template-columns: 1fr auto; gap: 6px; }
+.mel-resume__bouton {
+  padding: 8px 12px;
+  font: inherit;
+  font-size: .8125rem;
+  font-weight: 700;
+  color: var(--encre);
+  background: transparent;
+  border: 1px solid var(--encre);
+  border-radius: var(--rayon);
+  cursor: pointer;
+  transition: translate var(--duree-rapide) var(--aise), box-shadow var(--duree-rapide) var(--aise);
+}
+.mel-resume__bouton:hover { translate: -1px -1px; box-shadow: 3px 3px 0 var(--encre); }
+.mel-resume__bouton--plein { color: var(--sur-accent); background: var(--encre); }
+
+/* La fenêtre de saisie : mêmes habits que l'explication des scénarios. */
+.mel-fenetre {
+  display: grid;
+  gap: 18px;
+  width: min(640px, calc(100vw - 32px));
+  padding: 22px 26px 20px;
+  border-color: var(--encre);
+}
+.mel-fenetre__entete { display: flex; align-items: start; justify-content: space-between; gap: 16px; }
+.mel-fenetre__titre {
+  margin: 0;
+  font-family: var(--police-titre);
+  font-weight: var(--graisse-titre);
+  font-size: clamp(1.5rem, 4vw, 2rem);
+  line-height: 1.1;
+  letter-spacing: var(--interlettre-titre);
+}
+.mel-fenetre__intro { margin: 6px 0 0; font-size: .9375rem; color: var(--encre-2); }
+.mel-fenetre__pied { display: flex; justify-content: flex-end; }
+
+/* Les fenêtres d'aperçu et d'explication réutilisent ce bouton de fermeture. */
 .mel__fermer {
   font: inherit;
   font-size: 1.25rem;
@@ -1334,35 +1379,162 @@ input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; marg
 }
 .mel__fermer:hover { background: var(--surface-creuse); color: var(--encre); }
 
-.mel__champs {
-  margin-top: 16px;
+.mel__bandeau {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 20px;
+  color: var(--sur-accent);
+  background: var(--encre);
+}
+.mel__titre {
+  margin: 0;
+  font-family: var(--police-titre);
+  font-weight: var(--graisse-titre);
+  font-size: 1.5rem;
+  line-height: 1.1;
+  letter-spacing: var(--interlettre-titre);
+}
+
+.mel__reglages { display: grid; gap: 18px; }
+.mel__ligne {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
-  gap: 14px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px 28px;
   align-items: start;
 }
-
-.mel__avance {
-  grid-column: 1 / -1;
-  border-top: 1px solid var(--trait);
-  padding-top: 4px;
-}
-.mel__avance > .groupe__titre { padding: 10px 0; }
-.mel__avance-corps {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
-  gap: 14px;
-  padding-bottom: 6px;
-}
-
-.mel__incomplet {
-  margin: 14px 0 0;
-  font-size: .8125rem;
+.mel__libelle {
+  display: block;
+  font-size: .6875rem;
+  font-weight: 700;
+  letter-spacing: var(--interlettre-caps);
+  text-transform: uppercase;
   color: var(--encre-3);
 }
+
+/* L'année se lit en grand : c'est le réglage qu'on fait bouger. */
+.mel__curseur { display: grid; gap: 2px; }
+.mel__annee {
+  font-family: var(--police-titre);
+  font-size: 1.75rem;
+  line-height: 1.15;
+  color: var(--encre);
+}
+.mel__curseur input { width: 100%; margin: 6px 0 0; accent-color: var(--accent); cursor: pointer; }
+
+/* Meublé ou nu : deux boutons plutôt qu'une liste, c'est le choix qui pèse. */
+.mel__regime { display: grid; gap: 8px; }
+.mel__bascule {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  padding: 3px;
+  background: var(--surface-creuse);
+  border: 1px solid var(--trait);
+  border-radius: var(--rayon);
+}
+.mel__option {
+  padding: 9px 10px;
+  font: inherit;
+  font-size: .875rem;
+  font-weight: 600;
+  color: var(--encre-2);
+  background: transparent;
+  border: 0;
+  border-radius: calc(var(--rayon) - 2px);
+  cursor: pointer;
+}
+.mel__option:hover { color: var(--encre); }
+.mel__option--actif { color: var(--sur-accent); background: var(--encre); }
+.mel__option--actif:hover { color: var(--sur-accent); }
+
+.mel__aide { font-size: .75rem; color: var(--encre-3); }
+.mel__aide:empty { display: none; }
+
+.mel__avance { border-top: 1px solid var(--trait); padding-top: 10px; }
+.mel__avance summary,
+.mel__detail summary {
+  cursor: pointer;
+  font-size: .8125rem;
+  font-weight: 600;
+  color: var(--encre-2);
+}
+.mel__avance summary:hover,
+.mel__detail summary:hover { color: var(--accent); }
+.mel__avance-corps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 14px;
+  padding: 12px 0 4px;
+}
+
+.mel__incomplet { margin: 0; padding: 16px 20px 20px; font-size: .8125rem; color: var(--encre-3); }
 .mel__incomplet[hidden] { display: none; }
 
-#melNote { margin-top: 12px; }
+/* --- Ce qui répond -------------------------------------------------------- */
+.mel__resultats { display: grid; gap: 16px; padding: 20px; }
+.mel__resultats[hidden] { display: none; }
+
+.mel__chiffres { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.mel__chiffre {
+  padding: 14px 16px;
+  background: var(--surface-creuse);
+  border: 1px solid var(--trait);
+  border-radius: var(--rayon);
+}
+/* La première question d'un propriétaire : revendre ou louer. */
+.mel__chiffre--principal { background: var(--accent-doux); border-color: var(--accent); }
+.mel__chiffre-mot {
+  margin: 0;
+  font-size: .6875rem;
+  font-weight: 700;
+  letter-spacing: var(--interlettre-caps);
+  text-transform: uppercase;
+  color: var(--encre-2);
+}
+.mel__chiffre-valeur {
+  margin: 6px 0 2px;
+  font-family: var(--police-chiffres);
+  font-variant-numeric: tabular-nums;
+  font-size: 1.625rem;
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--encre);
+}
+.mel__chiffre-valeur--negatif { color: var(--alerte); }
+.mel__chiffre-aide { margin: 0; font-size: .75rem; line-height: 1.4; color: var(--encre-3); }
+
+.mel__graphique { margin: 0; }
+
+.mel__detail { border-top: 1px solid var(--trait); padding-top: 10px; }
+.mel__postes {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 4px 24px;
+  max-width: 420px;
+  margin: 12px 0 0;
+  font-size: .8125rem;
+}
+.mel__postes dt { color: var(--encre-2); }
+.mel__postes dd {
+  margin: 0;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  color: var(--encre);
+}
+/* La dernière ligne est le résultat : elle se sépare des postes. */
+.mel__postes dt:last-of-type,
+.mel__postes dd:last-of-type { padding-top: 6px; border-top: 1px solid var(--trait); font-weight: 700; color: var(--encre); }
+.mel__note { margin: 12px 0 0; font-size: .75rem; line-height: 1.5; color: var(--encre-3); }
+
+@media (max-width: 760px) {
+  .mel__ligne,
+  .mel__chiffres { grid-template-columns: minmax(0, 1fr); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mel-resume__bouton { transition: none; }
+}
 
 /* ---------------------------------------------------- Scénarios de marché */
 
@@ -1547,8 +1719,9 @@ input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; marg
   background: var(--encre);
 }
 
-/* Retirer le filtre : discret, sur le bandeau, sans couleur de plus. */
-.scenario__retirer {
+/* Pilule de bandeau d'encre (« × Retirer », « × Fermer ») : discrète, sans
+   couleur de plus. Partagée par la carte des scénarios et le module location. */
+.pilule {
   flex: none;
   display: inline-flex;
   align-items: center;
@@ -1564,9 +1737,9 @@ input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; marg
   cursor: pointer;
   transition: background var(--duree-rapide) var(--aise), color var(--duree-rapide) var(--aise);
 }
-.scenario__retirer span { font-size: .9375rem; line-height: 1; }
-.scenario__retirer:hover { color: var(--encre); background: var(--sur-accent); border-color: var(--sur-accent); }
-.scenario__retirer[hidden] { display: none; }
+.pilule span { font-size: .9375rem; line-height: 1; }
+.pilule:hover { color: var(--encre); background: var(--sur-accent); border-color: var(--sur-accent); }
+.pilule[hidden] { display: none; }
 
 .scenario__titre {
   margin: 0;
@@ -1666,7 +1839,9 @@ input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; marg
 /* --- Premier temps : l'explication, et rien d'autre --------------------- */
 
 .intro,
-.apercu {
+.apercu,
+.mel-fenetre,
+.mel-resultat {
   position: fixed;
   z-index: 50;
   top: 50%;
@@ -1680,7 +1855,13 @@ input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; marg
   box-shadow: 0 24px 64px rgba(11, 11, 11, .28);
 }
 .intro[hidden],
-.apercu[hidden] { display: none; }
+.apercu[hidden],
+.mel-fenetre[hidden],
+.mel-resultat[hidden] { display: none; }
+
+/* La grande fenêtre des résultats de mise en location : par-dessus l'analyse. */
+.mel-resultat { width: min(940px, calc(100vw - 32px)); border-color: var(--encre); }
+.mel__actions { display: flex; gap: 6px; }
 
 /*
  * L'explication tient en un écran et se lit en dix secondes : un titre, un
