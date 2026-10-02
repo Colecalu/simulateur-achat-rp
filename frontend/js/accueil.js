@@ -76,7 +76,7 @@
         observateur.unobserve(entree.target);
         montrer(entree.target);
       });
-    }, { threshold: 0.2, rootMargin: '0px 0px -6% 0px' });
+    }, { threshold: 0.15 });
     blocs.forEach((el) => observateur.observe(el));
   }
 
