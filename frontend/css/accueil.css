@@ -638,7 +638,7 @@ a:focus-visible, button:focus-visible, summary:focus-visible {
 
 .ledger {
   max-width: 1400px;
-  padding: 110px 8%;
+  padding: 100px 8%;
   margin: auto;
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -1212,7 +1212,7 @@ footer>span {
   }
   .ledger {
     grid-template-columns: 1fr;
-    padding: 55px 25px;
+    padding: 60px 25px;
     gap: 35px;
   }
   .tiny {
