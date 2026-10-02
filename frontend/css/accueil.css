@@ -1473,7 +1473,8 @@ a.pilier__renvoi:hover {
 }
 
 .faq {
-  padding: 90px 8%;
+  padding: 90px 8% 100px;
+  border-top: 1px solid var(--line);
   display: grid;
   grid-template-columns: 1fr 1.3fr;
   gap: 80px;
@@ -1534,7 +1535,7 @@ details p {
 
 .finale {
   background: var(--yellow);
-  padding: 55px 8% 65px;
+  padding: 80px 8% 90px;
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 25px 70px;
@@ -1552,6 +1553,15 @@ details p {
 
 .finale-side {
   align-self: center;
+}
+
+/* La phrase de la carte retirée en 02, reprise ici en note manuscrite : le
+   dernier mot de la page rend la décision au visiteur. */
+.finale__note {
+  margin-top: 30px;
+  font: 27px/1.15 var(--hand);
+  transform: rotate(-3deg);
+  transform-origin: left;
 }
 
 .finale-side>p {
@@ -1589,37 +1599,6 @@ details p {
   padding-bottom: 15px;
 }
 
-.contact {
-  padding: 60px 8%;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 18px 70px;
-}
-
-.contact>.tiny {
-  grid-column: 1/-1;
-}
-
-.contact h2 {
-  font: 38px/1.05 var(--serif);
-}
-
-.contact>div {
-  align-self: center;
-}
-
-.contact strong {
-  font-weight: 500;
-  border-bottom: 1px solid var(--ink);
-  font-size: 17px;
-}
-
-.contact p {
-  font-size: 10px;
-  color: var(--muted);
-  margin-top: 12px;
-}
-
 footer {
   padding: 25px 5%;
   display: flex;
@@ -1638,6 +1617,25 @@ footer>a:not(.brand) {
 }
 
 footer>span {
+  font-size: 9px;
+  color: var(--muted);
+}
+
+.pied__contact {
+  display: flex;
+  flex-direction: column;
+}
+
+.pied__contact a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  font-size: 12px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.pied__contact span {
   font-size: 9px;
   color: var(--muted);
 }
@@ -1869,7 +1867,7 @@ footer>span {
     max-width: none;
   }
   .faq {
-    padding: 50px 25px;
+    padding: 50px 25px 60px;
     grid-template-columns: 1fr;
     gap: 25px;
   }
@@ -1887,7 +1885,7 @@ footer>span {
     font-size: 85px;
   }
   .finale {
-    padding: 35px 25px 45px;
+    padding: 50px 25px 60px;
     grid-template-columns: 1fr;
     gap: 30px;
   }
@@ -1900,17 +1898,6 @@ footer>span {
   .ticket {
     margin: 0 5px;
   }
-  .contact {
-    padding: 40px 25px;
-    grid-template-columns: 1fr;
-    gap: 25px;
-  }
-  .contact h2 {
-    font-size: 34px;
-  }
-  .contact strong {
-    font-size: 17px;
-  }
   footer {
     flex-wrap: wrap;
     padding: 25px;
@@ -1921,8 +1908,17 @@ footer>span {
     font-size: 9px;
   }
   footer>span {
-    margin-left: auto;
     font-size: 8px;
+  }
+  .pied__contact {
+    width: 100%;
+  }
+  .pied__contact a {
+    min-height: 44px;
+  }
+  .finale__note {
+    margin-top: 20px;
+    font-size: 24px;
   }
   .ticket small {
     font-size: 7px;

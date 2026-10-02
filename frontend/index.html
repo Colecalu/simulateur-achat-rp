@@ -84,7 +84,7 @@
         <span>01 — DEUX CAMPS, DEUX CERTITUDES</span>
         <span aria-hidden="true">↙</span>
       </div>
-      <div class="camps__duel">
+      <div class="camps__duel" data-apparait>
         <blockquote class="camps__carte camps__carte--gauche">
           <p class="camps__numero">CERTITUDE N° 1</p>
           <p class="camps__citation">« Louer, c’est jeter son argent <span class="camps__barre">par les fenêtres.</span> »</p>
@@ -100,7 +100,7 @@
           <p class="camps__camp">— Le camp de la location</p>
         </blockquote>
       </div>
-      <p class="camps__texte">Tout dépend de votre prix, de votre loyer, du temps que vous resterez et de ce que feront les marchés. Æquo ne choisit pas de camp&nbsp;: il vous donne de quoi trancher.</p>
+      <p class="camps__texte" data-apparait>Tout dépend de votre prix, de votre loyer, du temps que vous resterez et de ce que feront les marchés. Æquo ne choisit pas de camp&nbsp;: il vous donne de quoi trancher.</p>
     </section>
 
     <!-- Trois questions, pas de fonctionnalité : les réponses viennent plus
@@ -124,7 +124,7 @@
           <text x="795" y="147.5" transform="rotate(18 795 143)">3</text>
         </g>
       </svg>
-      <div class="time-notes">
+      <div class="time-notes" data-apparait>
         <article>
           <span><span class="temps__repere" aria-hidden="true">1</span>ET SI…</span>
           <h3>vous partiez <br>plus tôt que prévu&nbsp;?</h3>
@@ -141,7 +141,7 @@
           <p>Garder votre logement et le mettre en location peut changer toute la comparaison.</p>
         </article>
       </div>
-      <p class="temps__transition">Un calcul en ligne droite ne répond à aucune de ces questions. <em>Voici comment Æquo s’y prend. <span aria-hidden="true">↓</span></em></p>
+      <p class="temps__transition" data-apparait>Un calcul en ligne droite ne répond à aucune de ces questions. <em>Voici comment Æquo s’y prend. <span aria-hidden="true">↓</span></em></p>
     </section>
 
     <section class="ledger" id="regle-du-jeu">
@@ -150,7 +150,7 @@
         <h2>Mêmes moyens. <br><em>Autres destinations.</em></h2>
         <p>Chaque mois, le même budget dans les deux cas. Côté achat, il paie le crédit et les charges&nbsp;; côté location, le loyer. Ce qui reste est investi. À l’arrivée, on compare ce que vous possédez vraiment.</p>
       </div>
-      <div class="ledger-sheet">
+      <div class="ledger-sheet" data-apparait>
         <div class="sheet-heading">
           <span>LE PRINCIPE ÆQUO</span>
           <span>↔</span>
@@ -188,7 +188,7 @@
         <span aria-hidden="true">↓</span>
       </div>
       <h2 id="piliersTitre">Trois façons <br><em>d’aller plus loin.</em></h2>
-      <div class="piliers__liste">
+      <div class="piliers__liste" data-apparait>
         <article class="pilier pilier--un">
           <svg class="pilier__picto" viewBox="0 0 120 80" aria-hidden="true">
             <path class="picto__trait" d="M48 74h24M60 74V19M24 26h72M24 26 12 52M24 26l12 26M96 26 84 52M96 26l12 26"/>
@@ -286,45 +286,44 @@
       <a class="apercu__lien" href="simulateur.html">Faire le calcul avec mon projet <span aria-hidden="true">↗</span></a>
     </section>
 
-    <section class="faq">
+    <section class="faq" id="questions" aria-labelledby="faqTitre">
       <div>
         <span class="tiny">QUELQUES NOTES AVANT DE PARTIR</span>
-        <h2>On vous <br>explique <br><em>le reste.</em></h2>
+        <h2 id="faqTitre">On vous <br>explique <br><em>le reste.</em></h2>
         <span class="asterisk" aria-hidden="true">✳</span>
       </div>
-      <div class="answers">
+      <div class="answers" data-apparait>
         <details>
-          <summary>Est-ce qu’Æquo va me dire d’acheter ou de louer ?</summary>
-          <p>Il compare les patrimoines calculés à la durée choisie, avec vos paramètres. Le résultat est conditionnel : modifier un loyer, un prix ou une hypothèse de marché peut changer la comparaison. Il ne remplace pas votre décision personnelle.</p>
+          <summary>Est-ce qu’Æquo va me dire d’acheter ou de louer&nbsp;?</summary>
+          <p>Non. Il compare vos deux patrimoines à la durée choisie, avec vos paramètres. Changer un prix, un loyer ou une hypothèse de marché peut inverser le résultat. La décision reste la vôtre.</p>
         </details>
         <details>
-          <summary>Pourquoi investir quand on reste locataire ?</summary>
-          <p>Pour comparer avec le même effort financier. Le capital qui n’est pas utilisé comme apport et la différence disponible après le logement peuvent être investis. Cette discipline d’épargne fait partie de l’hypothèse de référence ; elle n’est pas automatique dans la vie réelle.</p>
+          <summary>Pourquoi investir quand on reste locataire&nbsp;?</summary>
+          <p>Pour comparer à effort égal&nbsp;: l’apport non dépensé et ce qui reste après le loyer sont placés. Cette discipline d’épargne est une hypothèse, pas une évidence&nbsp;; le simulateur vous laisse indiquer que vous ne la tiendriez pas.</p>
         </details>
         <details>
-          <summary>Qu’est-ce qui entre dans les calculs ?</summary>
-          <p>Le financement, les frais d’acquisition, les charges de copropriété, la taxe foncière, les loyers, l’évolution du bien et celle des placements. Les portefeuilles capitalisent avant impôt ; leur fiscalité de sortie est prise en compte dans le patrimoine net affiché.</p>
-          <p>Le modèle ne couvre pas toutes les situations : notamment les frais de revente, les gros travaux imprévus ou les changements de vie.</p>
+          <summary>Qu’est-ce qui entre dans les calculs&nbsp;?</summary>
+          <p>Le crédit, les frais d’acquisition, la copropriété, la taxe foncière, les loyers, l’évolution du bien et celle des placements. Les placements capitalisent avant impôt&nbsp;; la fiscalité de sortie est déduite du patrimoine net affiché.</p>
+          <p>Le modèle ne couvre pas tout&nbsp;: notamment les frais de revente, les gros travaux imprévus ou les changements de vie.</p>
         </details>
         <details>
-          <summary>Les scénarios prédisent-ils les marchés ?</summary>
-          <p>Non. Un historique rejoue des évolutions passées sur votre projet ; une hypothèse teste un environnement possible. Ni l’un ni l’autre ne prédit l’avenir. Le projet est en développement et les données de scénarios sont encore provisoires : elles ne permettent pas de tirer une conclusion financière fiable à ce stade.</p>
+          <summary>Les scénarios prédisent-ils les marchés&nbsp;?</summary>
+          <p>Non. «&nbsp;Le passé&nbsp;» applique l’évolution des marchés d’une autre époque à votre projet, avec votre taux de crédit, pas celui de l’époque. «&nbsp;Des futurs possibles&nbsp;» teste des hypothèses. Ni l’un ni l’autre ne prédit l’avenir, et leurs données sont encore provisoires&nbsp;: elles ne permettent pas de conclusion financière fiable à ce stade.</p>
         </details>
         <details>
-          <summary>Dois-je connaître tous les montants pour commencer ?</summary>
-          <p>Vous pouvez explorer un exemple, puis remplacer les valeurs par celles de votre projet. Commencez avec votre prix d’achat, un loyer comparable et votre situation financière. Affinez ensuite les frais et les hypothèses.</p>
-        </details>
-        <details>
-          <summary>Où vont mes données ?</summary>
-          <p>Les calculs s’effectuent dans votre navigateur. Cette version ne nécessite pas de compte. Le brouillon du simulateur est conservé localement sur votre appareil ; il n’est pas synchronisé entre vos appareils.</p>
+          <summary>Où vont mes données&nbsp;?</summary>
+          <p>Les calculs se font dans votre navigateur, sans compte. Votre brouillon est gardé sur cet appareil&nbsp;; il n’est pas synchronisé entre vos appareils.</p>
         </details>
       </div>
     </section>
 
-    <section class="finale">
+    <section class="finale" aria-labelledby="finaleTitre">
       <p class="tiny">ASSEZ PARLÉ DES DEUX CHEMINS.</p>
-      <h2>Et le <br><em>vôtre ?</em></h2>
-      <div class="finale-side">
+      <div class="finale__titre">
+        <h2 id="finaleTitre">Et le <br><em>vôtre&nbsp;?</em></h2>
+        <p class="finale__note">Le simulateur éclaire les chiffres. <br>Vous décidez de leur place.</p>
+      </div>
+      <div class="finale-side" data-apparait>
         <p>Un prix, un loyer, votre situation. <br>Commencez par un exemple. <br>Faites-en votre histoire.</p>
         <a href="simulateur.html" class="ticket">
           <span>OUVRIR LE SIMULATEUR</span>
@@ -334,21 +333,17 @@
       </div>
     </section>
 
-    <section class="contact" id="contact">
-      <span class="tiny">LE CARNET RESTE OUVERT.</span>
-      <h2>Une idée à glisser <br>dans la boîte aux lettres ?</h2>
-      <div>
-        <strong>bonjour@aequo.example</strong>
-        <p>Adresse fictive de cette maquette. <br>Aucun message ne peut être reçu.</p>
-      </div>
-    </section>
-
   </main>
 
   <footer>
-    <a class="brand" href="index.html">Æquo<span>↗</span></a>
+    <a class="brand" href="index.html">Æquo<span aria-hidden="true">↗</span></a>
     <p>Acheter ou louer. Comprendre avant de choisir.</p>
-    <a href="#contact">Contact</a>
+    <!-- Adresse fictive tant que le domaine n'existe pas : le dire, pour
+         que personne n'écrive dans le vide. -->
+    <div class="pied__contact" id="contact">
+      <a href="mailto:bonjour@aequo.example">Contact</a>
+      <span>bonjour@aequo.example · adresse provisoire</span>
+    </div>
     <span>Prototype en développement. <br>Des hypothèses, pas une prédiction.</span>
   </footer>
 </body>
