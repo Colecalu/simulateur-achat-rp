@@ -851,8 +851,7 @@ a:focus-visible, button:focus-visible, summary:focus-visible {
 }
 
 @media (max-width: 700px) {
-  .temps__numeros,
-  .temps__repere {
+  .temps__numeros {
     display: none;
   }
   .temps__transition {
@@ -1126,6 +1125,351 @@ a.pilier__renvoi:hover {
   .pilier__titre {
     font-size: 28px;
   }
+}
+
+/* ---------------------------------------------------------------------------
+ * 05 — Ce que vous obtenez
+ * Le graphique est construit par accueil.js à partir de calc.js, à la largeur
+ * réelle de la feuille (une unité SVG = un pixel) : les tailles de texte
+ * ci-dessous sont donc de vrais pixels, en mobile comme sur grand écran.
+ * Couleurs de la couverture : la porte orange pour l'achat, violette pour la
+ * location.
+ * ------------------------------------------------------------------------- */
+.apercu {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 100px 8%;
+  display: grid;
+  grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr);
+  grid-template-areas: 'texte visuel' 'lien visuel';
+  gap: 0 70px;
+  align-items: center;
+}
+
+/* En mobile, le bouton passe sous le graphique : on lit la réponse avant
+   d'être invité à faire la sienne. */
+.apercu__texte {
+  grid-area: texte;
+  align-self: end;
+}
+
+.apercu__visuel {
+  grid-area: visuel;
+}
+
+.apercu__lien {
+  grid-area: lien;
+  align-self: start;
+  justify-self: start;
+}
+
+.apercu .section-label {
+  padding-bottom: 30px;
+}
+
+.apercu h2 {
+  font: clamp(46px, 4.6vw, 66px)/.98 var(--serif);
+  letter-spacing: -1.5px;
+}
+
+.apercu h2 em {
+  color: var(--purple);
+}
+
+.apercu__chiffres {
+  margin-top: 40px;
+}
+
+.apercu__kpis {
+  margin: 0;
+  border-top: 1px solid var(--line);
+}
+
+.apercu__kpi {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 20px;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.apercu__kpi dt {
+  font: 24px/1.1 var(--serif);
+}
+
+.apercu__kpi dt>span {
+  display: block;
+  margin-top: 5px;
+  font: 9px/1.6 var(--mono);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.apercu__kpi dd {
+  margin: 0;
+  font: 500 20px/1 var(--sans);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.apercu__kpi--achat dt {
+  color: var(--orange);
+}
+
+.apercu__kpi--location dt {
+  color: var(--purple);
+}
+
+.apercu__renvoi {
+  display: flex;
+  align-items: center;
+  margin-top: 16px;
+  font: 10px/1.5 var(--mono);
+  letter-spacing: .5px;
+  color: var(--muted);
+}
+
+.apercu__lien {
+  display: inline-flex;
+  align-items: center;
+  gap: 18px;
+  min-height: 48px;
+  margin-top: 34px;
+  padding: 13px 26px;
+  border-radius: 30px;
+  background: var(--ink);
+  color: var(--paper);
+  font-size: 14px;
+  box-shadow: 4px 4px 0 var(--yellow);
+  transition: translate .2s, box-shadow .2s;
+}
+
+.apercu__lien span {
+  font-size: 20px;
+}
+
+.apercu__lien:hover {
+  translate: 2px 2px;
+  box-shadow: 2px 2px 0 var(--yellow);
+}
+
+.apercu__visuel {
+  margin: 0;
+}
+
+.apercu__feuille {
+  position: relative;
+  background: var(--white);
+  border: 1px solid var(--line);
+  padding: 30px 24px 16px;
+  box-shadow: 8px 9px 0 var(--lavender);
+  transform: rotate(-1deg);
+}
+
+.apercu__feuille:before {
+  content: '';
+  position: absolute;
+  top: -16px;
+  left: 46%;
+  width: 90px;
+  height: 32px;
+  background: rgb(243 218 120 / .7);
+  transform: rotate(-5deg);
+}
+
+.apercu__graphique {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.apercu__grille path {
+  fill: none;
+  stroke: var(--line);
+  stroke-width: 1;
+  stroke-dasharray: 2 4;
+}
+
+.apercu__grille .apercu__axe {
+  stroke: var(--ink);
+  stroke-dasharray: none;
+}
+
+.apercu__graduation {
+  font: 10px var(--mono);
+  fill: var(--muted);
+  text-anchor: middle;
+}
+
+.apercu__graduation--y {
+  text-anchor: end;
+}
+
+.apercu__zone--location {
+  fill: var(--lavender);
+}
+
+.apercu__zone--achat {
+  fill: rgb(183 71 44 / .16);
+}
+
+.apercu__point-mort {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 1.2;
+  stroke-dasharray: 4 4;
+}
+
+.apercu__point-mort-texte {
+  font: 10px var(--mono);
+  letter-spacing: 1px;
+  fill: var(--ink);
+  text-anchor: middle;
+}
+
+.apercu__main {
+  font: 20px var(--hand);
+  fill: var(--ink);
+}
+
+.apercu__main--avant {
+  text-anchor: end;
+}
+
+.apercu__croisement {
+  fill: var(--white);
+  stroke: var(--ink);
+  stroke-width: 1.5;
+}
+
+.apercu__courbe {
+  fill: none;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.apercu__courbe--achat {
+  stroke: var(--orange);
+}
+
+.apercu__courbe--location {
+  stroke: var(--purple);
+}
+
+.apercu__etiquette-nom {
+  font: 10px var(--mono);
+  letter-spacing: 1px;
+}
+
+.apercu__etiquette-nom--achat {
+  fill: var(--orange);
+}
+
+.apercu__etiquette-nom--location {
+  fill: var(--purple);
+}
+
+.apercu__etiquette-valeur {
+  font: 21px var(--serif);
+  fill: var(--ink);
+}
+
+.apercu__legende {
+  max-width: 540px;
+  margin-top: 26px;
+  font: 10px/1.7 var(--mono);
+  color: var(--muted);
+}
+
+.apercu__legende span {
+  display: block;
+  color: var(--ink);
+}
+
+/* Tracé des courbes à l'apparition, puis le point mort et les étiquettes.
+   Sans JavaScript il n'y a pas de graphique du tout ; sous
+   prefers-reduced-motion, la règle globale coupe les transitions. */
+.js .apercu__courbe {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  transition: stroke-dashoffset 1.6s cubic-bezier(.4, 0, .2, 1) .2s;
+}
+
+.js .apercu__decor,
+.js .apercu__etiquettes {
+  opacity: 0;
+  transition: opacity .5s ease 1.4s;
+}
+
+.js .apercu__visuel.est-visible .apercu__courbe {
+  stroke-dashoffset: 0;
+}
+
+.js .apercu__visuel.est-visible .apercu__decor,
+.js .apercu__visuel.est-visible .apercu__etiquettes {
+  opacity: 1;
+}
+
+@media (max-width: 1000px) {
+  .apercu {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: 'texte' 'visuel' 'lien';
+    gap: 56px;
+  }
+  .apercu__lien {
+    margin-top: 0;
+  }
+}
+
+@media (max-width: 700px) {
+  .apercu {
+    padding: 50px 25px 60px;
+    gap: 44px;
+  }
+  .apercu h2 {
+    font-size: 44px;
+    letter-spacing: -1px;
+  }
+  .apercu__kpi dt {
+    font-size: 21px;
+  }
+  .apercu__kpi dd {
+    font-size: 18px;
+  }
+  .apercu__feuille {
+    padding: 24px 12px 10px;
+    transform: rotate(-.6deg);
+  }
+  .apercu__main {
+    font-size: 17px;
+  }
+  .apercu__etiquette-valeur {
+    font-size: 17px;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+ * Apparition au défilement — un seul effet pour toute la page.
+ * `translate` plutôt que `transform` : plusieurs blocs sont déjà inclinés
+ * par `transform`, et l'apparition ne doit pas effacer leur rotation.
+ * ------------------------------------------------------------------------- */
+.js [data-apparait] {
+  opacity: 0;
+  translate: 0 18px;
+  transition: opacity .7s ease, translate .7s ease;
+}
+
+.js [data-apparait].est-visible {
+  opacity: 1;
+  translate: none;
+}
+
+[hidden] {
+  display: none !important;
 }
 
 .faq {
@@ -1588,6 +1932,10 @@ footer>span {
 @media (prefers-reduced-motion:reduce) {
   html {
     scroll-behavior: auto;
+  }
+  .js [data-apparait] {
+    opacity: 1;
+    translate: none;
   }
   * {
     transition: none!important;

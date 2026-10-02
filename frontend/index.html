@@ -6,7 +6,8 @@
   <title>Æquo — La même porte. Pas la même histoire.</title>
   <meta name="description" content="Acheter ou louer sa résidence principale ? Ouvrez les deux portes et comparez deux trajectoires de patrimoine, avec les mêmes moyens.">
   <link rel="stylesheet" href="css/accueil.css">
-  <script src="js/accueil.js" defer></script>
+  <script src="js/calc.js" defer></script>
+  <script src="js/accueil.js"></script>
 </head>
 <body>
   <a class="skip" href="#contenu">Aller au contenu</a>
@@ -243,6 +244,46 @@
           <p class="pilier__renvoi"><span class="temps__repere" aria-hidden="true">3</span>Répond à&nbsp;: et si vous déménagiez sans vouloir vendre&nbsp;?</p>
         </article>
       </div>
+    </section>
+
+    <!-- Ce qu'on obtient en ouvrant le simulateur. Les chiffres sont calculés
+         au chargement par calc.js (accueil.js, initialiserApercu) : jamais
+         écrits à la main, ils divergeraient du moteur à la première
+         correction. Le bloc chiffré reste caché tant que le calcul n'a pas
+         réussi : sans JavaScript ou en cas d'échec, il ne reste que le titre
+         et le lien — jamais un NaN. -->
+    <section class="apercu" id="apercu" aria-labelledby="apercuTitre">
+      <div class="apercu__texte">
+        <div class="section-label">
+          <span>05 — CE QUE VOUS OBTENEZ</span>
+        </div>
+        <h2 id="apercuTitre">Deux trajectoires. <br><em>Une réponse à votre mesure.</em></h2>
+        <div class="apercu__chiffres" id="apercuChiffres" hidden>
+          <dl class="apercu__kpis">
+            <div class="apercu__kpi apercu__kpi--achat">
+              <dt>Achat <span>patrimoine net à <span id="apercuDuree">25 ans</span></span></dt>
+              <dd id="apercuAchat">—</dd>
+            </div>
+            <div class="apercu__kpi apercu__kpi--location">
+              <dt>Location <span>patrimoine net, même date</span></dt>
+              <dd id="apercuLocation">—</dd>
+            </div>
+            <div class="apercu__kpi apercu__kpi--point-mort">
+              <dt>Point mort <span>l’année où l’achat passe devant</span></dt>
+              <dd id="apercuPointMort">—</dd>
+            </div>
+          </dl>
+          <p class="apercu__renvoi" id="apercuRenvoi"><span class="temps__repere" aria-hidden="true">1</span>Répond à&nbsp;: et si vous partiez plus tôt que prévu&nbsp;?</p>
+        </div>
+      </div>
+      <figure class="apercu__visuel" id="apercuVisuel" hidden data-apparait>
+        <div class="apercu__feuille" id="apercuGraphique"></div>
+        <figcaption class="apercu__legende">
+          <span id="apercuHypotheses"></span>
+          Exemple calculé avec le moteur du simulateur. Vos chiffres seront différents.
+        </figcaption>
+      </figure>
+      <a class="apercu__lien" href="simulateur.html">Faire le calcul avec mon projet <span aria-hidden="true">↗</span></a>
     </section>
 
     <section class="faq">
