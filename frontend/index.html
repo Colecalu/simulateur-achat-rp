@@ -102,35 +102,45 @@
       <p class="camps__texte">Tout dépend de votre prix, de votre loyer, du temps que vous resterez et de ce que feront les marchés. Æquo ne choisit pas de camp&nbsp;: il vous donne de quoi trancher.</p>
     </section>
 
-    <section class="time-story">
+    <!-- Trois questions, pas de fonctionnalité : les réponses viennent plus
+         bas (point mort en 05, piliers 2 et 3 en 04). Les numéros dans les
+         points de la courbe renvoient aux cartes ; décoratifs, donc masqués
+         aux lecteurs d'écran, et retirés en mobile où la courbe s'estompe. -->
+    <section class="time-story" id="avenir">
       <div class="section-label">
-        <span>03 — LAISSER UNE PLACE AU TEMPS</span>
-        <span>ET AUX IMPRÉVUS</span>
+        <span>02 — CE QUE PERSONNE NE PEUT PRÉVOIR</span>
+        <span aria-hidden="true">↘</span>
       </div>
       <h2>Votre avenir <br>n’est pas une <br><em>ligne droite.</em></h2>
       <svg class="wandering" viewBox="0 0 1100 230" aria-hidden="true">
         <path d="M-20 180C90 180 160 10 310 70S390 230 480 150 510 5 600 65 690 240 795 143 960 20 1120 55"/>
-        <circle cx="310" cy="70" r="9"/>
-        <circle cx="600" cy="65" r="9"/>
-        <circle cx="795" cy="143" r="9"/>
+        <circle cx="310" cy="70" r="13"/>
+        <circle cx="600" cy="65" r="13"/>
+        <circle cx="795" cy="143" r="13"/>
+        <g class="temps__numeros">
+          <text x="310" y="74.5" transform="rotate(18 310 70)">1</text>
+          <text x="600" y="69.5" transform="rotate(18 600 65)">2</text>
+          <text x="795" y="147.5" transform="rotate(18 795 143)">3</text>
+        </g>
       </svg>
       <div class="time-notes">
         <article>
-          <span>ET SI…</span>
-          <h3>vous partiez <br>plus tôt ?</h3>
-          <p>Faites varier votre durée de détention. Les frais d’achat n’ont pas le même poids à cinq ou vingt ans.</p>
+          <span><span class="temps__repere" aria-hidden="true">1</span>ET SI…</span>
+          <h3>vous partiez <br>plus tôt que prévu&nbsp;?</h3>
+          <p>Une mutation, une famille qui s’agrandit… Les frais d’achat ne pèsent pas pareil à cinq ou à vingt ans.</p>
         </article>
         <article>
-          <span>ET SI…</span>
-          <h3>les marchés <br>vous surprenaient ?</h3>
-          <p>Explorez d’autres évolutions de l’immobilier et des placements, sans les confondre avec des prévisions.</p>
+          <span><span class="temps__repere" aria-hidden="true">2</span>ET SI…</span>
+          <h3>les marchés <br>vous surprenaient&nbsp;?</h3>
+          <p>Un immobilier qui recule, une bourse qui stagne dix ans&nbsp;: c’est déjà arrivé. Et demain ne ressemblera pas forcément à hier.</p>
         </article>
         <article>
-          <span>ET SI…</span>
-          <h3>votre choix <br>n’était pas que financier ?</h3>
-          <p>Stabilité, liberté, envie d’un chez-soi : le simulateur éclaire les chiffres. Vous décidez de leur place.</p>
+          <span><span class="temps__repere" aria-hidden="true">3</span>ET SI…</span>
+          <h3>vous déménagiez <br>sans vouloir vendre&nbsp;?</h3>
+          <p>Garder votre logement et le mettre en location peut changer toute la comparaison.</p>
         </article>
       </div>
+      <p class="temps__transition">Un calcul en ligne droite ne répond à aucune de ces questions. <em>Voici comment Æquo s’y prend. <span aria-hidden="true">↓</span></em></p>
     </section>
 
     <section class="ledger">

@@ -748,7 +748,7 @@ a:focus-visible, button:focus-visible, summary:focus-visible {
 
 .time-story {
   background: var(--lavender);
-  padding: 40px 8% 70px;
+  padding: 90px 8% 100px;
   position: relative;
   overflow: hidden;
 }
@@ -765,7 +765,7 @@ a:focus-visible, button:focus-visible, summary:focus-visible {
 .wandering {
   position: absolute;
   right: -70px;
-  top: 100px;
+  top: 150px;
   width: 76%;
   height: 300px;
   transform: rotate(-18deg);
@@ -804,6 +804,62 @@ a:focus-visible, button:focus-visible, summary:focus-visible {
 .time-notes p {
   font-size: 13px;
   max-width: 300px;
+}
+
+/* Les numéros des points de la courbe, repris sur les cartes : le seul lien
+   visuel entre une question et l'endroit où le chemin bifurque. */
+.temps__numeros text {
+  font: 500 13px var(--mono);
+  fill: var(--purple);
+  stroke: none;
+  text-anchor: middle;
+}
+
+.temps__repere {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  margin-right: 10px;
+  border: 1.5px solid var(--purple);
+  border-radius: 50%;
+  font: 500 11px var(--mono);
+  color: var(--purple);
+  vertical-align: middle;
+}
+
+.temps__transition {
+  position: relative;
+  max-width: 920px;
+  margin-top: 70px;
+  padding-top: 30px;
+  border-top: 1px dashed var(--purple);
+  font: clamp(24px, 2.4vw, 32px)/1.25 var(--serif);
+}
+
+.temps__transition em {
+  display: block;
+  color: var(--purple);
+}
+
+.temps__transition span {
+  display: inline-block;
+  margin-left: 6px;
+  font-family: var(--sans);
+  font-size: .8em;
+}
+
+@media (max-width: 700px) {
+  .temps__numeros,
+  .temps__repere {
+    display: none;
+  }
+  .temps__transition {
+    margin-top: 44px;
+    padding-top: 24px;
+    font-size: 25px;
+  }
 }
 
 .faq {
@@ -1174,7 +1230,7 @@ footer>span {
     transform: rotate(2deg);
   }
   .time-story {
-    padding: 30px 25px 45px;
+    padding: 50px 25px 60px;
   }
   .time-story>h2 {
     font-size: 68px;
