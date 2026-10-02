@@ -1312,7 +1312,9 @@ input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; marg
  * Horizon (`--papier-lilas`), prévue pour cet usage et jusqu'ici dormante.
  */
 /* Deux classes : la règle jaune de `.scenario` est plus bas dans la feuille. */
-.scenario.scenario--location[data-etat="ferme"] { background: var(--papier-lilas, var(--accent-doux)); }
+/* Le lilas reste une fois la location appliquée : la carte garde son identité. */
+.scenario.scenario--location[data-etat="ferme"],
+.scenario.scenario--location[data-etat="ouvert"] { background: var(--papier-lilas, var(--accent-doux)); }
 
 /* Le rappel du curseur d'horizon, sous le bandeau des résultats. */
 .mel__rappel { margin: 16px 20px 0; }
