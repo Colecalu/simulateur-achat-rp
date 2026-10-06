@@ -342,18 +342,28 @@ function afficherVerdict(resultat, horizon) {
   // côtés. L'écart est donc juste, et le supplément se lit dans le profil.
   // JAMAIS de signe négatif. Un écart négatif ne veut pas dire « moins de
   // patrimoine » dans l'absolu : il veut dire que c'est l'AUTRE trajectoire qui
-  // gagne, et de ce montant-là. La couleur le dit, la phrase juste en dessous
-  // l'explicite — le signe, lui, se lisait comme une perte.
-  chiffre.textContent = euros.format(Math.abs(ecart));
+  // gagne, et de ce montant-là. L'étiquette au-dessus nomme le gagnant, le
+  // montant est donc toujours SON avance : « + 330 000 € ». Le signe moins,
+  // lui, se lisait comme une perte.
   chiffre.className = 'verdict__chiffre ' +
     (ecart >= 0 ? 'verdict__chiffre--achat' : 'verdict__chiffre--location');
 
   // Sous ~1 % du patrimoine comparé, l'écart n'est pas un signal exploitable.
   const reference = Math.max(ligne.patrimoineTotalAchat, ligne.patrimoineTotalLocation);
+  const gagnant = $('#verdictGagnant');
   if (Math.abs(ecart) < reference * 0.01) {
+    gagnant.dataset.gagnant = 'egal';
+    $('#verdictGagnantTexte').textContent = 'Les deux se valent';
+    chiffre.textContent = euros.format(Math.abs(ecart));
     mesure.textContent = 'd\'écart : à cette échéance, les deux scénarios se valent.';
     return;
   }
+
+  gagnant.dataset.gagnant = ecart >= 0 ? 'achat' : 'location';
+  $('#verdictGagnantTexte').textContent = ecart >= 0
+    ? 'Avantage à l\'achat'
+    : 'Avantage à la location';
+  chiffre.textContent = '+\u202f' + euros.format(Math.abs(ecart));
 
   mesure.textContent = ecart >= 0
     ? 'de patrimoine en plus en achetant qu\'en restant locataire.'

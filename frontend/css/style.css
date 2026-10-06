@@ -1222,6 +1222,36 @@ h1, h2, h3 {
   letter-spacing: -0.03em;
   font-variant-numeric: tabular-nums;
 }
+/* L'étiquette du gagnant, entre la question et le montant. */
+.verdict__gagnant {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 4px auto 8px;
+  padding: 7px 18px 7px 14px;
+  border-radius: 999px;
+  font-size: 1rem;
+  font-weight: 650;
+  background: var(--surface-creuse);
+  color: var(--encre-2);
+}
+.verdict__gagnant[data-gagnant="achat"] { background: var(--achat-voile); color: var(--achat); }
+.verdict__gagnant[data-gagnant="location"] { background: var(--location-voile); color: var(--location); }
+.verdict__icone {
+  display: none;
+  width: 24px;
+  height: 24px;
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.verdict__gagnant[data-gagnant="achat"] .verdict__icone--achat,
+.verdict__gagnant[data-gagnant="location"] .verdict__icone--location,
+.verdict__gagnant[data-gagnant="egal"] .verdict__icone--egal { display: block; }
+
 .verdict__chiffre--achat { color: var(--achat); }
 .verdict__chiffre--location { color: var(--location); }
 .verdict__chiffre--indecis { color: var(--encre-3); }
