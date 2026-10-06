@@ -1476,7 +1476,6 @@ a.pilier__renvoi:hover {
 
 .faq {
   padding: 90px 8% 100px;
-  border-top: 1px solid var(--line);
   display: grid;
   grid-template-columns: 1fr 1.3fr;
   gap: 80px;

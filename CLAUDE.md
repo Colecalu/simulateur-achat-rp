@@ -792,9 +792,9 @@ déroulé, les textes et la fluidité qui ont changé. Branche `feat/accueil-tra
 | — | Couverture (inchangée) | C'est quoi ? | jaune |
 | 01 | Deux camps, deux certitudes | Pourquoi est-ce si dur de trancher ? | papier |
 | 02 | Ce que vous obtenez — l'aperçu | À quoi ressemble la réponse ? | blanc |
-| 03 | Votre avenir n'est pas une ligne droite | Pourquoi personne ne peut me répondre d'avance ? | lavande |
-| 04 | Trois façons d'aller plus loin (les piliers) | Que fait Æquo que les autres ne font pas ? | blanc |
-| 05 | La règle du jeu — Mêmes moyens | Comment Æquo compare ? | papier |
+| 03 | La règle du jeu — Mêmes moyens | Comment Æquo compare ? | papier |
+| 04 | Votre avenir n'est pas une ligne droite | Pourquoi personne ne peut me répondre d'avance ? | lavande |
+| 05 | Trois façons d'aller plus loin (les piliers) | Que fait Æquo que les autres ne font pas ? | blanc |
 | — | FAQ « On vous explique le reste » | Je peux vous faire confiance ? | papier, filet |
 | — | Finale « Et le vôtre ? » + contact en pied de page | Je commence comment ? | jaune |
 
@@ -803,9 +803,9 @@ déroulé, les textes et la fluidité qui ont changé. Branche `feat/accueil-tra
 - **Neutralité.** En 01, les deux citations sont sur deux cartes strictement identiques ; seul le
   sens de l'inclinaison change. Un poids visuel inégal ferait pencher la page.
 - **Ordre revu le 06/10 (Lucas)** : l'aperçu remonte juste après le face-à-face — montrer dès le
-  début ce qu'on obtient. La règle du jeu passe en dernier, en attendant de décider si elle reste
-  utile ou trouve une autre place.
-- **Chaque « Et si » de 03 a sa réponse** : marchés → pilier 2, déménager sans vendre → pilier 3
+  début ce qu'on obtient — et la règle du jeu le suit immédiatement, pour la continuité : on voit
+  la réponse, puis comment elle est obtenue. Viennent ensuite les imprévus et les piliers.
+- **Chaque « Et si » de 04 a sa réponse : marchés → pilier 2, déménager sans vendre → pilier 3
   (plus bas, renvois « Répond à » avec le rond numéroté `.temps__repere`) ; partir plus tôt → le
   point mort, déjà montré par l'aperçu en 02. L'aperçu ne porte donc plus de renvoi : il aurait
   répondu à une question pas encore posée. Supprimer une question oblige à revoir sa réponse.
