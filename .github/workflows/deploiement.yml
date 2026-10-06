@@ -1,0 +1,86 @@
+# ===========================================================================
+#  Déploiement d'Æquo : à chaque fusion sur main, tests puis envoi FTPS de
+#  frontend/ vers l'hébergement OVH mutualisé. Voir CLAUDE.md §6.
+#
+#  Seul frontend/ part : outils/, tests/, docs/ et backend/ restent dans le
+#  dépôt. backend/config.php n'est JAMAIS déployé par ce workflow.
+#
+#  Tant que les secrets FTP ne sont pas renseignés (Settings → Secrets and
+#  variables → Actions), le job s'arrête proprement, sans rien envoyer : une
+#  fusion sur main ne doit pas échouer parce que l'hébergement n'existe pas
+#  encore.
+# ===========================================================================
+name: Déploiement
+
+on:
+  push:
+    branches: [main]
+  # Lancement à la main depuis l'onglet Actions. « essai » simule l'envoi
+  # sans rien écrire : à utiliser pour le tout premier déploiement.
+  workflow_dispatch:
+    inputs:
+      essai:
+        description: "Simuler seulement (aucun fichier envoyé)"
+        type: boolean
+        default: true
+
+# Deux fusions rapprochées ne doivent pas envoyer en même temps : la seconde
+# attend la première.
+concurrency:
+  group: deploiement
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      # Les tests sont l'arbitre (CLAUDE.md §0) : rouges, rien ne part.
+      - run: node --test "tests/*.test.mjs"
+
+  deploiement:
+    needs: tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Les identifiants FTP sont-ils renseignés ?
+        id: secrets
+        env:
+          SERVEUR: ${{ secrets.FTP_SERVEUR }}
+          UTILISATEUR: ${{ secrets.FTP_UTILISATEUR }}
+          MOT_DE_PASSE: ${{ secrets.FTP_MOT_DE_PASSE }}
+        run: |
+          if [ -z "$SERVEUR" ] || [ -z "$UTILISATEUR" ] || [ -z "$MOT_DE_PASSE" ]; then
+            echo "pret=non" >> "$GITHUB_OUTPUT"
+            echo "::notice::Secrets FTP absents : rien n'est déployé. Voir CLAUDE.md §6."
+          else
+            echo "pret=oui" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/checkout@v4
+        if: steps.secrets.outputs.pret == 'oui'
+
+      # Envoie seulement ce qui a changé depuis le dernier déploiement : l'état
+      # est gardé sur le serveur dans .ftp-deploy-sync-state.json.
+      - name: Envoi FTPS de frontend/
+        if: steps.secrets.outputs.pret == 'oui'
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVEUR }}
+          username: ${{ secrets.FTP_UTILISATEUR }}
+          password: ${{ secrets.FTP_MOT_DE_PASSE }}
+          # FTPS obligatoire : en FTP simple, le mot de passe circulerait en
+          # clair.
+          protocol: ftps
+          local-dir: ./frontend/
+          # Sur OVH mutualisé, la racine web est en général www/. Le secret
+          # FTP_DOSSIER permet d'en choisir une autre sans toucher au fichier.
+          server-dir: ${{ secrets.FTP_DOSSIER || './www/' }}
+          # Le .htaccess fait partie du site : il est envoyé. Seuls les
+          # fichiers git sont exclus (comportement par défaut de l'action).
+          dry-run: ${{ github.event_name == 'workflow_dispatch' && inputs.essai }}

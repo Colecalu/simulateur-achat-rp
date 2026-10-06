@@ -176,7 +176,7 @@ valeurs réellement calculées par Excel sur 25 ans, au centime près.
 
 | | |
 |---|---|
-| Front | HTML / CSS / JavaScript **vanilla** + Chart.js (CDN). Pas de framework, **pas d'étape de build**. |
+| Front | HTML / CSS / JavaScript **vanilla** + Chart.js (copié dans `frontend/js/vendor/`). Pas de framework, **pas d'étape de build**. Aucun serveur tiers. |
 | Calculs | **100 % dans le navigateur.** Le serveur ne calcule jamais rien. |
 | Backend | PHP 8 + MySQL, **uniquement** pour les comptes et la sauvegarde. |
 | Hébergement | OVH mutualisé d'entrée de gamme (pas encore souscrit). |
@@ -211,7 +211,8 @@ frontend/                    servi tel quel, racine web en production
         theme-foret.css      gelé, conservé comme point de comparaison
         style.css            structure du simulateur
         accueil.css          feuille AUTONOME de l'accueil (ses propres jetons), une section par bloc
-  js/   calc.js              moteur PUR : window.SimuRP / module.exports
+  js/   vendor/chart.umd.min.js  Chart.js 4.4.1, fichier npm officiel inchangé (+ licence MIT)
+        calc.js              moteur PUR : window.SimuRP / module.exports
         calc-location.js     pilier 3 — CONSOMME calc.js, ne le modifie jamais
         scenarios.js         pilier 2 — données de marché, pas de logique
         sauvegarde.js        brouillon local + migration de schéma (testé)
@@ -355,9 +356,26 @@ internes fonctionnent en local comme en production, sans le `.htaccess`.
 
 ### Déploiement
 
-GitHub Actions déclenché au **merge sur `main`**, FTPS vers OVH, identifiants dans les secrets
-GitHub. **`backend/config.php` n'est jamais déployé par la CI** — il est créé à la main sur le
-serveur, une fois.
+`.github/workflows/deploiement.yml`, déclenché à **chaque fusion sur `main`** : les tests
+d'abord (rouges, rien ne part), puis l'envoi **FTPS** de `frontend/` — et de lui seul — vers
+OVH. Seuls les fichiers modifiés sont envoyés (l'état est gardé sur le serveur, dans
+`.ftp-deploy-sync-state.json`). **`backend/config.php` n'est jamais déployé par la CI** — il est
+créé à la main sur le serveur, une fois.
+
+**Tant que les secrets ne sont pas renseignés, le job passe sans rien envoyer** (une note
+l'indique dans l'onglet Actions) : une fusion ne doit pas échouer parce que l'hébergement n'existe
+pas encore. Secrets à créer dans GitHub → Settings → Secrets and variables → Actions :
+
+| Secret | Valeur |
+|---|---|
+| `FTP_SERVEUR` | l'hôte FTP donné par OVH (ex. `ftp.cluster0XX.hosting.ovh.net`) |
+| `FTP_UTILISATEUR` | l'identifiant FTP |
+| `FTP_MOT_DE_PASSE` | son mot de passe |
+| `FTP_DOSSIER` | facultatif — dossier de la racine web, `./www/` par défaut (à terminer par `/`) |
+
+**Premier déploiement : en simulation.** Onglet Actions → « Déploiement » → *Run workflow*,
+case « Simuler seulement » cochée (c'est le défaut) : le journal liste ce qui serait envoyé, et
+où, sans rien écrire. Vérifier le dossier cible, puis relancer case décochée.
 
 ### Migrations de base
 
@@ -818,8 +836,8 @@ déroulé, les textes et la fluidité qui ont changé. Branche `feat/accueil-tra
   « simulateur », « gratuit », « sans inscription », « résidence principale », « premier achat ».
   Seuls les textes ont changé, la composition est celle de Codex. Deux phrases ont été vérifiées
   avant d'être écrites : « en quelques minutes » (tous les champs du simulateur sont pré-remplis)
-  et « Aucune donnée envoyée » (aucune requête réseau dans le code ; seuls les CDN de polices et
-  de Chart.js sont appelés, sans rien de ce qui est saisi). Si un jour une requête part avec la
+  et « Aucune donnée envoyée » (aucune requête réseau dans le code ; depuis le 06/10, plus aucun
+  serveur tiers n'est appelé, polices et Chart.js compris). Si un jour une requête part avec la
   saisie — sauvegarde en compte, mesure d'audience —, **cette phrase devient fausse** : la
   remplacer par « Calculs faits dans votre navigateur, sans compte. ».
 - **Le tampon de couverture a sa propre brique, `#9e3a23`**, plus sombre que `--orange` : il porte
@@ -957,6 +975,7 @@ Aujourd'hui : balises de partage et `canonical` des deux pages, JSON-LD de l'acc
 
 Puis, au premier déploiement :
 
+0. **Secrets FTP** dans GitHub, puis un premier passage **en simulation** du workflow (§6).
 1. **`.htaccess`** (il ne se teste pas en local) :
    - `/simulateur` affiche le simulateur, **sans** changer d'adresse ;
    - `/simulateur.html` → 301 vers `/simulateur`, `/index.html` → 301 vers `/`,
