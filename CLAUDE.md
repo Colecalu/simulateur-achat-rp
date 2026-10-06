@@ -789,7 +789,7 @@ déroulé, les textes et la fluidité qui ont changé. Branche `feat/accueil-tra
 
 | # | Section | Question du visiteur | Fond |
 |---|---|---|---|
-| — | Couverture (inchangée) | C'est quoi ? | jaune |
+| — | Couverture | C'est quoi ? | jaune |
 | 01 | Deux camps, deux certitudes | Pourquoi est-ce si dur de trancher ? | papier |
 | 02 | Ce que vous obtenez — l'aperçu | À quoi ressemble la réponse ? | blanc |
 | 03 | La règle du jeu — Mêmes moyens | Comment Æquo compare ? | papier |
@@ -800,17 +800,43 @@ déroulé, les textes et la fluidité qui ont changé. Branche `feat/accueil-tra
 
 **Ce qui tient la page, et qu'une modification ne doit pas casser :**
 
+- **La couverture dit ce qu'est Æquo** (06/10) : sans défiler, à 1440 comme à 390 px, on lit
+  « simulateur », « gratuit », « sans inscription », « résidence principale », « premier achat ».
+  Seuls les textes ont changé, la composition est celle de Codex. Deux phrases ont été vérifiées
+  avant d'être écrites : « en quelques minutes » (tous les champs du simulateur sont pré-remplis)
+  et « Aucune donnée envoyée » (aucune requête réseau dans le code ; seuls les CDN de polices et
+  de Chart.js sont appelés, sans rien de ce qui est saisi). Si un jour une requête part avec la
+  saisie — sauvegarde en compte, mesure d'audience —, **cette phrase devient fausse** : la
+  remplacer par « Calculs faits dans votre navigateur, sans compte. ».
+- **Le tampon de couverture a sa propre brique, `#9e3a23`**, plus sombre que `--orange` : il porte
+  « 100 % gratuit / 0 € / sans inscription » en 8 px sur le jaune, où `--orange` n'atteint que
+  3,8:1. Décision de Lucas. La carte postale de la couverture est un `<p class="postcard__titre">`,
+  pas un titre : elle ne doit pas figurer dans le plan de la page.
 - **Neutralité.** En 01, les deux citations sont sur deux cartes strictement identiques ; seul le
-  sens de l'inclinaison change. Un poids visuel inégal ferait pencher la page.
+  sens de l'inclinaison change. Un poids visuel inégal ferait pencher la page. **On conteste
+  l'absolu, pas l'idée** : le mot « toujours » est entouré à la main (même ovale SVG dans les deux
+  cartes), jamais barré — un barré dirait « c'est faux », alors que le titre dit « les deux ont
+  raison, parfois ».
 - **Ordre revu le 06/10 (Lucas)** : l'aperçu remonte juste après le face-à-face — montrer dès le
   début ce qu'on obtient — et la règle du jeu le suit immédiatement, pour la continuité : on voit
   la réponse, puis comment elle est obtenue. Viennent ensuite les imprévus et les piliers.
-- **Chaque « Et si » de 04 a sa réponse : marchés → pilier 2, déménager sans vendre → pilier 3
+- **Chaque « Et si » de 04 a sa réponse** : marchés → pilier 2, déménager sans vendre → pilier 3
   (plus bas, renvois « Répond à » avec le rond numéroté `.temps__repere`) ; partir plus tôt → le
-  point mort, déjà montré par l'aperçu en 02. L'aperçu ne porte donc plus de renvoi : il aurait
-  répondu à une question pas encore posée. Supprimer une question oblige à revoir sa réponse.
+  point mort, déjà montré par l'aperçu en 02 ; **la carte 1 y renvoie** (« plus haut ↑ »).
+  L'aperçu, lui, ne porte pas de renvoi : il répondrait à une question pas encore posée. La
+  transition de fin de 04 ne disqualifie pas l'aperçu : « L'exemple plus haut suppose des marchés
+  réguliers… ». Supprimer une question oblige à revoir sa réponse.
+- **Pilier 1 = l'épargne forcée** (06/10) : « Placeriez-vous vraiment la différence ? ». C'est la
+  suite honnête de la règle du jeu (03) : à effort égal d'abord (« c'est la référence », dit 03),
+  puis ce que l'utilisateur ferait vraiment — `locatairePlaceDifference`, souvent ce qui décide.
+  Ses volets reprennent les deux boutons du simulateur. Nuance connue : le simulateur ne pose la
+  question que si l'achat coûte plus que l'effort actuel (sinon, pas d'épargne forcée) ; le texte
+  ne le précise pas, c'est le cas le plus courant d'un premier achat.
+- **Les trois cartes de piliers partagent une grille** (`subgrid`, six rangées) : les volets des
+  piliers 1 et 2 et les trois renvois tombent à la même hauteur. Empilées dès 1180 px : en
+  dessous, trois colonnes écrasent les volets.
 - **Pilier 2 : « Le passé » et « Des futurs possibles » occupent chacun une moitié égale** de la
-  carte. Aucun des deux n'est l'appendice de l'autre.
+  carte. Aucun des deux n'est l'appendice de l'autre. Même règle pour les deux volets du pilier 1.
 - **Les noms suivent le simulateur** (« Le passé », « Des futurs possibles », « point mort »…).
   Rien n'est promis que le simulateur ne fait pas ; aucune affirmation absolue sur les concurrents.
 - **L'aperçu (02) est calculé par `calc.js`**, chargé sur l'accueil pour ce seul bloc.
@@ -828,9 +854,8 @@ déroulé, les textes et la fluidité qui ont changé. Branche `feat/accueil-tra
   pas écraser les rotations des cartes, jamais sur un titre ; plus le tracé des courbes de 05.
   Tout est coupé sous `prefers-reduced-motion`.
 - **Contact** : dans le pied de page, adresse marquée « provisoire » tant qu'elle est fictive.
-- Contraste : tous les textes passent AA à 1440, 1024, 768 et 390 px, **sauf le tampon de la
-  couverture** (orange sur jaune, 3,82:1), hérité de Codex et laissé tel quel puisque la
-  couverture ne devait pas bouger. À trancher.
+- Contraste : tous les textes passent AA à 1440, 1024, 768 et 390 px, tampon compris depuis le
+  06/10.
 
 Les sous-sections suivantes décrivent l'étape précédente (30/09) et restent pour mémoire.
 
