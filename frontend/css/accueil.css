@@ -858,6 +858,19 @@ a:focus-visible, button:focus-visible, summary:focus-visible {
   vertical-align: middle;
 }
 
+/* Renvoi de la carte 1 vers le point mort de l'aperçu, plus haut : discret,
+   dans le texte, comme les renvois des piliers. */
+.temps__renvoi {
+  color: var(--purple);
+  text-decoration: underline dotted;
+  text-underline-offset: 3px;
+  white-space: nowrap;
+}
+
+.temps__renvoi:hover {
+  color: var(--ink);
+}
+
 .temps__transition {
   position: relative;
   max-width: 920px;
