@@ -789,7 +789,7 @@ déroulé, les textes et la fluidité qui ont changé. Branche `feat/accueil-tra
 
 | # | Section | Question du visiteur | Fond |
 |---|---|---|---|
-| — | Couverture (inchangée) | C'est quoi ? | jaune |
+| — | Couverture, allégée le 06/10 | C'est quoi ? | jaune |
 | 01 | Deux camps, deux certitudes | Pourquoi est-ce si dur de trancher ? | papier |
 | 02 | Ce que vous obtenez — l'aperçu | À quoi ressemble la réponse ? | blanc |
 | 03 | La règle du jeu — Mêmes moyens | Comment Æquo compare ? | papier |
@@ -828,9 +828,13 @@ déroulé, les textes et la fluidité qui ont changé. Branche `feat/accueil-tra
   pas écraser les rotations des cartes, jamais sur un titre ; plus le tracé des courbes de 05.
   Tout est coupé sous `prefers-reduced-motion`.
 - **Contact** : dans le pied de page, adresse marquée « provisoire » tant qu'elle est fictive.
-- Contraste : tous les textes passent AA à 1440, 1024, 768 et 390 px, **sauf le tampon de la
-  couverture** (orange sur jaune, 3,82:1), hérité de Codex et laissé tel quel puisque la
-  couverture ne devait pas bouger. À trancher.
+- **Couverture allégée le 06/10 (Lucas)**, pour qu'elle se lise d'un coup d'œil : retirés le
+  folio « Carnet d'un choix / France », le tampon « Même logement, 2 chemins possibles », la
+  mention « Une illustration pour comprendre… », la phrase « combien ça coûte / qu'est-ce qu'il
+  me reste » et le lien « Tourner la page ». Restent le titre, l'intro, la bascule, la maison, la
+  carte postale, la note « Imaginez » et le bouton rond, désormais centré sur le filet.
+- Contraste : tous les textes passent AA à 1440, 1024, 768 et 390 px. Le seul échec (le tampon
+  orange sur jaune, 3,82:1) a disparu avec le tampon.
 
 Les sous-sections suivantes décrivent l'étape précédente (30/09) et restent pour mémoire.
 
