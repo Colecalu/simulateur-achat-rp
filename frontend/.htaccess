@@ -1,0 +1,49 @@
+# ===========================================================================
+#  Æquo — configuration Apache (OVH mutualisé). frontend/ est la racine web.
+#
+#  NE SE TESTE PAS EN LOCAL : le petit serveur de lancer-le-site.cmd
+#  (http-server) l'ignore. Il sert déjà /simulateur tout seul (il ajoute
+#  .html quand l'adresse n'a pas d'extension), si bien que les liens
+#  fonctionnent dans les deux mondes. Vérifications à faire au premier
+#  déploiement : voir CLAUDE.md, « Le jour où le domaine est acheté ».
+# ===========================================================================
+
+# MultiViews laisse Apache choisir lui-même un fichier quand l'extension
+# manque : il servirait /simulateur à sa façon, avant nos règles, et les
+# redirections ci-dessous deviendraient imprévisibles.
+Options -MultiViews
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  # Une seule adresse par page, sinon les moteurs de recherche voient deux
+  # pages identiques et partagent leur crédit entre elles. On ne redirige que
+  # ce que le VISITEUR a demandé (THE_REQUEST) : la réécriture interne de
+  # /simulateur vers simulateur.html, plus bas, repasse par ces règles et
+  # bouclerait sans cette condition.
+  RewriteCond %{THE_REQUEST} \s/+index\.html[\s?] [NC]
+  RewriteRule ^index\.html$ / [R=301,L]
+
+  RewriteCond %{THE_REQUEST} \s/+simulateur\.html[\s?] [NC]
+  RewriteRule ^simulateur\.html$ /simulateur [R=301,L]
+
+  # Avec une barre finale, les chemins relatifs de la page (css/, js/)
+  # partiraient de /simulateur/ et ne trouveraient rien : la page serait nue.
+  RewriteRule ^simulateur/$ /simulateur [R=301,L]
+
+  # L'adresse propre, servie sans redirection visible. Les fichiers qui
+  # existent (css/, js/, fonts/, img/, favicon, robots.txt, sitemap.xml)
+  # ne sont concernés par aucune de ces règles : elles ne visent que ces
+  # trois adresses précises.
+  RewriteRule ^simulateur$ simulateur.html [L]
+</IfModule>
+
+<IfModule mod_headers.c>
+  # Les polices ne changent jamais sous le même nom : un an de cache évite
+  # de les retélécharger à chaque visite. Si une police change, changer son
+  # nom de fichier (et polices.css), sinon les visiteurs garderaient
+  # l'ancienne un an.
+  <FilesMatch "\.woff2$">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </FilesMatch>
+</IfModule>
