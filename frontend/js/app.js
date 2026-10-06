@@ -356,6 +356,7 @@ function afficherVerdict(resultat, horizon) {
     $('#verdictGagnantTexte').textContent = 'Les deux se valent';
     chiffre.textContent = euros.format(Math.abs(ecart));
     mesure.textContent = 'd\'écart : à cette échéance, les deux scénarios se valent.';
+    mesure.hidden = false;
     return;
   }
 
@@ -364,10 +365,9 @@ function afficherVerdict(resultat, horizon) {
     ? 'Avantage à l\'achat'
     : 'Avantage à la location';
   chiffre.textContent = '+\u202f' + euros.format(Math.abs(ecart));
-
-  mesure.textContent = ecart >= 0
-    ? 'de patrimoine en plus en achetant qu\'en restant locataire.'
-    : 'de patrimoine en plus en restant locataire qu\'en achetant.';
+  // L'étiquette dit déjà qui gagne : la phrase « de patrimoine en plus en
+  // achetant… » faisait doublon, une ligne de trop (décision de Lucas).
+  mesure.hidden = true;
 }
 
 /* --------------------------------------------------------- Épargne forcée */
