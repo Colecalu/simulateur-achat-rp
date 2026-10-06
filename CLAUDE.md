@@ -791,10 +791,10 @@ déroulé, les textes et la fluidité qui ont changé. Branche `feat/accueil-tra
 |---|---|---|---|
 | — | Couverture (inchangée) | C'est quoi ? | jaune |
 | 01 | Deux camps, deux certitudes | Pourquoi est-ce si dur de trancher ? | papier |
-| 02 | Votre avenir n'est pas une ligne droite | Pourquoi personne ne peut me répondre d'avance ? | lavande |
+| 02 | Ce que vous obtenez — l'aperçu | À quoi ressemble la réponse ? | blanc |
 | 03 | La règle du jeu — Mêmes moyens | Comment Æquo compare ? | papier |
-| 04 | Trois façons d'aller plus loin (les piliers) | Que fait Æquo que les autres ne font pas ? | blanc |
-| 05 | Ce que vous obtenez — l'aperçu | À quoi ressemble la réponse ? | papier |
+| 04 | Votre avenir n'est pas une ligne droite | Pourquoi personne ne peut me répondre d'avance ? | lavande |
+| 05 | Trois façons d'aller plus loin (les piliers) | Que fait Æquo que les autres ne font pas ? | blanc |
 | — | FAQ « On vous explique le reste » | Je peux vous faire confiance ? | papier, filet |
 | — | Finale « Et le vôtre ? » + contact en pied de page | Je commence comment ? | jaune |
 
@@ -802,15 +802,18 @@ déroulé, les textes et la fluidité qui ont changé. Branche `feat/accueil-tra
 
 - **Neutralité.** En 01, les deux citations sont sur deux cartes strictement identiques ; seul le
   sens de l'inclinaison change. Un poids visuel inégal ferait pencher la page.
-- **Chaque « Et si » de 02 a sa réponse plus bas** : partir plus tôt → point mort (05), marchés →
-  pilier 2, déménager sans vendre → pilier 3. Le lien est un rond numéroté (`.temps__repere`),
-  repris des points de la courbe jusqu'aux renvois « Répond à ». Supprimer une question oblige à
-  revoir sa réponse, et inversement.
+- **Ordre revu le 06/10 (Lucas)** : l'aperçu remonte juste après le face-à-face — montrer dès le
+  début ce qu'on obtient — et la règle du jeu le suit immédiatement, pour la continuité : on voit
+  la réponse, puis comment elle est obtenue. Viennent ensuite les imprévus et les piliers.
+- **Chaque « Et si » de 04 a sa réponse : marchés → pilier 2, déménager sans vendre → pilier 3
+  (plus bas, renvois « Répond à » avec le rond numéroté `.temps__repere`) ; partir plus tôt → le
+  point mort, déjà montré par l'aperçu en 02. L'aperçu ne porte donc plus de renvoi : il aurait
+  répondu à une question pas encore posée. Supprimer une question oblige à revoir sa réponse.
 - **Pilier 2 : « Le passé » et « Des futurs possibles » occupent chacun une moitié égale** de la
   carte. Aucun des deux n'est l'appendice de l'autre.
 - **Les noms suivent le simulateur** (« Le passé », « Des futurs possibles », « point mort »…).
   Rien n'est promis que le simulateur ne fait pas ; aucune affirmation absolue sur les concurrents.
-- **L'aperçu (05) est calculé par `calc.js`**, chargé sur l'accueil pour ce seul bloc.
+- **L'aperçu (02) est calculé par `calc.js`**, chargé sur l'accueil pour ce seul bloc.
   `accueil.js` ne fait que mettre la sortie en forme. Le graphique est un SVG construit à la
   largeur réelle de sa feuille (une unité = un pixel), pour que les textes restent lisibles en
   mobile. Si le calcul échoue, chiffres et graphique restent cachés (`hidden`) : il ne reste que
@@ -819,8 +822,8 @@ déroulé, les textes et la fluidité qui ont changé. Branche `feat/accueil-tra
   l'ancienne accueil (`09f7d0c`). Les deux jeux par défaut du simulateur n'ont pas de croisement
   (`DEFAUTS` : achat devant dès l'an 1 ; `VALEURS_DE_TRAVAIL` : jamais), le point mort n'aurait
   rien eu à montrer. **À remplacer par l'exemple par défaut du simulateur quand il sera fixé**
-  (§11) — un seul endroit, `ENTREES` dans `accueil.js`. Vérifier alors qu'il croise encore,
-  sans quoi le renvoi « partir plus tôt » se masque tout seul.
+  (§11) — un seul endroit, `ENTREES` dans `accueil.js`. Vérifier alors qu'il croise encore :
+  le point mort est la réponse au « partir plus tôt ».
 - **Une seule animation** : apparition au défilement (`[data-apparait]`), par `translate` pour ne
   pas écraser les rotations des cartes, jamais sur un titre ; plus le tracé des courbes de 05.
   Tout est coupé sous `prefers-reduced-motion`.

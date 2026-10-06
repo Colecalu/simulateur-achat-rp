@@ -142,9 +142,6 @@
     $('apercuLocation').textContent = euros.format(derniere.patrimoineTotalLocation);
     $('apercuPointMort').textContent =
       pointMort === null ? 'Jamais' : pointMort === 1 ? 'Dès la 1re année' : ans(pointMort);
-    // Le renvoi au « partir plus tôt » n'a de sens que s'il y a un avant et
-    // un après le point mort.
-    $('apercuRenvoi').hidden = !(pointMort > 1 && tientEncore);
     $('apercuHypotheses').textContent =
       'Exemple : bien ancien à ' + euros.format(ENTREES.prixNetVendeur) +
       ', loyer de ' + euros.format(ENTREES.loyer) + '/mois, sur ' + ans(annees.length) + '.';
