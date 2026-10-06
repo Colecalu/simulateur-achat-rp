@@ -125,7 +125,7 @@ a:focus-visible, button:focus-visible, summary:focus-visible {
   text-align: center;
 }
 
-.tiny {
+.folio, .tiny {
   font: 10px/1.6 var(--mono);
   letter-spacing: 1px;
 }
@@ -364,16 +364,50 @@ a:focus-visible, button:focus-visible, summary:focus-visible {
   fill: var(--purple);
 }
 
-/* Le bandeau du bas ne porte plus que le bouton rond, centré sur le filet. */
+.stamp {
+  position: absolute;
+  bottom: 65px;
+  left: 5%;
+  border: 1px solid var(--orange);
+  color: var(--orange);
+  border-radius: 50%;
+  width: 127px;
+  height: 127px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  text-align: center;
+  font: 8px/.7 var(--mono);
+  transform: rotate(-14deg);
+}
+
+.stamp strong {
+  font: 54px/.7 var(--serif);
+}
+
+.scene-caption {
+  position: absolute;
+  bottom: 5px;
+  left: 50%;
+  transform: translateX(-50%);
+  font: 8px var(--mono);
+  text-align: center;
+  width: 80%;
+}
+
 .cover-bottom {
   border-top: 1px solid var(--ink);
   padding-top: 25px;
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
   max-width: 1280px;
   margin: 20px auto 0;
   gap: 25px;
+}
+
+.cover-bottom>p {
+  font-size: 12px;
 }
 
 .round-cta {
@@ -400,6 +434,16 @@ a:focus-visible, button:focus-visible, summary:focus-visible {
 
 .round-cta>span:last-child {
   font-size: 34px;
+}
+
+.read-on {
+  font: 10px var(--mono);
+  display: flex;
+  gap: 25px;
+}
+
+.read-on span {
+  font-size: 24px;
 }
 
 .section-label {
@@ -1629,6 +1673,13 @@ footer>span {
     max-width: 85%;
     left: 45%;
   }
+  .stamp {
+    left: 0;
+    bottom: 65px;
+    width: 105px;
+    height: 105px;
+    font-size: 7px;
+  }
   .ledger {
     gap: 40px;
     padding-inline: 6%;
@@ -1663,6 +1714,9 @@ footer>span {
   }
   .cover {
     padding: 30px 20px 25px;
+  }
+  .folio {
+    font-size: 8px;
   }
   .cover h1 {
     font-size: clamp(44px,10.8vw,74px);
@@ -1721,9 +1775,29 @@ footer>span {
   .postcard-arrow {
     display: none;
   }
+  .stamp {
+    bottom: 70px;
+    left: 5px;
+    width: 102px;
+    height: 102px;
+  }
+  .scene-caption {
+    bottom: -10px;
+    left: 0;
+    transform: none;
+    text-align: left;
+    width: 100%;
+    font-size: 7px;
+  }
   .cover-bottom {
     margin-top: 40px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 20px;
     padding-top: 24px;
+  }
+  .cover-bottom>p {
+    font-size: 11px;
   }
   .round-cta {
     width: 115px;
@@ -1734,6 +1808,11 @@ footer>span {
   }
   .round-cta>span:last-child {
     font-size: 25px;
+  }
+  .read-on {
+    grid-column: 1/-1;
+    font-size: 9px;
+    justify-content: center;
   }
   .section-label {
     padding-bottom: 0;
@@ -1857,5 +1936,14 @@ footer>span {
   }
   * {
     transition: none!important;
+  }
+}
+
+@media (min-width:701px) {
+  .scene-caption {
+    left: 0;
+    transform: none;
+    width: 45%;
+    text-align: left;
   }
 }
