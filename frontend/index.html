@@ -38,6 +38,49 @@
   <link rel="preload" href="fonts/dm-sans-variable.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="css/polices.css">
   <link rel="stylesheet" href="css/accueil.css">
+  <!-- Données structurées. Pas de FAQPage : Google n'en affiche plus les
+       résultats enrichis pour ce type de site, ce serait du balisage à
+       maintenir pour rien. Chaque valeur est vraie du produit : gratuit, sans
+       compte, dans le navigateur, JavaScript requis. -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebSite",
+        "@id": "https://aequo.example/#site",
+        "name": "Æquo",
+        "alternateName": "Aequo",
+        "url": "https://aequo.example/",
+        "inLanguage": "fr-FR"
+      },
+      {
+        "@type": "WebApplication",
+        "@id": "https://aequo.example/simulateur#application",
+        "name": "Æquo — simulateur acheter ou louer",
+        "url": "https://aequo.example/simulateur",
+        "isPartOf": {
+          "@id": "https://aequo.example/#site"
+        },
+        "applicationCategory": "FinanceApplication",
+        "operatingSystem": "Web",
+        "browserRequirements": "JavaScript requis",
+        "inLanguage": "fr-FR",
+        "isAccessibleForFree": true,
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "EUR"
+        },
+        "description": "Acheter ou louer votre résidence principale ? Simulateur gratuit et sans inscription, pensé pour les primo-accédants : comparez deux trajectoires de patrimoine.",
+        "audience": {
+          "@type": "Audience",
+          "audienceType": "Primo-accédants et futurs acquéreurs de résidence principale"
+        }
+      }
+    ]
+  }
+  </script>
   <script src="js/calc.js" defer></script>
   <script src="js/accueil.js"></script>
 </head>
