@@ -29,8 +29,13 @@
 
     <section class="cover" aria-labelledby="titre">
       <div class="cover-heading">
-        <p class="folio">SIMULATEUR GRATUIT · SANS INSCRIPTION</p>
-        <h1 id="titre">La même porte. <br><em>Pas la même histoire.</em></h1>
+        <!-- Le surtitre fait partie du <h1> : le slogan seul ne dit rien du
+             sujet à un moteur de recherche. Les deux sont visibles, rien n'est
+             caché ; le rendu est celui d'avant (surtitre au-dessus, 24 px). -->
+        <h1 id="titre">
+          <span class="folio">SIMULATEUR GRATUIT · SANS INSCRIPTION</span>
+          <span class="cover__slogan">La même porte. <br><em>Pas la même histoire.</em></span>
+        </h1>
         <p class="intro">Acheter ou louer votre résidence principale&nbsp;? <br>Comparez les deux avec vos chiffres, en quelques minutes.</p>
       </div>
       <div class="theatre mode-achat" id="theatre">
