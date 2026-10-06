@@ -197,19 +197,19 @@ serveur, pas de migrations automatiques, aucune dépendance qui exige une étape
 
 ```
 frontend/                    servi tel quel, racine web en production
-  index.html                 page d'accueil « Carnet d'un choix » — copie de Codex, voir §12
+  index.html                 page d'accueil « Carnet d'un choix » — diverge de Codex depuis le 02/10, §12
   simulateur.html            le simulateur
   css/  theme-codex.css      THÈME EN SERVICE — « Horizon », valeurs + habillage de Codex (§12)
         theme-perron.css     thème précédent, conservé — valeurs uniquement
         theme-foret.css      gelé, conservé comme point de comparaison
         style.css            structure du simulateur
-        accueil.css          feuille AUTONOME de l'accueil (ses propres jetons) — copie de Codex
+        accueil.css          feuille AUTONOME de l'accueil (ses propres jetons), une section par bloc
   js/   calc.js              moteur PUR : window.SimuRP / module.exports
         calc-location.js     pilier 3 — CONSOMME calc.js, ne le modifie jamais
         scenarios.js         pilier 2 — données de marché, pas de logique
         sauvegarde.js        brouillon local + migration de schéma (testé)
         app.js               tout le DOM, toute l'interface
-        accueil.js           bascule des deux points de vue de l'accueil — aucun calcul
+        accueil.js           bascule, apparitions, aperçu chiffré — lit calc.js, ne calcule rien
 backend/                     vide aujourd'hui — voir docs/backend-spec.md
 docs/                        modèle, conventions UI, spec backend, design, Excel
 tests/                       node --test, 106 tests
@@ -224,8 +224,10 @@ migrations/                  à créer : SQL numéroté, appliqué à la main
   (§12) : le simulateur charge `theme-codex.css` + `style.css`, l'accueil `accueil.css` seul.
   L'ancien `socle.css` commun a été retiré avec la page d'accueil qui le justifiait (son exemple
   chiffré reprenait le bloc de résultat du simulateur). **Exception assumée** : `accueil.css` et
-  `index.html` sont la production de Codex, minifiés, avec des classes et des jetons en anglais
-  et leurs couleurs en dur. On ne les réécrit pas : c'est ce qui garde les deux bases identiques.
+  `index.html` gardent les classes et les jetons en anglais hérités de Codex (`--paper`, `.cover`,
+  `.ledger`…) — on ne les renomme pas. Tout ce qui s'y ajoute suit la convention du dépôt
+  (français, `bloc__element--modificateur`). Depuis le 02/10/2026, l'accueil **diverge
+  volontairement** de la branche de Codex et se réécrit comme le reste du dépôt (§12).
 - **`calc.js` est un module pur** : aucune logique financière ailleurs, aucun accès au DOM
   dedans. C'est ce qui le rend testable sous Node.
 - **Toute variante de scénario suit le patron de `calc-location.js`** : un module isolé qui lit
@@ -770,6 +772,62 @@ identique. Ont été copiés **octet pour octet** : `index.html`, `simulateur.ht
 - **L'accueil a changé de contenu, pas seulement d'habillage** : la page « Carnet d'un choix »
   remplace l'ancienne (exemple chiffré via `calc.js`, FAQ en JSON-LD, animations). Celle-ci reste
   dans l'historique git (`09f7d0c`) si l'on veut en reprendre un élément.
+
+### 02/10/2026 — l'accueil diverge de Codex
+
+**Décision de Lucas** : l'exception « on ne réécrit pas `index.html` ni `accueil.css` » est
+**levée pour l'accueil**. Le simulateur, lui, reste aligné sur Codex. La direction artistique
+« Carnet d'un choix » est conservée telle quelle (palette, Instrument Serif / DM Sans / DM Mono /
+Caveat, papier, rubans adhésifs, tampons, notes manuscrites, dessins SVG au trait) ; ce sont le
+déroulé, les textes et la fluidité qui ont changé. Branche `feat/accueil-trame`.
+
+- **Les fichiers ne sont plus minifiés** (commit de dé-minification vérifié sans écart de rendu,
+  élément par élément, à 1440 et 390 px). `accueil.css` regroupe chaque nouvelle section avec
+  ses propres points de rupture.
+- **Principe : une section = une question du visiteur**, dans l'ordre de sa réflexion. Un
+  visiteur qui ne lit que les surtitres et les titres doit comprendre toute l'histoire.
+
+| # | Section | Question du visiteur | Fond |
+|---|---|---|---|
+| — | Couverture (inchangée) | C'est quoi ? | jaune |
+| 01 | Deux camps, deux certitudes | Pourquoi est-ce si dur de trancher ? | papier |
+| 02 | Votre avenir n'est pas une ligne droite | Pourquoi personne ne peut me répondre d'avance ? | lavande |
+| 03 | La règle du jeu — Mêmes moyens | Comment Æquo compare ? | papier |
+| 04 | Trois façons d'aller plus loin (les piliers) | Que fait Æquo que les autres ne font pas ? | blanc |
+| 05 | Ce que vous obtenez — l'aperçu | À quoi ressemble la réponse ? | papier |
+| — | FAQ « On vous explique le reste » | Je peux vous faire confiance ? | papier, filet |
+| — | Finale « Et le vôtre ? » + contact en pied de page | Je commence comment ? | jaune |
+
+**Ce qui tient la page, et qu'une modification ne doit pas casser :**
+
+- **Neutralité.** En 01, les deux citations sont sur deux cartes strictement identiques ; seul le
+  sens de l'inclinaison change. Un poids visuel inégal ferait pencher la page.
+- **Chaque « Et si » de 02 a sa réponse plus bas** : partir plus tôt → point mort (05), marchés →
+  pilier 2, déménager sans vendre → pilier 3. Le lien est un rond numéroté (`.temps__repere`),
+  repris des points de la courbe jusqu'aux renvois « Répond à ». Supprimer une question oblige à
+  revoir sa réponse, et inversement.
+- **Pilier 2 : « Le passé » et « Des futurs possibles » occupent chacun une moitié égale** de la
+  carte. Aucun des deux n'est l'appendice de l'autre.
+- **Les noms suivent le simulateur** (« Le passé », « Des futurs possibles », « point mort »…).
+  Rien n'est promis que le simulateur ne fait pas ; aucune affirmation absolue sur les concurrents.
+- **L'aperçu (05) est calculé par `calc.js`**, chargé sur l'accueil pour ce seul bloc.
+  `accueil.js` ne fait que mettre la sortie en forme. Le graphique est un SVG construit à la
+  largeur réelle de sa feuille (une unité = un pixel), pour que les textes restent lisibles en
+  mobile. Si le calcul échoue, chiffres et graphique restent cachés (`hidden`) : il ne reste que
+  le titre et le lien, jamais un `NaN`.
+- ⚠️ **Le jeu d'exemple de l'aperçu est provisoire** : 280 000 €, loyer 1 000 €, 25 ans, repris de
+  l'ancienne accueil (`09f7d0c`). Les deux jeux par défaut du simulateur n'ont pas de croisement
+  (`DEFAUTS` : achat devant dès l'an 1 ; `VALEURS_DE_TRAVAIL` : jamais), le point mort n'aurait
+  rien eu à montrer. **À remplacer par l'exemple par défaut du simulateur quand il sera fixé**
+  (§11) — un seul endroit, `ENTREES` dans `accueil.js`. Vérifier alors qu'il croise encore,
+  sans quoi le renvoi « partir plus tôt » se masque tout seul.
+- **Une seule animation** : apparition au défilement (`[data-apparait]`), par `translate` pour ne
+  pas écraser les rotations des cartes, jamais sur un titre ; plus le tracé des courbes de 05.
+  Tout est coupé sous `prefers-reduced-motion`.
+- **Contact** : dans le pied de page, adresse marquée « provisoire » tant qu'elle est fictive.
+- Contraste : tous les textes passent AA à 1440, 1024, 768 et 390 px, **sauf le tampon de la
+  couverture** (orange sur jaune, 3,82:1), hérité de Codex et laissé tel quel puisque la
+  couverture ne devait pas bouger. À trancher.
 
 Les sous-sections suivantes décrivent l'étape précédente (30/09) et restent pour mémoire.
 
