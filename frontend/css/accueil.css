@@ -338,7 +338,7 @@ a:focus-visible, button:focus-visible, summary:focus-visible {
   font-size: 8px;
 }
 
-.postcard h2 {
+.postcard .postcard__titre {
   font: 36px/.98 var(--serif);
   white-space: pre-line;
   margin: 17px 0;
@@ -368,8 +368,11 @@ a:focus-visible, button:focus-visible, summary:focus-visible {
   position: absolute;
   bottom: 65px;
   left: 5%;
-  border: 1px solid var(--orange);
-  color: var(--orange);
+  /* Brique plus sombre que --orange, pour ce seul tampon : il porte une
+     information clé (gratuit, sans inscription) en 8 px sur le jaune, où
+     --orange n'atteint que 3,8:1. Celle-ci passe le seuil AA de 4,5:1. */
+  border: 1px solid #9e3a23;
+  color: #9e3a23;
   border-radius: 50%;
   width: 127px;
   height: 127px;
@@ -377,12 +380,16 @@ a:focus-visible, button:focus-visible, summary:focus-visible {
   flex-direction: column;
   justify-content: center;
   text-align: center;
-  font: 8px/.7 var(--mono);
+  font: 8px/1.2 var(--mono);
   transform: rotate(-14deg);
 }
 
+/* « 0 € » est bien plus large que l'ancien « 2 » : à 54 px et sans
+   interligne, il recouvrait les deux petites lignes, qui portent désormais
+   l'information. Le chiffre s'écarte d'elles et rétrécit un peu. */
 .stamp strong {
-  font: 54px/.7 var(--serif);
+  font: 42px/1.05 var(--serif);
+  white-space: nowrap;
 }
 
 .scene-caption {
@@ -1662,7 +1669,7 @@ footer>span {
     top: 180px;
     padding: 22px 18px;
   }
-  .postcard h2 {
+  .postcard .postcard__titre {
     font-size: 31px;
   }
   .pencil-note {
@@ -1760,13 +1767,13 @@ footer>span {
     padding: 18px;
     transform: rotate(5deg);
   }
-  .postcard h2 {
+  .postcard .postcard__titre {
     font-size: 29px;
     line-height: 1;
     white-space: normal;
     margin: 12px 0;
   }
-  .postcard h2 br {
+  .postcard .postcard__titre br {
     display: none;
   }
   .postcard p:last-of-type {
