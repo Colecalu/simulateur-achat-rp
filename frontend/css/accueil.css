@@ -539,10 +539,32 @@ a:focus-visible, button:focus-visible, summary:focus-visible {
   font: clamp(30px, 2.7vw, 40px)/1.1 var(--serif);
 }
 
-.camps__barre {
-  text-decoration: line-through;
-  text-decoration-color: var(--orange);
-  text-decoration-thickness: 2px;
+/* « toujours », entouré à la main : c'est la généralisation qu'on conteste.
+   Le mot est en <em> pour que l'insistance existe aussi sans le dessin, et
+   ne passe jamais à la ligne, sinon l'ovale se couperait. Même tracé, même
+   trait et même orange que le soulignement de « Parfois. ». */
+.camps__toujours {
+  position: relative;
+  margin: 0 .14em;
+  white-space: nowrap;
+}
+
+.camps__ovale {
+  position: absolute;
+  left: -.32em;
+  top: -.12em;
+  width: calc(100% + .64em);
+  height: calc(100% + .3em);
+  overflow: visible;
+  fill: none;
+  stroke: var(--orange);
+  stroke-width: 2;
+  stroke-linecap: round;
+  pointer-events: none;
+}
+
+.camps__ovale path {
+  vector-effect: non-scaling-stroke;
 }
 
 .camps__camp {
