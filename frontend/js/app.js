@@ -1892,28 +1892,13 @@ let bulleZoomee = null;
  */
 let profilValide = false;
 
-/**
- * Le titre « Ma situation actuelle » n'est un bouton que dans l'état
- * « ferme » : ensuite il redevient un simple titre, sorti de la tabulation.
- */
 function etatProfil(etat) {
   $('#profil').dataset.etat = etat;
-  const declencheur = $('#profilOuvrir');
-  declencheur.disabled = etat !== 'ferme';
-  declencheur.setAttribute('aria-expanded', String(etat === 'saisie'));
 }
 
 function ouvrirProfil() {
   etatProfil('saisie');
   $('#capitalInitial').focus();
-}
-
-/**
- * L'état de la première visite : replié, à ouvrir d'un clic comme les
- * bulles. Le point de départ se voit avant les questions.
- */
-function fermerProfil() {
-  etatProfil('ferme');
 }
 
 /**
@@ -2546,8 +2531,7 @@ function initialiser() {
       delete $(id).dataset.auto;
     }
     remplirFormulaireMel();
-    // Repartir de zéro, c'est retrouver l'écran de la première visite.
-    fermerProfil();
+    ouvrirProfil();
     majBulles();
     // Réinitialiser, c'est repartir de zéro : le brouillon part avec.
     Sauvegarde.effacer();
@@ -2555,7 +2539,6 @@ function initialiser() {
     recalculer();
   });
 
-  $('#profilOuvrir').addEventListener('click', ouvrirProfil);
   $('#profilValider').addEventListener('click', figerProfil);
   $('#profilModifier').addEventListener('click', ouvrirProfil);
 

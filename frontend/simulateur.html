@@ -53,18 +53,11 @@
 
 <main class="page">
 
-  <!-- ==================== MA SITUATION ACTUELLE ======================
-       Trois états (data-etat) : « ferme » à la première visite — replié,
-       en jaune comme la prochaine bulle à ouvrir, on clique pour commencer ;
-       « saisie » ; « fige » une fois validé, résumé sur une ligne. Le titre
-       est le bouton d'ouverture : il n'agit que dans l'état « ferme ». -->
-  <section class="profil" id="profil" data-etat="ferme">
+  <!-- ==================== MA SITUATION ACTUELLE ====================== -->
+  <section class="profil" id="profil" data-etat="saisie">
     <div class="profil__ligne">
       <span class="profil__pastille" aria-hidden="true"></span>
-      <h2 class="profil__titre">
-        <button type="button" class="profil__declencheur" id="profilOuvrir"
-                aria-expanded="false" aria-controls="profilSaisie">Ma situation actuelle</button>
-      </h2>
+      <h2 class="profil__titre">Ma situation actuelle</h2>
       <p class="profil__resume" id="profilResume"></p>
       <button type="button" class="bouton bouton--discret" id="profilModifier">Modifier</button>
     </div>

@@ -715,9 +715,8 @@ dessus** : ce sont les valeurs du classeur Excel, que la fixture compare au cent
 - **Deux champs se proposent d'eux-mêmes** (`LIAISONS`, mécanisme `data-auto`) : la valeur
   estimée suit prix + travaux, le loyer de comparaison suit le loyer actuel — jusqu'à ce que
   l'utilisateur les modifie.
-- **« Ma situation actuelle »** (ex-« Mon profil ») est repliée à la première visite, en jaune
-  comme la prochaine bulle, à la hauteur de sa saisie ; on clique pour l'ouvrir. « Nouvelle
-  simulation » ramène à cet état.
+- **« Ma situation actuelle »** (ex-« Mon profil ») est ouverte d'emblée, champs vides. Essayé
+  puis écarté le 06/10 par Lucas : une carte repliée en jaune, à ouvrir d'un clic comme les bulles.
 
 ### Conflit des deux loyers — à traiter
 
