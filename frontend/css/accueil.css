@@ -1135,10 +1135,12 @@ a.pilier__renvoi:hover {
  * Couleurs de la couverture : la porte orange pour l'achat, violette pour la
  * location.
  * ------------------------------------------------------------------------- */
+/* Fond blanc : l'aperçu suit directement le face-à-face, sur papier.
+   La largeur utile reste plafonnée à ~1200 px par le rembourrage. */
 .apercu {
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 100px 8%;
+  background: var(--white);
+  border-block: 1px solid var(--line);
+  padding: 100px max(8%, calc(50% - 600px));
   display: grid;
   grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr);
   grid-template-areas: 'texte visuel' 'lien visuel';
@@ -1261,7 +1263,7 @@ a.pilier__renvoi:hover {
 
 .apercu__feuille {
   position: relative;
-  background: var(--white);
+  background: var(--paper);
   border: 1px solid var(--line);
   padding: 30px 24px 16px;
   box-shadow: 8px 9px 0 var(--lavender);

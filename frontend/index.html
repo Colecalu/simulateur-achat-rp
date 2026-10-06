@@ -103,13 +103,53 @@
       <p class="camps__texte" data-apparait>Tout dépend de votre prix, de votre loyer, du temps que vous resterez et de ce que feront les marchés. Æquo ne choisit pas de camp&nbsp;: il vous donne de quoi trancher.</p>
     </section>
 
+    <!-- Ce qu'on obtient en ouvrant le simulateur. Les chiffres sont calculés
+         au chargement par calc.js (accueil.js, initialiserApercu) : jamais
+         écrits à la main, ils divergeraient du moteur à la première
+         correction. Le bloc chiffré reste caché tant que le calcul n'a pas
+         réussi : sans JavaScript ou en cas d'échec, il ne reste que le titre
+         et le lien — jamais un NaN. -->
+    <section class="apercu" id="apercu" aria-labelledby="apercuTitre">
+      <div class="apercu__texte">
+        <div class="section-label">
+          <span>02 — CE QUE VOUS OBTENEZ</span>
+        </div>
+        <h2 id="apercuTitre">Deux trajectoires. <br><em>Une réponse à votre mesure.</em></h2>
+        <div class="apercu__chiffres" id="apercuChiffres" hidden>
+          <dl class="apercu__kpis">
+            <div class="apercu__kpi apercu__kpi--achat">
+              <dt>Achat <span>patrimoine net à <span id="apercuDuree">25 ans</span></span></dt>
+              <dd id="apercuAchat">—</dd>
+            </div>
+            <div class="apercu__kpi apercu__kpi--location">
+              <dt>Location <span>patrimoine net, même date</span></dt>
+              <dd id="apercuLocation">—</dd>
+            </div>
+            <div class="apercu__kpi apercu__kpi--point-mort">
+              <dt>Point mort <span>l’année où l’achat passe devant</span></dt>
+              <dd id="apercuPointMort">—</dd>
+            </div>
+          </dl>
+        </div>
+      </div>
+      <figure class="apercu__visuel" id="apercuVisuel" hidden data-apparait>
+        <div class="apercu__feuille" id="apercuGraphique"></div>
+        <figcaption class="apercu__legende">
+          <span id="apercuHypotheses"></span>
+          Exemple calculé avec le moteur du simulateur. Vos chiffres seront différents.
+        </figcaption>
+      </figure>
+      <a class="apercu__lien" href="simulateur.html">Faire le calcul avec mon projet <span aria-hidden="true">↗</span></a>
+    </section>
+
     <!-- Trois questions, pas de fonctionnalité : les réponses viennent plus
-         bas (point mort en 05, piliers 2 et 3 en 04). Les numéros dans les
+         bas pour les marchés et le déménagement (piliers 2 et 3, en 04) ;
+         celle du départ anticipé, le point mort, est déjà montrée en 02. Les numéros dans les
          points de la courbe renvoient aux cartes ; décoratifs, donc masqués
          aux lecteurs d'écran, et retirés en mobile où la courbe s'estompe. -->
     <section class="time-story" id="avenir">
       <div class="section-label">
-        <span>02 — CE QUE PERSONNE NE PEUT PRÉVOIR</span>
+        <span>03 — CE QUE PERSONNE NE PEUT PRÉVOIR</span>
         <span aria-hidden="true">↘</span>
       </div>
       <h2>Votre avenir <br>n’est pas une <br><em>ligne droite.</em></h2>
@@ -144,39 +184,6 @@
       <p class="temps__transition" data-apparait>Un calcul en ligne droite ne répond à aucune de ces questions. <em>Voici comment Æquo s’y prend. <span aria-hidden="true">↓</span></em></p>
     </section>
 
-    <section class="ledger" id="regle-du-jeu">
-      <div class="ledger-title">
-        <span class="tiny">03 — LA RÈGLE DU JEU</span>
-        <h2>Mêmes moyens. <br><em>Autres destinations.</em></h2>
-        <p>Chaque mois, le même budget dans les deux cas. Côté achat, il paie le crédit et les charges&nbsp;; côté location, le loyer. Ce qui reste est investi. À l’arrivée, on compare ce que vous possédez vraiment.</p>
-      </div>
-      <div class="ledger-sheet" data-apparait>
-        <div class="sheet-heading">
-          <span>LE PRINCIPE ÆQUO</span>
-          <span>↔</span>
-        </div>
-        <div class="route">
-          <h3>J’achète</h3>
-          <p>Mon apport entre dans le logement.</p>
-          <div class="route-bar buy-bar">
-            <span>Crédit + charges</span>
-            <span>Investissement</span>
-          </div>
-          <p class="route-end">À l’arrivée : bien net de crédit + placements nets d’impôt.</p>
-        </div>
-        <div class="route">
-          <h3>Je loue</h3>
-          <p>Mon capital reste investi.</p>
-          <div class="route-bar rent-bar">
-            <span>Loyer</span>
-            <span>Investissement</span>
-          </div>
-          <p class="route-end">À l’arrivée : placements nets d’impôt.</p>
-        </div>
-        <p class="sheet-note">Proportions illustratives. Dans le simulateur, c’est votre projet qui les détermine.</p>
-      </div>
-    </section>
-
     <!-- La différenciation. Chaque pilier tient en trois lignes et renvoie à
          une question posée plus haut : le pilier 1 à la règle du jeu, les
          piliers 2 et 3 aux « Et si » numérotés de la section 02. Dans le
@@ -203,7 +210,7 @@
           <p class="pilier__numero">PILIER 1</p>
           <h3 class="pilier__titre">Ce qui vous reste, <em>pas seulement ce que ça coûte.</em></h3>
           <p class="pilier__texte">La plupart des simulateurs comparent un loyer à une mensualité. Æquo compare deux patrimoines, en tenant compte de ce que votre apport aurait pu rapporter ailleurs.</p>
-          <a class="pilier__renvoi" href="#regle-du-jeu">Voir la règle du jeu <span aria-hidden="true">↑</span></a>
+          <a class="pilier__renvoi" href="#regle-du-jeu">Voir la règle du jeu <span aria-hidden="true">↓</span></a>
         </article>
         <article class="pilier pilier--deux">
           <svg class="pilier__picto" viewBox="0 0 120 80" aria-hidden="true">
@@ -246,44 +253,37 @@
       </div>
     </section>
 
-    <!-- Ce qu'on obtient en ouvrant le simulateur. Les chiffres sont calculés
-         au chargement par calc.js (accueil.js, initialiserApercu) : jamais
-         écrits à la main, ils divergeraient du moteur à la première
-         correction. Le bloc chiffré reste caché tant que le calcul n'a pas
-         réussi : sans JavaScript ou en cas d'échec, il ne reste que le titre
-         et le lien — jamais un NaN. -->
-    <section class="apercu" id="apercu" aria-labelledby="apercuTitre">
-      <div class="apercu__texte">
-        <div class="section-label">
-          <span>05 — CE QUE VOUS OBTENEZ</span>
-        </div>
-        <h2 id="apercuTitre">Deux trajectoires. <br><em>Une réponse à votre mesure.</em></h2>
-        <div class="apercu__chiffres" id="apercuChiffres" hidden>
-          <dl class="apercu__kpis">
-            <div class="apercu__kpi apercu__kpi--achat">
-              <dt>Achat <span>patrimoine net à <span id="apercuDuree">25 ans</span></span></dt>
-              <dd id="apercuAchat">—</dd>
-            </div>
-            <div class="apercu__kpi apercu__kpi--location">
-              <dt>Location <span>patrimoine net, même date</span></dt>
-              <dd id="apercuLocation">—</dd>
-            </div>
-            <div class="apercu__kpi apercu__kpi--point-mort">
-              <dt>Point mort <span>l’année où l’achat passe devant</span></dt>
-              <dd id="apercuPointMort">—</dd>
-            </div>
-          </dl>
-          <p class="apercu__renvoi" id="apercuRenvoi"><span class="temps__repere" aria-hidden="true">1</span>Répond à&nbsp;: et si vous partiez plus tôt que prévu&nbsp;?</p>
-        </div>
+    <section class="ledger" id="regle-du-jeu">
+      <div class="ledger-title">
+        <span class="tiny">05 — LA RÈGLE DU JEU</span>
+        <h2>Mêmes moyens. <br><em>Autres destinations.</em></h2>
+        <p>Chaque mois, le même budget dans les deux cas. Côté achat, il paie le crédit et les charges&nbsp;; côté location, le loyer. Ce qui reste est investi. À l’arrivée, on compare ce que vous possédez vraiment.</p>
       </div>
-      <figure class="apercu__visuel" id="apercuVisuel" hidden data-apparait>
-        <div class="apercu__feuille" id="apercuGraphique"></div>
-        <figcaption class="apercu__legende">
-          <span id="apercuHypotheses"></span>
-          Exemple calculé avec le moteur du simulateur. Vos chiffres seront différents.
-        </figcaption>
-      </figure>
-      <a class="apercu__lien" href="simulateur.html">Faire le calcul avec mon projet <span aria-hidden="true">↗</span></a>
+      <div class="ledger-sheet" data-apparait>
+        <div class="sheet-heading">
+          <span>LE PRINCIPE ÆQUO</span>
+          <span>↔</span>
+        </div>
+        <div class="route">
+          <h3>J’achète</h3>
+          <p>Mon apport entre dans le logement.</p>
+          <div class="route-bar buy-bar">
+            <span>Crédit + charges</span>
+            <span>Investissement</span>
+          </div>
+          <p class="route-end">À l’arrivée : bien net de crédit + placements nets d’impôt.</p>
+        </div>
+        <div class="route">
+          <h3>Je loue</h3>
+          <p>Mon capital reste investi.</p>
+          <div class="route-bar rent-bar">
+            <span>Loyer</span>
+            <span>Investissement</span>
+          </div>
+          <p class="route-end">À l’arrivée : placements nets d’impôt.</p>
+        </div>
+        <p class="sheet-note">Proportions illustratives. Dans le simulateur, c’est votre projet qui les détermine.</p>
+      </div>
     </section>
 
     <section class="faq" id="questions" aria-labelledby="faqTitre">
