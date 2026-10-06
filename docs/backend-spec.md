@@ -262,7 +262,8 @@ au chargement de chaque page.
 - **HTTPS partout**, redirection HTTP → HTTPS dans `.htaccess`.
 - En-têtes via `.htaccess` :
   - `Content-Security-Policy` — `default-src 'self'`, avec `https://cdnjs.cloudflare.com` pour
-    Chart.js et `https://fonts.googleapis.com` / `https://fonts.gstatic.com` pour les polices.
+    Chart.js. Les polices sont hébergées sur le site depuis le 06/10/2026 (`frontend/fonts/`) :
+    plus besoin d'autoriser Google Fonts.
     **Pas de `'unsafe-inline'`.**
 
     Les styles en ligne que le JavaScript injectait (`style="background:…"` sur les pastilles de

@@ -198,8 +198,15 @@ serveur, pas de migrations automatiques, aucune dépendance qui exige une étape
 ```
 frontend/                    servi tel quel, racine web en production
   index.html                 page d'accueil « Carnet d'un choix » — diverge de Codex depuis le 02/10, §12
-  simulateur.html            le simulateur
-  css/  theme-codex.css      THÈME EN SERVICE — « Horizon », valeurs + habillage de Codex (§12)
+  simulateur.html            le simulateur — servi à /simulateur en production (.htaccess)
+  .htaccess                  adresses propres, 301, cache des polices — Apache seulement, §13
+  robots.txt, sitemap.xml    indexation — URL sur aequo.example, PROVISOIRE, §13
+  favicon.svg / .ico         générés par outils/favicon.mjs
+  apple-touch-icon.png       idem
+  img/partage.png            aperçu de partage 1200 × 630 — outils/image-partage.mjs
+  fonts/                     polices hébergées (woff2, latin) + licences OFL — plus de Google Fonts
+  css/  polices.css          @font-face des polices hébergées, chargée en premier par les deux pages
+        theme-codex.css      THÈME EN SERVICE — « Horizon », valeurs + habillage de Codex (§12)
         theme-perron.css     thème précédent, conservé — valeurs uniquement
         theme-foret.css      gelé, conservé comme point de comparaison
         style.css            structure du simulateur
@@ -211,6 +218,11 @@ frontend/                    servi tel quel, racine web en production
         app.js               tout le DOM, toute l'interface
         accueil.js           bascule, apparitions, aperçu chiffré — lit calc.js, ne calcule rien
 backend/                     vide aujourd'hui — voir docs/backend-spec.md
+outils/                      jamais déployé — scripts de développement
+  fenetres-historiques.mjs   choix des fenêtres du pilier 2 (§9)
+  favicon.mjs                favicon.svg / .ico / apple-touch-icon.png
+  image-partage.mjs (+ .html) img/partage.png
+  package.json               fontkit, wawoff2, Playwright — devDependencies, §13
 docs/                        modèle, conventions UI, spec backend, design, Excel
 tests/                       node --test, 106 tests
 migrations/                  à créer : SQL numéroté, appliqué à la main
@@ -338,6 +350,8 @@ pied de page. **Pas de bandeau cookies** : seul le cookie de session, strictemen
 phpMyAdmin) — au plus près de la cible OVH, et rien à installer sur la machine.
 
 Tant que le backend n'existe pas, le front seul suffit : `npx http-server frontend -p 4173 -c-1`.
+http-server sert déjà les adresses propres (`/simulateur` → `simulateur.html`) : les liens
+internes fonctionnent en local comme en production, sans le `.htaccess`.
 
 ### Déploiement
 
@@ -900,3 +914,61 @@ Pour récupérer une version ultérieure : comparer, prendre les valeurs, **lais
 `--couverture` (le jaune) et `--papier-lilas` ne sont utilisés que par `horizon.css`, qui n'est
 pas chargé. Ils restent dans le thème pour que les règles commentées fonctionnent le jour où l'on
 en réactive une. Ce ne sont pas des oublis.
+
+---
+
+## 13. Référencement (SEO) et domaine
+
+Socle posé le 06/10/2026 (branche `feat/seo-socle`). Rien n'a changé à l'écran, hors deux
+formulations de la FAQ.
+
+| | |
+|---|---|
+| `<h1>` de l'accueil | contient le surtitre « Simulateur gratuit · sans inscription » ET le slogan — le slogan seul ne disait rien du sujet. Rendu identique à avant. |
+| Titres d'onglet | le mot-clé en tête : « Simulateur acheter ou louer sa résidence principale — Æquo ». Description ≤ 160 caractères. |
+| Partage | balises `og:*` et `twitter:*` sur les deux pages ; une image `img/partage.png`. |
+| Données structurées | accueil seulement : `WebSite` + `WebApplication` (gratuite, Web, JavaScript requis). **Pas de `FAQPage`** : Google n'en affiche plus les résultats enrichis pour ce type de site. |
+| Polices | **hébergées sur le site** (`fonts/`, `css/polices.css`) : plus de requête vers Google, ni délai, ni IP envoyée. Déclarations identiques à celles de Google — DM Sans, fichier variable, reste déclaré quatre fois (400 à 700), sinon la graisse 650 du simulateur changerait. Trois préchargements au plus, sur l'accueil. |
+| Adresses | `/` et `/simulateur` ; `.htaccess` réécrit et redirige ; `canonical`, `og:url` et `sitemap.xml` disent tous la même adresse. |
+
+### Régénérer les images
+
+```bash
+cd outils && npm install          # une fois — fontkit, wawoff2, Playwright, jamais déployés
+npm run favicon                   # frontend/favicon.svg, favicon.ico, apple-touch-icon.png
+npm run image-partage             # frontend/img/partage.png (relire le résultat : < 300 Ko)
+```
+
+Rien n'y est dessiné à la main : le « Æ » du favicon est le tracé de DM Sans 700 lu dans
+`fonts/` ; l'image de partage reprend la maison de `index.html` et les couleurs d'`accueil.css`.
+Si la couverture change, relancer `npm run image-partage`.
+
+### Le jour où le domaine est acheté
+
+`aequo.example` est un domaine **fictif** partout où une URL absolue est obligatoire. Une seule
+recherche liste tout ce qu'il faut remplacer :
+
+```bash
+git grep -n "aequo.example"
+```
+
+Aujourd'hui : balises de partage et `canonical` des deux pages, JSON-LD de l'accueil,
+`robots.txt`, `sitemap.xml`, et l'adresse de contact du pied de page (qui est aussi à créer).
+
+Puis, au premier déploiement :
+
+1. **`.htaccess`** (il ne se teste pas en local) :
+   - `/simulateur` affiche le simulateur, **sans** changer d'adresse ;
+   - `/simulateur.html` → 301 vers `/simulateur`, `/index.html` → 301 vers `/`,
+     `/simulateur/` → 301 vers `/simulateur` (vérifier les codes avec `curl -I`) ;
+   - `/css/polices.css`, `/fonts/dm-sans-variable.woff2`, `/img/partage.png`, `/favicon.svg`,
+     `/robots.txt`, `/sitemap.xml` répondent 200 ; les polices portent
+     `Cache-Control: public, max-age=31536000, immutable`.
+   - Ajouter alors la redirection HTTP → HTTPS prévue par docs/backend-spec.md, une fois le
+     certificat actif.
+2. **Google Search Console** : déclarer le domaine, soumettre `https://<domaine>/sitemap.xml`.
+3. **Aperçu de partage** : tester l'accueil et le simulateur avec l'outil d'inspection de
+   publication de LinkedIn (Post Inspector).
+4. **Données structurées** : passer l'accueil au test des résultats enrichis de Google.
+5. Mettre à jour les `lastmod` de `sitemap.xml`.
+
