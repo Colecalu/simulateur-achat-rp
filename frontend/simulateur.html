@@ -53,11 +53,18 @@
 
 <main class="page">
 
-  <!-- ========================= MON PROFIL ============================ -->
-  <section class="profil" id="profil" data-etat="saisie">
+  <!-- ==================== MA SITUATION ACTUELLE ======================
+       Trois états (data-etat) : « ferme » à la première visite — replié,
+       en jaune comme la prochaine bulle à ouvrir, on clique pour commencer ;
+       « saisie » ; « fige » une fois validé, résumé sur une ligne. Le titre
+       est le bouton d'ouverture : il n'agit que dans l'état « ferme ». -->
+  <section class="profil" id="profil" data-etat="ferme">
     <div class="profil__ligne">
       <span class="profil__pastille" aria-hidden="true"></span>
-      <h2 class="profil__titre">Mon profil</h2>
+      <h2 class="profil__titre">
+        <button type="button" class="profil__declencheur" id="profilOuvrir"
+                aria-expanded="false" aria-controls="profilSaisie">Ma situation actuelle</button>
+      </h2>
       <p class="profil__resume" id="profilResume"></p>
       <button type="button" class="bouton bouton--discret" id="profilModifier">Modifier</button>
     </div>
@@ -127,7 +134,7 @@
 
       <div class="profil__pied">
         <button type="button" class="bouton bouton--primaire" id="profilValider">
-          Valider mon profil
+          Valider ma situation
         </button>
       </div>
     </div>
@@ -518,7 +525,7 @@
       <div class="attente" id="attente">
         <p class="attente__titre">Votre réponse s'affichera ici</p>
         <p class="attente__texte">
-          Renseignez votre profil puis les quatre bulles. Rien n'est calculé tant qu'il manque une
+          Renseignez votre situation actuelle puis les quatre bulles. Rien n'est calculé tant qu'il manque une
           donnée&nbsp;: pas de chiffre inventé à partir de valeurs par défaut.
         </p>
         <div class="attente__jauge" id="attenteJauge" role="progressbar"

@@ -167,8 +167,14 @@
         var attendu = propre[groupe][cle];
         // Un champ facultatif vaut légitimement null tant qu'il n'est pas
         // renseigné : c'est une valeur, pas une absence.
+        //
+        // Pour le PROJET (moteur) et la SITUATION (profil), null veut dire
+        // « laissé vide par l'utilisateur » : depuis le 06/10/2026, l'écran
+        // part de champs vides. Le remplacer par le défaut du moteur ferait
+        // réapparaître au rechargement un prix de 420 000 € que personne n'a
+        // saisi — un chiffre inventé, exactement ce que l'écran s'interdit.
         if (v === null) {
-          propre[groupe][cle] = attendu === null ? null : attendu;
+          propre[groupe][cle] = groupe === 'location' && attendu !== null ? attendu : null;
           return;
         }
         /*

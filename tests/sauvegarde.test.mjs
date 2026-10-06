@@ -253,3 +253,17 @@ test('lire et ecrire ne lèvent jamais sans localStorage', () => {
   assert.equal(sauvegarde.ecrire(vide(), {}), false);
   assert.doesNotThrow(() => sauvegarde.effacer());
 });
+
+test('un champ du projet laissé vide (null) reste vide à la relecture', () => {
+  // L'écran part de champs vides : le prix, l'apport, la situation. Relire
+  // null comme le défaut du moteur inventerait un projet à 420 000 €.
+  const p = migrer(paquet({
+    moteur: { prixNetVendeur: null, apport: null, dureeAnnees: 20 },
+    profil: { loyerActuel: null, epargneActuelle: 300 },
+  }));
+  assert.equal(p.moteur.prixNetVendeur, null);
+  assert.equal(p.moteur.apport, null);
+  assert.equal(p.moteur.dureeAnnees, 20);
+  assert.equal(p.profil.loyerActuel, null);
+  assert.equal(p.profil.epargneActuelle, 300);
+});

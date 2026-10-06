@@ -99,6 +99,52 @@ h1, h2, h3 {
 .profil[data-etat="saisie"] #profilModifier { display: none; }
 .profil[data-etat="fige"] .profil__saisie { display: none; }
 
+/* Première visite : replié, et présenté comme la prochaine bulle à ouvrir
+   (mêmes anneau, ombre et soulèvement que .bulle--ouvrable). Toute la carte
+   est cliquable : le bouton du titre l'étend par un pseudo-élément. */
+.profil { position: relative; }
+.profil[data-etat="ferme"] .profil__resume,
+.profil[data-etat="ferme"] #profilModifier { display: none; }
+.profil[data-etat="ferme"] {
+  border-color: var(--accent);
+  box-shadow: var(--anneau), var(--ombre-2);
+  transition: box-shadow var(--duree-base) var(--aise), transform var(--duree-base) var(--aise);
+}
+.profil[data-etat="ferme"]:hover { box-shadow: var(--anneau), var(--ombre-3); transform: translateY(-2px); }
+/* Replié, il garde la HAUTEUR de la saisie : une simple ligne jaune passait
+   inaperçue. Les champs restent en place mais invisibles (visibility, donc
+   hors du clavier et des lecteurs d'écran), le titre se centre par-dessus. */
+.profil[data-etat="ferme"] .profil__saisie { visibility: hidden; }
+.profil[data-etat="ferme"] .profil__ligne {
+  position: absolute;
+  inset: 0;
+  justify-content: center;
+  margin: 0;
+}
+.profil[data-etat="ferme"] .profil__titre { font-size: 1.375rem; }
+
+.profil__declencheur {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  padding: 0;
+  text-align: left;
+  cursor: pointer;
+}
+.profil__declencheur::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+}
+.profil__declencheur:focus-visible { outline: none; }
+.profil__declencheur:focus-visible::after { outline: 2px solid var(--accent); outline-offset: 3px; }
+/* Hors de l'état « ferme », le titre redevient un titre : ni main, ni zone
+   cliquable par-dessus les champs. */
+.profil__declencheur:disabled { cursor: default; color: inherit; }
+.profil__declencheur:disabled::after { content: none; }
+
 .profil__pastille {
   width: 22px; height: 22px;
   flex: none;
@@ -202,7 +248,18 @@ h1, h2, h3 {
   border: 1px solid var(--bord-champ);
   border-radius: var(--rayon);
 }
-.profil__groupes .champ__saisie:focus-within {
+.profil__groupes /* Champ obligatoire laissé vide, signalé quand on veut valider l'étape. */
+.champ--manquant .champ__saisie {
+  border-color: var(--alerte);
+  box-shadow: 0 0 0 2px var(--alerte-fond);
+}
+.champ--manquant .champ__libelle::after {
+  content: " · à renseigner";
+  color: var(--alerte);
+  font-weight: 400;
+}
+
+.champ__saisie:focus-within {
   border-color: var(--accent);
   box-shadow: var(--anneau);
 }

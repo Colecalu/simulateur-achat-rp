@@ -179,6 +179,7 @@ body .profil { border-top:3px solid var(--accent); }
 body .profil__groupe { border-radius:var(--rayon); }
 body .bulle__numero { font-family:var(--police-titre); }
 body .bulle--ouvrable { background:var(--couverture); }
+body .profil[data-etat="ferme"] { background:var(--couverture); }
 body .bulle--zoom { background:var(--surface); }
 body .scenario { border-style:dashed; }
 body .carte--graphique { border-top-color:var(--accent); }
