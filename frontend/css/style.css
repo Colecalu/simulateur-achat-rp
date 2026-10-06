@@ -1204,6 +1204,13 @@ h1, h2, h3 {
   color: var(--encre-2);
 }
 .verdict__horizon { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 220px; }
+/* En mobile, le curseur partageait sa ligne avec la question et ne gardait
+   qu'une quarantaine de pixels : il prend désormais une ligne entière, sous
+   la question centrée. */
+@media (max-width: 640px) {
+  .verdict__entete { justify-content: center; }
+  .verdict__horizon { flex-basis: 100%; }
+}
 .verdict__horizon input[type="range"] { flex: 1; accent-color: var(--accent); cursor: pointer; }
 .verdict__annees {
   font-variant-numeric: tabular-nums;
