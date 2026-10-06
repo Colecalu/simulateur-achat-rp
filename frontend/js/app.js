@@ -45,19 +45,38 @@ const CHAMPS = Object.keys(DEFAUTS).filter((c) => c !== 'horizon');
  * centime. Seul l'écran part d'ici ; le moteur, les tests et la sauvegarde
  * (`normaliser`) gardent leurs défauts.
  *
- * Profil : patrimoine 200 000 €, loyer actuel 1 600 €, épargne 1 800 € (ceux
- * de `Sauvegarde.DEFAUTS_PROFIL`), revenus du foyer 8 000 €.
+ * Décision de Lucas, 06/10/2026 : ce que seul l'utilisateur connaît part
+ * VIDE (null) — sa situation, le prix, l'apport, le loyer. Le reste est
+ * pré-rempli : bien ancien, sans frais d'agence ni travaux, 2 000 € de frais
+ * bancaires, 20 ans à 3,5 % (assurance 0,15 %), copropriété et taxe foncière
+ * à 1 000 €/an, scénario de marché du moteur. Deux champs se proposent
+ * d'eux-mêmes (voir LIAISONS) : la valeur estimée (prix + travaux) et le loyer
+ * de comparaison (le loyer actuel).
  */
 const VALEURS_DE_TRAVAIL = Object.assign({}, DEFAUTS, {
-  revenusFoyer: 8000,
-  prixNetVendeur: 550000,
+  capitalInitial: null,
+  revenusFoyer: null, // facultatif
+  prixNetVendeur: null,
+  typeBien: 'ancien',
   fraisAgence: 0,
   travaux: 0,
   fraisBancaires: 2000,
-  valeurEstimee: 550000,
-  dureeAnnees: 25,
-  chargesCopro: 2000,
+  valeurEstimee: null, // suit prix + travaux
+  apport: null,
+  dureeAnnees: 20,
+  tauxCredit: 0.035,
+  tauxAssurance: 0.0015,
+  chargesCopro: 1000,
+  taxeFonciere: 1000,
+  loyer: null, // suit le loyer actuel
 });
+
+/**
+ * La situation part vide, elle aussi. `Sauvegarde.DEFAUTS_PROFIL` reste celle
+ * du moteur (loyer 1 600 €) : elle sert à relire les anciennes sauvegardes,
+ * et les tests en dépendent.
+ */
+const PROFIL_DE_TRAVAIL = { loyerActuel: null, epargneActuelle: null };
 
 /** Champs facultatifs : laissés vides à l'écran plutôt qu'affichés à zéro. */
 const FACULTATIFS = new Set(['revenusFoyer']);
@@ -110,7 +129,102 @@ function lireProfil() {
 }
 
 function remplirProfil(profil) {
-  for (const champ of CHAMPS_EFFORT) document.getElementById(champ).value = profil[champ];
+  for (const champ of CHAMPS_EFFORT) document.getElementById(champ).value = profil[champ] ?? '';
+}
+
+/* ---------------------------------------- Champs vides, champs automatiques */
+
+/*
+ * Un champ VIDE est « non renseigné » : jamais remplacé en silence par un
+ * défaut du moteur. On ne valide pas une étape qui en contient, et le
+ * résultat ne s'affiche pas tant qu'il en reste un, y compris vidé après
+ * coup. `lireFormulaire` garde son repli sur DEFAUTS pour que le moteur
+ * tourne toujours, mais rien de ce qu'il calcule alors n'est montré.
+ */
+const libelleDe = (el) =>
+  el.closest('.champ')?.querySelector('.champ__libelle')?.textContent.trim() || el.id;
+
+function champsVides(zone) {
+  return [...zone.querySelectorAll('input[type="number"]')]
+    .filter((el) => !FACULTATIFS.has(el.id) && el.value.trim() === '');
+}
+
+/** Signale les champs vides d'une étape et place le curseur sur le premier. */
+function signalerVides(vides) {
+  for (const el of vides) {
+    el.setAttribute('aria-invalid', 'true');
+    el.closest('.champ')?.classList.add('champ--manquant');
+  }
+  if (vides.length) vides[0].focus();
+}
+
+function oublierSignalement(el) {
+  el.removeAttribute('aria-invalid');
+  el.closest('.champ')?.classList.remove('champ--manquant');
+}
+
+/** Les zones du parcours : la situation, puis les quatre bulles. */
+const zonesDuParcours = () => [$('#profilSaisie'), ...BULLES.map(bulle)];
+
+/*
+ * Deux champs se proposent d'eux-mêmes et restent modifiables : la valeur
+ * estimée suit prix + travaux, le loyer de comparaison suit le loyer actuel.
+ * Dès que l'utilisateur les touche, ils ne suivent plus — même mécanisme
+ * (data-auto) que les loyers de la mise en location. Des additions et des
+ * recopies, pas du calcul financier : comme l'effort (loyer + épargne).
+ */
+const nombreDe = (id) => parseFloat(document.getElementById(id).value);
+const LIAISONS = [
+  {
+    cible: 'valeurEstimee',
+    sources: ['prixNetVendeur', 'travaux'],
+    valeur: () => {
+      const prix = nombreDe('prixNetVendeur');
+      const travaux = nombreDe('travaux');
+      return Number.isFinite(prix) ? prix + (Number.isFinite(travaux) ? travaux : 0) : '';
+    },
+  },
+  {
+    cible: 'loyer',
+    sources: ['loyerActuel'],
+    valeur: () => (Number.isFinite(nombreDe('loyerActuel')) ? nombreDe('loyerActuel') : ''),
+  },
+];
+
+function majLiaisons() {
+  for (const l of LIAISONS) {
+    const el = document.getElementById(l.cible);
+    if (el.dataset.auto !== 'oui') continue;
+    el.value = l.valeur();
+    if (el.value !== '') oublierSignalement(el);
+  }
+}
+
+/** Au départ et après relecture : un champ vide, ou égal à ce qu'il proposerait, reprend son suivi. */
+function armerLiaisons() {
+  for (const l of LIAISONS) {
+    const el = document.getElementById(l.cible);
+    if (el.value === '' || el.value === String(l.valeur())) el.dataset.auto = 'oui';
+    else delete el.dataset.auto;
+  }
+  majLiaisons();
+}
+
+function initialiserLiaisons() {
+  for (const l of LIAISONS) {
+    for (const source of l.sources) {
+      document.getElementById(source).addEventListener('input', majLiaisons);
+    }
+    document.getElementById(l.cible).addEventListener('input', (e) => {
+      delete e.target.dataset.auto;
+    });
+  }
+  // Un champ signalé vide cesse de l'être dès qu'on y tape quelque chose.
+  document.addEventListener('input', (e) => {
+    if (e.target.hasAttribute && e.target.hasAttribute('aria-invalid') && e.target.value !== '') {
+      oublierSignalement(e.target);
+    }
+  });
 }
 
 function lireFormulaire() {
@@ -151,6 +265,7 @@ function remplirFormulaire(valeurs) {
     if (!el) continue;
     const v = valeurs[champ];
     if (el.type === 'checkbox') { el.checked = v !== false; continue; }
+    if (v === null || v === undefined) { el.value = ''; continue; } // non renseigné
     if (FACULTATIFS.has(champ) && !v) { el.value = ''; continue; }
     el.value = POURCENTAGES.has(champ) ? +(v * 100).toFixed(4) : v;
   }
@@ -227,22 +342,32 @@ function afficherVerdict(resultat, horizon) {
   // côtés. L'écart est donc juste, et le supplément se lit dans le profil.
   // JAMAIS de signe négatif. Un écart négatif ne veut pas dire « moins de
   // patrimoine » dans l'absolu : il veut dire que c'est l'AUTRE trajectoire qui
-  // gagne, et de ce montant-là. La couleur le dit, la phrase juste en dessous
-  // l'explicite — le signe, lui, se lisait comme une perte.
-  chiffre.textContent = euros.format(Math.abs(ecart));
+  // gagne, et de ce montant-là. L'étiquette au-dessus nomme le gagnant, le
+  // montant est donc toujours SON avance : « + 330 000 € ». Le signe moins,
+  // lui, se lisait comme une perte.
   chiffre.className = 'verdict__chiffre ' +
     (ecart >= 0 ? 'verdict__chiffre--achat' : 'verdict__chiffre--location');
 
   // Sous ~1 % du patrimoine comparé, l'écart n'est pas un signal exploitable.
   const reference = Math.max(ligne.patrimoineTotalAchat, ligne.patrimoineTotalLocation);
+  const gagnant = $('#verdictGagnant');
   if (Math.abs(ecart) < reference * 0.01) {
+    gagnant.dataset.gagnant = 'egal';
+    $('#verdictGagnantTexte').textContent = 'Les deux se valent';
+    chiffre.textContent = euros.format(Math.abs(ecart));
     mesure.textContent = 'd\'écart : à cette échéance, les deux scénarios se valent.';
+    mesure.hidden = false;
     return;
   }
 
-  mesure.textContent = ecart >= 0
-    ? 'de patrimoine en plus en achetant qu\'en restant locataire.'
-    : 'de patrimoine en plus en restant locataire qu\'en achetant.';
+  gagnant.dataset.gagnant = ecart >= 0 ? 'achat' : 'location';
+  $('#verdictGagnantTexte').textContent = ecart >= 0
+    ? 'Avantage à l\'achat'
+    : 'Avantage à la location';
+  chiffre.textContent = '+\u202f' + euros.format(Math.abs(ecart));
+  // L'étiquette dit déjà qui gagne : la phrase « de patrimoine en plus en
+  // achetant… » faisait doublon, une ligne de trop (décision de Lucas).
+  mesure.hidden = true;
 }
 
 /* --------------------------------------------------------- Épargne forcée */
@@ -1328,6 +1453,13 @@ function paramsCourants() {
   for (const champ of Object.keys(p.moteur)) {
     if (champ in saisie) p.moteur[champ] = saisie[champ];
   }
+  // Un champ laissé vide part en null, pas avec le défaut que `lireFormulaire`
+  // a mis à sa place (voir `normaliser`, sauvegarde.js).
+  for (const champ of Object.keys(p.moteur)) {
+    const el = document.getElementById(champ);
+    const pilote = scenarioActif && TAUX_SCENARISES.includes(champ);
+    if (el && el.type === 'number' && !pilote && el.value.trim() === '') p.moteur[champ] = null;
+  }
   // Un scénario est un filtre posé sur le projet, pas une partie du projet :
   // on sauvegarde les taux de l'utilisateur (mis de côté) et la clé du
   // scénario, jamais ses séries. Sinon, au rechargement, les séries étaient
@@ -1341,6 +1473,9 @@ function paramsCourants() {
   }
   // La décomposition, pas la somme : l'effort se déduit, il ne se stocke pas.
   p.profil = lireProfil();
+  for (const champ of CHAMPS_EFFORT) {
+    if (document.getElementById(champ).value.trim() === '') p.profil[champ] = null;
+  }
 
   // Les champs de mise en location sont lus directement : `lireFormulaireMel`
   // rend `null` tant que le palier 1 est incomplet, or on veut sauvegarder la
@@ -1490,6 +1625,7 @@ function initialiserBrouillon() {
   addEventListener('pagehide', ecrireBrouillon);
 
   restaurerBrouillon();
+  armerLiaisons();
 }
 
 /* ---------------------------------------------------------------- Orchestre */
@@ -1766,8 +1902,12 @@ let bulleZoomee = null;
  */
 let profilValide = false;
 
+function etatProfil(etat) {
+  $('#profil').dataset.etat = etat;
+}
+
 function ouvrirProfil() {
-  $('#profil').dataset.etat = 'saisie';
+  etatProfil('saisie');
   $('#capitalInitial').focus();
 }
 
@@ -1777,8 +1917,17 @@ function ouvrirProfil() {
  *   d'ouvrir la page, ce n'est pas une aide, c'est une surprise.
  */
 function figerProfil(discret) {
+  const vides = champsVides($('#profilSaisie'));
+  if (vides.length) {
+    // Un brouillon relu avec une situation incomplète rouvre la saisie au
+    // lieu de la figer ; un clic sur « Valider » montre ce qui manque.
+    profilValide = false;
+    if (discret === true) etatProfil('saisie');
+    else signalerVides(vides);
+    return;
+  }
   profilValide = true;
-  $('#profil').dataset.etat = 'fige';
+  etatProfil('fige');
   majBulles();
   recalculer();
   if (discret === true) return;
@@ -2080,7 +2229,12 @@ function repondre(place) {
 
 /** Toutes les bulles sont-elles renseignées ? Sans quoi rien n'est affiché. */
 function parcoursComplet() {
-  return profilValide && BULLES.every((n) => validees.has(n));
+  return profilValide && BULLES.every((n) => validees.has(n)) && valeursManquantes().length === 0;
+}
+
+/** Champs vidés APRÈS validation : le résultat attend qu'ils soient remplis. */
+function valeursManquantes() {
+  return zonesDuParcours().flatMap(champsVides);
 }
 
 /**
@@ -2101,8 +2255,11 @@ function majAttente() {
     jauge.innerHTML = BULLES.map(
       (n) => `<span class="attente__cran${validees.has(n) ? ' attente__cran--faite' : ''}"></span>`
     ).join('');
-    $('#attenteCompte').textContent = !profilValide
-      ? 'Commencez par renseigner votre profil.'
+    const manquantes = profilValide && validees.size === BULLES.length ? valeursManquantes() : [];
+    $('#attenteCompte').textContent = manquantes.length
+      ? `Il manque ${manquantes.length > 1 ? 'des valeurs' : 'une valeur'} : ${manquantes.map(libelleDe).join(', ')}.`
+      : !profilValide
+      ? 'Commencez par renseigner votre situation actuelle.'
       : faites === 0
         ? 'Aucune bulle renseignée pour le moment.'
         : `${faites} bulle${faites > 1 ? 's' : ''} sur ${BULLES.length} renseignée${faites > 1 ? 's' : ''}.`;
@@ -2221,6 +2378,11 @@ function validerBulle(n) {
   // ajouterait `null` aux bulles validées et `bulle(null)` casserait.
   if (n === null || bulleZoomee !== n) return;
   const el = bulle(n);
+  const vides = champsVides(el);
+  if (vides.length) {
+    signalerVides(vides);
+    return;
+  }
 
   validees.add(n);
   bulleZoomee = null;
@@ -2317,8 +2479,10 @@ function initialiserSaisie() {
 
 function initialiser() {
   remplirFormulaire(VALEURS_DE_TRAVAIL);
-  remplirProfil(Sauvegarde.DEFAUTS_PROFIL);
+  remplirProfil(PROFIL_DE_TRAVAIL);
   remplirFormulaireMel();
+  initialiserLiaisons();
+  armerLiaisons();
   initialiserSaisie();
   initialiserDetail();
   construireScenarios();
@@ -2356,7 +2520,9 @@ function initialiser() {
   $('#reinitialiserOui').addEventListener('click', () => {
     $('#nouvelle').dataset.etat = 'repos';
     remplirFormulaire(VALEURS_DE_TRAVAIL);
-    remplirProfil(Sauvegarde.DEFAUTS_PROFIL);
+    remplirProfil(PROFIL_DE_TRAVAIL);
+    for (const el of document.querySelectorAll('[aria-invalid]')) oublierSignalement(el);
+    armerLiaisons();
     $('#horizon').value = 20;
     validees.clear();
     profilValide = false;

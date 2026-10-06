@@ -53,11 +53,11 @@
 
 <main class="page">
 
-  <!-- ========================= MON PROFIL ============================ -->
+  <!-- ==================== MA SITUATION ACTUELLE ====================== -->
   <section class="profil" id="profil" data-etat="saisie">
     <div class="profil__ligne">
       <span class="profil__pastille" aria-hidden="true"></span>
-      <h2 class="profil__titre">Mon profil</h2>
+      <h2 class="profil__titre">Ma situation actuelle</h2>
       <p class="profil__resume" id="profilResume"></p>
       <button type="button" class="bouton bouton--discret" id="profilModifier">Modifier</button>
     </div>
@@ -127,7 +127,7 @@
 
       <div class="profil__pied">
         <button type="button" class="bouton bouton--primaire" id="profilValider">
-          Valider mon profil
+          Valider ma situation
         </button>
       </div>
     </div>
@@ -518,7 +518,7 @@
       <div class="attente" id="attente">
         <p class="attente__titre">Votre réponse s'affichera ici</p>
         <p class="attente__texte">
-          Renseignez votre profil puis les quatre bulles. Rien n'est calculé tant qu'il manque une
+          Renseignez votre situation actuelle puis les quatre bulles. Rien n'est calculé tant qu'il manque une
           donnée&nbsp;: pas de chiffre inventé à partir de valeurs par défaut.
         </p>
         <div class="attente__jauge" id="attenteJauge" role="progressbar"
@@ -535,8 +535,28 @@
             <output class="verdict__annees" id="horizonLabel">20 ans</output>
           </div>
         </div>
-        <p class="verdict__chiffre" id="verdictChiffre">—</p>
-        <p class="verdict__mesure" id="verdictMesure"></p>
+        <!-- Qui gagne, dit d'un coup d'œil avant le montant : une maison pour
+             l'achat, une clé pour la location, « = » quand l'écart est sous
+             1 %. Seule l'icône du gagnant s'affiche (data-gagnant). La couleur
+             ne porte jamais seule l'information : le texte la double. -->
+        <div class="verdict__ligne">
+          <p class="verdict__gagnant" id="verdictGagnant" data-gagnant="egal">
+            <svg class="verdict__icone verdict__icone--achat" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M3.5 11 12 4l8.5 7"/><path d="M5.5 9.5V20h13V9.5"/><path d="M10 20v-5.5h4V20"/>
+            </svg>
+            <svg class="verdict__icone verdict__icone--location" viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="7.5" cy="12" r="4"/><path d="M11.5 12h9M17.5 12v3M20.5 12v2.5"/>
+            </svg>
+            <svg class="verdict__icone verdict__icone--egal" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M5 9h14M5 15h14"/>
+            </svg>
+            <span id="verdictGagnantTexte">—</span>
+          </p>
+          <p class="verdict__chiffre" id="verdictChiffre">—</p>
+        </div>
+        <!-- Seulement en cas d'égalité : « Les deux se valent » suivi d'un
+             montant seul serait ambigu. Sinon l'étiquette dit déjà tout. -->
+        <p class="verdict__mesure" id="verdictMesure" hidden></p>
       </div>
 
       <figure class="carte carte--graphique">

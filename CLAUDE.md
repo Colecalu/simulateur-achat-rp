@@ -12,7 +12,7 @@ Document de référence du projet. Court par nature : le détail vit dans `docs/
 ## Commandes
 
 ```bash
-node --test "tests/*.test.mjs"   # 106 tests : moteur, location, indicateurs, séries, sauvegarde, scénarios
+node --test "tests/*.test.mjs"   # 107 tests : moteur, location, indicateurs, séries, sauvegarde, scénarios
 ```
 
 Le motif est entre guillemets : `node --test tests/` échoue sous Windows (Node tente de charger
@@ -56,7 +56,7 @@ structurante change.
   de feature ouverte par Claude Code est à considérer comme une expérimentation en cours.
 - **Une expérimentation ne remplace jamais l'implémentation en place automatiquement.** Elle est
   analysée sur demande, puis intégrée, adaptée ou écartée — décision de Lucas.
-- **Les 106 tests sont l'arbitre.** Une proposition qui les casse est rejetée, quelle que soit son
+- **Les 107 tests sont l'arbitre.** Une proposition qui les casse est rejetée, quelle que soit son
   élégance. La fixture Excel compare 25 années × 15 grandeurs **au centime** : elle ne se
   contourne pas, elle se respecte ou se discute explicitement.
 
@@ -225,7 +225,7 @@ outils/                      jamais déployé — scripts de développement
   image-partage.mjs (+ .html) img/partage.png
   package.json               fontkit, wawoff2, Playwright — devDependencies, §13
 docs/                        modèle, conventions UI, spec backend, design, Excel
-tests/                       node --test, 106 tests
+tests/                       node --test, 107 tests
 migrations/                  à créer : SQL numéroté, appliqué à la main
 ```
 
@@ -273,6 +273,10 @@ demi-seconde. Fermer l'onglet ne fait rien perdre, sans compte ni réseau.
   qu'une bulle — ce qu'on s'interdit.
 - **Tout le reste se déduit** : l'ouverture du module de mise en location se lit dans la présence
   d'une année de bascule. Ne pas stocker ce qui se déduit.
+- **Un champ laissé vide part en `null` et revient vide** (groupes `moteur` et `profil`). Avant le
+  06/10/2026, `normaliser` remplaçait `null` par le défaut du moteur : un prix laissé vide serait
+  revenu à 420 000 € au rechargement. Un test le verrouille. Les anciennes sauvegardes, qui ne
+  contiennent que des nombres, se relisent à l'identique : pas d'incrément de version.
 - **`SCHEMA_VERSION` ne s'incrémente que si une ancienne sauvegarde ne se relit plus à
   l'identique.** Ajouter un champ ne casse rien : `normaliser()` lui donne son défaut.
 - **`migrer()` ne lève jamais.** Sauvegarde corrompue, version future, migration qui plante :
@@ -714,10 +718,23 @@ indicateur et un changement de défauts aurait rendu chaque effet impossible à 
 
 ### Valeurs pré-remplies de l'écran ≠ défauts du moteur
 
-Pour travailler, l'écran part de `VALEURS_DE_TRAVAIL` (`app.js`) : 550 000 €, sans travaux, 25 ans,
-2 000 € de charges de copro, 8 000 € de revenus du foyer. **Ne pas aligner `DEFAUTS` de `calc.js`
-dessus** : ce sont les valeurs du classeur Excel, que la fixture compare au centime. D'autres valeurs
-pré-remplies seront choisies pour la mise en ligne.
+**Décision de Lucas, 06/10/2026 : l'écran part VIDE pour ce que seul l'utilisateur connaît** — sa
+situation (patrimoine, loyer actuel, épargne, revenus), le prix net vendeur, l'apport et le loyer
+de comparaison. Le reste est pré-rempli par `VALEURS_DE_TRAVAIL` (`app.js`) : bien ancien, frais
+d'agence et travaux à 0, frais bancaires 2 000 €, 20 ans à 3,5 % (assurance 0,15 %), copropriété et
+taxe foncière 1 000 €/an, scénario de marché du moteur. **Ne pas aligner `DEFAUTS` de `calc.js`
+dessus** : ce sont les valeurs du classeur Excel, que la fixture compare au centime.
+
+- **Un champ vide est « non renseigné », jamais remplacé en silence.** On ne valide ni la
+  situation ni une bulle qui en contient (champs signalés, curseur sur le premier) ; le résultat
+  reste en attente tant qu'il en manque un, vidé après validation compris (« Il manque une
+  valeur : Apport. »). Seuls les revenus du foyer sont facultatifs. `lireFormulaire` garde son
+  repli sur `DEFAUTS` pour que le moteur tourne, mais rien de ce qu'il calcule alors n'est montré.
+- **Deux champs se proposent d'eux-mêmes** (`LIAISONS`, mécanisme `data-auto`) : la valeur
+  estimée suit prix + travaux, le loyer de comparaison suit le loyer actuel — jusqu'à ce que
+  l'utilisateur les modifie.
+- **« Ma situation actuelle »** (ex-« Mon profil ») est ouverte d'emblée, champs vides. Essayé
+  puis écarté le 06/10 par Lucas : une carte repliée en jaune, à ouvrir d'un clic comme les bulles.
 
 ### Conflit des deux loyers — à traiter
 
@@ -879,9 +896,9 @@ déroulé, les textes et la fluidité qui ont changé. Branche `feat/accueil-tra
 - ⚠️ **Le jeu d'exemple de l'aperçu est provisoire** : 280 000 €, loyer 1 000 €, 25 ans, repris de
   l'ancienne accueil (`09f7d0c`). Les deux jeux par défaut du simulateur n'ont pas de croisement
   (`DEFAUTS` : achat devant dès l'an 1 ; `VALEURS_DE_TRAVAIL` : jamais), le point mort n'aurait
-  rien eu à montrer. **À remplacer par l'exemple par défaut du simulateur quand il sera fixé**
-  (§11) — un seul endroit, `ENTREES` dans `accueil.js`. Vérifier alors qu'il croise encore :
-  le point mort est la réponse au « partir plus tôt ».
+  rien eu à montrer. Depuis le 06/10/2026, le simulateur n'a plus d'exemple par défaut (il part
+  vide, §11) : l'aperçu garde donc le sien, dans `ENTREES` (`accueil.js`). S'il change, vérifier
+  qu'il croise encore : le point mort est la réponse au « partir plus tôt ».
 - **Une seule animation** : apparition au défilement (`[data-apparait]`), par `translate` pour ne
   pas écraser les rotations des cartes, jamais sur un titre ; plus le tracé des courbes de 05.
   Tout est coupé sous `prefers-reduced-motion`.

@@ -991,6 +991,19 @@ h1, h2, h3 {
   border-radius: var(--rayon);
   transition: border-color .12s ease, box-shadow .12s ease;
 }
+/* Champ obligatoire laissé vide, signalé quand on veut valider l'étape.
+   Placé après .profil__groupes .champ__saisie (même spécificité) pour
+   l'emporter dans la situation comme dans les bulles. */
+.champ--manquant .champ__saisie {
+  border-color: var(--alerte);
+  box-shadow: 0 0 0 2px var(--alerte-fond);
+}
+.champ--manquant .champ__libelle::after {
+  content: " · à renseigner";
+  color: var(--alerte);
+  font-weight: 400;
+}
+
 .champ__saisie:focus-within {
   border-color: var(--achat);
   box-shadow: 0 0 0 3px var(--achat-voile);
@@ -1191,6 +1204,13 @@ h1, h2, h3 {
   color: var(--encre-2);
 }
 .verdict__horizon { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 220px; }
+/* En mobile, le curseur partageait sa ligne avec la question et ne gardait
+   qu'une quarantaine de pixels : il prend désormais une ligne entière, sous
+   la question centrée. */
+@media (max-width: 640px) {
+  .verdict__entete { justify-content: center; }
+  .verdict__horizon { flex-basis: 100%; }
+}
 .verdict__horizon input[type="range"] { flex: 1; accent-color: var(--accent); cursor: pointer; }
 .verdict__annees {
   font-variant-numeric: tabular-nums;
@@ -1209,6 +1229,45 @@ h1, h2, h3 {
   letter-spacing: -0.03em;
   font-variant-numeric: tabular-nums;
 }
+/* L'étiquette du gagnant et le montant, côte à côte et centrés. En étroit,
+   le montant passe sous l'étiquette plutôt que de déborder. */
+.verdict__ligne {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 8px 18px;
+  margin-top: 4px;
+}
+.verdict__gagnant {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 7px 18px 7px 14px;
+  border-radius: 999px;
+  font-size: 1rem;
+  font-weight: 650;
+  background: var(--surface-creuse);
+  color: var(--encre-2);
+}
+.verdict__gagnant[data-gagnant="achat"] { background: var(--achat-voile); color: var(--achat); }
+.verdict__gagnant[data-gagnant="location"] { background: var(--location-voile); color: var(--location); }
+.verdict__icone {
+  display: none;
+  width: 24px;
+  height: 24px;
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.verdict__gagnant[data-gagnant="achat"] .verdict__icone--achat,
+.verdict__gagnant[data-gagnant="location"] .verdict__icone--location,
+.verdict__gagnant[data-gagnant="egal"] .verdict__icone--egal { display: block; }
+
 .verdict__chiffre--achat { color: var(--achat); }
 .verdict__chiffre--location { color: var(--location); }
 .verdict__chiffre--indecis { color: var(--encre-3); }
