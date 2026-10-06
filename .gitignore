@@ -8,6 +8,9 @@ backend/config/*.local.php
 # Dépendances
 vendor/
 node_modules/
+# ...sauf les bibliothèques front copiées dans le site (Chart.js) : elles
+# partent en production avec frontend/, il faut les commiter.
+!frontend/js/vendor/
 
 # Dumps et sauvegardes base de données
 *.sql
