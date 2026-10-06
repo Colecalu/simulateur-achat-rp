@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Æquo — La même porte. Pas la même histoire.</title>
-  <meta name="description" content="Acheter ou louer sa résidence principale ? Ouvrez les deux portes et comparez deux trajectoires de patrimoine, avec les mêmes moyens.">
+  <title>Æquo — Simulateur acheter ou louer sa résidence principale</title>
+  <meta name="description" content="Acheter ou louer votre résidence principale ? Simulateur gratuit et sans inscription : comparez deux trajectoires de patrimoine, avec les mêmes moyens.">
   <link rel="stylesheet" href="css/accueil.css">
   <script src="js/calc.js" defer></script>
   <script src="js/accueil.js"></script>
@@ -14,7 +14,7 @@
 
   <header class="masthead">
     <a class="brand" href="index.html" aria-label="Æquo, accueil">Æquo<span aria-hidden="true">↗</span></a>
-    <span class="edition">UN AUTRE REGARD SUR <br>VOTRE RÉSIDENCE PRINCIPALE</span>
+    <span class="edition">SIMULATEUR ACHAT OU LOCATION <br>DE VOTRE RÉSIDENCE PRINCIPALE</span>
     <a class="nav-cta" href="simulateur.html">Le simulateur <span aria-hidden="true">↗</span></a>
   </header>
 
@@ -22,12 +22,12 @@
 
     <section class="cover" aria-labelledby="titre">
       <div class="cover-heading">
-        <p class="folio">CARNET D’UN CHOIX / FRANCE</p>
+        <p class="folio">SIMULATEUR GRATUIT · SANS INSCRIPTION</p>
         <h1 id="titre">La même porte. <br><em>Pas la même histoire.</em></h1>
-        <p class="intro">Acheter ou louer ? Derrière ces deux mots, <br>deux façons de construire votre patrimoine.</p>
+        <p class="intro">Acheter ou louer votre résidence principale&nbsp;? <br>Comparez les deux avec vos chiffres, en quelques minutes.</p>
       </div>
       <div class="theatre mode-achat" id="theatre">
-        <div class="pencil-note">Imaginez : <br>vous habitez ici.<svg viewBox="0 0 120 90" aria-hidden="true"><path d="M8 8Q100 0 88 65M70 52l18 13 15-16"/></svg></div>
+        <div class="pencil-note">Votre premier achat&nbsp;? <br>C’est par ici.<svg viewBox="0 0 120 90" aria-hidden="true"><path d="M8 8Q100 0 88 65M70 52l18 13 15-16"/></svg></div>
         <div class="view-switch" role="group" aria-label="Explorer les deux points de vue">
           <button type="button" id="vueAchat" aria-pressed="true" aria-controls="pointDeVue">Si j’achète</button>
           <button type="button" id="vueLocation" aria-pressed="false" aria-controls="pointDeVue">Si je loue</button>
@@ -62,12 +62,12 @@
         </svg>
         <div class="postcard" id="pointDeVue" aria-live="polite">
           <p class="tiny" id="pointNumero">HISTOIRE A / PROPRIÉTAIRE</p>
-          <h2 id="pointTitre">Une clé. <br>Et du capital <br>dans les murs.</h2>
+          <p class="postcard__titre" id="pointTitre">Une clé. <br>Et du capital <br>dans les murs.</p>
           <p id="pointTexte">Vous remboursez votre crédit. Ce qui reste disponible peut aussi être investi.</p>
           <span class="postcard-arrow" aria-hidden="true">↗</span>
         </div>
-        <span class="stamp">MÊME LOGEMENT <br><strong>2</strong> <br>CHEMINS POSSIBLES</span>
-        <p class="scene-caption">Une illustration pour comprendre. Pas une projection financière.</p>
+        <span class="stamp">100&nbsp;% GRATUIT <br><strong>0&nbsp;€</strong> <br>SANS INSCRIPTION</span>
+        <p class="scene-caption">Calculs faits dans votre navigateur. Aucune donnée envoyée.</p>
       </div>
       <div class="cover-bottom">
         <p>La question n’est pas seulement <br><strong>« combien ça coûte ? »</strong> <br>Mais aussi <strong>« qu’est-ce qu’il me reste ? »</strong></p>
@@ -76,9 +76,12 @@
       </div>
     </section>
 
-    <!-- Les deux idées reçues, renvoyées dos à dos. Les deux cartes sont
-         strictement identiques (taille, fond, barre) : seule l'inclinaison
-         change de sens. Un poids visuel inégal ferait pencher la page. -->
+    <!-- Les deux idées reçues, renvoyées dos à dos. Ce qu'on conteste n'est
+         pas l'idée mais l'absolu : « toujours » est entouré à la main, jamais
+         barré — un barré dirait « c'est faux », alors que le titre dit « les
+         deux ont raison, parfois ». Les deux cartes et les deux ovales sont
+         strictement identiques ; seule l'inclinaison change de sens. Un poids
+         visuel inégal ferait pencher la page. -->
     <section class="camps" id="deux-camps" aria-labelledby="campsTitre">
       <div class="section-label">
         <span>01 — DEUX CAMPS, DEUX CERTITUDES</span>
@@ -87,7 +90,7 @@
       <div class="camps__duel" data-apparait>
         <blockquote class="camps__carte camps__carte--gauche">
           <p class="camps__numero">CERTITUDE N° 1</p>
-          <p class="camps__citation">« Louer, c’est jeter son argent <span class="camps__barre">par les fenêtres.</span> »</p>
+          <p class="camps__citation">« Louer, c’est <em class="camps__toujours">toujours<svg class="camps__ovale" viewBox="0 0 120 48" preserveAspectRatio="none" aria-hidden="true"><path d="M16 31C9 18 38 6 69 6c29 0 47 10 45 22-2 13-31 17-59 16C27 43 5 35 9 23c3-8 14-13 27-15"/></svg></em> jeter son argent par les fenêtres. »</p>
           <p class="camps__camp">— Le camp de l’achat</p>
         </blockquote>
         <div class="camps__pivot">
@@ -96,7 +99,7 @@
         </div>
         <blockquote class="camps__carte camps__carte--droite">
           <p class="camps__numero">CERTITUDE N° 2</p>
-          <p class="camps__citation">« Acheter, c’est <span class="camps__barre">un mauvais placement.</span> Louez et investissez. »</p>
+          <p class="camps__citation">« Acheter, c’est <em class="camps__toujours">toujours<svg class="camps__ovale" viewBox="0 0 120 48" preserveAspectRatio="none" aria-hidden="true"><path d="M16 31C9 18 38 6 69 6c29 0 47 10 45 22-2 13-31 17-59 16C27 43 5 35 9 23c3-8 14-13 27-15"/></svg></em> un mauvais placement. Louez et investissez. »</p>
           <p class="camps__camp">— Le camp de la location</p>
         </blockquote>
       </div>
@@ -146,7 +149,7 @@
       <div class="ledger-title">
         <span class="tiny">03 — LA RÈGLE DU JEU</span>
         <h2>Mêmes moyens. <br><em>Autres destinations.</em></h2>
-        <p>Chaque mois, le même budget dans les deux cas. Côté achat, il paie le crédit et les charges&nbsp;; côté location, le loyer. Ce qui reste est investi. À l’arrivée, on compare ce que vous possédez vraiment.</p>
+        <p>Chaque mois, le même budget dans les deux cas. Côté achat, il paie le crédit et les charges&nbsp;; côté location, le loyer. Ce qui reste est investi — c’est la référence. À l’arrivée, on compare ce que vous possédez vraiment.</p>
       </div>
       <div class="ledger-sheet" data-apparait>
         <div class="sheet-heading">
@@ -175,11 +178,12 @@
       </div>
     </section>
 
-    <!-- Trois questions, pas de fonctionnalité : les réponses viennent plus
-         bas pour les marchés et le déménagement (piliers 2 et 3, en 05) ;
-         celle du départ anticipé, le point mort, est déjà montrée en 02. Les numéros dans les
-         points de la courbe renvoient aux cartes ; décoratifs, donc masqués
-         aux lecteurs d'écran, et retirés en mobile où la courbe s'estompe. -->
+    <!-- Trois questions, pas de fonctionnalité. Leurs réponses : partir plus
+         tôt → le point mort, déjà montré par l'aperçu en 02 (la carte 1 y
+         renvoie, vers le haut) ; marchés et déménagement → piliers 2 et 3,
+         juste après. Les numéros dans les points de la courbe renvoient aux
+         cartes ; décoratifs, donc masqués aux lecteurs d'écran, et retirés en
+         mobile où la courbe s'estompe. -->
     <section class="time-story" id="avenir">
       <div class="section-label">
         <span>04 — CE QUE PERSONNE NE PEUT PRÉVOIR</span>
@@ -201,7 +205,7 @@
         <article>
           <span><span class="temps__repere" aria-hidden="true">1</span>ET SI…</span>
           <h3>vous partiez <br>plus tôt que prévu&nbsp;?</h3>
-          <p>Une mutation, une famille qui s’agrandit… Les frais d’achat ne pèsent pas pareil à cinq ou à vingt ans.</p>
+          <p>Une mutation, une famille qui s’agrandit… Les frais d’achat ne pèsent pas pareil à cinq ou à vingt ans. C’est ce que montre le point mort, <a class="temps__renvoi" href="#apercu">plus haut <span aria-hidden="true">↑</span></a>.</p>
         </article>
         <article>
           <span><span class="temps__repere" aria-hidden="true">2</span>ET SI…</span>
@@ -214,14 +218,16 @@
           <p>Garder votre logement et le mettre en location peut changer toute la comparaison.</p>
         </article>
       </div>
-      <p class="temps__transition" data-apparait>Un calcul en ligne droite ne répond à aucune de ces questions. <em>Voici comment Æquo s’y prend. <span aria-hidden="true">↓</span></em></p>
+      <p class="temps__transition" data-apparait>L’exemple plus haut suppose des marchés réguliers et une vie sans surprise. <br>La vôtre ne le sera pas. <em>Voici comment Æquo va plus loin. <span aria-hidden="true">↓</span></em></p>
     </section>
 
-    <!-- La différenciation. Chaque pilier tient en trois lignes et renvoie à
-         une question posée plus haut : le pilier 1 à la règle du jeu, les
-         piliers 2 et 3 aux « Et si » numérotés de la section 04. Dans le
-         pilier 2, le passé et les futurs possibles ont chacun une moitié
-         égale de la carte : aucun des deux n'est l'appendice de l'autre. -->
+    <!-- La différenciation. Chaque pilier renvoie à ce qui le précède : le
+         pilier 1 à la règle du jeu, dont il est la suite honnête (à effort
+         égal, d'accord — mais placeriez-vous vraiment la différence ? c'est
+         l'épargne forcée, locatairePlaceDifference, souvent ce qui décide) ;
+         les piliers 2 et 3 aux « Et si » numérotés de la section 04. Dans les
+         piliers 1 et 2, les deux volets ont chacun une moitié égale de la
+         carte, et une grille partagée les aligne d'une carte à l'autre. -->
     <section class="piliers" id="piliers" aria-labelledby="piliersTitre">
       <div class="section-label">
         <span>05 — LÀ OÙ LES AUTRES S’ARRÊTENT</span>
@@ -231,18 +237,32 @@
       <div class="piliers__liste" data-apparait>
         <article class="pilier pilier--un">
           <svg class="pilier__picto" viewBox="0 0 120 80" aria-hidden="true">
-            <path class="picto__trait" d="M48 74h24M60 74V19M24 26h72M24 26 12 52M24 26l12 26M96 26 84 52M96 26l12 26"/>
-            <circle class="picto__papier" cx="60" cy="16" r="3.5"/>
-            <path class="picto__papier" d="M7 52h34c-2 8-8 11-17 11S9 60 7 52ZM79 52h34c-2 8-8 11-17 11s-15-3-17-11Z"/>
-            <path class="picto__papier" d="M16 52V42l8-7 8 7v10Z"/>
-            <path class="picto__porte" d="M22 52v-6h4v6Z"/>
-            <ellipse class="picto__piece" cx="96" cy="49" rx="8" ry="2.6"/>
-            <ellipse class="picto__piece" cx="96" cy="45" rx="8" ry="2.6"/>
-            <ellipse class="picto__piece" cx="96" cy="41" rx="8" ry="2.6"/>
+            <path class="picto__papier" d="M17 34c0-4 3-6 6-6h22c3 0 6 2 6 6v34c0 4-3 6-6 6H23c-4 0-6-2-6-6Z"/>
+            <path class="picto__couvercle" d="M20 21h28v7H20Z"/>
+            <ellipse class="picto__piece" cx="34" cy="68" rx="10" ry="2.8"/>
+            <ellipse class="picto__piece" cx="34" cy="63.5" rx="10" ry="2.8"/>
+            <ellipse class="picto__piece" cx="34" cy="59" rx="10" ry="2.8"/>
+            <path class="picto__trait picto__trait--epais" d="M30.5 41v-3.5a3.5 3.5 0 0 1 7 0V41"/>
+            <path class="picto__piece" d="M27.5 41h13v10h-13Z"/>
+            <circle class="picto__serrure" cx="34" cy="45.5" r="1.4"/>
+            <path class="picto__papier" d="M69 34c0-4 3-6 6-6h22c3 0 6 2 6 6v34c0 4-3 6-6 6H75c-4 0-6-2-6-6Z"/>
+            <path class="picto__couvercle" d="m96 13 23 5.5-1.6 6.6-23-5.5Z"/>
+            <ellipse class="picto__piece" cx="86" cy="68" rx="10" ry="2.8"/>
+            <text class="picto__question" x="86" y="57">?</text>
           </svg>
           <p class="pilier__numero">PILIER 1</p>
-          <h3 class="pilier__titre">Ce qui vous reste, <em>pas seulement ce que ça coûte.</em></h3>
-          <p class="pilier__texte">La plupart des simulateurs comparent un loyer à une mensualité. Æquo compare deux patrimoines, en tenant compte de ce que votre apport aurait pu rapporter ailleurs.</p>
+          <h3 class="pilier__titre">Placeriez-vous <em>vraiment la différence&nbsp;?</em></h3>
+          <p class="pilier__texte">Acheter vous oblige à épargner&nbsp;: chaque mensualité rembourse un peu votre logement. Louer vous laisse libre de placer la différence… ou de la dépenser. Æquo compare d’abord à effort égal, puis vous demande ce que vous feriez vraiment. C’est souvent cette réponse qui décide.</p>
+          <div class="pilier__volets">
+            <div class="pilier__volet">
+              <p class="pilier__volet-nom">À effort égal <span>Référence</span></p>
+              <p>Vous placez ce que l’acheteur rembourse.</p>
+            </div>
+            <div class="pilier__volet">
+              <p class="pilier__volet-nom">Selon vos habitudes <span>Votre choix</span></p>
+              <p>Vous gardez votre effort actuel.</p>
+            </div>
+          </div>
           <a class="pilier__renvoi" href="#regle-du-jeu">Voir la règle du jeu <span aria-hidden="true">↑</span></a>
         </article>
         <article class="pilier pilier--deux">
