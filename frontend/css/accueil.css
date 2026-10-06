@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&family=Caveat:wght@500&display=swap');
+/* Polices : css/polices.css, hébergées sur le site (plus de Google Fonts). */
 
 :root {
   --paper: #f7f2e7;
@@ -133,7 +133,18 @@ a:focus-visible, button:focus-visible, summary:focus-visible {
 .cover h1 {
   font: clamp(60px,7.5vw,114px)/.95 var(--serif);
   letter-spacing: -3px;
-  margin: 24px 0 20px;
+  margin: 0 0 20px;
+}
+
+/* Le surtitre vit dans le <h1> mais garde son style (.folio, plus haut) et
+   l'écart de 24 px qu'il avait quand il était un paragraphe au-dessus. */
+.cover h1 .folio {
+  display: block;
+  margin-bottom: 24px;
+}
+
+.cover__slogan {
+  display: block;
 }
 
 .cover h1 em {

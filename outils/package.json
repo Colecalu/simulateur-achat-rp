@@ -1,0 +1,14 @@
+{
+  "name": "aequo-outils",
+  "private": true,
+  "description": "Outils de développement d'Æquo. Jamais déployés : seul frontend/ part en production.",
+  "scripts": {
+    "favicon": "node favicon.mjs",
+    "image-partage": "node image-partage.mjs"
+  },
+  "devDependencies": {
+    "fontkit": "^2.0.4",
+    "playwright": "1.49.1",
+    "wawoff2": "^2.0.1"
+  }
+}

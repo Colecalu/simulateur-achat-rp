@@ -1,0 +1,7 @@
+# Æquo : tout est public, rien à cacher aux moteurs de recherche.
+# aequo.example est le domaine provisoire : voir CLAUDE.md,
+# « Le jour où le domaine est acheté ».
+User-agent: *
+Allow: /
+
+Sitemap: https://aequo.example/sitemap.xml

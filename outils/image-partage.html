@@ -1,0 +1,92 @@
+<!doctype html>
+<!--
+  Gabarit de l'image de partage (frontend/img/partage.png, 1200 × 630).
+  Ne s'ouvre pas tel quel : outils/image-partage.mjs remplit les trois
+  marqueurs entre doubles accolades — les polices du site, la feuille de
+  l'accueil, la maison en papier copiée de index.html — puis en fait une
+  capture. (Ne pas écrire ces marqueurs ici : le script remplacerait
+  d'abord ce commentaire.)
+
+  Règles de lisibilité, parce que l'image est souvent vue en vignette :
+  peu de texte, gros caractères, et rien d'important à moins de 60 px des
+  bords — certains réseaux recadrent.
+-->
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<style>
+{{POLICES}}
+{{ACCUEIL}}
+
+/* Ce qui suit l'emporte sur accueil.css : on ne garde de lui que les
+   couleurs et le dessin de la maison. */
+html, body {
+  margin: 0;
+  width: 1200px;
+  height: 630px;
+  overflow: hidden;
+  background: var(--yellow);
+}
+
+.partage {
+  position: relative;
+  width: 1200px;
+  height: 630px;
+  box-sizing: border-box;
+  padding: 90px 0 0 80px;
+}
+
+.partage__marque {
+  font: 700 46px/1 var(--sans);
+  letter-spacing: -2.5px;
+  color: var(--ink);
+}
+
+.partage__marque span {
+  font-size: 20px;
+  vertical-align: top;
+  margin-left: 4px;
+}
+
+.partage__slogan {
+  margin: 58px 0 0;
+  font: 400 82px/.95 var(--serif);
+  letter-spacing: -2.5px;
+  color: var(--ink);
+}
+
+.partage__ligne {
+  margin: 34px 0 0;
+  width: 520px;
+  padding-top: 22px;
+  border-top: 2px solid var(--ink);
+  font: 500 27px/1.3 var(--sans);
+  color: var(--ink);
+}
+
+.partage__ligne strong {
+  font-weight: 700;
+}
+
+/* La maison, à droite, posée sur le même filet que dans la couverture. */
+.partage .house {
+  position: absolute;
+  left: auto;
+  right: 40px;
+  top: 112px;
+  width: 560px;
+  max-width: none;
+  height: 470px;
+  transform: none;
+}
+</style>
+</head>
+<body>
+  <div class="partage">
+    <div class="partage__marque">Æquo<span>↗</span></div>
+    <p class="partage__slogan">La même porte. <br><em>Pas la même histoire.</em></p>
+    <p class="partage__ligne"><strong>Simulateur gratuit</strong> · acheter ou louer sa résidence principale</p>
+    {{MAISON}}
+  </div>
+</body>
+</html>

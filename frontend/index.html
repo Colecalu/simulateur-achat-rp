@@ -3,9 +3,85 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Æquo — Simulateur acheter ou louer sa résidence principale</title>
-  <meta name="description" content="Acheter ou louer votre résidence principale ? Simulateur gratuit et sans inscription : comparez deux trajectoires de patrimoine, avec les mêmes moyens.">
+  <title>Simulateur acheter ou louer sa résidence principale — Æquo</title>
+  <meta name="description" content="Acheter ou louer votre résidence principale ? Simulateur gratuit et sans inscription, pensé pour les primo-accédants : comparez deux trajectoires de patrimoine.">
+  <link rel="canonical" href="https://aequo.example/">
+  <!-- Aperçu de partage (réseaux, messageries). URL absolues obligatoires :
+       aequo.example est le domaine provisoire, voir « Le jour où le domaine
+       est acheté » dans CLAUDE.md. Image : outils/image-partage.mjs. -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Æquo">
+  <meta property="og:locale" content="fr_FR">
+  <meta property="og:title" content="Simulateur acheter ou louer sa résidence principale — Æquo">
+  <meta property="og:description" content="Acheter ou louer votre résidence principale ? Simulateur gratuit et sans inscription, pensé pour les primo-accédants : comparez deux trajectoires de patrimoine.">
+  <meta property="og:url" content="https://aequo.example/">
+  <meta property="og:image" content="https://aequo.example/img/partage.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Æquo, une maison en papier sur fond jaune : « La même porte. Pas la même histoire. » Simulateur gratuit pour acheter ou louer sa résidence principale.">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Simulateur acheter ou louer sa résidence principale — Æquo">
+  <meta name="twitter:description" content="Acheter ou louer votre résidence principale ? Simulateur gratuit et sans inscription, pensé pour les primo-accédants : comparez deux trajectoires de patrimoine.">
+  <meta name="twitter:image" content="https://aequo.example/img/partage.png">
+  <!-- Icônes générées par outils/favicon.mjs. Le .ico d'abord, le SVG
+       ensuite : les navigateurs récents retiennent le SVG, les anciens le
+       .ico (ordre recommandé). Chemins absolus : la page est servie à / et à
+       /simulateur. -->
+  <link rel="icon" href="/favicon.ico" sizes="32x32">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <meta name="theme-color" content="#f3da78">
+  <!-- Trois préchargements, pas plus : les seules polices visibles sans
+       défiler (titre en Instrument Serif, droit et italique ; texte en DM
+       Sans). Précharger le reste retarderait celles-ci. -->
+  <link rel="preload" href="fonts/instrument-serif.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/instrument-serif-italique.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/dm-sans-variable.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="css/polices.css">
   <link rel="stylesheet" href="css/accueil.css">
+  <!-- Données structurées. Pas de FAQPage : Google n'en affiche plus les
+       résultats enrichis pour ce type de site, ce serait du balisage à
+       maintenir pour rien. Chaque valeur est vraie du produit : gratuit, sans
+       compte, dans le navigateur, JavaScript requis. -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebSite",
+        "@id": "https://aequo.example/#site",
+        "name": "Æquo",
+        "alternateName": "Aequo",
+        "url": "https://aequo.example/",
+        "inLanguage": "fr-FR"
+      },
+      {
+        "@type": "WebApplication",
+        "@id": "https://aequo.example/simulateur#application",
+        "name": "Æquo — simulateur acheter ou louer",
+        "url": "https://aequo.example/simulateur",
+        "isPartOf": {
+          "@id": "https://aequo.example/#site"
+        },
+        "applicationCategory": "FinanceApplication",
+        "operatingSystem": "Web",
+        "browserRequirements": "JavaScript requis",
+        "inLanguage": "fr-FR",
+        "isAccessibleForFree": true,
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "EUR"
+        },
+        "description": "Acheter ou louer votre résidence principale ? Simulateur gratuit et sans inscription, pensé pour les primo-accédants : comparez deux trajectoires de patrimoine.",
+        "audience": {
+          "@type": "Audience",
+          "audienceType": "Primo-accédants et futurs acquéreurs de résidence principale"
+        }
+      }
+    ]
+  }
+  </script>
   <script src="js/calc.js" defer></script>
   <script src="js/accueil.js"></script>
 </head>
@@ -13,17 +89,22 @@
   <a class="skip" href="#contenu">Aller au contenu</a>
 
   <header class="masthead">
-    <a class="brand" href="index.html" aria-label="Æquo, accueil">Æquo<span aria-hidden="true">↗</span></a>
+    <a class="brand" href="/" aria-label="Æquo, accueil">Æquo<span aria-hidden="true">↗</span></a>
     <span class="edition">SIMULATEUR ACHAT OU LOCATION <br>DE VOTRE RÉSIDENCE PRINCIPALE</span>
-    <a class="nav-cta" href="simulateur.html">Le simulateur <span aria-hidden="true">↗</span></a>
+    <a class="nav-cta" href="/simulateur">Le simulateur <span aria-hidden="true">↗</span></a>
   </header>
 
   <main id="contenu">
 
     <section class="cover" aria-labelledby="titre">
       <div class="cover-heading">
-        <p class="folio">SIMULATEUR GRATUIT · SANS INSCRIPTION</p>
-        <h1 id="titre">La même porte. <br><em>Pas la même histoire.</em></h1>
+        <!-- Le surtitre fait partie du <h1> : le slogan seul ne dit rien du
+             sujet à un moteur de recherche. Les deux sont visibles, rien n'est
+             caché ; le rendu est celui d'avant (surtitre au-dessus, 24 px). -->
+        <h1 id="titre">
+          <span class="folio">SIMULATEUR GRATUIT · SANS INSCRIPTION</span>
+          <span class="cover__slogan">La même porte. <br><em>Pas la même histoire.</em></span>
+        </h1>
         <p class="intro">Acheter ou louer votre résidence principale&nbsp;? <br>Comparez les deux avec vos chiffres, en quelques minutes.</p>
       </div>
       <div class="theatre mode-achat" id="theatre">
@@ -71,7 +152,7 @@
       </div>
       <div class="cover-bottom">
         <p>La question n’est pas seulement <br><strong>« combien ça coûte ? »</strong> <br>Mais aussi <strong>« qu’est-ce qu’il me reste ? »</strong></p>
-        <a class="round-cta" href="simulateur.html"><span>Explorer <br>mon projet</span><span aria-hidden="true">↗</span></a>
+        <a class="round-cta" href="/simulateur"><span>Explorer <br>mon projet</span><span aria-hidden="true">↗</span></a>
         <a class="read-on" href="#deux-camps">Tourner la page <span aria-hidden="true">↓</span></a>
       </div>
     </section>
@@ -142,7 +223,7 @@
           Exemple calculé avec le moteur du simulateur. Vos chiffres seront différents.
         </figcaption>
       </figure>
-      <a class="apercu__lien" href="simulateur.html">Faire le calcul avec mon projet <span aria-hidden="true">↗</span></a>
+      <a class="apercu__lien" href="/simulateur">Faire le calcul avec mon projet <span aria-hidden="true">↗</span></a>
     </section>
 
     <section class="ledger" id="regle-du-jeu">
@@ -315,7 +396,7 @@
       <div class="answers" data-apparait>
         <details>
           <summary>Est-ce qu’Æquo va me dire d’acheter ou de louer&nbsp;?</summary>
-          <p>Non. Il compare vos deux patrimoines à la durée choisie, avec vos paramètres. Changer un prix, un loyer ou une hypothèse de marché peut inverser le résultat. La décision reste la vôtre.</p>
+          <p>Non. Primo-accédant ou non, il compare vos deux patrimoines à la durée choisie, avec vos paramètres. Changer un prix, un loyer ou une hypothèse de marché peut inverser le résultat. La décision reste la vôtre.</p>
         </details>
         <details>
           <summary>Pourquoi investir quand on reste locataire&nbsp;?</summary>
@@ -323,7 +404,7 @@
         </details>
         <details>
           <summary>Qu’est-ce qui entre dans les calculs&nbsp;?</summary>
-          <p>Le crédit, les frais d’acquisition, la copropriété, la taxe foncière, les loyers, l’évolution du bien et celle des placements. Les placements capitalisent avant impôt&nbsp;; la fiscalité de sortie est déduite du patrimoine net affiché.</p>
+          <p>Le crédit immobilier, les frais d’acquisition (notaire, agence…), la copropriété, la taxe foncière, les loyers, l’évolution du bien et celle des placements. Les placements capitalisent avant impôt&nbsp;; la fiscalité de sortie est déduite du patrimoine net affiché.</p>
           <p>Le modèle ne couvre pas tout&nbsp;: notamment les frais de revente, les gros travaux imprévus ou les changements de vie.</p>
         </details>
         <details>
@@ -345,7 +426,7 @@
       </div>
       <div class="finale-side" data-apparait>
         <p>Un prix, un loyer, votre situation. <br>Commencez par un exemple. <br>Faites-en votre histoire.</p>
-        <a href="simulateur.html" class="ticket">
+        <a href="/simulateur" class="ticket">
           <span>OUVRIR LE SIMULATEUR</span>
           <strong>C’est parti <span aria-hidden="true">↗</span></strong>
           <small>SANS INSCRIPTION / DANS VOTRE NAVIGATEUR</small>
@@ -356,7 +437,7 @@
   </main>
 
   <footer>
-    <a class="brand" href="index.html">Æquo<span aria-hidden="true">↗</span></a>
+    <a class="brand" href="/">Æquo<span aria-hidden="true">↗</span></a>
     <p>Acheter ou louer. Comprendre avant de choisir.</p>
     <!-- Adresse fictive tant que le domaine n'existe pas : le dire, pour
          que personne n'écrive dans le vide. -->
