@@ -494,7 +494,7 @@ inflation de **2,0 %** — la cible de la BCE, seule référence prospective non
 | Loyers (IRL) | **2,0 %** | L'IRL **est** légalement la moyenne sur 12 mois de l'IPC hors tabac et loyers (loi du 8 février 2008). L'indexation des loyers est l'inflation, par construction — pas une hypothèse. Écart observé 1991-2022 : +0,21 pt. |
 | Charges de copropriété | **2,0 %** | Inflation. |
 | Taxe foncière | **2,5 %** | Depuis 2018 la revalorisation forfaitaire des valeurs locatives suit l'IPCH, mais les taux communaux dérivent en plus. Inflation + 0,5 pt corrige la sous-estimation connue. |
-| Immobilier | **2,5 %** | 2 % + croissance **réelle** du revenu disponible brut par ménage (INSEE, ≈ 0,5 %/an). Thèse de Friggit : sur longue période, les prix suivent le revenu. |
+| Immobilier | **2,0 %** | Hypothèse centrale neutre : prix et loyers suivent l'inflation, rapport prix/loyer constant. Les prix partent d'un niveau élevé par rapport au revenu des ménages (Friggit, IGEDD) ; marché quasi stable à légèrement baissier en 2026 (Notaires-Insee). **Abaissé de 2,5 % le 08/10/2026** (décision de Lucas) : l'ancienne construction ajoutait la croissance réelle du revenu (≈ 0,5 %/an). |
 | Bourse | **6,8 %** | 2 % + rendement **réel** de long terme des actions **mondiales** (Dimson-Marsh-Staunton, *UBS Global Investment Returns Yearbook*, ≈ 5 %/an depuis 1900 — pas les États-Unis, ≈ 6,5 %), **moins ≈ 0,3 %/an de frais d'un ETF monde**. |
 | Taux de crédit | **3,5 %** | Pretto, sept. 2026 : 3,52 % sur 20 ans ; Crédit Logement/CSA, août 2026 : 3,31 % toutes durées. **À revoir chaque trimestre.** |
 
@@ -528,7 +528,7 @@ passe de −32 329 € à +128 379 €. **Ce sont les hypothèses qui répondent
 l'exigence de sourcer.
 
 **2. Le vrai message du site est le rendement locatif d'équilibre.** Avec les hypothèses de long
-terme, sur le profil par défaut, le basculement se situe à **3,57 % de rendement locatif brut** :
+terme, sur le profil par défaut, le basculement se situe à **3,57 % de rendement locatif brut** (⚠️ mesuré avec l'immobilier à 2,5 % : à recalculer depuis le passage à 2,0 %) :
 
 | | Rendement locatif brut | Verdict |
 |---|---|---|
@@ -978,7 +978,9 @@ déroulé, les textes et la fluidité qui ont changé. Branche `feat/accueil-tra
   mobile. Si le calcul échoue, chiffres et graphique restent cachés (`hidden`) : il ne reste que
   le titre et le lien, jamais un `NaN`.
 - ⚠️ **Le jeu d'exemple de l'aperçu est provisoire** : 340 000 €, loyer 950 € (3,35 % brut),
-  apport 60 000 €, 25 ans — point mort en 8ᵉ année, achat devant de 15 k€ à 25 ans. Recalé le
+  apport 60 000 €, 25 ans — point mort en 8ᵉ année, achat devant de 15 k€ à 25 ans. ⚠️ **Avec l'immobilier
+  à 2,0 % (08/10/2026), il ne croise plus** : location devant de 58 k€, « Point mort : Jamais ».
+  Laissé tel quel (Lucas : simple illustration, à revoir plus tard). Recalé le
   08/10/2026 avec la tendance longue : l'ancien (280 000 €, 1 000 €, repris de `09f7d0c`) passait
   l'achat devant dès l'an 4, de 152 k€ — trop optimiste pour une vitrine (Lucas). Les deux jeux par défaut du simulateur n'ont pas de croisement
   (`DEFAUTS` : achat devant dès l'an 1 ; `VALEURS_DE_TRAVAIL` : jamais), le point mort n'aurait
