@@ -636,7 +636,12 @@ Règles posées par l'audit mobile, à ne pas défaire. Elles vivent en fin de `
 d'`accueil.css` (sections « Téléphone ») et ne changent rien à la souris ni au-dessus de 560 px.
 
 - **Saisie à 16 px sur écran tactile** (`pointer: coarse`) : en dessous, Safari iOS zoome sur le
-  champ touché et laisse la page agrandie, décalée.
+  champ touché et laisse la page agrandie, décalée. Garde-fou général en `!important` sur tous les
+  champs : une règle plus précise (`.profil__groupes .champ input`) avait échappé au premier
+  correctif — vu sur iPhone, pas dans l'émulateur.
+- **Pas d'attente du double-tap** (`html { touch-action: manipulation }`, les deux pages) et vol
+  des bulles raccourci à 200 ms sous 560 px (`dureeVol`) : à 420 ms plus ≈ 350 ms d'attente iOS,
+  chaque toucher semblait mettre une seconde à répondre.
 - **Zones de contact de 44 px** : le contrôle grandit (lignes des bulles validées, boutons) ou un
   `::after` invisible le prolonge (croix `.mel__fermer`). Le dessin ne change pas.
 - **`inputmode="numeric"` sur les montants entiers** (tous `min="0"`). Pas sur les pourcentages :

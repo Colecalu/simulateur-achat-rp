@@ -2347,9 +2347,16 @@ function volerVers(el, appliquerChangement) {
       { transform: `translate(${dx}px, ${dy}px) scale(${echelle})`, opacity: 0.75 },
       { transform: 'translate(0, 0) scale(1)', opacity: 1 },
     ],
-    { duration: 420, easing: 'cubic-bezier(.22, .8, .28, 1)' }
+    { duration: dureeVol(), easing: 'cubic-bezier(.22, .8, .28, 1)' }
   );
 }
+
+/*
+ * Sur téléphone, la bulle part d'une case presque aussi large que l'écran :
+ * le vol ne montre plus grand-chose et son contenu reste masqué pendant tout
+ * le trajet. 420 ms y donnaient l'impression d'un toucher qui ne répond pas.
+ */
+const dureeVol = () => (matchMedia('(max-width: 560px)').matches ? 200 : 420);
 
 /** Reflète l'état de chaque bulle : verrouillée, ouvrable ou validée. */
 function majBulles() {

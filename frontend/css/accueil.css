@@ -2201,6 +2201,12 @@ footer .pied__avertissement {
   }
 }
 
+/* Pas d'attente du double-tap après chaque toucher (le pincement reste
+   permis) : même réglage que le simulateur. */
+html {
+  touch-action: manipulation;
+}
+
 /* Zones de contact de 44 px, sans changer le dessin. */
 @media (pointer:coarse) {
   .view-switch button {

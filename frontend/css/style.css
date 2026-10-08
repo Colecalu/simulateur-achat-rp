@@ -2457,6 +2457,13 @@ input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; marg
  *   (lignes, boutons) ou une zone invisible le prolonge (croix, curseurs).
  */
 @media (pointer: coarse) {
+  /* Garde-fou général, en !important à dessein : une règle plus précise
+     (`.profil__groupes .champ input`, 15 px) avait échappé au premier
+     correctif, et Safari zoomait dès le premier champ de la situation — la
+     page restait ensuite agrandie et glissait de gauche à droite. Aucun
+     champ, présent ou futur, ne doit passer sous 16 px au toucher. */
+  input:not([type="range"]):not([type="checkbox"]):not([type="radio"]),
+  select, textarea { font-size: 16px !important; }
   .champ input, .champ select,
   .bulle--validee:not(.bulle--zoom) .champ input,
   .bulle--validee:not(.bulle--zoom) .champ select,
@@ -2487,6 +2494,19 @@ input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; marg
   html:has(.question:not([hidden])) { overflow: hidden; }
 }
 .bulle--zoom .bulle__corps, .mel-fenetre, .mel-resultat, .apercu, .intro, .question { overscroll-behavior: contain; }
+
+/*
+ * Réactivité au toucher. `manipulation` retire l'attente qu'iOS s'accorde
+ * après chaque toucher pour guetter un double-tap (≈ 0,35 s, et toujours
+ * présente dès que la page est un tant soit peu zoomée) ; le pincement reste
+ * permis. Le contenu d'une bulle apparaît au même rythme que son vol, plus
+ * court sur téléphone (`dureeVol`).
+ */
+html { touch-action: manipulation; }
+@media (max-width: 560px) {
+  .bulle--zoom .bulle__corps,
+  .bulle--zoom .bulle__declencheur { animation-duration: .14s; animation-delay: .08s; }
+}
 
 /* Étiquettes qui portent une information : 11 px au moins sur téléphone. */
 @media (max-width: 560px) {
