@@ -37,10 +37,15 @@ jobs:
   tests:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
-          node-version: 20
+          # Node 24 (LTS), comme en local. PAS en dessous de 22 : c'est à
+          # partir de Node 21 que `node --test` développe lui-même un motif
+          # comme "tests/*.test.mjs". Node 20 le prenait pour un nom de
+          # fichier, ne trouvait rien et sortait en erreur — tests rouges
+          # sans qu'un seul test ait tourné.
+          node-version: 24
       # Les tests sont l'arbitre (CLAUDE.md §0) : rouges, rien ne part.
       - run: node --test "tests/*.test.mjs"
 
@@ -62,14 +67,16 @@ jobs:
             echo "pret=oui" >> "$GITHUB_OUTPUT"
           fi
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         if: steps.secrets.outputs.pret == 'oui'
 
       # Envoie seulement ce qui a changé depuis le dernier déploiement : l'état
       # est gardé sur le serveur dans .ftp-deploy-sync-state.json.
       - name: Envoi FTPS de frontend/
         if: steps.secrets.outputs.pret == 'oui'
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        # Version exacte, pas un tag mobile : cette action reçoit le mot de
+        # passe FTP. v4.4.0 = mêmes paramètres que v4.3.5, sur Node 24.
+        uses: SamKirkland/FTP-Deploy-Action@v4.4.0
         with:
           server: ${{ secrets.FTP_SERVEUR }}
           username: ${{ secrets.FTP_UTILISATEUR }}

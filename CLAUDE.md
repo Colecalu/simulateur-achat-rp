@@ -17,6 +17,9 @@ node --test "tests/*.test.mjs"   # 107 tests : moteur, location, indicateurs, s�
 
 Le motif est entre guillemets : `node --test tests/` échoue sous Windows (Node tente de charger
 le dossier comme un module), et un glob non quoté n'est pas développé par tous les shells.
+**Node 22 au minimum** (24 en local et en CI) : avant Node 21, `node --test` ne développe pas le
+motif lui-même et échoue sans lancer un seul test — c'est ce qui a fait tomber le premier essai
+du workflow de déploiement, sous Node 20, le 08/10/2026.
 
 Pas de build. `frontend/` est servi tel quel.
 
