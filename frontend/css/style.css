@@ -623,6 +623,11 @@ h1, h2, h3 {
     max-height: none;
     grid-template-rows: none;
     grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    /* Le déclencheur d'une bulle au repos est en position absolue : il ne
+       donne aucune hauteur à sa rangée. Sans plancher, les bulles 3 et 4
+       tombaient à 2 px sur téléphone — invisibles, le parcours semblait
+       s'arrêter au financement. Même plancher que les bulles 1 et 2. */
+    grid-auto-rows: minmax(140px, auto);
   }
   /* Une colonne : la carte devient une barre, titre à gauche, action à droite. */
   .nouvelle { flex-direction: row; align-items: center; flex-wrap: wrap; }
