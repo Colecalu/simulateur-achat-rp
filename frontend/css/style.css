@@ -1342,6 +1342,68 @@ h1, h2, h3 {
   line-height: 1.55;
   max-width: 78ch;
 }
+/* Discret mais pas caché : sous l'avertissement de scénario, séparé par un
+   filet pour qu'on ne les lise pas comme une seule phrase. */
+.avertissement--conseil {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px dashed var(--trait);
+}
+
+/* ----------------------------------------------------------- Pied de page */
+
+/* Le pendant du pied de l'accueil, dans les jetons du simulateur. */
+.pied {
+  margin-top: 32px;
+  border-top: 1px solid var(--trait);
+  background: var(--surface);
+}
+.pied__contenu {
+  max-width: 1360px;
+  margin: 0 auto;
+  padding: 18px 24px 22px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 28px;
+}
+.pied__marque {
+  font-family: var(--police-titre);
+  font-size: 1.125rem;
+  color: var(--encre);
+  text-decoration: none;
+}
+.pied__devise {
+  margin: 0 auto 0 0;
+  font-size: .8125rem;
+  color: var(--encre-2);
+}
+.pied__liens {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 20px;
+}
+/* 44 px de haut : une cible de doigt, comme dans le pied de l'accueil. */
+.pied__liens a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  font-size: .8125rem;
+  color: var(--encre);
+  text-underline-offset: 3px;
+}
+.pied__liens a:hover { color: var(--accent); }
+.pied__avertissement {
+  flex-basis: 100%;
+  margin: 6px 0 0;
+  max-width: 90ch;
+  font-size: .75rem;
+  line-height: 1.5;
+  color: var(--encre-3);
+}
+@media (max-width: 560px) {
+  .pied__devise { flex-basis: 100%; }
+}
 
 /* Confort de lecture des champs numériques */
 input[type="number"] { -moz-appearance: textfield; }

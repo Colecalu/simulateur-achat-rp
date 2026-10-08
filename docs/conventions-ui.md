@@ -29,8 +29,9 @@ les écarts assumés.
   `--accent`, `--achat`, `--rayon-large`…).
 - **Les thèmes ne contiennent que des VALEURS** : les rampes du design recopiées, les polices
   importées, puis les noms sémantiques qui pointent dessus. Aucune règle de mise en page.
-  `theme-codex.css` est **celui en service** ; `theme-perron.css` et `theme-foret.css` sont
-  conservés.
+  `theme-codex.css` est **celui en service**, et désormais le seul : `theme-perron.css` et
+  `theme-foret.css`, chargés par aucune page, ont été retirés le 07/10/2026 avant la mise en
+  ligne. Ils restent dans l'historique git (`git show 93dcde3:frontend/css/theme-perron.css`).
 - Si un rôle manque, l'ajouter au **thème en service** plutôt que d'écrire une couleur dans une
   feuille de structure. Perron et Forêt n'étant plus chargés, ils peuvent manquer le rôle et
   retomber en valeur par défaut : c'est accepté, on ne les rattrape pas.

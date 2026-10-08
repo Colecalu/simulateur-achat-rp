@@ -482,13 +482,14 @@ const traitPointMort = {
 };
 
 function dessinerGraphiques(resultat, horizon, mel) {
-  // Chart.js vient d'un CDN : hors ligne, il manque. Les chiffres et le tableau
-  // restent justes, on se contente de le dire au lieu de casser la page.
+  // Chart.js est hébergé sur le site (js/vendor/), mais son chargement peut
+  // encore échouer (fichier bloqué, coupure en plein chargement). Les chiffres
+  // et le tableau restent justes : on le dit au lieu de casser la page.
   if (typeof Chart === 'undefined') {
     document.querySelectorAll('.graphique').forEach((zone) => {
       zone.innerHTML =
         '<p class="graphique__absent">Graphique indisponible : la librairie Chart.js ' +
-        'n\'a pas pu être chargée (connexion internet requise). Les chiffres et le ' +
+        'n\'a pas pu être chargée. Rechargez la page pour réessayer. Les chiffres et le ' +
         'tableau ci-dessous restent exacts.</p>';
     });
     return;

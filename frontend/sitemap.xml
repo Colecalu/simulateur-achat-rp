@@ -1,14 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Les deux pages, à leurs adresses propres (voir .htaccess). aequo.example
-     est le domaine provisoire. lastmod : à mettre à jour quand une page
-     change vraiment de contenu, pas à chaque correction de style. -->
+<!-- Les pages, à leurs adresses propres (voir .htaccess), sur
+     https://aequo-immo.fr sans www. lastmod : à mettre à jour quand une page
+     change vraiment de contenu, pas à chaque correction de style. La 404 n'y
+     figure pas : ce n'est pas une page à indexer. -->
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://aequo.example/</loc>
-    <lastmod>2026-10-06</lastmod>
+    <loc>https://aequo-immo.fr/</loc>
+    <lastmod>2026-10-07</lastmod>
   </url>
   <url>
-    <loc>https://aequo.example/simulateur</loc>
-    <lastmod>2026-10-06</lastmod>
+    <loc>https://aequo-immo.fr/simulateur</loc>
+    <lastmod>2026-10-07</lastmod>
+  </url>
+  <url>
+    <loc>https://aequo-immo.fr/mentions-legales</loc>
+    <lastmod>2026-10-07</lastmod>
+  </url>
+  <url>
+    <loc>https://aequo-immo.fr/confidentialite</loc>
+    <lastmod>2026-10-07</lastmod>
   </url>
 </urlset>
