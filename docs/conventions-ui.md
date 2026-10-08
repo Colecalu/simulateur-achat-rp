@@ -304,7 +304,7 @@ réelles — en cours ; **(3)** la mise en location ultérieure — moteur fait,
   indépendantes : deux dates à l'écran, c'est la garantie qu'on finit par comparer deux instants
   différents sans s'en apercevoir.
 - **« Chaque mois » : quatre KPI sous le graphique, HORS du détail repliable** (`#mensuel`,
-  carte `.kpis`) : point d'équilibre · **Achat** (coût réel, investi) · **Location** (loyer,
+  carte `.kpis`) : point mort · **Achat** (coût réel, investi) · **Location** (loyer,
   investi) · taux d'endettement. Première année, ramenée au mois. Tous les chiffres mensuels au
   même endroit — ils étaient en double avec un bloc du profil, retiré. Le **coût réel**
   (mensualité, assurance, charges de copropriété, taxe foncière) contient la mensualité, qui n'est
@@ -414,18 +414,20 @@ réelles — en cours ; **(3)** la mise en location ultérieure — moteur fait,
 
   > **Cet achat demande 23 807 € de plus par mois que votre effort actuel.**
   > Êtes-vous vraiment prêt à faire cet effort supplémentaire ?
-  > *Si oui : pourquoi ne le faites-vous pas déjà, aujourd'hui, en tant que locataire ?*
-  > C'est tout l'enjeu : le crédit vous FORCERA à mettre cette somme de côté chaque mois, alors
+  > *Si oui, pourquoi ne pas le faire dès aujourd'hui, en restant locataire ?*
+  > C'est tout l'enjeu : le crédit vous obligera à mettre cette somme de côté chaque mois, alors
   > que rien ne vous y oblige en restant locataire. Selon votre réponse, les deux trajectoires
   > n'auront pas la même enveloppe : 23 807 € par mois d'écart, pendant toute la simulation.
   > *Répondez franchement, même si la réponse ne vous arrange pas.*
-  > [ Je place le gap ] [ Je conserve mon effort actuel ]
+  > [ Je place la différence ] [ Je conserve mon effort actuel ]
   > À 10 ans, votre réponse déplace le résultat de 3 362 108 €.
 
   - **La deuxième question est celle qui fait tout le travail**, et elle dérange exprès : si
     l'effort est tenable, pourquoi ne le fait-on pas déjà ? La réponse honnête est presque
     toujours « parce que rien ne m'y oblige » — c'est exactement ce que le crédit changerait.
-    Elle est **en couleur d'alerte** : ce n'est pas une question de même rang que la première.
+    Elle est **en italique**, plus en couleur d'alerte : en rouge, avec « FORCERA » en capitales
+    et « pourquoi ne le faites-vous pas déjà », elle sonnait comme un reproche — or le site
+    compare, il ne juge pas (audit du 08/10/2026, Lucas). Toujours au **vouvoiement**.
     Ni l'une ni l'autre n'a de bouton : elles se répondent dans sa tête.
   - **Le paragraphe dit ce que le choix ENGAGE**, pas ce qu'est l'épargne forcée : deux enveloppes
     différentes pour toute la suite, chiffrées. Sans lui, on répond à une question de principe
@@ -503,7 +505,7 @@ réelles — en cours ; **(3)** la mise en location ultérieure — moteur fait,
   `grid-template-rows: repeat(2, 1fr)` à gauche) : une bulle qui s'étire pousserait toute la mise
   en page.
   1. L'opération · 2. Le financement · 3. Les dépenses annuelles (charges du propriétaire **et**
-  loyer du locataire) · 4. Le scénario de marché (rendement, fiscalité et toutes les
+  loyer du locataire) · 4. Les hypothèses de marché (rendement, fiscalité et toutes les
   revalorisations).
   La bulle 4 est destinée à devenir un **filtre de scénarios** (optimiste / moyen / pessimiste,
   adossés à des séries historiques réelles) appliqué par-dessus le reste du modèle : y regrouper
@@ -657,11 +659,40 @@ d'`accueil.css` (sections « Téléphone ») et ne changent rien à la souris ni
   page est sur une colonne (`montrerResultatUneFois`). Pas aux retouches suivantes.
 - **Plancher de 11 px pour ce qui porte une information** (légendes, unités, avertissement,
   adresse de contact, mention « Calculs faits dans votre navigateur »). Le décor — surtitres,
-  folios, tampons, numéros de carte — garde sa taille.
+  folios, numéros de carte — a un plancher de **10 px** depuis l'audit du 08/10/2026 (il
+  descendait à 7 et 8 px, plus petit sur téléphone qu'au bureau) ; le tampon de couverture, borné
+  par son cercle, reste à 9 px.
 - **Sur une colonne (≤ 1040 px), le résultat suit la quatrième bulle**, et les cartes
   « Scénarios » et « Mise en location » passent dessous : ce sont des suites, débloquées par le
   résultat (décision de Lucas, 08/10/2026). `.plateau__gauche` y est en `display: contents` pour
   que le rail et les deux cartes se placent chacun dans leur zone de grille. Au bureau, rien ne
   change.
-- **« Chaque mois » sur téléphone (≤ 720 px) : deux rangées fixes** — point d'équilibre et taux
+- **« Chaque mois » sur téléphone (≤ 720 px) : deux rangées fixes** — point mort et taux
   d'endettement en haut, Achat et Location côte à côte en bas (décision de Lucas, 08/10/2026).
+
+## Audit d'ergonomie du 08/10/2026 — avant l'indexation
+
+Audit du site en ligne à 1440, 1024, 768, 390, 360 et 320 px, parcours complet du simulateur.
+Décisions de Lucas, à ne pas défaire sans en reparler :
+
+- **Le détail ne déborde plus sous 375 px** : `.detail` et `.detail__panneau` ont des colonnes
+  explicites en `minmax(0, 1fr)`. Sans elles, la grille prenait la largeur minimale de son contenu
+  (deux camemberts) et la page défilait de côté à 360 px, la largeur Android la plus courante.
+- **Mise en location : on ne revend pas avant d'avoir loué.** À l'ouverture du résultat, si le
+  curseur principal est avant l'année de bascule, il passe à cette année ; le curseur « Bilan
+  dans » commence à l'année de bascule (`min`). La fenêtre s'ouvrait sur deux « — ».
+- **Vocabulaire** : « point mort » partout (plus « point d'équilibre ») ; la bulle 4 s'appelle
+  « Les hypothèses de marché », pour ne plus se confondre avec la carte « Scénarios de marché ».
+- **Marque** : « Æquo↗ » partout, jamais « ® » (la marque n'est pas déposée).
+- **Champ manquant dans la situation** : « à renseigner » s'écrit DANS le champ vide, plus après
+  le libellé, qui passait sur deux lignes et désalignait les groupes.
+- **Pied de page identique sur les cinq pages** : trois liens alignés — Mentions légales,
+  Confidentialité, et l'adresse `contact@aequo-immo.fr` elle-même (cliquable, plus de « Contact »
+  doublé d'une adresse en 9 px) — puis « Des hypothèses, pas une prédiction. » et
+  l'avertissement. Marque en DM Sans grasse avec sa flèche, comme l'en-tête.
+- **Couverture de l'accueil sous 700 px** : maison, carte postale et tampon descendus de 40 px ;
+  carte et tampon resserrés sous 360 px. Plus de chevauchement de 320 à 430 px.
+- **Écartés** : alerte au-delà de 35 % d'endettement (non) ; vide de la carte du pilier 3 (laissé).
+- **En suspens** : sur téléphone, les cartes « Scénarios » et « Mise en location » arrivent après
+  tout le détail (≈ 4 200 px sur 5 100). Leur place sous le résultat est une décision du
+  08/10/2026 ; les remonter avant le détail reste à trancher.

@@ -49,7 +49,7 @@
 <header class="entete">
   <div class="entete__contenu">
     <!-- Retour à la page d'accueil, qui est désormais la racine du site. -->
-    <a class="entete__marque" href="./">Æquo<span aria-hidden="true">®</span></a>
+    <a class="entete__marque" href="./" aria-label="Æquo, accueil">Æquo<span aria-hidden="true">↗</span></a>
     <h1>Dois-je acheter ma résidence principale&nbsp;?</h1>
     <p class="entete__sous-titre">
       À budget mensuel identique, on compare deux trajectoires patrimoniales&nbsp;: rester
@@ -344,11 +344,11 @@
           <article class="bulle" data-bulle="4" data-colonnes="1">
             <button type="button" class="bulle__declencheur" data-ouvrir="4">
               <span class="bulle__numero">4</span>
-              <span class="bulle__titre">Le scénario de marché</span>
+              <span class="bulle__titre">Les hypothèses de marché</span>
               <span class="bulle__cadenas" aria-hidden="true"></span>
             </button>
             <div class="bulle__corps">
-              <p class="bulle__intro">Les hypothèses qui font évoluer le monde autour de vous&nbsp;: bourse, immobilier, loyers, fiscalité. Elles partent d'une tendance longue sourcée&nbsp;; les scénarios de marché viendront les remplacer par des trajectoires année par année.</p>
+              <p class="bulle__intro">Les hypothèses qui font évoluer le monde autour de vous&nbsp;: bourse, immobilier, loyers, fiscalité. Elles partent d'une tendance longue sourcée&nbsp;; un scénario de marché, plus bas, peut les remplacer par des trajectoires année par année.</p>
               <div class="bulle__champs">
               <label class="champ">
             <span class="champ__libelle">Rendement de la bourse</span>
@@ -589,7 +589,7 @@
       <section class="mensuel" id="mensuel" aria-label="Chaque mois">
         <div class="kpis">
           <div class="kpi">
-            <p class="kpi__mot">Point d'équilibre</p>
+            <p class="kpi__mot">Point mort</p>
             <p class="kpi__chiffre tabulaire" id="pointMort">—</p>
           </div>
           <div class="kpi kpi--projet">
@@ -778,7 +778,7 @@
         elle qui décide du résultat.
       </p>
       <div class="question__reponses">
-        <button type="button" class="question__reponse" data-reponse="oui">Je place le gap</button>
+        <button type="button" class="question__reponse" data-reponse="oui">Je place la différence</button>
         <button type="button" class="question__reponse" data-reponse="non">Je conserve mon effort actuel</button>
       </div>
       <p class="question__enjeu" id="questionEnjeu"></p>
@@ -1037,13 +1037,14 @@
      liens légaux, contact, et l'avertissement en entier. -->
 <footer class="pied">
   <div class="pied__contenu">
-    <a class="pied__marque" href="/">Æquo</a>
+    <a class="pied__marque" href="/">Æquo<span aria-hidden="true">↗</span></a>
     <p class="pied__devise">Acheter ou louer. Comprendre avant de choisir.</p>
     <nav class="pied__liens" aria-label="Informations légales">
       <a href="/mentions-legales">Mentions légales</a>
       <a href="/confidentialite">Confidentialité</a>
-      <a href="mailto:contact@aequo-immo.fr">Contact</a>
+      <a href="mailto:contact@aequo-immo.fr">contact@aequo-immo.fr</a>
     </nav>
+    <p class="pied__mention">Des hypothèses, pas une prédiction.</p>
     <p class="pied__avertissement">Æquo propose des simulations à visée pédagogique. Elles ne
       constituent ni un conseil financier, ni un conseil en investissement, ni un conseil
       immobilier&nbsp;: avant de vous engager, vérifiez vos chiffres et, si besoin, faites-vous

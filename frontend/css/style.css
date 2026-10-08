@@ -395,7 +395,9 @@ h1, h2, h3 {
 .question__demande { margin: 14px 0 0; font-size: 1rem; font-weight: 600; color: var(--encre); }
 /* La question qui dérange : elle doit se voir comme la bascule du raisonnement,
    pas comme une deuxième question de même rang. */
-.question__demande--gene { margin-top: 6px; color: var(--alerte); }
+/* Plus en couleur d'alerte (audit du 08/10/2026) : en rouge, elle sonnait
+   comme un reproche. L'italique suffit à la distinguer. */
+.question__demande--gene { margin-top: 6px; font-style: italic; }
 .question__reponses { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
 @media (max-width: 560px) { .question__reponses { grid-template-columns: 1fr; } }
 /* Deux libellés, rien de plus : l'aide sous chaque bouton ajoutait deux lignes
@@ -1019,6 +1021,24 @@ h1, h2, h3 {
   color: var(--alerte);
   font-weight: 400;
 }
+/*
+ * Dans la situation, la mention passe DANS le champ vide : ajoutée au
+ * libellé, elle le faisait passer sur deux lignes et décalait les champs
+ * d'un groupe à l'autre (audit du 08/10/2026). Elle disparaît à la frappe,
+ * avec la classe.
+ */
+.profil__groupes .champ--manquant .champ__libelle::after { content: none; }
+.profil__groupes .champ--manquant .champ__saisie { position: relative; }
+.profil__groupes .champ--manquant .champ__saisie::before {
+  content: "à renseigner";
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  translate: 0 -50%;
+  font-size: .8125rem;
+  color: var(--alerte);
+  pointer-events: none;
+}
 
 .champ__saisie:focus-within {
   border-color: var(--achat);
@@ -1384,11 +1404,18 @@ h1, h2, h3 {
   gap: 4px 28px;
 }
 .pied__marque {
-  font-family: var(--police-titre);
-  font-size: 1.125rem;
+  font-family: var(--police);
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -.07em;
+  line-height: 1;
   color: var(--encre);
   text-decoration: none;
 }
+/* La même marque que l'en-tête et que le pied de l'accueil : DM Sans grasse
+   et sa flèche (audit du 08/10/2026). */
+.pied__marque span { font-size: .6rem; vertical-align: top; margin-left: 3px; letter-spacing: 0; }
+.pied__mention { flex-basis: 100%; margin: 0; font-size: .75rem; color: var(--encre-3); }
 .pied__devise {
   margin: 0 auto 0 0;
   font-size: .8125rem;
@@ -2193,8 +2220,13 @@ input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; marg
  * discret du module de mise en location passait inaperçu ici, parce qu'il
  * arrive après un graphique qui occupe tout l'écran.
  */
-.detail { display: grid; gap: 16px; justify-items: center; }
-.detail__panneau { display: grid; gap: 16px; width: 100%; }
+/*
+ * Colonnes explicites en minmax(0, 1fr) : une grille sans colonne déclarée
+ * prend la largeur minimale de son contenu, et le détail débordait de 30 px
+ * sous 375 px de large (Android courants à 360 px, audit du 08/10/2026).
+ */
+.detail { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; justify-items: center; }
+.detail__panneau { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; width: 100%; }
 .detail__panneau[hidden] { display: none; }
 
 .cta {
