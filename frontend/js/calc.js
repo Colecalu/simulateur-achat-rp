@@ -40,9 +40,11 @@
     // moins ≈ 0,3 %/an de frais de gestion d'un ETF monde. Pas le marché
     // américain (≈ 6,5 % réel), qui est le gagnant connu après coup.
     rendementBourse: 0.068,
-    // 2 % + croissance réelle du revenu disponible brut par ménage (INSEE,
-    // ≈ 0,5 %/an) : sur longue période, les prix suivent le revenu (Friggit).
-    revalBien: 0.025,
+    // Hypothèse centrale neutre : prix et loyers suivent l'inflation (2 %),
+    // rapport prix/loyer constant. Les prix partent d'un niveau élevé par
+    // rapport au revenu des ménages (Friggit, IGEDD) ; marché quasi stable à
+    // légèrement baissier en 2026 (Notaires-Insee).
+    revalBien: 0.02,
     // L'IRL EST légalement l'inflation (loi du 8 février 2008).
     revalLoyer: 0.02,
     // Inflation.
