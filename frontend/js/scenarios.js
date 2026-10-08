@@ -104,12 +104,11 @@
    * quatre. Les fenêtres historiques y sont découpées ; rien d'autre dans ce
    * fichier n'est observé.
    *
-   * ⚠️ `rendementBourse` 1999-2011 est FAUX : ce sont des valeurs USD, pas EUR
-   * (1991-1998 a été converti via le franc, voir le tableau).
-   * Diagnostic confirmé (CLAUDE.md §10) : 9 années sur 11 coïncident au
-   * centième avec le MSCI World USD Net, 0 sur 11 avec l'EUR. 2012-2022 vient
-   * en revanche de la fiche officielle MSCI World EUR Net. La série est donc
-   * PANACHÉE tant que les années 1991-2011 ne sont pas remplacées.
+   * `rendementBourse` 1991-2011 est RECONSTITUÉ : MSCI World USD Net converti
+   * en euros (CLAUDE.md §10). Juste dans les grandes masses, approximatif année
+   * par année — méthode éprouvée sur 2012-2022, où l'officiel EUR existe :
+   * 0,7 pt d'écart moyen par an, 82 % contre 80 % cumulés sur 2016-2022.
+   * 2012-2022 vient de la fiche officielle MSCI World EUR Net.
    *
    * ⚠️ Ces mêmes tableaux existent dans `outils/fenetres-historiques.mjs`, qui
    * ne part jamais en production mais sert à choisir les fenêtres. Les deux
@@ -121,14 +120,14 @@
 
   var SERIES_OBSERVEES = {
     rendementBourse: [
-      // 1991-1998 — MSCI World USD Net converti en EUR via le franc (parité fixe
-      // 6,55957 F/€, sans effet sur un rendement) : r€ = (1 + r$) × S(t) / S(t-1) − 1,
-      // S = francs pour 1 $, moyenne mensuelle de décembre (FRED EXFRUS), prise
-      // comme approximation du cours de fin d'année.
+      // 1991-2011 — MSCI World USD Net converti en EUR : r€ = (1 + r$) × S(t) / S(t-1) − 1,
+      // S = unités pour 1 $, moyenne mensuelle de décembre (FRED) prise comme
+      // approximation du cours de fin d'année. Avant 1999 via le franc (EXFRUS ;
+      // la parité fixe 6,55957 F/€ ne change aucun rendement), ensuite via l'euro
+      // (EXUSEU). Raccord fin 1998 : 6,55957 / 5,5981 = 1,1717 $/€.
       0.2414, -0.0419, 0.3272, -0.0271, 0.1052, 0.2005, 0.3152, 0.1687,
-      // 1999-2011 — ⚠️ PROVISOIRE, valeurs USD à remplacer par du MSCI World EUR Net
-      0.253, -0.132,
-      -0.165, -0.199, 0.331, 0.147, 0.095, 0.207, 0.09, -0.403, 0.3, 0.118, -0.055,
+      0.4522, -0.0231, -0.1583, -0.2997, 0.1033, 0.0522, 0.2376, 0.0842, -0.0114,
+      -0.3567, 0.2048, 0.2328, -0.0503,
       // 2012-2022 — MSCI World EUR Net, fiche officielle
       0.1405, 0.212, 0.195, 0.1042, 0.1073, 0.0751, -0.0411, 0.3002, 0.0633,
       0.3107, -0.1278,
@@ -157,9 +156,8 @@
 
   var SOURCES_OBSERVEES = {
     rendementBourse:
-      '⚠️ PROVISOIRE — MSCI World : 2012-2022 en EUR dividendes nets réinvestis ' +
-      '(fiche officielle), 1991-1998 USD converti en EUR via le franc, ' +
-      '1999-2011 en USD, à remplacer',
+      'MSCI World, dividendes nets réinvestis, en euros : 2012-2022 fiche officielle, ' +
+      '1991-2011 reconstitué depuis la série en dollars (change de décembre, FRED)',
     revalBien:
       'INSEE, indice Notaires-INSEE 010567059, France métropolitaine, maisons + appartements',
     revalLoyer:
@@ -182,11 +180,11 @@
     revalTaxeFonciere: 'Tendance longue (inflation + 0,5 pt)',
   };
 
-  /** Réserve commune tant que la série boursière n'est pas corrigée. */
+  /** Réserve commune : la partie reconstituée de la série boursière. */
   var RESERVE_DEVISE =
-    'Données provisoires : les rendements boursiers 1991-2011 sont en dollars, ' +
-    'pas en euros. Le chemin année par année est donc faux sur cette partie. ' +
-    'Ni la période retenue ni les chiffres affichés ne sont définitifs.';
+    'Rendements boursiers 1991-2011 reconstitués : MSCI World en dollars converti ' +
+    'en euros au change de fin d’année. Juste dans les grandes masses, ' +
+    'approximatif année par année.';
 
   /* ====================================================================== 3 —
    * OUTILLAGE
@@ -283,7 +281,7 @@
       reserves: [
         RESERVE_DEVISE,
         'Période retenue à titre provisoire : le classement des fenêtres sera ' +
-          'refait une fois la série boursière corrigée.',
+          'refait une fois les séries prolongées jusqu’en 2025.',
       ],
       taux: taux,
       // Années réellement observées. Au-delà, la courbe passe en pointillé.
@@ -401,24 +399,25 @@
       cle: 'decennie-perdue-bourse',
       nom: 'Décennie perdue en bourse',
       resume:
-        'Les actions mondiales font du surplace douze années durant — deux krachs, ' +
-        'et un portefeuille revenu à son point de départ — avant de repartir sur la ' +
+        'Les actions mondiales reculent douze années durant — deux krachs, et un ' +
+        'portefeuille encore 20 % sous son point de départ — avant de repartir sur la ' +
         "tendance longue. L'immobilier, lui, reste sur la tendance longue.",
       sourceChoc:
-        '⚠️ PROVISOIRE — séquence du MSCI World 2000-2011, en dollars faute de ' +
-        'série EUR sur ces années',
+        'Séquence du MSCI World 2000-2011 en euros, reconstituée depuis la série ' +
+        'en dollars',
       // Pas de `RESERVE_DEVISE` ici : elle parle d'une « période retenue »,
       // notion qui n'a de sens que pour une fenêtre historique. La réserve
       // ci-dessous dit la même chose, en plus exact pour ce scénario.
       reserves: [
-        'Séquence reprise du MSCI World 2000-2011, en dollars faute de série EUR. ' +
-          "En euros l'épisode fut PLUS dur : le dollar s'est effondré de 2002 à 2008 " +
-          "(l'euro est passé de 0,85 à 1,60), ce que ces chiffres ne portent pas.",
+        'Séquence reprise du MSCI World 2000-2011, convertie en euros au change ' +
+          'de fin d’année : juste dans les grandes masses, approximative année par ' +
+          "année. En euros l'épisode fut plus dur qu'en dollars : la chute du dollar " +
+          'de 2002 à 2008 a effacé l’essentiel des rebonds.',
       ],
       choc: {
         // Douze années réellement enchaînées, pas une stagnation lissée : c'est
-        // la SÉQUENCE qui fait mal (−42 % cumulé au creux de la 3ᵉ année), pas
-        // la moyenne, qui ressort à +0,4 % par an.
+        // la SÉQUENCE qui fait mal (−42 % cumulé en 3ᵉ année, −43 % en 9ᵉ), pas
+        // seulement la moyenne, qui ressort à −1,8 % par an.
         rendementBourse: fenetre('rendementBourse', 2000, 12),
       },
     })
