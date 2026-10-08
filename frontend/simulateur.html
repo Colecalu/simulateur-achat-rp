@@ -84,7 +84,7 @@
           <label class="champ">
             <span class="champ__libelle">Patrimoine financier</span>
             <span class="champ__saisie">
-              <input type="number" id="capitalInitial" step="1000" min="0">
+              <input type="number" inputmode="numeric" id="capitalInitial" step="1000" min="0">
               <span class="champ__unite">€</span>
             </span>
             <span class="champ__aide">Livrets, placements, épargne salariale. Pas d'immobilier.</span>
@@ -97,7 +97,7 @@
             <label class="champ">
               <span class="champ__libelle">Loyer actuel</span>
               <span class="champ__saisie">
-                <input type="number" id="loyerActuel" step="50" min="0">
+                <input type="number" inputmode="numeric" id="loyerActuel" step="50" min="0">
                 <span class="champ__unite">€/mois</span>
               </span>
             </label>
@@ -105,7 +105,7 @@
             <label class="champ">
               <span class="champ__libelle">Épargne mensuelle actuelle</span>
               <span class="champ__saisie">
-                <input type="number" id="epargneActuelle" step="50" min="0">
+                <input type="number" inputmode="numeric" id="epargneActuelle" step="50" min="0">
                 <span class="champ__unite">€/mois</span>
               </span>
             </label>
@@ -120,7 +120,7 @@
           <label class="champ">
             <span class="champ__libelle">Revenus nets du foyer, avant impôt</span>
             <span class="champ__saisie">
-              <input type="number" id="revenusFoyer" step="100" min="0" placeholder="—">
+              <input type="number" inputmode="numeric" id="revenusFoyer" step="100" min="0" placeholder="—">
               <span class="champ__unite">€/mois</span>
             </span>
             <span class="champ__aide">« Net à payer avant impôt » de la fiche de paie. À deux, additionnez.</span>
@@ -187,7 +187,7 @@
           <span class="champ__libelle">Prix net vendeur</span>
             <span class="champ__court">Prix</span>
           <span class="champ__saisie">
-            <input type="number" id="prixNetVendeur" step="5000" min="0">
+            <input type="number" inputmode="numeric" id="prixNetVendeur" step="5000" min="0">
             <span class="champ__unite">€</span>
           </span>
         </label>
@@ -207,7 +207,7 @@
           <span class="champ__libelle">Frais d'agence</span>
             <span class="champ__court">Agence</span>
           <span class="champ__saisie">
-            <input type="number" id="fraisAgence" step="1000" min="0">
+            <input type="number" inputmode="numeric" id="fraisAgence" step="1000" min="0">
             <span class="champ__unite">€</span>
           </span>
         </label>
@@ -215,7 +215,7 @@
           <span class="champ__libelle">Travaux</span>
             <span class="champ__court">Travaux</span>
           <span class="champ__saisie">
-            <input type="number" id="travaux" step="1000" min="0">
+            <input type="number" inputmode="numeric" id="travaux" step="1000" min="0">
             <span class="champ__unite">€</span>
           </span>
         </label>
@@ -223,7 +223,7 @@
           <span class="champ__libelle">Frais bancaires&nbsp;<em>(dossier + hypothèque)</em></span>
             <span class="champ__court">Banque</span>
           <span class="champ__saisie">
-            <input type="number" id="fraisBancaires" step="100" min="0">
+            <input type="number" inputmode="numeric" id="fraisBancaires" step="100" min="0">
             <span class="champ__unite">€</span>
           </span>
         </label>
@@ -231,7 +231,7 @@
           <span class="champ__libelle">Valeur estimée du bien après travaux</span>
             <span class="champ__court">Valeur</span>
           <span class="champ__saisie">
-            <input type="number" id="valeurEstimee" step="5000" min="0">
+            <input type="number" inputmode="numeric" id="valeurEstimee" step="5000" min="0">
             <span class="champ__unite">€</span>
           </span>
           <span class="champ__aide">Ce que vous en tireriez à la revente en année 0. Souvent inférieure au total dépensé&nbsp;: les frais de notaire ne se récupèrent pas.</span>
@@ -257,7 +257,7 @@
           <span class="champ__libelle">Apport</span>
             <span class="champ__court">Apport</span>
           <span class="champ__saisie">
-            <input type="number" id="apport" step="5000" min="0">
+            <input type="number" inputmode="numeric" id="apport" step="5000" min="0">
             <span class="champ__unite">€</span>
           </span>
         </label>
@@ -265,7 +265,7 @@
           <span class="champ__libelle">Durée</span>
             <span class="champ__court">Durée</span>
           <span class="champ__saisie">
-            <input type="number" id="dureeAnnees" step="1" min="1" max="30">
+            <input type="number" inputmode="numeric" id="dureeAnnees" step="1" min="1" max="30">
             <span class="champ__unite">ans</span>
           </span>
         </label>
@@ -311,7 +311,7 @@
             <span class="champ__libelle">Charges de copropriété</span>
               <span class="champ__court">Charges de copro</span>
             <span class="champ__saisie">
-              <input type="number" id="chargesCopro" step="100" min="0" placeholder="voir l'annonce" aria-describedby="chargesCoproAide">
+              <input type="number" inputmode="numeric" id="chargesCopro" step="100" min="0" placeholder="voir l'annonce" aria-describedby="chargesCoproAide">
               <span class="champ__unite">€/an</span>
             </span>
             <span class="champ__aide" id="chargesCoproAide">Montants indiqués dans l'annonce. 0 si le bien n'est pas en copropriété.</span>
@@ -320,7 +320,7 @@
             <span class="champ__libelle">Taxe foncière</span>
               <span class="champ__court">Taxe foncière</span>
             <span class="champ__saisie">
-              <input type="number" id="taxeFonciere" step="100" min="0" placeholder="voir l'annonce" aria-describedby="taxeFonciereAide">
+              <input type="number" inputmode="numeric" id="taxeFonciere" step="100" min="0" placeholder="voir l'annonce" aria-describedby="taxeFonciereAide">
               <span class="champ__unite">€/an</span>
             </span>
             <span class="champ__aide" id="taxeFonciereAide">Montants indiqués dans l'annonce.</span>
@@ -329,7 +329,7 @@
             <span class="champ__libelle">Loyer (charges comprises)</span>
               <span class="champ__court">Loyer (locataire)</span>
             <span class="champ__saisie">
-              <input type="number" id="loyer" step="50" min="0">
+              <input type="number" inputmode="numeric" id="loyer" step="50" min="0">
               <span class="champ__unite">€/mois</span>
             </span>
           </label>
@@ -829,7 +829,7 @@
             <label class="champ mel__champ">
               <span class="champ__libelle">Loyer que vous percevrez</span>
               <span class="champ__saisie">
-                <input type="number" id="melLoyerPercu" min="0" step="50" placeholder="ex. 1800">
+                <input type="number" inputmode="numeric" id="melLoyerPercu" min="0" step="50" placeholder="ex. 1800">
                 <span class="champ__unite">€/mois</span>
               </span>
               <span class="mel__aide" id="melLoyerPercuAide"></span>
@@ -837,7 +837,7 @@
             <label class="champ mel__champ">
               <span class="champ__libelle">Votre loyer pour vous reloger</span>
               <span class="champ__saisie">
-                <input type="number" id="melLoyerFutur" min="0" step="50" placeholder="ex. 1600">
+                <input type="number" inputmode="numeric" id="melLoyerFutur" min="0" step="50" placeholder="ex. 1600">
                 <span class="champ__unite">€/mois</span>
               </span>
               <span class="mel__aide" id="melLoyerFuturAide"></span>
@@ -850,14 +850,14 @@
               <label class="champ">
                 <span class="champ__libelle">Tranche marginale d'imposition</span>
                 <span class="champ__saisie">
-                  <input type="number" id="melTmi" min="0" max="60" step="1" data-pourcentage>
+                  <input type="number" inputmode="numeric" id="melTmi" min="0" max="60" step="1" data-pourcentage>
                   <span class="champ__unite">%</span>
                 </span>
               </label>
               <label class="champ">
                 <span class="champ__libelle">Frais annexes</span>
                 <span class="champ__saisie">
-                  <input type="number" id="melFraisAnnexes" min="0" step="50">
+                  <input type="number" inputmode="numeric" id="melFraisAnnexes" min="0" step="50">
                   <span class="champ__unite">€/an</span>
                 </span>
                 <span class="champ__aide">Forfait&nbsp;: gestion locative, assurance PNO, comptable.</span>
@@ -865,7 +865,7 @@
               <label class="champ">
                 <span class="champ__libelle">Achat de meubles</span>
                 <span class="champ__saisie">
-                  <input type="number" id="melAchatMeubles" min="0" step="500">
+                  <input type="number" inputmode="numeric" id="melAchatMeubles" min="0" step="500">
                   <span class="champ__unite">€</span>
                 </span>
                 <span class="champ__aide">Dépensé une fois, à la mise en location. Obligatoire en meublé.</span>
@@ -873,7 +873,7 @@
               <label class="champ">
                 <span class="champ__libelle">Vacance locative</span>
                 <span class="champ__saisie">
-                  <input type="number" id="melTauxVacance" min="0" max="100" step="1" data-pourcentage>
+                  <input type="number" inputmode="numeric" id="melTauxVacance" min="0" max="100" step="1" data-pourcentage>
                   <span class="champ__unite">%</span>
                 </span>
               </label>

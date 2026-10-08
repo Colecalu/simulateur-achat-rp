@@ -262,8 +262,11 @@
       const xp = x(i);
       decor.appendChild(svg('path', { class: 'apercu__point-mort', d: 'M' + xp + ' ' + (marge.haut - 22) + 'V' + y(0) }));
       decor.appendChild(svg('text', { x: xp, y: marge.haut - 30, class: 'apercu__point-mort-texte' }, 'point mort · ' + ans(pointMort)));
-      decor.appendChild(svg('text', { x: xp - 12, y: marge.haut + 24, class: 'apercu__main apercu__main--avant' }, etroit ? '← location' : '← la location devant'));
-      decor.appendChild(svg('text', { x: xp + 12, y: marge.haut + 24, class: 'apercu__main apercu__main--apres' }, etroit ? 'achat →' : 'l’achat devant →'));
+      // En étroit, un point mort précoce colle « ← location » aux graduations
+      // de gauche : les deux mots montent dans la bande libre sous le titre.
+      const yMain = etroit ? marge.haut - 9 : marge.haut + 24;
+      decor.appendChild(svg('text', { x: xp - 12, y: yMain, class: 'apercu__main apercu__main--avant' }, etroit ? '← location' : '← la location devant'));
+      decor.appendChild(svg('text', { x: xp + 12, y: yMain, class: 'apercu__main apercu__main--apres' }, etroit ? 'achat →' : 'l’achat devant →'));
       decor.appendChild(svg('circle', { class: 'apercu__croisement', cx: cx.toFixed(1), cy: cy.toFixed(1), r: 4 }));
     }
     racine.appendChild(decor);

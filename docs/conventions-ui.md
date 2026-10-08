@@ -629,3 +629,27 @@ réelles — en cours ; **(3)** la mise en location ultérieure — moteur fait,
 - **Pas de `<form>` imbriqué** : le plateau est un `<div>`, car il contient le `<form>` du module
   de mise en location. Deux formulaires imbriqués sont invalides et le parseur supprime
   silencieusement la balise interne.
+
+## Téléphone (audit du 08/10/2026, 375 et 414 px)
+
+Règles posées par l'audit mobile, à ne pas défaire. Elles vivent en fin de `style.css` et
+d'`accueil.css` (sections « Téléphone ») et ne changent rien à la souris ni au-dessus de 560 px.
+
+- **Saisie à 16 px sur écran tactile** (`pointer: coarse`) : en dessous, Safari iOS zoome sur le
+  champ touché et laisse la page agrandie, décalée.
+- **Zones de contact de 44 px** : le contrôle grandit (lignes des bulles validées, boutons) ou un
+  `::after` invisible le prolonge (croix `.mel__fermer`). Le dessin ne change pas.
+- **`inputmode="numeric"` sur les montants entiers** (tous `min="0"`). Pas sur les pourcentages :
+  le pavé décimal d'iOS en français n'offre que la virgule, qu'un `type="number"` peut refuser.
+- **Milliers dans les bulles validées** : `type="number"` n'affiche pas d'espace. Une copie mise
+  en forme (`.champ__milliers`, `initialiserMilliers` dans `app.js`) se pose à la place du nombre
+  hors focus ; le champ réel reste dans la page et reprend sa place au toucher.
+- **Bulle agrandie en une colonne sous 560 px**, et `min-width: 0` sur `.champ__saisie` : sans
+  lui, la colonne prend la largeur naturelle de l'entrée et déborde de la fenêtre.
+- **Une fenêtre ouverte fige la page** (`html:has(#voile:not([hidden]))`, sous 1040 px) et garde
+  son propre défilement (`overscroll-behavior: contain`).
+- **Le résultat est amené à l'écran une fois**, à la validation de la dernière bulle, quand la
+  page est sur une colonne (`montrerResultatUneFois`). Pas aux retouches suivantes.
+- **Plancher de 11 px pour ce qui porte une information** (légendes, unités, avertissement,
+  adresse de contact, mention « Calculs faits dans votre navigateur »). Le décor — surtitres,
+  folios, tampons, numéros de carte — garde sa taille.
