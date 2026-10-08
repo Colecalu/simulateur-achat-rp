@@ -355,10 +355,14 @@ h1, h2, h3 {
 /* Une seule colonne : le visuel prend toute la largeur, la bulle revient au
    centre de la fenêtre. Même seuil que `.plateau`. */
 @media (max-width: 1040px) {
-  .question { translate: -50% -50%; }
+  /* La largeur de bureau retire celle du rail, qui n'est plus à côté :
+     à 375 px il restait 50 px, texte en colonne d'une lettre. */
+  .question { translate: -50% -50%; width: min(860px, calc(100vw - 32px)); }
   /* Une colonne : plus de place à gagner, le titre peut revenir à la ligne
-     plutôt que de devenir minuscule. */
-  .question__titre { white-space: normal; font-size: 1.25rem; }
+     plutôt que de devenir minuscule. Sélecteur renforcé : la règle de base,
+     plus bas dans le fichier, imposait sinon son `nowrap` et le titre
+     débordait de la bulle sur téléphone. */
+  .question .question__titre { white-space: normal; font-size: 1.25rem; }
 }
 @keyframes questionEntree {
   from { transform: scale(.72); opacity: 0; }
@@ -2450,9 +2454,10 @@ input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; marg
  * page ; chaque fenêtre garde son propre défilement.
  */
 @media (max-width: 1040px) {
-  html:has(#voile:not([hidden])) { overflow: hidden; }
+  html:has(#voile:not([hidden])),
+  html:has(.question:not([hidden])) { overflow: hidden; }
 }
-.bulle--zoom .bulle__corps, .mel-fenetre, .mel-resultat, .apercu, .intro { overscroll-behavior: contain; }
+.bulle--zoom .bulle__corps, .mel-fenetre, .mel-resultat, .apercu, .intro, .question { overscroll-behavior: contain; }
 
 /* Étiquettes qui portent une information : 11 px au moins sur téléphone. */
 @media (max-width: 560px) {
