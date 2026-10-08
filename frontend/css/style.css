@@ -618,9 +618,16 @@ h1, h2, h3 {
 @media (max-width: 1040px) {
   .plateau {
     grid-template-columns: minmax(0, 1fr);
-    grid-template-areas: "coin" "haut" "gauche" "visu";
+    /* Sur une colonne, le résultat suit directement la quatrième bulle ; les
+       cartes « Scénarios » et « Mise en location », qui ne s'ouvrent qu'une
+       fois le résultat obtenu, passent dessous. La colonne de gauche s'efface
+       (`display: contents`) pour que ses enfants se placent un à un. */
+    grid-template-areas: "coin" "haut" "rail" "visu" "scenario" "location";
   }
-  .plateau__gauche { grid-template-rows: none; }
+  .plateau__gauche { display: contents; }
+  .rail { grid-area: rail; }
+  #scenario { grid-area: scenario; }
+  #melCarte { grid-area: location; }
   .rail {
     height: auto;
     min-height: 0;
