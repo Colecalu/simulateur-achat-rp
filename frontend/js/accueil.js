@@ -83,30 +83,33 @@
   /* -------------------------------------------------------------- Aperçu */
 
   /*
-   * Le projet de l'exemple : un appartement ancien plausible en métropole
-   * (4,3 % de rendement locatif brut), crédit sur 25 ans. Les taux de crédit,
+   * Le projet de l'exemple : un appartement ancien dans une grande métropole
+   * (3,35 % de rendement locatif brut), crédit sur 25 ans, endettement 29 %. Les taux de crédit,
    * d'assurance et de marché sont ceux du moteur par défaut — les mêmes que
    * le simulateur, pour qu'un visiteur qui recopie ces entrées retrouve ces
    * chiffres. Choisi pour que les courbes se croisent pendant l'horizon : le
    * point mort est la réponse au « Et si vous partiez plus tôt ? ».
-   * Repris de l'ancienne accueil ; à remplacer par l'exemple par défaut du
+   * Recalé le 08/10/2026 sur la tendance longue (décision de Lucas) : point
+   * mort en 8ᵉ année, achat devant de 15 k€ à 25 ans, sans recroisement.
+   * L'ancien exemple (280 000 €, 1 000 €, 4,3 %) donnait l'achat devant dès
+   * la 4ᵉ année et de 152 k€ : trop optimiste pour une vitrine. À remplacer par l'exemple par défaut du
    * simulateur quand celui-ci sera fixé (décision de Lucas, 02/10/2026).
    */
   const ENTREES = {
-    prixNetVendeur: 280000,
-    valeurEstimee: 280000,
+    prixNetVendeur: 340000,
+    valeurEstimee: 340000,
     typeBien: 'ancien',
     travaux: 0,
     fraisAgence: 0,
-    apport: 40000,
-    capitalInitial: 60000,
+    apport: 60000,
+    capitalInitial: 80000,
     dureeAnnees: 25,
     chargesCopro: 1200,
     taxeFonciere: 1000,
-    loyer: 1000,
-    // Profil : loyer actuel 1 000 € + épargne 600 € = effort de 1 600 €/mois.
-    enveloppeMensuelle: 1600,
-    revenusFoyer: 4500,
+    loyer: 950,
+    // Profil : loyer actuel 950 € + épargne 850 € = effort de 1 800 €/mois.
+    enveloppeMensuelle: 1800,
+    revenusFoyer: 5500,
     horizon: 25,
   };
 

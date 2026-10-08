@@ -977,8 +977,10 @@ déroulé, les textes et la fluidité qui ont changé. Branche `feat/accueil-tra
   largeur réelle de sa feuille (une unité = un pixel), pour que les textes restent lisibles en
   mobile. Si le calcul échoue, chiffres et graphique restent cachés (`hidden`) : il ne reste que
   le titre et le lien, jamais un `NaN`.
-- ⚠️ **Le jeu d'exemple de l'aperçu est provisoire** : 280 000 €, loyer 1 000 €, 25 ans, repris de
-  l'ancienne accueil (`09f7d0c`). Les deux jeux par défaut du simulateur n'ont pas de croisement
+- ⚠️ **Le jeu d'exemple de l'aperçu est provisoire** : 340 000 €, loyer 950 € (3,35 % brut),
+  apport 60 000 €, 25 ans — point mort en 8ᵉ année, achat devant de 15 k€ à 25 ans. Recalé le
+  08/10/2026 avec la tendance longue : l'ancien (280 000 €, 1 000 €, repris de `09f7d0c`) passait
+  l'achat devant dès l'an 4, de 152 k€ — trop optimiste pour une vitrine (Lucas). Les deux jeux par défaut du simulateur n'ont pas de croisement
   (`DEFAUTS` : achat devant dès l'an 1 ; `VALEURS_DE_TRAVAIL` : jamais), le point mort n'aurait
   rien eu à montrer. Depuis le 06/10/2026, le simulateur n'a plus d'exemple par défaut (il part
   vide, §11) : l'aperçu garde donc le sien, dans `ENTREES` (`accueil.js`). S'il change, vérifier
