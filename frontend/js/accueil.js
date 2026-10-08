@@ -83,17 +83,15 @@
   /* -------------------------------------------------------------- Aperçu */
 
   /*
-   * Le projet de l'exemple : un appartement ancien dans une grande métropole
-   * (3,35 % de rendement locatif brut), crédit sur 25 ans, endettement 29 %. Les taux de crédit,
-   * d'assurance et de marché sont ceux du moteur par défaut — les mêmes que
-   * le simulateur, pour qu'un visiteur qui recopie ces entrées retrouve ces
-   * chiffres. Choisi pour que les courbes se croisent pendant l'horizon : le
-   * point mort est la réponse au « Et si vous partiez plus tôt ? ».
-   * Recalé le 08/10/2026 sur la tendance longue (décision de Lucas) : point
-   * mort en 8ᵉ année, achat devant de 15 k€ à 25 ans, sans recroisement.
-   * L'ancien exemple (280 000 €, 1 000 €, 4,3 %) donnait l'achat devant dès
-   * la 4ᵉ année et de 152 k€ : trop optimiste pour une vitrine. À remplacer par l'exemple par défaut du
-   * simulateur quand celui-ci sera fixé (décision de Lucas, 02/10/2026).
+   * Exemple FICTIF, choisi pour le dessin (décision de Lucas, 08/10/2026) :
+   * l'aperçu illustre ce que l'on obtient — deux trajectoires qui se croisent
+   * nettement — et ne prétend décrire aucun marché. Ses paramètres ne sont
+   * donc plus affichés. Loyer et taux de marché sont propres à l'exemple
+   * (immobilier 3 %, bourse 5 %), et non ceux du simulateur : avec la
+   * tendance longue, les courbes restaient collées ou ne se croisaient pas.
+   * Résultat : point mort en 7ᵉ année, achat devant de 130 k€ à 25 ans, sans
+   * recroisement. S'il change, vérifier qu'il croise encore : le point mort
+   * est la réponse au « Et si vous partiez plus tôt ? » (section 04).
    */
   const ENTREES = {
     prixNetVendeur: 340000,
@@ -106,8 +104,10 @@
     dureeAnnees: 25,
     chargesCopro: 1200,
     taxeFonciere: 1000,
-    loyer: 950,
-    // Profil : loyer actuel 950 € + épargne 850 € = effort de 1 800 €/mois.
+    loyer: 750,
+    revalBien: 0.03,
+    rendementBourse: 0.05,
+    // Effort de 1 800 €/mois.
     enveloppeMensuelle: 1800,
     revenusFoyer: 5500,
     horizon: 25,
@@ -145,9 +145,6 @@
     $('apercuLocation').textContent = euros.format(derniere.patrimoineTotalLocation);
     $('apercuPointMort').textContent =
       pointMort === null ? 'Jamais' : pointMort === 1 ? 'Dès la 1re année' : ans(pointMort);
-    $('apercuHypotheses').textContent =
-      'Exemple : bien ancien à ' + euros.format(ENTREES.prixNetVendeur) +
-      ', loyer de ' + euros.format(ENTREES.loyer) + '/mois, sur ' + ans(annees.length) + '.';
 
     $('apercuChiffres').hidden = false;
     $('apercuVisuel').hidden = false;

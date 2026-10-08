@@ -978,9 +978,12 @@ déroulé, les textes et la fluidité qui ont changé. Branche `feat/accueil-tra
   mobile. Si le calcul échoue, chiffres et graphique restent cachés (`hidden`) : il ne reste que
   le titre et le lien, jamais un `NaN`.
 - ⚠️ **Le jeu d'exemple de l'aperçu est provisoire** : 340 000 €, loyer 950 € (3,35 % brut),
-  apport 60 000 €, 25 ans — point mort en 8ᵉ année, achat devant de 15 k€ à 25 ans. ⚠️ **Avec l'immobilier
-  à 2,0 % (08/10/2026), il ne croise plus** : location devant de 58 k€, « Point mort : Jamais ».
-  Laissé tel quel (Lucas : simple illustration, à revoir plus tard). Recalé le
+  apport 60 000 €, 25 ans — point mort en 8ᵉ année, achat devant de 15 k€ à 25 ans. **Remplacé le
+  08/10/2026 par un exemple FICTIF** (décision de Lucas : une illustration, pas une vérité de
+  marché) : loyer 750 €, immobilier 3 % et bourse 5 % propres à l'exemple (`ENTREES`,
+  `accueil.js`) — point mort en 7ᵉ année, achat devant de 130 k€. Ses paramètres ne sont plus
+  affichés ; la légende dit « Exemple fictif ». Avec la tendance longue (immobilier à 2,0 %),
+  l'ancien ne croisait plus. Recalé le
   08/10/2026 avec la tendance longue : l'ancien (280 000 €, 1 000 €, repris de `09f7d0c`) passait
   l'achat devant dès l'an 4, de 152 k€ — trop optimiste pour une vitrine (Lucas). Les deux jeux par défaut du simulateur n'ont pas de croisement
   (`DEFAUTS` : achat devant dès l'an 1 ; `VALEURS_DE_TRAVAIL` : jamais), le point mort n'aurait
