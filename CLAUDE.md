@@ -383,6 +383,12 @@ Ubuntu) et fait un `mirror` du dépôt vers le serveur :
   supprime l'ancien fichier avant d'envoyer le nouveau (le site perd son `index.html` le temps
   de l'envoi) ; sans le second, il laisse une copie `index.html~date~` de chaque fichier
   remplacé, **publique** dans `www/`.
+- **`xfer:use-temp-file yes`** : chaque fichier part sous un nom temporaire puis est renommé à
+  sa place. Ajouté après l'échec du premier envoi réel (08/10/2026, « Access failed: No such
+  file (index.html) ») : la page d'attente d'OVH est un **lien symbolique** vers un fichier hors
+  de notre espace, impossible à ouvrir en écriture ; le renommage remplace le lien lui-même.
+  Reproduit puis vérifié sur un serveur SFTP local. **La simulation ne peut pas voir ce genre
+  d'erreur** : elle n'écrit rien, donc ne teste aucun droit.
 - **Tout est renvoyé à chaque déploiement** (~1 Mo) : le checkout donne à chaque fichier la date
   du jour, plus récente que celle du serveur. C'est voulu — comparer à la taille seule laisserait
   passer une modification de même longueur.

@@ -157,6 +157,14 @@ jobs:
           # Avec --overwrite, lftp garde par défaut une copie de chaque fichier
           # remplacé (index.html~20261008…~) : dans www/, elle serait publique.
           set xfer:make-backup no
+          # Chaque fichier part sous un nom temporaire, puis est RENOMMÉ à sa
+          # place. Le 08/10/2026, le premier envoi réel a échoué sur
+          # « Access failed: No such file (index.html) » : la page d'attente
+          # d'OVH est un lien symbolique vers un fichier hors de notre espace,
+          # qu'on ne peut pas ouvrir en écriture. Le renommage remplace le lien
+          # lui-même (reproduit et vérifié en SFTP local). Bonus : un visiteur
+          # ne reçoit jamais un fichier à moitié envoyé.
+          set xfer:use-temp-file yes
           set net:max-retries 2
           set net:timeout 30
           set sftp:auto-confirm no
