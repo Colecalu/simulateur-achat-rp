@@ -21,7 +21,41 @@
 (function (global) {
   'use strict';
 
-  /** Valeurs par défaut = scénario « Paris » du classeur de référence. */
+  /**
+   * LA TENDANCE LONGUE — vue de base du simulateur, et seule source des cinq
+   * taux de marché par défaut. Chaque taux se décompose
+   * `nominal = (1 + réel) × (1 + inflation) − 1`, inflation à 2,0 % (cible BCE).
+   * Raisonnement complet : CLAUDE.md, section 8.
+   *
+   * Déclarée ICI et non dans scenarios.js : l'accueil ne charge que calc.js, et
+   * le moteur ne doit dépendre de rien. scenarios.js la relit (`moteur.TENDANCE_LONGUE`)
+   * pour faire retomber ses stress tests dessus — une valeur, un seul endroit.
+   *
+   * Les taux du classeur Excel (1 % / 5 %) ne sont plus des défauts : ils ne
+   * vivent plus que dans le test qui compare le moteur à la fixture.
+   */
+  var TENDANCE_LONGUE = {
+    // 2 % + rendement RÉEL de long terme des actions MONDIALES (Dimson-Marsh-
+    // Staunton, UBS Global Investment Returns Yearbook, ≈ 5 %/an depuis 1900),
+    // moins ≈ 0,3 %/an de frais de gestion d'un ETF monde. Pas le marché
+    // américain (≈ 6,5 % réel), qui est le gagnant connu après coup.
+    rendementBourse: 0.068,
+    // 2 % + croissance réelle du revenu disponible brut par ménage (INSEE,
+    // ≈ 0,5 %/an) : sur longue période, les prix suivent le revenu (Friggit).
+    revalBien: 0.025,
+    // L'IRL EST légalement l'inflation (loi du 8 février 2008).
+    revalLoyer: 0.02,
+    // Inflation.
+    revalCharges: 0.02,
+    // Inflation + 0,5 pt : les taux communaux dérivent au-delà de la
+    // revalorisation forfaitaire des valeurs locatives (indexée sur l'IPCH).
+    revalTaxeFonciere: 0.025,
+  };
+
+  /**
+   * Valeurs par défaut : le projet « Paris » du classeur de référence, sur la
+   * tendance longue. L'écran part d'autres valeurs (VALEURS_DE_TRAVAIL, app.js).
+   */
   var DEFAUTS = {
     capitalInitial: 200000,
     // Effort mensuel DÉCLARÉ : ce que l'utilisateur sort aujourd'hui pour se
@@ -46,19 +80,21 @@
 
     apport: 100000,
     dureeAnnees: 20,
+    // Pretto, sept. 2026 : 3,52 % sur 20 ans ; Crédit Logement/CSA, août 2026 :
+    // 3,31 % toutes durées. À revoir chaque trimestre (CLAUDE.md, §13).
     tauxCredit: 0.035,
     tauxAssurance: 0.0015,
 
     chargesCopro: 1500,
     taxeFonciere: 1500,
-    revalBien: 0.01,
-    revalTaxeFonciere: 0.01,
-    revalCharges: 0.01,
+    revalBien: TENDANCE_LONGUE.revalBien,
+    revalTaxeFonciere: TENDANCE_LONGUE.revalTaxeFonciere,
+    revalCharges: TENDANCE_LONGUE.revalCharges,
 
     loyer: 1600,
-    revalLoyer: 0.01,
+    revalLoyer: TENDANCE_LONGUE.revalLoyer,
 
-    rendementBourse: 0.05, // BRUT, pas net d'impôt
+    rendementBourse: TENDANCE_LONGUE.rendementBourse, // BRUT, pas net d'impôt
     fiscalitePlusValues: 0.314, // flat tax CTO 2026 ; PEA/AV ont d'autres taux
 
     horizon: 25,
@@ -551,6 +587,7 @@
   }
 
   var api = {
+    TENDANCE_LONGUE: TENDANCE_LONGUE,
     DEFAUTS: DEFAUTS,
     fraisDeNotaire: fraisDeNotaire,
     mensualiteCredit: mensualiteCredit,

@@ -81,7 +81,7 @@ test('l\'impôt sur plus-value tombe à zéro côté IR dès 22 ans de détentio
   // À 22 ans il ne reste que les prélèvements sociaux.
   proche(
     an22.impotPlusValue,
-    an22.plusValueImposable * (1 - an22.abattementPS) * 0.186,
+    an22.plusValueImposable * (1 - an22.abattementPS) * 0.172, // plus-value immobilière : hors hausse de CSG
     'PS seuls après exonération IR'
   );
 });
@@ -235,7 +235,7 @@ test('LMNP : l\'excédent d\'amortissement se reporte sans limite', () => {
   );
 });
 
-test('LMNP : pas de prélèvements sociaux sur la base BIC', () => {
+test('LMNP : prélèvements sociaux à 18,6 % sur la base BIC', () => {
   const mel = simulerMiseEnLocation(
     base,
     // Loyer énorme : la base imposable survit à l'amortissement.
@@ -243,7 +243,38 @@ test('LMNP : pas de prélèvements sociaux sur la base BIC', () => {
   );
   const a = mel.annees[0];
   assert.ok(a.baseImposable > 0, 'base imposable positive');
-  proche(a.impotLocatif, a.baseImposable * 0.41, 'TMI seule, sans PS');
+  proche(a.impotLocatif, a.baseImposable * (0.41 + 0.186), 'TMI + 18,6 % (LFSS 2026)');
+});
+
+test('location nue : prélèvements sociaux à 17,2 % sur les revenus fonciers', () => {
+  const mel = simulerMiseEnLocation(
+    base, options({ anneeBascule: 1, regime: 'nu', loyerPercu: 9000, tmi: 0.41 })
+  );
+  const a = mel.annees[0];
+  assert.ok(a.baseImposable > 0, 'base imposable positive');
+  proche(a.impotLocatif, a.baseImposable * (0.41 + 0.172), 'TMI + 17,2 % (exclus de la hausse de CSG)');
+});
+
+test('plus-value immobilière : 17,2 % de prélèvements sociaux, dans les deux régimes', () => {
+  for (const regime of ['meuble', 'nu']) {
+    const mel = simulerMiseEnLocation(
+      base, options({ anneeBascule: 1, regime, loyerPercu: 1800 })
+    );
+    const a = mel.annees[9];
+    const ab = abattementPlusValue(a.annee);
+    assert.ok(a.plusValueImposable > 0, `${regime} : plus-value positive`);
+    proche(
+      a.impotPlusValue,
+      a.plusValueImposable * (1 - ab.ir) * 0.19 + a.plusValueImposable * (1 - ab.ps) * 0.172,
+      `${regime} : IR 19 % + PS 17,2 %`
+    );
+  }
+});
+
+test('prélèvements sociaux : le meublé reste le régime par défaut, le taux suit le régime', () => {
+  assert.equal(calcLocation.DEFAUTS_LOCATION.regime, 'meuble');
+  assert.ok(!('tauxPrelevementsSociaux' in calcLocation.DEFAUTS_LOCATION), 'plus un champ de saisie');
+  assert.deepEqual(calcLocation.PRELEVEMENTS_SOCIAUX, { meuble: 0.186, nu: 0.172, plusValueImmobiliere: 0.172 });
 });
 
 test('LMNP : les amortissements déduits sont réintégrés dans la plus-value', () => {
@@ -295,9 +326,10 @@ test('la vacance locative réduit les revenus bruts', () => {
 test('les loyers sont saisis en euros du moment de la bascule, puis indexés', () => {
   const mel = simulerMiseEnLocation(base, options({ anneeBascule: 5 }));
   proche(mel.annees[4].loyerPercuAnnuel, 1800 * 12, 'année de bascule : montant saisi tel quel');
-  proche(mel.annees[5].loyerPercuAnnuel, 1800 * 12 * 1.01, 'année suivante : +1 % IRL');
+  const irl = 1 + base.entrees.revalLoyer;
+  proche(mel.annees[5].loyerPercuAnnuel, 1800 * 12 * irl, 'année suivante : + IRL');
   proche(mel.annees[4].loyerFuturAnnuel, 1600 * 12, 'loyer futur à la bascule');
-  proche(mel.annees[5].loyerFuturAnnuel, 1600 * 12 * 1.01, 'loyer futur indexé pareil');
+  proche(mel.annees[5].loyerFuturAnnuel, 1600 * 12 * irl, 'loyer futur indexé pareil');
 });
 
 test('le loyer futur est indépendant de la trajectoire du loyer de référence', () => {
@@ -313,7 +345,7 @@ test('le loyer futur est indépendant de la trajectoire du loyer de référence'
   );
   proche(
     mel.annees[9].loyerFuturAnnuel,
-    base.annees[9].loyerAnnuel / Math.pow(1.01, 9),
+    base.annees[9].loyerAnnuel / Math.pow(1 + base.entrees.revalLoyer, 9),
     'écart = exactement les 9 années d\'indexation non appliquées'
   );
 });
