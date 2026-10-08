@@ -289,7 +289,8 @@ résultat foncier    = revenus bruts − charges déductibles
 ```
 
 - **Résultat positif** : on impute d'abord le stock de déficit reporté, puis
-  `impôt = base × (TMI + prélèvements sociaux)`.
+  `impôt = base × (TMI + 17,2 %)` — les revenus fonciers sont exclus de la hausse de
+  CSG de la LFSS 2026.
 - **Résultat négatif** : la part due aux charges financières (intérêts +
   assurance) n'est **jamais** imputable sur le revenu global et part
   intégralement en report. Le reste est imputable sur le revenu global dans la
@@ -309,7 +310,7 @@ dotation = valeur d'entrée × 85 % / 30 ans     (bâti, terrain non amortissabl
          + achat de meubles / 7 ans            (mobilier)
 
 base imposable = max(0, revenus bruts − charges déductibles − amortissement)
-impôt          = base × TMI                    (pas de prélèvements sociaux en BIC)
+impôt          = base × (TMI + 18,6 %)         (prélèvements sociaux sur les BIC LMNP, LFSS 2026)
 ```
 
 Deux choix structurants :
@@ -352,8 +353,13 @@ Abattements pour durée de détention, comptés **depuis l'achat initial** :
 
 ```
 impôt = PV imposable × (1 − abattement IR) × 19 %
-      + PV imposable × (1 − abattement PS) × prélèvements sociaux
+      + PV imposable × (1 − abattement PS) × 17,2 %
 ```
+
+Les prélèvements sociaux ne sont pas un champ de saisie : ils suivent le régime
+(`PRELEVEMENTS_SOCIAUX`, calc-location.js). Jusqu'au 08/10/2026, un seul taux de
+18,6 % s'appliquait partout, et aucun aux BIC du meublé — deux erreurs dans des
+sens opposés. La plus-value immobilière reste à 17,2 % dans les deux régimes.
 
 Sur un horizon de 25 ans, l'exonération IR est atteinte (22 ans) mais jamais
 celle des prélèvements sociaux (30 ans).

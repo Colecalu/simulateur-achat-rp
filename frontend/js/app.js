@@ -51,8 +51,9 @@ const CHAMPS = Object.keys(DEFAUTS).filter((c) => c !== 'horizon');
  * Décision de Lucas, 06/10/2026 : ce que seul l'utilisateur connaît part
  * VIDE (null) — sa situation, le prix, l'apport, le loyer. Le reste est
  * pré-rempli : bien ancien, sans frais d'agence ni travaux, 2 000 € de frais
- * bancaires, 20 ans à 3,5 % (assurance 0,15 %), copropriété et taxe foncière
- * à 1 000 €/an, scénario de marché du moteur. Deux champs se proposent
+ * bancaires, 20 ans à 3,5 % (assurance 0,15 %), taux de marché de la
+ * tendance longue (DEFAUTS du moteur). Copropriété et taxe foncière partent
+ * vides depuis le 08/10/2026 : l'annonce les donne, un défaut les inventait. Deux champs se proposent
  * d'eux-mêmes (voir LIAISONS) : la valeur estimée (prix + travaux) et le loyer
  * de comparaison (le loyer actuel).
  */
@@ -69,8 +70,10 @@ const VALEURS_DE_TRAVAIL = Object.assign({}, DEFAUTS, {
   dureeAnnees: 20,
   tauxCredit: 0.035,
   tauxAssurance: 0.0015,
-  chargesCopro: 1000,
-  taxeFonciere: 1000,
+  // Pas de valeur supposée : ce sont des montants du bien, que l'annonce
+  // indique. 0 est une vraie réponse (une maison sans copropriété).
+  chargesCopro: null,
+  taxeFonciere: null,
   loyer: null, // suit le loyer actuel
 });
 
@@ -286,7 +289,6 @@ const CHAMPS_MEL_AVANCES = {
   melFraisAnnexes: { cle: 'fraisAnnexes' },
   melAchatMeubles: { cle: 'achatMeubles' },
   melTauxVacance: { cle: 'tauxVacance', pourcentage: true },
-  melPrelevementsSociaux: { cle: 'tauxPrelevementsSociaux', pourcentage: true },
 };
 
 function remplirFormulaireMel() {
@@ -1756,6 +1758,12 @@ function majReglagesMel() {
     b.classList.toggle('mel__option--actif', actif);
     b.setAttribute('aria-checked', String(actif));
   }
+  // Les prélèvements sociaux suivent le régime : on les montre, on ne les saisit pas.
+  const ps = window.SimuRPLocation.PRELEVEMENTS_SOCIAUX;
+  const pct = (t) => (t * 100).toLocaleString('fr-FR') + ' %';
+  $('#melPrelevementsSociaux').textContent = regime === 'nu'
+    ? `${pct(ps.nu)} sur les loyers (revenus fonciers), ${pct(ps.plusValueImmobiliere)} sur la plus-value à la revente.`
+    : `${pct(ps.meuble)} sur les bénéfices (BIC), ${pct(ps.plusValueImmobiliere)} sur la plus-value à la revente.`;
 }
 
 /** €/mois signés : « +312 € » ou « −450 € ». */

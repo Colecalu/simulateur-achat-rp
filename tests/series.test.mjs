@@ -9,7 +9,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import calc from '../frontend/js/calc.js';
 
-const { simuler, tauxAnnee, facteur } = calc;
+const { simuler, tauxAnnee, facteur, DEFAUTS } = calc;
 const proche = (a, b, t = 0.01) =>
   assert.ok(Math.abs(a - b) <= t, `${a} ≈ ${b} (écart ${Math.abs(a - b)})`);
 
@@ -45,11 +45,11 @@ test('une série constante donne exactement le même résultat qu\'un nombre', (
   const constant = simuler({ horizon: 25 });
   const enSerie = simuler({
     horizon: 25,
-    revalBien: [0.01],
-    revalCharges: [0.01],
-    revalTaxeFonciere: [0.01],
-    revalLoyer: [0.01],
-    rendementBourse: [0.05],
+    revalBien: [DEFAUTS.revalBien],
+    revalCharges: [DEFAUTS.revalCharges],
+    revalTaxeFonciere: [DEFAUTS.revalTaxeFonciere],
+    revalLoyer: [DEFAUTS.revalLoyer],
+    rendementBourse: [DEFAUTS.rendementBourse],
   });
   for (let i = 0; i < constant.annees.length; i++) {
     proche(enSerie.annees[i].patrimoineTotalAchat, constant.annees[i].patrimoineTotalAchat);

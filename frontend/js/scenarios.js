@@ -55,7 +55,14 @@
 (function (global) {
   'use strict';
 
-  /** Tant que ce n'est pas 'DEFINITIF', rien de ce fichier ne fait autorité. */
+  /**
+   * Tant que ce n'est pas 'DEFINITIF', rien de ce fichier ne fait autorité.
+   * Reste PROVISOIRE (08/10/2026) pour deux raisons, et seulement deux : les
+   * séries immobilier, loyers et inflation s'arrêtent en 2022, et le classement
+   * des fenêtres n'est pas stabilisé (2003 talonne 2002 à 909 € près). La
+   * devise de la bourse (levée le 08/10) et la tendance longue (devenue les
+   * défauts du moteur) ne le justifient plus.
+   */
   var STATUT_DONNEES = 'PROVISOIRE';
 
   var HORIZON = 25;
@@ -72,30 +79,14 @@
    *
    * C'est la VUE DE BASE du simulateur : ce qui s'applique quand aucun scénario
    * n'est choisi, et ce sur quoi les deux stress tests retombent une fois le
-   * choc passé. Chaque taux se décompose `nominal = (1 + réel) × (1 + inflation)`,
-   * inflation à 2,0 % (cible BCE). Raisonnement complet : CLAUDE.md, section 8.
-   *
-   * ⚠️ DEUX ENDROITS, UNE SEULE DÉCISION. Ces valeurs doivent finir identiques
-   * aux défauts de `calc.js` (`DEFAUTS.revalBien`, `DEFAUTS.rendementBourse`…) :
-   * la tendance longue EST la vue de base. Elles ne le sont PAS aujourd'hui —
-   * les défauts du moteur portent encore les anciennes valeurs rondes, et on ne
-   * les bouge qu'une fois les sources reçues, d'un seul coup. Backlog :
-   * CLAUDE.md, section 11.
+   * choc passé. Elle est DÉCLARÉE dans calc.js, avec ses sources : ce sont les
+   * défauts du moteur, et l'accueil ne charge que calc.js. On la relit ici —
+   * une seule valeur, un seul endroit.
    */
-  var TENDANCE_LONGUE = {
-    // PROVISOIRE — 2 % + rendement réel de long terme des actions mondiales
-    // (Dimson-Marsh-Staunton), moins les frais de gestion d'un ETF monde.
-    rendementBourse: 0.068,
-    // PROVISOIRE — 2 % + croissance réelle du revenu disponible par ménage (INSEE).
-    revalBien: 0.025,
-    // VALIDÉ — l'IRL EST légalement l'inflation (loi du 8 février 2008).
-    revalLoyer: 0.02,
-    // VALIDÉ — inflation.
-    revalCharges: 0.02,
-    // VALIDÉ — inflation + 0,5 pt : les taux communaux dérivent au-delà de la
-    // revalorisation forfaitaire des valeurs locatives.
-    revalTaxeFonciere: 0.025,
-  };
+  var moteur = typeof module !== 'undefined' && module.exports
+    ? require('./calc.js')
+    : global.SimuRP;
+  var TENDANCE_LONGUE = moteur.TENDANCE_LONGUE;
 
   /* ====================================================================== 2 —
    * LES SÉRIES OBSERVÉES, 1991 → 2022

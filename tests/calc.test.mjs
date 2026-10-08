@@ -2,7 +2,8 @@
  * Vérifie que le moteur JS reproduit le classeur de référence.
  *
  * La fixture tests/fixtures/excel-paris.json contient les valeurs réellement
- * calculées par Excel pour le scénario « Paris » (defaults du moteur).
+ * calculées par Excel pour le scénario « Paris » (défauts du moteur, sur les
+ * taux de marché du classeur — voir TAUX_CLASSEUR).
  * Toute divergence signifie que le port a dérivé du modèle métier.
  *
  *   node --test tests/
@@ -17,7 +18,16 @@ const { simuler, fraisDeNotaire, mensualiteCredit } = calc;
 const attendu = JSON.parse(
   readFileSync(new URL('./fixtures/excel-paris.json', import.meta.url), 'utf8')
 );
-const r = simuler();
+/**
+ * Le classeur tourne sur des taux de marché ronds (1 % / 5 %) ; les défauts du
+ * moteur sont désormais la tendance longue. La fixture se compare donc sur les
+ * taux du classeur, passés explicitement.
+ */
+const TAUX_CLASSEUR = {
+  revalBien: 0.01, revalTaxeFonciere: 0.01, revalCharges: 0.01,
+  revalLoyer: 0.01, rendementBourse: 0.05,
+};
+const r = simuler(TAUX_CLASSEUR);
 
 /** Tolérance au centime : Excel et JS font tous deux du flottant 64 bits. */
 const proche = (obtenu, cible, message) =>

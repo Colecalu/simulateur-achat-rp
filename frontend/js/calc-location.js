@@ -23,6 +23,21 @@
   var tauxAnnee = moteur.tauxAnnee;
   var facteur = moteur.facteur;
 
+  /**
+   * Prélèvements sociaux, selon la nature du revenu — et non un seul taux.
+   * La LFSS 2026 relève la CSG sur les revenus du capital (17,2 % → 18,6 %),
+   * mais en EXCLUT les revenus fonciers et les plus-values immobilières.
+   *   · meublé (BIC LMNP, non professionnel) : 18,6 % ;
+   *   · location nue (revenus fonciers)      : 17,2 % ;
+   *   · plus-value immobilière à la revente  : 17,2 %, dans les deux régimes.
+   * Ils suivent le régime choisi : ce n'est plus un champ de saisie.
+   */
+  var PRELEVEMENTS_SOCIAUX = {
+    meuble: 0.186,
+    nu: 0.172,
+    plusValueImmobiliere: 0.172,
+  };
+
   var DEFAUTS_LOCATION = {
     // --- Palier 1 : obligatoires ---
     anneeBascule: null,
@@ -37,7 +52,6 @@
     achatMeubles: 0, // € dépensés en mobilier à la mise en location
 
     // --- Fiscalité ---
-    tauxPrelevementsSociaux: 0.186, // 18,6 % à compter de 2026
     tauxImpotPlusValueIR: 0.19,
     plafondDeficitGlobal: 10700, // imputable sur le revenu global, par an
     dureeReportDeficit: 10, // années de report sur les revenus fonciers
@@ -278,7 +292,7 @@
           var impute = consommerStock(stockDeficitFoncier, resultat);
           baseImposable = resultat - impute;
           impotLocatif =
-            baseImposable * (o.tmi + o.tauxPrelevementsSociaux);
+            baseImposable * (o.tmi + PRELEVEMENTS_SOCIAUX.nu);
         } else {
           var deficit = -resultat;
           // La fraction due aux intérêts n'est jamais imputable sur le
@@ -320,7 +334,7 @@
         amortissementsDeduits += amortissementUtilise;
 
         baseImposable = avantAmort - amortissementUtilise;
-        impotLocatif = baseImposable * o.tmi; // pas de PS en BIC
+        impotLocatif = baseImposable * (o.tmi + PRELEVEMENTS_SOCIAUX.meuble);
       }
 
       var cashFlowNet = cashFlowAvantImpot - impotLocatif + economieDeficit;
@@ -359,7 +373,7 @@
       if (plusValueImposable > 0) {
         impotPlusValue =
           plusValueImposable * (1 - ab.ir) * o.tauxImpotPlusValueIR +
-          plusValueImposable * (1 - ab.ps) * o.tauxPrelevementsSociaux;
+          plusValueImposable * (1 - ab.ps) * PRELEVEMENTS_SOCIAUX.plusValueImmobiliere;
       }
 
       var patrimoineTotal =
@@ -414,6 +428,7 @@
 
   var api = {
     DEFAUTS_LOCATION: DEFAUTS_LOCATION,
+    PRELEVEMENTS_SOCIAUX: PRELEVEMENTS_SOCIAUX,
     purgerStock: purgerStock,
     abattementPlusValue: abattementPlusValue,
     dotationAmortissement: dotationAmortissement,

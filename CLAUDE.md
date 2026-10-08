@@ -13,7 +13,7 @@ Document de référence du projet. Court par nature : le détail vit dans `docs/
 ## Commandes
 
 ```bash
-node --test "tests/*.test.mjs"   # 107 tests : moteur, location, indicateurs, séries, sauvegarde, scénarios
+node --test "tests/*.test.mjs"   # 110 tests : moteur, location, indicateurs, séries, sauvegarde, scénarios
 ```
 
 Le motif est entre guillemets : `node --test tests/` échoue sous Windows (Node tente de charger
@@ -60,7 +60,7 @@ structurante change.
   de feature ouverte par Claude Code est à considérer comme une expérimentation en cours.
 - **Une expérimentation ne remplace jamais l'implémentation en place automatiquement.** Elle est
   analysée sur demande, puis intégrée, adaptée ou écartée — décision de Lucas.
-- **Les 107 tests sont l'arbitre.** Une proposition qui les casse est rejetée, quelle que soit son
+- **Les 110 tests sont l'arbitre.** Une proposition qui les casse est rejetée, quelle que soit son
   élégance. La fixture Excel compare 25 années × 15 grandeurs **au centime** : elle ne se
   contourne pas, elle se respecte ou se discute explicitement.
 
@@ -232,7 +232,7 @@ outils/                      jamais déployé — scripts de développement
   image-partage.mjs (+ .html) img/partage.png
   package.json               fontkit, wawoff2, Playwright — devDependencies, §13
 docs/                        modèle, conventions UI, spec backend, design, Excel
-tests/                       node --test, 107 tests
+tests/                       node --test, 110 tests
 migrations/                  à créer : SQL numéroté, appliqué à la main
 ```
 
@@ -469,7 +469,9 @@ vérifiés pendant quelques semaines. L'adresse d'expédition doit être sur le 
 
 ## 8. Les hypothèses par défaut, et pourquoi elles sont sourcées
 
-> **En cours de refonte.** Les valeurs ci-dessous marquées PROVISOIRE attendent des données.
+> **Adoptées le 08/10/2026** comme défauts du moteur (`TENDANCE_LONGUE`, déclarée dans `calc.js`,
+> relue par `scenarios.js` : une seule source). Les sources sont citées de mémoire, sans relecture
+> de la dernière édition — à vérifier pour la future page « Méthode et sources ».
 
 ### Pourquoi les défauts ne sont pas un détail
 
@@ -492,8 +494,9 @@ inflation de **2,0 %** — la cible de la BCE, seule référence prospective non
 | Loyers (IRL) | **2,0 %** | L'IRL **est** légalement la moyenne sur 12 mois de l'IPC hors tabac et loyers (loi du 8 février 2008). L'indexation des loyers est l'inflation, par construction — pas une hypothèse. Écart observé 1991-2022 : +0,21 pt. |
 | Charges de copropriété | **2,0 %** | Inflation. |
 | Taxe foncière | **2,5 %** | Depuis 2018 la revalorisation forfaitaire des valeurs locatives suit l'IPCH, mais les taux communaux dérivent en plus. Inflation + 0,5 pt corrige la sous-estimation connue. |
-| Immobilier | **PROVISOIRE 2,5 %** | 2 % + croissance **réelle** du revenu disponible brut par ménage (INSEE). Thèse de Friggit : sur longue période, les prix suivent le revenu. **En attente de la série INSEE.** |
-| Bourse | **PROVISOIRE 6,8 %** | 2 % + rendement **réel** de long terme des actions mondiales (Dimson-Marsh-Staunton, *UBS Global Investment Returns Yearbook*), **moins les frais de gestion d'un ETF monde**. **En attente du chiffre DMS de la dernière édition.** |
+| Immobilier | **2,5 %** | 2 % + croissance **réelle** du revenu disponible brut par ménage (INSEE, ≈ 0,5 %/an). Thèse de Friggit : sur longue période, les prix suivent le revenu. |
+| Bourse | **6,8 %** | 2 % + rendement **réel** de long terme des actions **mondiales** (Dimson-Marsh-Staunton, *UBS Global Investment Returns Yearbook*, ≈ 5 %/an depuis 1900 — pas les États-Unis, ≈ 6,5 %), **moins ≈ 0,3 %/an de frais d'un ETF monde**. |
+| Taux de crédit | **3,5 %** | Pretto, sept. 2026 : 3,52 % sur 20 ans ; Crédit Logement/CSA, août 2026 : 3,31 % toutes durées. **À revoir chaque trimestre.** |
 
 **Ne PAS utiliser la moyenne MSCI 1991-2025 comme rendement de long terme** : elle est écrasée par
 la séquence haussière 2012-2025, qui vaut à elle seule +12,68 %/an. Une moyenne sur 35 ans reste
@@ -632,15 +635,15 @@ impossible par construction.
 | Bourse 1991-2011 en EUR | `SERIES_OBSERVEES.rendementBourse` | valeurs USD |
 | Immobilier / loyers / inflation 2023-2025 | les trois autres séries | s'arrêtent en 2022 |
 | Années de départ des deux fenêtres | `FENETRES[].debut` | 1992 et 2002 |
-| Tendance longue bourse et immobilier | `TENDANCE_LONGUE` | 6,8 % et 2,5 % |
 
 ⚠️ **Les mêmes tableaux existent dans `outils/fenetres-historiques.mjs`**, qui ne part jamais en
 production mais qui sert à choisir les fenêtres. Les deux fichiers changent **ensemble** : sans
 quoi les fenêtres figées ne correspondraient plus au classement qui les a désignées.
 
-⚠️ **`TENDANCE_LONGUE` et les défauts de `calc.js` doivent finir identiques** — la tendance longue
-EST la vue de base. Ils ne le sont pas aujourd'hui : les défauts du moteur portent encore les
-anciennes valeurs rondes, et on ne les bouge qu'une fois les sources reçues. Voir §11.
+**`TENDANCE_LONGUE` EST la vue de base, et les défauts du moteur** (08/10/2026). Elle est
+déclarée dans `calc.js` — l'accueil ne charge que lui, et le moteur ne dépend de rien — et
+`scenarios.js` la relit. Les taux ronds du classeur Excel (1 % / 5 %) ne vivent plus que dans
+`tests/calc.test.mjs` (`TAUX_CLASSEUR`), qui les passe explicitement pour comparer à la fixture.
 
 **Douze tests verrouillent la structure, pas les valeurs** (`tests/scenarios.test.mjs`). C'est
 délibéré : un test qui figerait un rendement provisoire empêcherait exactement ce qu'on prépare.
@@ -728,7 +731,9 @@ produit. **Attendre la série complète 1991-2011 avant de toucher quoi que ce s
   (+252 109 €) — mais **2003 talonne 2002 à 909 € près** : le prolongement des séries jusqu'en
   2025 pourrait l'inverser.
 - `scenarios.js` et `outils/fenetres-historiques.mjs` portent les mêmes valeurs. `STATUT_DONNEES`
-  reste `'PROVISOIRE'` pour d'autres raisons (tendance longue §9, séries arrêtées en 2022).
+  reste `'PROVISOIRE'` pour deux raisons : séries immobilier/loyers/inflation arrêtées en 2022,
+  et classement des fenêtres pas stabilisé (2003 contre 2002). La tendance longue ne le justifie
+  plus : elle est devenue les défauts du moteur.
 
 ### Ce qui reste à obtenir
 
@@ -740,8 +745,8 @@ produit. **Attendre la série complète 1991-2011 avant de toucher quoi que ce s
 
 ### Ce que la correction n'affecte pas
 
-La fixture Excel (`tests/fixtures/excel-paris.json`) est calculée sur les **taux constants par
-défaut**, pas sur les scénarios. Corriger les données ne demande donc **aucune mise à jour de
+La fixture Excel (`tests/fixtures/excel-paris.json`) est calculée sur les **taux constants du
+classeur** (`TAUX_CLASSEUR`, passés par le test), pas sur les scénarios. Corriger les données ne demande donc **aucune mise à jour de
 fixture**.
 
 `tests/scenarios.test.mjs` référence bien `scenarios.js` depuis la refonte, mais ne vérifie **que
@@ -769,15 +774,13 @@ indicateur et un changement de défauts aurait rendu chaque effet impossible à 
 | Sujet | Ce qu'on sait déjà | Pourquoi ça attend |
 |---|---|---|
 | **Loyer d'équilibre / rendement locatif** | Le basculement est à **3,57 % de rendement locatif brut** sur le profil courant — soit un loyer d'équilibre de 1 249 €/mois. Ce seuil sépare Paris (3,0-3,5 %) des grandes métropoles (4-5 %). C'est probablement **le vrai message du site** : ce n'est pas le marché qui répond, c'est le rapport loyer/prix de la ville. | Nouvel indicateur à part entière, avec sa visualisation. Mérite sa propre session. |
-| **Frais de gestion en bourse** | Le modèle chiffre **tous** les coûts côté achat et **aucun** côté bourse. Déduire 0,20 à 0,40 %/an (ETF monde) rétablit la symétrie. **0,30 %/an déplace le verdict de 45 646 €** à 25 ans. Ce n'est pas de la fiscalité : notre convention « rendement brut, impôt à la sortie » n'est pas en cause, un frais de gestion est un coût comme une taxe foncière. | Touche le moteur et les défauts. À faire avec la mise à jour de `TENDANCE_LONGUE`. |
+| **Frais de gestion en bourse** — ✅ intégrés le 08/10/2026 dans les 6,8 % de la tendance longue (≈ 0,3 %/an) | Le modèle chiffre **tous** les coûts côté achat et **aucun** côté bourse. Déduire 0,20 à 0,40 %/an (ETF monde) rétablit la symétrie. **0,30 %/an déplace le verdict de 45 646 €** à 25 ans. Ce n'est pas de la fiscalité : notre convention « rendement brut, impôt à la sortie » n'est pas en cause, un frais de gestion est un coût comme une taxe foncière. | Touche le moteur et les défauts. À faire avec la mise à jour de `TENDANCE_LONGUE`. |
 | **Profil d'exemple à revoir** | 420 000 € pour 1 600 € de loyer = **4,57 % brut** : l'utilisateur arrive déjà du côté « acheter gagne » avant toute saisie. Ce sont des **valeurs de test**, pas un profil choisi. | Si l'on source les taux au dixième de point, il faut être aussi rigoureux sur le profil. Décision produit, pas technique. |
 
 ### Dettes de cohérence ouvertes par la refonte
 
-- **`TENDANCE_LONGUE` (scenarios.js) et `DEFAUTS` (calc.js) doivent devenir identiques** sur les
-  cinq taux de marché. La tendance longue EST la vue de base ; aujourd'hui les défauts du moteur
-  portent encore les anciennes valeurs rondes. À faire **d'un seul bloc**, à la réception des
-  sources, avec l'arbitrage sur les frais d'ETF.
+- ✅ **`TENDANCE_LONGUE` et `DEFAUTS`** : fait le 08/10/2026, une seule déclaration dans
+  `calc.js` (§9). Les frais d'ETF sont dans les 6,8 % (§8).
 - **`scenarios.js` et `outils/fenetres-historiques.mjs` portent les mêmes tableaux.** Ils changent
   ensemble, sans quoi les fenêtres figées ne correspondent plus au classement qui les a choisies.
 
@@ -786,9 +789,13 @@ indicateur et un changement de défauts aurait rendu chaque effet impossible à 
 **Décision de Lucas, 06/10/2026 : l'écran part VIDE pour ce que seul l'utilisateur connaît** — sa
 situation (patrimoine, loyer actuel, épargne, revenus), le prix net vendeur, l'apport et le loyer
 de comparaison. Le reste est pré-rempli par `VALEURS_DE_TRAVAIL` (`app.js`) : bien ancien, frais
-d'agence et travaux à 0, frais bancaires 2 000 €, 20 ans à 3,5 % (assurance 0,15 %), copropriété et
-taxe foncière 1 000 €/an, scénario de marché du moteur. **Ne pas aligner `DEFAUTS` de `calc.js`
-dessus** : ce sont les valeurs du classeur Excel, que la fixture compare au centime.
+d'agence et travaux à 0, frais bancaires 2 000 €, 20 ans à 3,5 % (assurance 0,15 %), taux de
+marché de la tendance longue. **Ne pas aligner `DEFAUTS` de `calc.js` dessus** : ses montants sont
+ceux du classeur Excel, que la fixture compare au centime.
+
+**Copropriété et taxe foncière partent vides** (08/10/2026) : ce sont des montants du bien,
+indiqués dans l'annonce (aide du champ et texte indicatif « voir l'annonce »). Le défaut de
+1 000 €/an les inventait. **0 est accepté** — une maison sans copropriété.
 
 - **Un champ vide est « non renseigné », jamais remplacé en silence.** On ne valide ni la
   situation ni une bulle qui en contient (champs signalés, curseur sur le premier) ; le résultat
@@ -800,6 +807,16 @@ dessus** : ce sont les valeurs du classeur Excel, que la fixture compare au cent
   l'utilisateur les modifie.
 - **« Ma situation actuelle »** (ex-« Mon profil ») est ouverte d'emblée, champs vides. Essayé
   puis écarté le 06/10 par Lucas : une carte repliée en jaune, à ouvrir d'un clic comme les bulles.
+
+### Simplifications assumées — à dire dans la future page « Méthode et sources »
+
+- **Frais de revente non modélisés** (décision de Lucas, 08/10/2026) : ni frais d'agence à la
+  vente, ni diagnostics, ni mainlevée d'hypothèque. Le patrimoine immobilier est la valeur du bien
+  moins le capital restant dû. Cela flatte l'achat, d'autant plus que l'horizon est court.
+- **Prélèvements sociaux de la mise en location** : fixés par le régime, pas saisis —
+  18,6 % sur les BIC du meublé (LMNP, régime par défaut), 17,2 % sur les revenus fonciers en
+  nu, 17,2 % sur la plus-value immobilière dans les deux cas (LFSS 2026). `PRELEVEMENTS_SOCIAUX`
+  dans `calc-location.js`.
 
 ### Conflit des deux loyers — à traiter
 
@@ -1112,6 +1129,12 @@ de l'hébergement.
       navigateurs refusent le `http://` du site pendant un an : c'est pour ça qu'on attend.
       Vérifier ensuite : `curl -sI https://aequo-immo.fr/ | grep -i strict`.
 
+#### Entretien régulier
+
+- [ ] **Revoir le taux de crédit par défaut chaque trimestre** (`DEFAUTS.tauxCredit` et
+      `VALEURS_DE_TRAVAIL.tauxCredit`, 3,5 % ; source dans le commentaire de `calc.js`).
+      Prochaine revue : janvier 2027.
+
 #### Checklist « Lancement public »
 
 À dérouler **dans l'ordre**, le jour où le site doit être trouvé :
@@ -1124,8 +1147,10 @@ de l'hébergement.
       « À RETIRER AU LANCEMENT PUBLIC » (`git grep -n "À RETIRER AU LANCEMENT PUBLIC"`).
       **Pas** celui de `404.html`, qui est définitif.
 - [ ] Vérifier que `robots.txt` ne bloque toujours rien.
-- [ ] Lever les points bloquants de contenu : devise des rendements MSCI (§10, levé le 08/10 par reconstitution), données
+- [ ] Lever les points bloquants de contenu : devise des rendements MSCI (§10, levé le 08/10 par reconstitution),
+      tendance longue (§8, adoptée le 08/10 — sources à relire à la source), données
       provisoires des scénarios (§9), jeu d'exemple de l'aperçu (§12).
+- [ ] Revoir le taux de crédit par défaut (trimestriel, voir « Entretien régulier »).
 - [ ] Retirer « Prototype en développement » des pieds de page, si ce n'en est plus un.
 - [ ] Mettre à jour les `lastmod` de `sitemap.xml`.
 - [ ] **Google Search Console** : déclarer le domaine, soumettre
