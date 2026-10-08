@@ -653,3 +653,8 @@ d'`accueil.css` (sections « Téléphone ») et ne changent rien à la souris ni
 - **Plancher de 11 px pour ce qui porte une information** (légendes, unités, avertissement,
   adresse de contact, mention « Calculs faits dans votre navigateur »). Le décor — surtitres,
   folios, tampons, numéros de carte — garde sa taille.
+- **Sur une colonne (≤ 1040 px), le résultat suit la quatrième bulle**, et les cartes
+  « Scénarios » et « Mise en location » passent dessous : ce sont des suites, débloquées par le
+  résultat (décision de Lucas, 08/10/2026). `.plateau__gauche` y est en `display: contents` pour
+  que le rail et les deux cartes se placent chacun dans leur zone de grille. Au bureau, rien ne
+  change.
