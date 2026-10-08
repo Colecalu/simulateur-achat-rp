@@ -1141,9 +1141,10 @@ de l'hébergement.
 
 À dérouler **dans l'ordre**, le jour où le site doit être trouvé :
 
-- [ ] **Bandeau de consentement GA4 (Consent Mode v2) OBLIGATOIRE avant le retrait du noindex.**
-      Aujourd'hui les cookies `_ga` sont déposés sans consentement — toléré tant que le site
-      n'est pas public, jamais au-delà. Mettre à jour `confidentialite.html` dans le même commit.
+- [ ] ⏸ **Bandeau de consentement GA4 (Consent Mode v2) — reporté (décision du propriétaire,
+      08/10/2026), à prévoir après le lancement.** N'est plus bloquant. Les cookies `_ga` restent
+      déposés sans consentement en attendant : risque CNIL connu et assumé. Mettre à jour
+      `confidentialite.html` dans le même commit que le bandeau.
 - [ ] **Retirer `<meta name="robots" content="noindex">`** de `index.html`, `simulateur.html`,
       `mentions-legales.html` et `confidentialite.html` — chacune porte le commentaire
       « À RETIRER AU LANCEMENT PUBLIC » (`git grep -n "À RETIRER AU LANCEMENT PUBLIC"`).
@@ -1153,7 +1154,7 @@ de l'hébergement.
       tendance longue (§8, adoptée le 08/10 — sources à relire à la source), données
       provisoires des scénarios (§9), jeu d'exemple de l'aperçu (§12).
 - [ ] Revoir le taux de crédit par défaut (trimestriel, voir « Entretien régulier »).
-- [ ] Retirer « Prototype en développement » des pieds de page, si ce n'en est plus un.
+- [x] Retirer « Prototype en développement » des pieds de page (08/10/2026).
 - [ ] Mettre à jour les `lastmod` de `sitemap.xml`.
 - [ ] **Google Search Console** : déclarer le domaine, soumettre
       `https://aequo-immo.fr/sitemap.xml`, demander l'indexation de `/` et `/simulateur`.
