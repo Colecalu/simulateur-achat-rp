@@ -44,22 +44,27 @@ Options -MultiViews
   # mémorisé par les navigateurs et ne se retire pas d'un clic.
   # -------------------------------------------------------------------------
 
+  # Les cibles des 301 ci-dessous sont des URL COMPLÈTES : avec un simple
+  # « /simulateur », Apache, derrière le frontal HTTPS d'OVH, reconstruisait
+  # https://aequo-immo.fr:443/simulateur (constaté en ligne le 08/10/2026).
+  # Ça marchait, mais ce n'était pas l'adresse canonique.
+
   # Une seule adresse par page, sinon les moteurs de recherche voient deux
   # pages identiques et partagent leur crédit entre elles. On ne redirige que
   # ce que le VISITEUR a demandé (THE_REQUEST) : la réécriture interne de
   # /simulateur vers simulateur.html, plus bas, repasse par ces règles et
   # bouclerait sans cette condition.
   RewriteCond %{THE_REQUEST} \s/+index\.html[\s?] [NC]
-  RewriteRule ^index\.html$ / [R=301,L]
+  RewriteRule ^index\.html$ https://aequo-immo.fr/ [R=301,L]
 
   # Les pages à adresse propre : le simulateur et les deux pages légales.
   # Une nouvelle page s'ajoute dans les TROIS règles ci-dessous.
   RewriteCond %{THE_REQUEST} \s/+(simulateur|mentions-legales|confidentialite)\.html[\s?] [NC]
-  RewriteRule ^(simulateur|mentions-legales|confidentialite)\.html$ /$1 [R=301,L]
+  RewriteRule ^(simulateur|mentions-legales|confidentialite)\.html$ https://aequo-immo.fr/$1 [R=301,L]
 
   # Avec une barre finale, les chemins relatifs de la page (css/, js/)
   # partiraient de /simulateur/ et ne trouveraient rien : la page serait nue.
-  RewriteRule ^(simulateur|mentions-legales|confidentialite)/$ /$1 [R=301,L]
+  RewriteRule ^(simulateur|mentions-legales|confidentialite)/$ https://aequo-immo.fr/$1 [R=301,L]
 
   # L'adresse propre, servie sans redirection visible. Les fichiers qui
   # existent (css/, js/, fonts/, img/, favicon, robots.txt, sitemap.xml)
@@ -67,6 +72,11 @@ Options -MultiViews
   # adresses précises.
   RewriteRule ^(simulateur|mentions-legales|confidentialite)$ $1.html [L]
 </IfModule>
+
+# OVH sert les .woff2 sans type de contenu (constaté le 08/10/2026). Les
+# navigateurs les chargent quand même, mais un type déclaré évite qu'un
+# navigateur ou un proxy strict les refuse.
+AddType font/woff2 .woff2
 
 <IfModule mod_headers.c>
   # Les polices ne changent jamais sous le même nom : un an de cache évite
