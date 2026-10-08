@@ -1,6 +1,6 @@
 # ===========================================================================
-#  Déploiement d'Æquo : à chaque fusion sur main, tests puis envoi FTPS de
-#  frontend/ vers l'hébergement OVH mutualisé. Voir CLAUDE.md §6.
+#  Déploiement d'Æquo : à chaque fusion sur main, tests puis envoi SFTP de
+#  frontend/ vers l'hébergement OVH mutualisé. Voir CLAUDE.md §6 et §13.
 #
 #  Seul frontend/ part : outils/, tests/, docs/ et backend/ restent dans le
 #  dépôt. backend/config.php n'est JAMAIS déployé par ce workflow.
@@ -8,7 +8,8 @@
 #  Tant que les secrets FTP ne sont pas renseignés (Settings → Secrets and
 #  variables → Actions), le job s'arrête proprement, sans rien envoyer : une
 #  fusion sur main ne doit pas échouer parce que l'hébergement n'existe pas
-#  encore.
+#  encore. Les secrets gardent leur nom FTP_* : ce sont les identifiants du
+#  compte FTP d'OVH, que SFTP utilise tels quels.
 # ===========================================================================
 name: Déploiement
 
@@ -20,7 +21,7 @@ on:
   workflow_dispatch:
     inputs:
       essai:
-        description: "Simuler seulement (aucun fichier envoyé)"
+        description: "Simuler seulement (liste ce qui serait envoyé ou supprimé, sans rien modifier)"
         type: boolean
         default: true
 
@@ -70,24 +71,98 @@ jobs:
       - uses: actions/checkout@v7
         if: steps.secrets.outputs.pret == 'oui'
 
-      # Envoie seulement ce qui a changé depuis le dernier déploiement : l'état
-      # est gardé sur le serveur dans .ftp-deploy-sync-state.json.
-      - name: Envoi FTPS de frontend/
+      # lftp plutôt qu'une action tierce : l'offre gratuite d'OVH refuse le
+      # FTPS (« 500 This security scheme is not implemented ») et
+      # SamKirkland/FTP-Deploy-Action ne parle pas SFTP. lftp est un outil
+      # maintenu, empaqueté par Ubuntu : aucun code tiers ne voit le mot de
+      # passe.
+      - name: Installer lftp
         if: steps.secrets.outputs.pret == 'oui'
-        # Version exacte, pas un tag mobile : cette action reçoit le mot de
-        # passe FTP. v4.4.0 = mêmes paramètres que v4.3.5, sur Node 24.
-        uses: SamKirkland/FTP-Deploy-Action@v4.4.0
-        with:
-          server: ${{ secrets.FTP_SERVEUR }}
-          username: ${{ secrets.FTP_UTILISATEUR }}
-          password: ${{ secrets.FTP_MOT_DE_PASSE }}
-          # FTPS obligatoire : en FTP simple, le mot de passe circulerait en
-          # clair.
-          protocol: ftps
-          local-dir: ./frontend/
-          # Sur OVH mutualisé, la racine web est en général www/. Le secret
-          # FTP_DOSSIER permet d'en choisir une autre sans toucher au fichier.
-          server-dir: ${{ secrets.FTP_DOSSIER || './www/' }}
-          # Le .htaccess fait partie du site : il est envoyé. Seuls les
-          # fichiers git sont exclus (comportement par défaut de l'action).
-          dry-run: ${{ github.event_name == 'workflow_dispatch' && inputs.essai }}
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq lftp
+
+      # La clé d'hôte est ÉPINGLÉE, pas découverte à chaque passage : un
+      # ssh-keyscan dans le job accepterait n'importe quel serveur qui se
+      # ferait passer pour OVH, et lui donnerait le mot de passe. Relevées le
+      # 08/10/2026 sur ftp.cluster129.hosting.ovh.net (OpenSSH 7.9) :
+      #   ED25519 SHA256:xhieLplnoEvvl7+a8sq8wLCh/bvOQvQFIVewi+fK2og
+      #   RSA     SHA256:itDZ6cuojUbG3+jrh5F/igkXa2xjzejbYJkNAlw8/VM
+      # Si OVH change de clé ou de cluster, le job échoue net (« Host key
+      # verification failed ») au lieu d'envoyer à l'aveugle : relever les
+      # nouvelles clés et les remplacer ici (procédure : CLAUDE.md §13).
+      - name: Clé d'hôte du serveur SFTP
+        if: steps.secrets.outputs.pret == 'oui'
+        env:
+          SERVEUR: ${{ secrets.FTP_SERVEUR }}
+        run: |
+          mkdir -p ~/.ssh && chmod 700 ~/.ssh
+          {
+            echo "$SERVEUR ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPHzGPnvg+XUpaMELjQ4AIj/6pkjvvHYCUxDVpcdaC8T"
+            echo "$SERVEUR ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDNRHIUr16MAqfE7FCijkY+M0PJYmgtjuraB2qE4F1f3SVcTuJyB/4YZpkX6CN0vl8rzP5Mo+c2/jT33afewvhqkgZgGR5J1FwU+yJXqR8CKLO0BW++3Av4azcc0a/5E6H/eXu6dJga1Suw9FF0/K7Wa2ENxMjvKKj0OnXgmwxt/N2jHldZslg2srYYQ14roO0Kyy72nJ84mBnocHBxY/xxch7zERQY8su3YH9YclmS3bCWnr8e+rCZSLRGuu29CeqeOLdd0cWq5GimMTWUv7SxJ5Mrrf7bzKM9VgnF5h9hLxKZZxRSP0H7iHUCFo35TtROjMvADjuxOyzgiOX8xuXrUrDCd4Air+D/AG0+xdRUF1P2x2Tt1pgMooPGqETCzLV/RXIKanCDhaFqPp9OnjneIq7GNKh0qiWXK0OxLu30p0DZWluk4kLOVCv8vMmFRv7e3uBCB/w13l7eloTnbY1qZHkOTym30BbN5HHXovl31aLqMB5fUSXdDvEx6g9cPH9ofAx/DY6EJ3i8xa7lSnu27zzWh9RNc1cKBEs4QldzH9ZGn2yHrY3DL1ZDqSG9+4sMoaStKC/cJyWjivyQJoXUMznndkRCdFXTx6WdaqzHVwWpqIqQXNDv3fcIZCf3hWH+3gTOkF3SoCoWGZY1vmihVRRh3ob5dSyPTeP1sdfEoQ=="
+          } > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/known_hosts
+
+      - name: Envoi SFTP de frontend/
+        if: steps.secrets.outputs.pret == 'oui'
+        env:
+          SERVEUR: ${{ secrets.FTP_SERVEUR }}
+          UTILISATEUR: ${{ secrets.FTP_UTILISATEUR }}
+          # lftp lit le mot de passe dans cette variable (open --env-password) :
+          # il n'apparaît ni dans la ligne de commande, ni dans le script, ni
+          # dans le journal (GitHub masque en plus tout secret affiché).
+          LFTP_PASSWORD: ${{ secrets.FTP_MOT_DE_PASSE }}
+          DOSSIER: ${{ secrets.FTP_DOSSIER }}
+          ESSAI: ${{ github.event_name == 'workflow_dispatch' && inputs.essai }}
+        run: |
+          set -euo pipefail
+
+          # Un envoi réel ne part que de main : le déploiement, c'est la
+          # fusion (CLAUDE.md §6). Depuis une autre branche, simulation forcée.
+          if [ "$ESSAI" != "true" ] && [ "$GITHUB_REF" != "refs/heads/main" ]; then
+            echo "::notice::Branche ${GITHUB_REF#refs/heads/} : envoi réel réservé à main, simulation forcée."
+            ESSAI=true
+          fi
+
+          # Le dossier cible, relatif au home du compte. Garde-fou avant
+          # --delete : un dossier vide, « . », absolu ou contenant « .. »
+          # ferait supprimer ce qui se trouve HORS de la racine web.
+          DOSSIER="${DOSSIER:-www}"
+          DOSSIER="${DOSSIER#./}"
+          DOSSIER="${DOSSIER%/}"
+          case "$DOSSIER" in
+            ""|"."|/*|*..*)
+              echo "::error::FTP_DOSSIER refusé (« $DOSSIER ») : il faut un dossier relatif au home, comme www."
+              exit 1 ;;
+          esac
+
+          # --reverse : du dépôt vers le serveur. --delete : ce qui n'existe
+          # plus dans frontend/ disparaît du serveur (dont la page « Site en
+          # construction » d'OVH), mais seulement SOUS le dossier cible : lftp
+          # y entre d'abord (cd), et s'arrête s'il n'existe pas.
+          # --overwrite : un fichier modifié est réécrit en place. Sans lui,
+          # lftp SUPPRIME d'abord l'ancien : index.html manquerait le temps
+          # de l'envoi.
+          # --no-perms : les droits du serveur restent ceux d'OVH.
+          # .ovhconfig : réglage PHP d'OVH, s'il était posé dans www/ ; ni
+          # envoyé ni supprimé.
+          OPTIONS="--reverse --delete --overwrite --verbose --no-perms --parallel=4 --exclude-glob .ovhconfig"
+          if [ "$ESSAI" = "true" ]; then
+            OPTIONS="$OPTIONS --dry-run"
+            echo "::notice::Simulation : liste de ce qui serait envoyé (put) ou supprimé (rm) dans $DOSSIER/, rien n'est modifié."
+          fi
+
+          # StrictHostKeyChecking=yes + known_hosts épinglé : jamais de
+          # question interactive, et jamais de connexion à un serveur inconnu.
+          lftp <<FIN
+          set cmd:fail-exit yes
+          # Avec --overwrite, lftp garde par défaut une copie de chaque fichier
+          # remplacé (index.html~20261008…~) : dans www/, elle serait publique.
+          set xfer:make-backup no
+          set net:max-retries 2
+          set net:timeout 30
+          set sftp:auto-confirm no
+          set sftp:connect-program "ssh -a -x -o StrictHostKeyChecking=yes -o UserKnownHostsFile=$HOME/.ssh/known_hosts"
+          open --env-password -u "$UTILISATEUR" "sftp://$SERVEUR:22"
+          cd "$DOSSIER"
+          mirror $OPTIONS ./frontend/ ./
+          bye
+          FIN

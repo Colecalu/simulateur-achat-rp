@@ -182,11 +182,11 @@ valeurs réellement calculées par Excel sur 25 ans, au centime près.
 | Front | HTML / CSS / JavaScript **vanilla** + Chart.js (copié dans `frontend/js/vendor/`). Pas de framework, **pas d'étape de build**. Aucun serveur tiers. |
 | Calculs | **100 % dans le navigateur.** Le serveur ne calcule jamais rien. |
 | Backend | PHP 8 + MySQL, **uniquement** pour les comptes et la sauvegarde. |
-| Hébergement | OVH mutualisé d'entrée de gamme (pas encore souscrit). |
-| Déploiement | GitHub Actions → FTPS, au merge sur `main`. |
+| Hébergement | OVH mutualisé, offre gratuite (Free hosting, 100 Mo), `ftp.cluster129.hosting.ovh.net`. |
+| Déploiement | GitHub Actions → **SFTP** (lftp), au merge sur `main`. |
 
 **Hypothèses d'hébergement à respecter** : pas de Node côté serveur, **pas d'accès SSH garanti**,
-déploiement par FTP, base gérée via phpMyAdmin. Conséquences : pas de `composer install` sur le
+déploiement par SFTP, base gérée via phpMyAdmin. Conséquences : pas de `composer install` sur le
 serveur, pas de migrations automatiques, aucune dépendance qui exige une étape de compilation.
 
 **Pas de modules ES** (`import` / `export`, `<script type="module">`) : bloqués par CORS en
@@ -366,25 +366,55 @@ internes fonctionnent en local comme en production, sans le `.htaccess`.
 ### Déploiement
 
 `.github/workflows/deploiement.yml`, déclenché à **chaque fusion sur `main`** : les tests
-d'abord (rouges, rien ne part), puis l'envoi **FTPS** de `frontend/` — et de lui seul — vers
-OVH. Seuls les fichiers modifiés sont envoyés (l'état est gardé sur le serveur, dans
-`.ftp-deploy-sync-state.json`). **`backend/config.php` n'est jamais déployé par la CI** — il est
-créé à la main sur le serveur, une fois.
+d'abord (rouges, rien ne part), puis l'envoi **SFTP** de `frontend/` — et de lui seul — dans
+`www/` chez OVH. **`backend/config.php` n'est jamais déployé par la CI** — il est créé à la main
+sur le serveur, une fois.
+
+**Pourquoi SFTP et lftp** (08/10/2026) : l'offre gratuite d'OVH refuse le FTPS (« 500 This
+security scheme is not implemented ») et `SamKirkland/FTP-Deploy-Action` ne parle pas SFTP. Le
+FTP non chiffré est exclu : le mot de passe circulerait en clair. Le job installe `lftp` (paquet
+Ubuntu) et fait un `mirror` du dépôt vers le serveur :
+
+- **`--delete`** : ce qui n'existe plus dans `frontend/` disparaît de `www/` — et seulement de
+  `www/` : lftp y entre d'abord et s'arrête s'il n'existe pas. Le dossier cible passe par un
+  garde-fou (vide, `.`, absolu ou contenant `..` : refusé), sans quoi un `FTP_DOSSIER` mal
+  saisi ferait supprimer le home. `.ovhconfig` n'est jamais touché.
+- **`--overwrite`** et **`xfer:make-backup no`**, vérifiés en local : sans le premier, lftp
+  supprime l'ancien fichier avant d'envoyer le nouveau (le site perd son `index.html` le temps
+  de l'envoi) ; sans le second, il laisse une copie `index.html~date~` de chaque fichier
+  remplacé, **publique** dans `www/`.
+- **Tout est renvoyé à chaque déploiement** (~1 Mo) : le checkout donne à chaque fichier la date
+  du jour, plus récente que celle du serveur. C'est voulu — comparer à la taille seule laisserait
+  passer une modification de même longueur.
+- **Mot de passe** : lu par lftp dans `LFTP_PASSWORD` (`open --env-password`), jamais sur une
+  ligne de commande ni dans le journal.
+- **Clé d'hôte épinglée** dans le workflow (ED25519 `SHA256:xhieLplnoEvvl7+a8sq8wLCh/bvOQvQFIVewi+fK2og`,
+  RSA `SHA256:itDZ6cuojUbG3+jrh5F/igkXa2xjzejbYJkNAlw8/VM`, relevées le 08/10/2026), avec
+  `StrictHostKeyChecking=yes` : jamais de question qui bloquerait le job, jamais de connexion à
+  un serveur inconnu. Un `ssh-keyscan` à chaque passage aurait accepté n'importe quel imposteur.
+  **Si OVH change de clé ou de cluster**, le job échoue sur « Host key verification failed » :
+  relever les nouvelles clés (`ssh-keyscan ftp.clusterXXX.hosting.ovh.net`), comparer leur
+  empreinte (`| ssh-keygen -lf -`) à celle qu'affiche un premier `sftp` manuel, puis les
+  remplacer dans l'étape « Clé d'hôte du serveur SFTP ».
+- **Un envoi réel ne part que de `main`.** Lancé à la main depuis une autre branche, le job
+  force la simulation, même case décochée.
 
 **Tant que les secrets ne sont pas renseignés, le job passe sans rien envoyer** (une note
-l'indique dans l'onglet Actions) : une fusion ne doit pas échouer parce que l'hébergement n'existe
-pas encore. Secrets à créer dans GitHub → Settings → Secrets and variables → Actions :
+l'indique dans l'onglet Actions). Les secrets gardent leur nom `FTP_*` : ce sont les identifiants
+du compte FTP d'OVH, que SFTP utilise tels quels (onglet FTP-SSH de l'hébergement, SFTP activé
+pour l'utilisateur). GitHub → Settings → Secrets and variables → Actions :
 
 | Secret | Valeur |
 |---|---|
-| `FTP_SERVEUR` | l'hôte FTP donné par OVH (ex. `ftp.cluster0XX.hosting.ovh.net`) |
-| `FTP_UTILISATEUR` | l'identifiant FTP |
+| `FTP_SERVEUR` | `ftp.cluster129.hosting.ovh.net` |
+| `FTP_UTILISATEUR` | l'identifiant FTP (`aequoib`) |
 | `FTP_MOT_DE_PASSE` | son mot de passe |
-| `FTP_DOSSIER` | facultatif — dossier de la racine web, `./www/` par défaut (à terminer par `/`) |
+| `FTP_DOSSIER` | facultatif — racine web relative au home (`/home/aequoib`), `www` par défaut |
 
 **Premier déploiement : en simulation.** Onglet Actions → « Déploiement » → *Run workflow*,
-case « Simuler seulement » cochée (c'est le défaut) : le journal liste ce qui serait envoyé, et
-où, sans rien écrire. Vérifier le dossier cible, puis relancer case décochée.
+case « Simuler seulement » cochée (c'est le défaut) : le journal liste ce qui serait envoyé
+(`put`) et supprimé (`rm`) dans `www/`, sans rien modifier. Vérifier qu'aucun `rm` ne vise autre
+chose que la page d'attente d'OVH, puis fusionner sur `main`.
 
 ### Migrations de base
 
@@ -1012,8 +1042,9 @@ d'audience » porte un commentaire qui dit quoi écrire).
 
 #### Au premier déploiement
 
-0. **Secrets FTP** dans GitHub, puis un premier passage **en simulation** du workflow (§6).
-   Vérifier dans le journal que la cible est bien la racine web (`www/`).
+0. **Secrets FTP** dans GitHub, puis un premier passage **en simulation** du workflow (§6) :
+   dans le journal, les `put` visent `www/`, et les seuls `rm` concernent la page « Site en
+   construction » d'OVH. Puis fusionner sur `main` : c'est la fusion qui envoie pour de vrai.
 1. ~~**Certificat SSL** actif dans l'espace client OVH (domaine nu ET www)~~ — fait le
    08/10/2026, et la redirection est décommentée. **Reste à vérifier en ligne** après le premier
    envoi : `http://aequo-immo.fr/`, `http://www.aequo-immo.fr/` et `https://www.aequo-immo.fr/`
