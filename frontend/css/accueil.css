@@ -2174,3 +2174,42 @@ footer .pied__avertissement {
     text-align: left;
   }
 }
+
+/* ============================================================ Téléphone
+   Audit mobile du 08/10/2026 (375 et 414 px). Plancher de 11 px pour ce qui
+   porte une information — promesse, légende, chiffre, avertissement, adresse.
+   Le décor garde sa taille : surtitres, folios, tampons, numéros de carte. */
+
+@media (max-width:700px) {
+  .scene-caption,
+  .read-on,
+  .camps__camp,
+  .apercu__kpi dt>span,
+  .apercu__legende,
+  .route-bar span,
+  .sheet-note,
+  .pilier__renvoi,
+  .ticket small,
+  footer p,
+  footer>span,
+  .pied__contact span,
+  footer .pied__avertissement {
+    font-size: 11px;
+  }
+  .pilier__volet-nom span {
+    font-size: 10px;
+  }
+}
+
+/* Zones de contact de 44 px, sans changer le dessin. */
+@media (pointer:coarse) {
+  .view-switch button {
+    min-height: 44px;
+  }
+  /* Renvoi dans le texte : la zone grandit, la ligne ne bouge pas. */
+  .temps__renvoi {
+    display: inline-block;
+    padding: 12px 4px;
+    margin: -12px -4px;
+  }
+}

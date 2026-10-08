@@ -1681,6 +1681,7 @@ function recalculer() {
     : null;
 
   dernierResultat = simuler(saisie);
+  afficherMilliers();
   rafraichir();
 }
 
@@ -2438,6 +2439,24 @@ function validerBulle(n) {
   // On enchaîne : la bulle suivante devient visiblement la prochaine à remplir.
   const suivante = prochaineBulle();
   if (suivante !== null) bulle(suivante).querySelector('.bulle__declencheur').focus();
+  else montrerResultatUneFois();
+}
+
+/*
+ * Sur une colonne (téléphone, tablette), le résultat est sous les quatre
+ * bulles et les cartes des scénarios : la dernière bulle validée, rien ne
+ * disait qu'il venait d'apparaître 1 300 px plus bas. On l'amène à l'écran,
+ * une fois — ensuite, retoucher une bulle laisse la page où elle est.
+ */
+let resultatMontre = false;
+function montrerResultatUneFois() {
+  if (resultatMontre || !matchMedia('(max-width: 1040px)').matches) return;
+  if ($('#visu').dataset.etat === 'attente') return;
+  resultatMontre = true;
+  const sansMouvement = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // Après le retour de la bulle à sa place : défiler pendant son vol
+  // fausserait la position d'arrivée qu'elle a mesurée.
+  setTimeout(() => $('#visu').scrollIntoView({ behavior: sansMouvement ? 'auto' : 'smooth', block: 'start' }), 350);
 }
 
 function initialiserBulles() {
@@ -2517,7 +2536,36 @@ function initialiserSaisie() {
   });
 }
 
+/*
+ * Bulle validée : « 300000 € » se lit mal, et un champ `type="number"` ne
+ * sait pas afficher d'espace entre les milliers. Une copie mise en forme se
+ * pose à la place du nombre tant que le champ n'a pas le focus ; au toucher,
+ * le champ réel reprend sa place (le <label> parent lui donne le focus).
+ * Pourcentages exclus : ils n'ont pas de milliers et gardent leur décimale.
+ */
+const milliers = new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 2 });
+const COPIES_MILLIERS = [];
+
+function initialiserMilliers() {
+  for (const el of document.querySelectorAll('.bulle .champ input[inputmode="numeric"]')) {
+    const copie = document.createElement('span');
+    copie.className = 'champ__milliers';
+    copie.setAttribute('aria-hidden', 'true');
+    el.before(copie);
+    COPIES_MILLIERS.push([el, copie]);
+    el.addEventListener('input', afficherMilliers);
+  }
+}
+
+function afficherMilliers() {
+  for (const [el, copie] of COPIES_MILLIERS) {
+    const v = parseFloat(el.value);
+    copie.textContent = Number.isFinite(v) ? milliers.format(v) : '—';
+  }
+}
+
 function initialiser() {
+  initialiserMilliers();
   remplirFormulaire(VALEURS_DE_TRAVAIL);
   remplirProfil(PROFIL_DE_TRAVAIL);
   remplirFormulaireMel();

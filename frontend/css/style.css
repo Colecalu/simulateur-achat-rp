@@ -2374,3 +2374,127 @@ input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; marg
  */
 .legende__valeur { font-variant-numeric: tabular-nums; color: var(--encre-3); }
 
+
+/* ------------------------------------------------------------- Téléphone */
+
+/*
+ * Audit mobile du 08/10/2026 (375 et 414 px). Tout ce qui suit ne change rien
+ * au-dessus de 560 px ni à la souris : on ajuste l'espace et les zones de
+ * contact, jamais la direction visuelle.
+ */
+
+/*
+ * Bulle agrandie : en deux colonnes, la colonne de chaque champ prenait la
+ * largeur naturelle de son entrée (`min-width: auto` du flex) et débordait de
+ * la fenêtre — libellés superposés, unités coupées. Une colonne sous 560 px,
+ * et la case de saisie autorisée à rétrécir partout.
+ */
+.bulle--zoom .champ { grid-template-columns: minmax(0, 1fr); }
+.bulle--zoom .champ__saisie { min-width: 0; }
+@media (max-width: 560px) {
+  .bulle--zoom .bulle__champs { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+  /* En une colonne, plus de voisin à aligner : la hauteur réservée au
+     libellé sur deux lignes ne serait que du vide. */
+  .bulle--zoom .champ__libelle { min-height: 0; }
+  .bulle--zoom .bulle__declencheur { padding: 18px 18px 0; }
+  .bulle--zoom .bulle__corps { padding: 0 18px 18px; }
+}
+
+/*
+ * Loyer + épargne : à 375 px, « €/mois » ne laissait que 36 px pour taper.
+ * Sous 420 px les deux champs s'empilent, le « + » entre eux.
+ */
+@media (max-width: 420px) {
+  .profil__somme { grid-template-columns: minmax(0, 1fr); gap: 4px; }
+  .profil__signe { padding: 0; text-align: center; line-height: 1; }
+}
+/* Libellés d'une ou deux lignes : les cases restent alignées par le bas. */
+.profil__somme .champ { align-content: end; }
+
+/*
+ * Écran tactile.
+ * - Saisie à 16 px : en dessous, Safari iOS zoome sur le champ touché et
+ *   laisse la page agrandie, décalée sur le côté.
+ * - Zones de contact de 44 px, sans changer le dessin : le contrôle grandit
+ *   (lignes, boutons) ou une zone invisible le prolonge (croix, curseurs).
+ */
+@media (pointer: coarse) {
+  .champ input, .champ select,
+  .bulle--validee:not(.bulle--zoom) .champ input,
+  .bulle--validee:not(.bulle--zoom) .champ select,
+  .bulle[data-colonnes="1"].bulle--validee:not(.bulle--zoom) .champ input { font-size: 1rem; }
+  .bulle--validee:not(.bulle--zoom) .champ__court,
+  .bulle[data-colonnes="1"].bulle--validee:not(.bulle--zoom) .champ__court { font-size: .8125rem; }
+  .bulle--validee:not(.bulle--zoom) .champ { min-height: 44px; }
+  .bulle--validee:not(.bulle--zoom) .bulle__declencheur { min-height: 44px; padding-bottom: 6px; }
+
+  .bouton--discret { height: 44px; }
+  .scenario__apercu { width: 44px; }
+
+  /* Le curseur natif garde son dessin ; c'est sa piste qui s'épaissit. */
+  input[type="range"] { height: 36px; }
+
+  .mel__fermer { position: relative; }
+  .mel__fermer::after { content: ""; position: absolute; inset: -14px; }
+  .pied__marque { display: inline-flex; align-items: center; min-height: 44px; }
+}
+
+/*
+ * Fenêtres (bulle, scénarios, location) : arrivé au bout de leur contenu, le
+ * doigt faisait défiler la page derrière le voile. Le voile visible fige la
+ * page ; chaque fenêtre garde son propre défilement.
+ */
+@media (max-width: 1040px) {
+  html:has(#voile:not([hidden])) { overflow: hidden; }
+}
+.bulle--zoom .bulle__corps, .mel-fenetre, .mel-resultat, .apercu, .intro { overscroll-behavior: contain; }
+
+/* Étiquettes qui portent une information : 11 px au moins sur téléphone. */
+@media (max-width: 560px) {
+  .kpi__mot, .part__mot, .rappel__mot, .scenario__famille,
+  .bulle--validee:not(.bulle--zoom) .champ__unite { font-size: .6875rem; }
+}
+
+/*
+ * Copie du nombre avec ses espaces de milliers (`initialiserMilliers`), à la
+ * place du champ dans la bulle validée tant qu'il n'a pas le focus. Le champ
+ * reste dans la page — lu par les lecteurs d'écran, atteint au clavier.
+ */
+.champ__milliers { display: none; }
+.bulle--validee:not(.bulle--zoom) .champ__milliers {
+  display: block;
+  font-family: var(--police-chiffres);
+  font-variant-numeric: tabular-nums;
+  font-size: .875rem;
+  font-weight: 600;
+  color: var(--encre);
+  white-space: nowrap;
+  cursor: text;
+}
+.bulle[data-colonnes="1"].bulle--validee:not(.bulle--zoom) .champ__milliers { font-size: .9375rem; }
+.bulle--validee:not(.bulle--zoom) .champ__saisie { position: relative; }
+.bulle--validee:not(.bulle--zoom) .champ:not(:focus-within) .champ__milliers + input {
+  position: absolute;
+  right: 0;
+  width: 1px;
+  opacity: 0;
+}
+.bulle--validee:not(.bulle--zoom) .champ:focus-within .champ__milliers { display: none; }
+@media (max-height: 820px) {
+  .bulle--validee:not(.bulle--zoom) .champ__milliers { font-size: .8125rem; }
+}
+@media (pointer: coarse) {
+  .bulle--validee:not(.bulle--zoom) .champ__milliers,
+  .bulle[data-colonnes="1"].bulle--validee:not(.bulle--zoom) .champ__milliers { font-size: 1rem; }
+  /* Au toucher, le nombre entier doit tenir pendant la frappe. */
+  .bulle--validee:not(.bulle--zoom) .champ input { width: 8ch; }
+}
+
+/*
+ * Situation figée sur téléphone : le résumé, coincé entre le titre et
+ * « Modifier », débordait sous le bouton. Il passe sur sa propre ligne.
+ */
+@media (max-width: 640px) {
+  .profil__resume { flex: 1 1 100%; order: 1; }
+  #profilModifier { margin-left: auto; }
+}
