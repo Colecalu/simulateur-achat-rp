@@ -1,5 +1,10 @@
 # Designs « Acheter ou louer » — architecture de thèmes
 
+> **07/10/2026 — `theme-perron.css` et `theme-foret.css` ont été retirés du site** : aucune page
+> ne les chargeait plus depuis l'adoption d'Horizon (`theme-codex.css`, CLAUDE.md §12). Ce
+> document décrit l'état antérieur. Les deux fichiers restent dans l'historique git :
+> `git show 93dcde3:frontend/css/theme-perron.css`.
+
 Deux designs Claude Design sont intégrés et **interchangeables à chaud**, pour
 pouvoir les juger sur les mêmes chiffres :
 

@@ -199,18 +199,20 @@ serveur, pas de migrations automatiques, aucune dépendance qui exige une étape
 frontend/                    servi tel quel, racine web en production
   index.html                 page d'accueil « Carnet d'un choix » — diverge de Codex depuis le 02/10, §12
   simulateur.html            le simulateur — servi à /simulateur en production (.htaccess)
-  .htaccess                  adresses propres, 301, cache des polices — Apache seulement, §13
-  robots.txt, sitemap.xml    indexation — URL sur aequo.example, PROVISOIRE, §13
+  mentions-legales.html      servie à /mentions-legales — §13
+  confidentialite.html       servie à /confidentialite — doit rester VRAIE du code, §13
+  404.html                   ErrorDocument — chemins ABSOLUS obligatoires, §13
+  .htaccess                  HTTPS + sans www, adresses propres, 301, 404, cache des polices — Apache seulement, §13
+  robots.txt, sitemap.xml    indexation — https://aequo-immo.fr, sans www, §13
   favicon.svg / .ico         générés par outils/favicon.mjs
   apple-touch-icon.png       idem
   img/partage.png            aperçu de partage 1200 × 630 — outils/image-partage.mjs
   fonts/                     polices hébergées (woff2, latin) + licences OFL — plus de Google Fonts
   css/  polices.css          @font-face des polices hébergées, chargée en premier par les deux pages
         theme-codex.css      THÈME EN SERVICE — « Horizon », valeurs + habillage de Codex (§12)
-        theme-perron.css     thème précédent, conservé — valeurs uniquement
-        theme-foret.css      gelé, conservé comme point de comparaison
         style.css            structure du simulateur
-        accueil.css          feuille AUTONOME de l'accueil (ses propres jetons), une section par bloc
+        accueil.css          feuille AUTONOME de l'accueil (ses propres jetons), une section par bloc ;
+                             sert aussi aux pages légales et à la 404 (section « Document »)
   js/   vendor/chart.umd.min.js  Chart.js 4.4.1, fichier npm officiel inchangé (+ licence MIT)
         calc.js              moteur PUR : window.SimuRP / module.exports
         calc-location.js     pilier 3 — CONSOMME calc.js, ne le modifie jamais
@@ -792,7 +794,8 @@ Les deux passent. Ce qui tranche, c'est le **contraste sur le fond de page** :
 | Immobilier | 8,68:1 | **4,76:1** |
 | Loyers | **1,74:1** ❌ | **10,47:1** |
 
-Le gris des loyers de Perron est très en dessous du 3:1 — faiblesse que `theme-perron.css`
+Le gris des loyers de Perron est très en dessous du 3:1 — faiblesse que `theme-perron.css` (retiré
+du site le 07/10/2026, relisible par `git show 93dcde3:frontend/css/theme-perron.css`)
 documente lui-même comme assumée, et qui obligeait à étiqueter les valeurs sous la courbe.
 Horizon la corrige.
 
@@ -902,7 +905,8 @@ déroulé, les textes et la fluidité qui ont changé. Branche `feat/accueil-tra
 - **Une seule animation** : apparition au défilement (`[data-apparait]`), par `translate` pour ne
   pas écraser les rotations des cartes, jamais sur un titre ; plus le tracé des courbes de 05.
   Tout est coupé sous `prefers-reduced-motion`.
-- **Contact** : dans le pied de page, adresse marquée « provisoire » tant qu'elle est fictive.
+- **Contact** : dans le pied de page, `contact@aequo-immo.fr` (07/10/2026). La boîte doit exister
+  avant le lancement public — voir la checklist du §13.
 - Contraste : tous les textes passent AA à 1440, 1024, 768 et 390 px, tampon compris depuis le
   06/10.
 
@@ -978,33 +982,65 @@ Rien n'y est dessiné à la main : le « Æ » du favicon est le tracé de DM Sa
 `fonts/` ; l'image de partage reprend la maison de `index.html` et les couleurs d'`accueil.css`.
 Si la couverture change, relancer `npm run image-partage`.
 
-### Le jour où le domaine est acheté
+### Mise en ligne technique sur aequo-immo.fr
 
-`aequo.example` est un domaine **fictif** partout où une URL absolue est obligatoire. Une seule
-recherche liste tout ce qu'il faut remplacer :
+Préparée le 07/10/2026 (branche `feat/mise-en-ligne`). **Domaine : `https://aequo-immo.fr`, sans
+www**, dans toutes les URL absolues (canonical, `og:*`, JSON-LD, `robots.txt`, `sitemap.xml`).
+V1 **sans backend** : rien à masquer, l'interface n'a jamais exposé de compte.
 
-```bash
-git grep -n "aequo.example"
-```
+**Mise en ligne technique ≠ lancement public.** Le site est en ligne mais **toutes les pages
+portent `<meta name="robots" content="noindex">`** : on vérifie en conditions réelles avant que
+Google n'indexe quoi que ce soit. `robots.txt` ne bloque **rien**, et ne doit rien bloquer : un
+robot qui n'a pas le droit de lire une page n'y voit pas le `noindex`, et peut indexer son adresse
+quand même à partir des liens qui y mènent.
 
-Aujourd'hui : balises de partage et `canonical` des deux pages, JSON-LD de l'accueil,
-`robots.txt`, `sitemap.xml`, et l'adresse de contact du pied de page (qui est aussi à créer).
+| Ajouté le 07/10 | |
+|---|---|
+| Pages légales | `/mentions-legales` et `/confidentialite`, habillage de l'accueil (`accueil.css`, section « Document »), au sitemap. Éditeur déclaré **à titre non professionnel** (identité confiée à l'hébergeur) : à compléter si le site devient une activité professionnelle. |
+| Avertissement | « ni un conseil financier, ni un conseil en investissement, ni un conseil immobilier » : pied de **toutes** les pages (même phrase partout) et, en version courte, sous les résultats du simulateur (`.avertissement--conseil`). |
+| Pied du simulateur | `.pied` dans `style.css` : liens légaux, contact, avertissement. |
+| 404 | `404.html` + `ErrorDocument 404 /404.html`. **Chemins absolus obligatoires** : Apache la sert à l'adresse demandée, `/a/b/c` compris. `noindex` **définitif**, lui. |
+| HTTPS | Redirection 301 HTTP → HTTPS et www → sans www, vers `https://aequo-immo.fr`, **active depuis le 08/10/2026** (certificats Let's Encrypt vérifiés sur les deux noms, échéance 05/01/2027, renouvellement automatique par OVH). En tête des règles du `.htaccess`. Si le certificat disparaît, la recommenter : sans lui, le site devient inaccessible. |
 
-Puis, au premier déploiement :
+**Les pages légales doivent rester vraies du code.** « Aucune donnée collectée », « aucun
+cookie », « jamais transmis » : le jour où une requête part avec la saisie ou qu'un outil
+d'audience est installé, `confidentialite.html` change dans le même commit (sa section « Mesure
+d'audience » porte un commentaire qui dit quoi écrire).
+
+#### Au premier déploiement
 
 0. **Secrets FTP** dans GitHub, puis un premier passage **en simulation** du workflow (§6).
-1. **`.htaccess`** (il ne se teste pas en local) :
-   - `/simulateur` affiche le simulateur, **sans** changer d'adresse ;
-   - `/simulateur.html` → 301 vers `/simulateur`, `/index.html` → 301 vers `/`,
-     `/simulateur/` → 301 vers `/simulateur` (vérifier les codes avec `curl -I`) ;
+   Vérifier dans le journal que la cible est bien la racine web (`www/`).
+1. ~~**Certificat SSL** actif dans l'espace client OVH (domaine nu ET www)~~ — fait le
+   08/10/2026, et la redirection est décommentée. **Reste à vérifier en ligne** après le premier
+   envoi : `http://aequo-immo.fr/`, `http://www.aequo-immo.fr/` et `https://www.aequo-immo.fr/`
+   répondent 301 vers `https://aequo-immo.fr/` en **un seul saut**, chemin conservé, sans boucle.
+2. **`.htaccess`** (il ne se teste pas en local) :
+   - `/simulateur`, `/mentions-legales`, `/confidentialite` s'affichent **sans** changer
+     d'adresse ;
+   - `/simulateur.html` → 301 vers `/simulateur` (idem pour les deux pages légales),
+     `/index.html` → 301 vers `/`, `/simulateur/` → 301 vers `/simulateur` ;
+   - `/nimporte/quoi/ici` répond **404** (pas 200, pas 302) avec la page habillée ;
    - `/css/polices.css`, `/fonts/dm-sans-variable.woff2`, `/img/partage.png`, `/favicon.svg`,
      `/robots.txt`, `/sitemap.xml` répondent 200 ; les polices portent
      `Cache-Control: public, max-age=31536000, immutable`.
-   - Ajouter alors la redirection HTTP → HTTPS prévue par docs/backend-spec.md, une fois le
-     certificat actif.
-2. **Google Search Console** : déclarer le domaine, soumettre `https://<domaine>/sitemap.xml`.
-3. **Aperçu de partage** : tester l'accueil et le simulateur avec l'outil d'inspection de
-   publication de LinkedIn (Post Inspector).
-4. **Données structurées** : passer l'accueil au test des résultats enrichis de Google.
-5. Mettre à jour les `lastmod` de `sitemap.xml`.
+3. **Boîte `contact@aequo-immo.fr`** créée et testée (elle figure sur toutes les pages).
 
+#### Checklist « Lancement public »
+
+À dérouler **dans l'ordre**, le jour où le site doit être trouvé :
+
+- [ ] **Retirer `<meta name="robots" content="noindex">`** de `index.html`, `simulateur.html`,
+      `mentions-legales.html` et `confidentialite.html` — chacune porte le commentaire
+      « À RETIRER AU LANCEMENT PUBLIC » (`git grep -n "À RETIRER AU LANCEMENT PUBLIC"`).
+      **Pas** celui de `404.html`, qui est définitif.
+- [ ] Vérifier que `robots.txt` ne bloque toujours rien.
+- [ ] Lever les points bloquants de contenu : devise des rendements MSCI (§10), données
+      provisoires des scénarios (§9), jeu d'exemple de l'aperçu (§12).
+- [ ] Retirer « Prototype en développement » des pieds de page, si ce n'en est plus un.
+- [ ] Mettre à jour les `lastmod` de `sitemap.xml`.
+- [ ] **Google Search Console** : déclarer le domaine, soumettre
+      `https://aequo-immo.fr/sitemap.xml`, demander l'indexation de `/` et `/simulateur`.
+- [ ] **Aperçu de partage** : tester l'accueil et le simulateur avec le Post Inspector de
+      LinkedIn.
+- [ ] **Données structurées** : passer l'accueil au test des résultats enrichis de Google.

@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Page introuvable — Æquo</title>
+  <!-- noindex DÉFINITIF : celui-ci ne se retire pas au lancement public. Une
+       page d'erreur n'a rien à faire dans un moteur de recherche. -->
+  <meta name="robots" content="noindex">
+  <link rel="icon" href="/favicon.ico" sizes="32x32">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <meta name="theme-color" content="#f3da78">
+  <!-- TOUS les chemins sont absolus, et doivent le rester : Apache sert cette
+       page (ErrorDocument, .htaccess) à l'adresse demandée, quelle qu'elle
+       soit. Depuis /a/b/c, un « css/accueil.css » relatif chercherait
+       /a/b/css/accueil.css — qui n'existe pas — et la page s'afficherait nue.
+       polices.css appelle ses fichiers par ../fonts/, relatif à LUI-MÊME :
+       chargé par /css/polices.css, il les trouve toujours. -->
+  <link rel="stylesheet" href="/css/polices.css">
+  <link rel="stylesheet" href="/css/accueil.css">
+</head>
+<body>
+  <a class="skip" href="#contenu">Aller au contenu</a>
+
+  <header class="masthead">
+    <a class="brand" href="/" aria-label="Æquo, accueil">Æquo<span aria-hidden="true">↗</span></a>
+    <span class="edition">SIMULATEUR ACHAT OU LOCATION <br>DE VOTRE RÉSIDENCE PRINCIPALE</span>
+    <a class="nav-cta" href="/simulateur">Le simulateur <span aria-hidden="true">↗</span></a>
+  </header>
+
+  <main id="contenu" class="document">
+    <p class="folio">ERREUR 404</p>
+    <h1>Cette page <em>n’existe pas.</em></h1>
+    <p class="document__chapeau">L’adresse est peut-être mal saisie, ou la page a changé de place. Rien n’est perdu&nbsp;: votre brouillon de simulation est toujours dans votre navigateur.</p>
+    <div class="document__actions">
+      <a class="nav-cta" href="/">Revenir à l’accueil <span aria-hidden="true">↗</span></a>
+      <a class="nav-cta" href="/simulateur">Ouvrir le simulateur <span aria-hidden="true">↗</span></a>
+    </div>
+  </main>
+
+  <footer>
+    <a class="brand" href="/">Æquo<span aria-hidden="true">↗</span></a>
+    <p>Acheter ou louer. Comprendre avant de choisir.</p>
+    <nav class="pied__liens" aria-label="Informations légales">
+      <a href="/mentions-legales">Mentions légales</a>
+      <a href="/confidentialite">Confidentialité</a>
+    </nav>
+    <div class="pied__contact">
+      <a href="mailto:contact@aequo-immo.fr">Contact</a>
+      <span>contact@aequo-immo.fr</span>
+    </div>
+    <span>Prototype en développement. <br>Des hypothèses, pas une prédiction.</span>
+    <p class="pied__avertissement">Æquo propose des simulations à visée pédagogique. Elles ne constituent ni un conseil financier, ni un conseil en investissement, ni un conseil immobilier&nbsp;: avant de vous engager, vérifiez vos chiffres et, si besoin, faites-vous accompagner par un professionnel.</p>
+  </footer>
+</body>
+</html>

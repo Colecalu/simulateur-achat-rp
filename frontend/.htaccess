@@ -5,8 +5,13 @@
 #  (http-server) l'ignore. Il sert déjà /simulateur tout seul (il ajoute
 #  .html quand l'adresse n'a pas d'extension), si bien que les liens
 #  fonctionnent dans les deux mondes. Vérifications à faire au premier
-#  déploiement : voir CLAUDE.md, « Le jour où le domaine est acheté ».
+#  déploiement : voir CLAUDE.md §13, « Au premier déploiement ».
 # ===========================================================================
+
+# Page d'erreur : un chemin LOCAL (pas une URL complète), pour qu'Apache
+# garde le code 404 au lieu de rediriger. Servie à l'adresse demandée, quelle
+# qu'elle soit : 404.html n'utilise donc que des chemins absolus.
+ErrorDocument 404 /404.html
 
 # MultiViews laisse Apache choisir lui-même un fichier quand l'extension
 # manque : il servirait /simulateur à sa façon, avant nos règles, et les
@@ -16,6 +21,29 @@ Options -MultiViews
 <IfModule mod_rewrite.c>
   RewriteEngine On
 
+  # --- HTTPS et domaine sans www — ACTIF depuis le 08/10/2026 -------------
+  # Une seule adresse canonique : https://aequo-immo.fr, sans www. Tout le
+  # reste (http, www, ou les deux) repart en 301 vers elle, chemin et
+  # paramètres conservés. EN TÊTE des règles : une page demandée en http doit
+  # changer de protocole avant toute réécriture d'adresse propre.
+  #
+  # Prérequis, vérifié le 08/10/2026 : certificat Let's Encrypt actif sur
+  # aequo-immo.fr ET www.aequo-immo.fr. S'il venait à expirer ou à être
+  # retiré dans l'espace client OVH, recommenter ces trois lignes : sans
+  # certificat, la redirection rendrait le site inaccessible.
+  #
+  # Test du port plutôt que de %{HTTPS} : c'est la forme que donne le guide
+  # d'OVH pour ses hébergements mutualisés. Si une page boucle en
+  # redirection, c'est ce test qu'il faut revoir.
+  RewriteCond %{SERVER_PORT} 80 [OR]
+  RewriteCond %{HTTP_HOST} ^www\. [NC]
+  RewriteRule ^ https://aequo-immo.fr%{REQUEST_URI} [R=301,L,NE]
+  #
+  # Une fois la redirection vérifiée en ligne pendant quelques jours,
+  # envisager l'en-tête HSTS (mod_headers, plus bas) — pas avant : il est
+  # mémorisé par les navigateurs et ne se retire pas d'un clic.
+  # -------------------------------------------------------------------------
+
   # Une seule adresse par page, sinon les moteurs de recherche voient deux
   # pages identiques et partagent leur crédit entre elles. On ne redirige que
   # ce que le VISITEUR a demandé (THE_REQUEST) : la réécriture interne de
@@ -24,18 +52,20 @@ Options -MultiViews
   RewriteCond %{THE_REQUEST} \s/+index\.html[\s?] [NC]
   RewriteRule ^index\.html$ / [R=301,L]
 
-  RewriteCond %{THE_REQUEST} \s/+simulateur\.html[\s?] [NC]
-  RewriteRule ^simulateur\.html$ /simulateur [R=301,L]
+  # Les pages à adresse propre : le simulateur et les deux pages légales.
+  # Une nouvelle page s'ajoute dans les TROIS règles ci-dessous.
+  RewriteCond %{THE_REQUEST} \s/+(simulateur|mentions-legales|confidentialite)\.html[\s?] [NC]
+  RewriteRule ^(simulateur|mentions-legales|confidentialite)\.html$ /$1 [R=301,L]
 
   # Avec une barre finale, les chemins relatifs de la page (css/, js/)
   # partiraient de /simulateur/ et ne trouveraient rien : la page serait nue.
-  RewriteRule ^simulateur/$ /simulateur [R=301,L]
+  RewriteRule ^(simulateur|mentions-legales|confidentialite)/$ /$1 [R=301,L]
 
   # L'adresse propre, servie sans redirection visible. Les fichiers qui
   # existent (css/, js/, fonts/, img/, favicon, robots.txt, sitemap.xml)
   # ne sont concernés par aucune de ces règles : elles ne visent que ces
-  # trois adresses précises.
-  RewriteRule ^simulateur$ simulateur.html [L]
+  # adresses précises.
+  RewriteRule ^(simulateur|mentions-legales|confidentialite)$ $1.html [L]
 </IfModule>
 
 <IfModule mod_headers.c>

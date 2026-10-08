@@ -1,7 +1,8 @@
 # Æquo : tout est public, rien à cacher aux moteurs de recherche.
-# aequo.example est le domaine provisoire : voir CLAUDE.md,
-# « Le jour où le domaine est acheté ».
+# Ne RIEN bloquer ici pendant la mise en ligne technique : les pages portent
+# une balise <meta name="robots" content="noindex">, et un robot à qui l'on
+# interdit une page ne la lit pas, donc ne voit pas ce noindex.
 User-agent: *
 Allow: /
 
-Sitemap: https://aequo.example/sitemap.xml
+Sitemap: https://aequo-immo.fr/sitemap.xml

@@ -1738,6 +1738,37 @@ footer>span {
   color: var(--muted);
 }
 
+/* Les pages légales et la 404 reprennent ce pied tel quel : un visiteur doit
+   les trouver depuis n'importe quelle page. */
+footer {
+  flex-wrap: wrap;
+}
+
+.pied__liens {
+  display: flex;
+  gap: 20px;
+}
+
+.pied__liens a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  font-size: 12px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* L'avertissement prend toute la ligne, sous le reste : il doit se lire, pas
+   seulement exister. 11 px plutôt que les 9 px des mentions voisines. */
+footer .pied__avertissement {
+  flex-basis: 100%;
+  margin-right: 0;
+  max-width: 90ch;
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
 @media (min-width:1500px) {
   .cover h1 {
     font-size: 120px;
@@ -2008,11 +2039,19 @@ footer>span {
   footer>span {
     font-size: 8px;
   }
+  /* « Contact » passe à la ligne sous les deux liens légaux : on annule
+     l'espacement du pied (20 px) pour qu'il en soit la suite, au même pas
+     de 44 px, et non un bloc détaché. */
   .pied__contact {
     width: 100%;
+    margin-top: -20px;
   }
   .pied__contact a {
     min-height: 44px;
+  }
+  footer .pied__avertissement {
+    width: 100%;
+    font-size: 10px;
   }
   .finale__note {
     margin-top: 20px;
@@ -2020,6 +2059,97 @@ footer>span {
   }
   .ticket small {
     font-size: 7px;
+  }
+}
+
+/* ============================================================== Document
+   Pages légales et 404 : même masthead et même pied que l'accueil, un seul
+   bloc de texte au milieu. Une colonne de lecture, pas de décor : ces pages
+   se lisent, elles ne se racontent pas. */
+
+.document {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 70px 5% 90px;
+}
+
+.document h1 {
+  font: clamp(48px, 6vw, 76px)/1 var(--serif);
+  letter-spacing: -2px;
+  margin: 14px 0 22px;
+}
+
+.document h1 em {
+  color: var(--purple);
+}
+
+.document__chapeau {
+  font-size: 18px;
+  line-height: 1.55;
+  margin-bottom: 18px;
+}
+
+.document__maj {
+  color: var(--muted);
+  margin-bottom: 30px;
+}
+
+.document section {
+  padding-top: 30px;
+  margin-top: 30px;
+  border-top: 1px dashed var(--line);
+}
+
+.document h2 {
+  font: 32px/1.15 var(--serif);
+  margin-bottom: 14px;
+}
+
+.document p + p,
+.document p + ul,
+.document ul + p {
+  margin-top: 12px;
+}
+
+.document ul {
+  margin: 0;
+  padding-left: 1.2em;
+}
+
+.document li + li {
+  margin-top: 6px;
+}
+
+/* Dans le texte, un lien doit se voir comme tel : le reset global (a sans
+   soulignement) vaut pour la mise en page, pas pour la lecture. */
+.document a {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.document__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px 35px;
+  margin-top: 34px;
+}
+
+.document__actions a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  font-size: 14px;
+}
+
+@media (max-width:700px) {
+  .document {
+    padding: 44px 20px 60px;
+  }
+  .document h2 {
+    font-size: 27px;
+  }
+  .document__chapeau {
+    font-size: 16px;
   }
 }
 

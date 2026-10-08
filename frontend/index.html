@@ -5,24 +5,29 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Simulateur acheter ou louer sa résidence principale — Æquo</title>
   <meta name="description" content="Acheter ou louer votre résidence principale ? Simulateur gratuit et sans inscription, pensé pour les primo-accédants : comparez deux trajectoires de patrimoine.">
-  <link rel="canonical" href="https://aequo.example/">
-  <!-- Aperçu de partage (réseaux, messageries). URL absolues obligatoires :
-       aequo.example est le domaine provisoire, voir « Le jour où le domaine
-       est acheté » dans CLAUDE.md. Image : outils/image-partage.mjs. -->
+  <!-- À RETIRER AU LANCEMENT PUBLIC. Mise en ligne technique : la page est
+       publique mais ne doit pas encore entrer dans l'index des moteurs. Ne
+       rien bloquer dans robots.txt : un robot qui ne lit pas la page ne voit
+       pas cette balise. Checklist « Lancement public » dans CLAUDE.md. -->
+  <meta name="robots" content="noindex">
+  <link rel="canonical" href="https://aequo-immo.fr/">
+  <!-- Aperçu de partage (réseaux, messageries). URL absolues obligatoires,
+       toutes sur https://aequo-immo.fr, sans www. Image :
+       outils/image-partage.mjs. -->
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Æquo">
   <meta property="og:locale" content="fr_FR">
   <meta property="og:title" content="Simulateur acheter ou louer sa résidence principale — Æquo">
   <meta property="og:description" content="Acheter ou louer votre résidence principale ? Simulateur gratuit et sans inscription, pensé pour les primo-accédants : comparez deux trajectoires de patrimoine.">
-  <meta property="og:url" content="https://aequo.example/">
-  <meta property="og:image" content="https://aequo.example/img/partage.png">
+  <meta property="og:url" content="https://aequo-immo.fr/">
+  <meta property="og:image" content="https://aequo-immo.fr/img/partage.png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta property="og:image:alt" content="Æquo, une maison en papier sur fond jaune : « La même porte. Pas la même histoire. » Simulateur gratuit pour acheter ou louer sa résidence principale.">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Simulateur acheter ou louer sa résidence principale — Æquo">
   <meta name="twitter:description" content="Acheter ou louer votre résidence principale ? Simulateur gratuit et sans inscription, pensé pour les primo-accédants : comparez deux trajectoires de patrimoine.">
-  <meta name="twitter:image" content="https://aequo.example/img/partage.png">
+  <meta name="twitter:image" content="https://aequo-immo.fr/img/partage.png">
   <!-- Icônes générées par outils/favicon.mjs. Le .ico d'abord, le SVG
        ensuite : les navigateurs récents retiennent le SVG, les anciens le
        .ico (ordre recommandé). Chemins absolus : la page est servie à / et à
@@ -49,19 +54,19 @@
     "@graph": [
       {
         "@type": "WebSite",
-        "@id": "https://aequo.example/#site",
+        "@id": "https://aequo-immo.fr/#site",
         "name": "Æquo",
         "alternateName": "Aequo",
-        "url": "https://aequo.example/",
+        "url": "https://aequo-immo.fr/",
         "inLanguage": "fr-FR"
       },
       {
         "@type": "WebApplication",
-        "@id": "https://aequo.example/simulateur#application",
+        "@id": "https://aequo-immo.fr/simulateur#application",
         "name": "Æquo — simulateur acheter ou louer",
-        "url": "https://aequo.example/simulateur",
+        "url": "https://aequo-immo.fr/simulateur",
         "isPartOf": {
-          "@id": "https://aequo.example/#site"
+          "@id": "https://aequo-immo.fr/#site"
         },
         "applicationCategory": "FinanceApplication",
         "operatingSystem": "Web",
@@ -439,13 +444,18 @@
   <footer>
     <a class="brand" href="/">Æquo<span aria-hidden="true">↗</span></a>
     <p>Acheter ou louer. Comprendre avant de choisir.</p>
-    <!-- Adresse fictive tant que le domaine n'existe pas : le dire, pour
-         que personne n'écrive dans le vide. -->
+    <nav class="pied__liens" aria-label="Informations légales">
+      <a href="/mentions-legales">Mentions légales</a>
+      <a href="/confidentialite">Confidentialité</a>
+    </nav>
     <div class="pied__contact" id="contact">
-      <a href="mailto:bonjour@aequo.example">Contact</a>
-      <span>bonjour@aequo.example · adresse provisoire</span>
+      <a href="mailto:contact@aequo-immo.fr">Contact</a>
+      <span>contact@aequo-immo.fr</span>
     </div>
     <span>Prototype en développement. <br>Des hypothèses, pas une prédiction.</span>
+    <!-- Même phrase dans le pied du simulateur, des pages légales et de la
+         404 : la changer partout à la fois. -->
+    <p class="pied__avertissement">Æquo propose des simulations à visée pédagogique. Elles ne constituent ni un conseil financier, ni un conseil en investissement, ni un conseil immobilier&nbsp;: avant de vous engager, vérifiez vos chiffres et, si besoin, faites-vous accompagner par un professionnel.</p>
   </footer>
 </body>
 </html>

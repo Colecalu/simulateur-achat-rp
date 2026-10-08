@@ -110,10 +110,12 @@ le même selon ce qu'on touche.
 
 L'architecture s'y prête déjà, et c'est vérifié : `style.css` (1 455 lignes) ne contient **aucune
 couleur en dur et aucun nom de rampe** — que de la structure en noms sémantiques français
-(`--plan`, `--encre`, `--accent`, `--achat`…). `theme-perron.css` (141 lignes) ne contient **que
-des valeurs**.
+(`--plan`, `--encre`, `--accent`, `--achat`…). L'ancien `theme-perron.css` (141 lignes) ne
+contenait **que des valeurs** ; il a été retiré du site le 07/10/2026 et se relit dans l'historique
+git (`git show 93dcde3:frontend/css/theme-perron.css`).
 
-Copier `theme-perron.css`, changer les valeurs, garder tous les noms sémantiques. **Zéro conflit
+Partir de ce fichier-là (ou des seules valeurs de `theme-codex.css`, sans ses règles de
+composants), changer les valeurs, garder tous les noms sémantiques. **Zéro conflit
 possible**, et comparaison directe en changeant une balise `<link>`.
 
 Si un rôle manque pour exprimer une idée, le dire : on l'ajoute aux deux thèmes plutôt que
