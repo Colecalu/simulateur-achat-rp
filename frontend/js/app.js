@@ -1072,6 +1072,11 @@ function ouvrirResultatMel() {
   // Un graphique créé dans une fenêtre cachée garde une largeur nulle, et
   // `resize()` ne replace pas ses points : on le recrée une fois visible.
   if (graphMel) { graphMel.destroy(); graphMel = null; }
+  // On ne revend pas un bien avant de l'avoir mis en location : si le curseur
+  // principal est avant l'année de bascule, le bilan s'ouvre sur cette année.
+  // Sans quoi la fenêtre s'ouvrait sur deux « — » (audit du 08/10/2026).
+  const bascule = parseInt($('#melAnneeBascule').value, 10);
+  if (bascule > parseInt($('#horizon').value, 10)) $('#horizon').value = bascule;
   rafraichir();
   if (dernieresOptionsMel && !$('#melResultats').hidden) {
     // Une tranche, pas l'année exacte : on veut savoir à quel horizon les
@@ -1378,7 +1383,11 @@ function appliquerScenario(cle) {
  */
 function majAvertissement() {
   const commun =
-    'Ni inflation générale, ni changement de situation, ni revente anticipée subie. ' +
+    // « Ni inflation générale » laissait croire l'inflation ignorée, alors que
+    // les taux nominaux l'intègrent : ce qui manque, c'est la conversion en
+    // euros d'aujourd'hui (audit du 08/10/2026).
+    "Montants en euros courants, non corrigés de l'inflation. " +
+    'Ni changement de situation, ni revente anticipée subie. ' +
     "Un résultat serré (moins de quelques milliers d'euros d'écart) doit se lire comme une égalité.";
   if (!scenarioActif) {
     $('#avertissement').textContent =
@@ -1778,6 +1787,8 @@ function afficherMel(mel, horizon) {
   const regime = mel.options.regime === 'nu' ? 'location nue' : 'meublé';
   $('#melTitre').textContent = `Si vous la louez dès l'année ${N}, en ${regime}`;
   const apresHorizon = N > horizon;
+  // Le curseur « Bilan dans » ne propose que des reventes après la bascule.
+  $('#horizonMel').min = N;
 
   // 1 et 2 : comparaisons de patrimoine, à l'horizon du curseur principal.
   const vsRevente = ligne.patrimoineTotal - base[horizon - 1].patrimoineTotalAchat;
@@ -2110,20 +2121,21 @@ function afficherQuestion(resultat, horizon) {
   // première ne se répond pas à l'écran : elle se répond dans sa tête, et
   // c'est elle qui décide si la seconde a un sens.
   $('#questionSupplement').textContent = montant;
-  // La question qui dérange, et qui fait tout le travail : si l'effort est
-  // tenable, pourquoi ne le fait-il pas DÉJÀ ? La réponse honnête est presque
-  // toujours « parce que rien ne m'y oblige » — et c'est exactement ce que le
-  // crédit changerait. Espace INSÉCABLE avant le « ? », sinon il tombe seul à
-  // la ligne dès que la bulle se resserre.
+  // La question qui fait tout le travail : si l'effort est tenable, pourquoi
+  // ne pas le faire DÉJÀ ? La réponse honnête est presque toujours « parce que
+  // rien ne m'y oblige » — et c'est exactement ce que le crédit changerait.
+  // Posée sans reproche (audit du 08/10/2026) : le site compare, il ne juge
+  // pas. Espace INSÉCABLE avant le « ? », sinon il tombe seul à la ligne dès
+  // que la bulle se resserre.
   $('#questionDemande2').textContent =
-    'Si oui : pourquoi ne le faites-vous pas déjà, aujourd’hui, ' +
-    'en tant que locataire ?';
+    'Si oui, pourquoi ne pas le faire dès aujourd’hui, ' +
+    'en restant locataire ?';
 
   // Ce que le choix engage vraiment : deux enveloppes différentes pour toute la
   // suite. Sans ça, on répond à une question de principe sans voir qu'on
   // paramètre la simulation.
   $('#questionTexte').textContent =
-    'C’est tout l’enjeu : le crédit vous FORCERA à mettre cette somme de ' +
+    'C’est tout l’enjeu : le crédit vous obligera à mettre cette somme de ' +
     'côté chaque mois, alors que rien ne vous y oblige en restant locataire. ' +
     `Selon votre réponse, les deux trajectoires n’auront pas la même ` +
     `enveloppe : ${montant} par mois d’écart, pendant toute la simulation.`;

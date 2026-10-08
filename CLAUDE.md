@@ -942,7 +942,7 @@ déroulé, les textes et la fluidité qui ont changé. Branche `feat/accueil-tra
   remplacer par « Calculs faits dans votre navigateur, sans compte. ». **Fait le 08/10/2026**,
   avec l'arrivée de Google Analytics.
 - **Le tampon de couverture a sa propre brique, `#9e3a23`**, plus sombre que `--orange` : il porte
-  « 100 % gratuit / 0 € / sans inscription » en 8 px sur le jaune, où `--orange` n'atteint que
+  « 100 % gratuit / 0 € / sans inscription » en 9 px sur le jaune, où `--orange` n'atteint que
   3,8:1. Décision de Lucas. La carte postale de la couverture est un `<p class="postcard__titre">`,
   pas un titre : elle ne doit pas figurer dans le plan de la page.
 - **Neutralité.** En 01, les deux citations sont sur deux cartes strictement identiques ; seul le

@@ -96,7 +96,7 @@ a:focus-visible, button:focus-visible, summary:focus-visible {
 }
 
 .edition {
-  font: 9px/1.5 var(--mono);
+  font: 10px/1.5 var(--mono);
   letter-spacing: 1px;
   margin-right: auto;
   margin-left: 35px;
@@ -346,7 +346,7 @@ a:focus-visible, button:focus-visible, summary:focus-visible {
 }
 
 .postcard .tiny {
-  font-size: 8px;
+  font-size: 10px;
 }
 
 .postcard .postcard__titre {
@@ -380,7 +380,7 @@ a:focus-visible, button:focus-visible, summary:focus-visible {
   bottom: 65px;
   left: 5%;
   /* Brique plus sombre que --orange, pour ce seul tampon : il porte une
-     information clé (gratuit, sans inscription) en 8 px sur le jaune, où
+     information clé (gratuit, sans inscription) en 9 px sur le jaune, où
      --orange n'atteint que 3,8:1. Celle-ci passe le seuil AA de 4,5:1. */
   border: 1px solid #9e3a23;
   color: #9e3a23;
@@ -391,7 +391,7 @@ a:focus-visible, button:focus-visible, summary:focus-visible {
   flex-direction: column;
   justify-content: center;
   text-align: center;
-  font: 8px/1.2 var(--mono);
+  font: 9px/1.2 var(--mono);
   transform: rotate(-14deg);
 }
 
@@ -408,7 +408,7 @@ a:focus-visible, button:focus-visible, summary:focus-visible {
   bottom: 5px;
   left: 50%;
   transform: translateX(-50%);
-  font: 8px var(--mono);
+  font: 10px var(--mono);
   text-align: center;
   width: 80%;
 }
@@ -467,7 +467,7 @@ a:focus-visible, button:focus-visible, summary:focus-visible {
 .section-label {
   display: flex;
   justify-content: space-between;
-  font: 9px var(--mono);
+  font: 10px var(--mono);
   letter-spacing: 1px;
   grid-column: 1/-1;
   padding-bottom: 30px;
@@ -541,7 +541,7 @@ a:focus-visible, button:focus-visible, summary:focus-visible {
 
 .camps__numero,
 .camps__camp {
-  font: 9px/1.6 var(--mono);
+  font: 10px/1.6 var(--mono);
   letter-spacing: 1px;
   color: var(--muted);
 }
@@ -719,7 +719,7 @@ a:focus-visible, button:focus-visible, summary:focus-visible {
 }
 
 .sheet-heading {
-  font: 9px var(--mono);
+  font: 10px var(--mono);
   display: flex;
   justify-content: space-between;
   gap: 15px;
@@ -749,7 +749,7 @@ a:focus-visible, button:focus-visible, summary:focus-visible {
   display: flex;
   margin: 16px 0;
   min-height: 42px;
-  font-size: 9px;
+  font-size: 10px;
 }
 
 .route-bar span {
@@ -782,7 +782,7 @@ a:focus-visible, button:focus-visible, summary:focus-visible {
 }
 
 .sheet-note {
-  font: 9px/1.6 var(--mono);
+  font: 10px/1.6 var(--mono);
   margin-top: 20px;
 }
 
@@ -833,7 +833,7 @@ a:focus-visible, button:focus-visible, summary:focus-visible {
 }
 
 .time-notes article>span {
-  font: 9px var(--mono);
+  font: 10px var(--mono);
 }
 
 .time-notes h3 {
@@ -880,6 +880,14 @@ a:focus-visible, button:focus-visible, summary:focus-visible {
 
 .temps__renvoi:hover {
   color: var(--ink);
+}
+
+/* 24 px de haut à la souris (17 px avant l'audit du 08/10/2026), sans
+   bouger la ligne ; 44 px au doigt, plus bas (pointer:coarse). */
+.temps__renvoi {
+  display: inline-block;
+  padding: 4px 2px;
+  margin: -4px -2px;
 }
 
 .temps__transition {
@@ -1104,7 +1112,7 @@ a:focus-visible, button:focus-visible, summary:focus-visible {
 }
 
 .pilier__numero {
-  font: 9px/1.6 var(--mono);
+  font: 10px/1.6 var(--mono);
   letter-spacing: 1px;
   color: var(--muted);
 }
@@ -1145,7 +1153,7 @@ a:focus-visible, button:focus-visible, summary:focus-visible {
 .pilier__volet-nom span {
   display: block;
   margin-top: 5px;
-  font: 8px/1.6 var(--mono);
+  font: 10px/1.6 var(--mono);
   letter-spacing: 1px;
   text-transform: uppercase;
   color: var(--muted);
@@ -1300,7 +1308,7 @@ a.pilier__renvoi:hover {
 .apercu__kpi dt>span {
   display: block;
   margin-top: 5px;
-  font: 9px/1.6 var(--mono);
+  font: 10px/1.6 var(--mono);
   letter-spacing: 1px;
   text-transform: uppercase;
   color: var(--muted);
@@ -1684,7 +1692,7 @@ details p {
 }
 
 .ticket>span, .ticket small {
-  font: 8px var(--mono);
+  font: 10px var(--mono);
   letter-spacing: 1px;
 }
 
@@ -1706,7 +1714,7 @@ footer {
 }
 
 footer p {
-  font-size: 10px;
+  font-size: 12px;
   margin-right: auto;
 }
 
@@ -1715,26 +1723,7 @@ footer>a:not(.brand) {
 }
 
 footer>span {
-  font-size: 9px;
-  color: var(--muted);
-}
-
-.pied__contact {
-  display: flex;
-  flex-direction: column;
-}
-
-.pied__contact a {
-  display: inline-flex;
-  align-items: center;
-  min-height: 44px;
-  font-size: 12px;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-
-.pied__contact span {
-  font-size: 9px;
+  font-size: 11px;
   color: var(--muted);
 }
 
@@ -1744,9 +1733,13 @@ footer {
   flex-wrap: wrap;
 }
 
+/* L'adresse de contact est le troisième lien, à la même hauteur que les deux
+   autres (audit du 08/10/2026 : elle flottait au-dessus, en 9 px et non
+   cliquable). Sur téléphone, elle passe à la ligne au même pas de 44 px. */
 .pied__liens {
   display: flex;
-  gap: 20px;
+  flex-wrap: wrap;
+  gap: 0 20px;
 }
 
 .pied__liens a {
@@ -1804,9 +1797,9 @@ footer .pied__avertissement {
   .stamp {
     left: 0;
     bottom: 65px;
-    width: 105px;
-    height: 105px;
-    font-size: 7px;
+    width: 115px;
+    height: 115px;
+    font-size: 9px;
   }
   .ledger {
     gap: 40px;
@@ -1844,7 +1837,7 @@ footer .pied__avertissement {
     padding: 30px 20px 25px;
   }
   .folio {
-    font-size: 8px;
+    font-size: 10px;
   }
   .cover h1 {
     font-size: clamp(44px,10.8vw,74px);
@@ -1854,8 +1847,11 @@ footer .pied__avertissement {
   .intro {
     font-size: 12px;
   }
+  /* Maison, carte postale et tampon descendent de 40 px (audit du
+     08/10/2026) : le toit recouvrait « C'est par ici », et la carte la
+     phrase « Calculs faits dans votre navigateur ». */
   .theatre {
-    height: 535px;
+    height: 590px;
     margin-top: 24px;
   }
   .view-switch {
@@ -1870,7 +1866,7 @@ footer .pied__avertissement {
     width: 510px;
     height: 345px;
     left: 48%;
-    top: 38px;
+    top: 78px;
   }
   .pencil-note {
     font-size: 21px;
@@ -1882,7 +1878,7 @@ footer .pied__avertissement {
     margin-left: 5px;
   }
   .postcard {
-    top: 307px;
+    top: 347px;
     right: 5px;
     width: 205px;
     padding: 18px;
@@ -1896,6 +1892,9 @@ footer .pied__avertissement {
   }
   .postcard .postcard__titre br {
     display: none;
+  }
+  .postcard .tiny {
+    letter-spacing: .5px;
   }
   .postcard p:last-of-type {
     font-size: 11px;
@@ -1915,7 +1914,23 @@ footer .pied__avertissement {
     transform: none;
     text-align: left;
     width: 100%;
-    font-size: 7px;
+    font-size: 10px;
+  }
+  /* Sous 360 px, la carte postale mordait sur le tampon, et, plus haute
+     parce que plus étroite, sur la phrase du bas. */
+  @media (max-width:360px) {
+    .theatre {
+      height: 630px;
+    }
+    .postcard {
+      width: 180px;
+      padding: 16px;
+    }
+    .stamp {
+      left: 0;
+      width: 94px;
+      height: 94px;
+    }
   }
   .cover-bottom {
     margin-top: 40px;
@@ -1939,12 +1954,12 @@ footer .pied__avertissement {
   }
   .read-on {
     grid-column: 1/-1;
-    font-size: 9px;
+    font-size: 10px;
     justify-content: center;
   }
   .section-label {
     padding-bottom: 0;
-    font-size: 8px;
+    font-size: 10px;
     gap: 20px;
   }
   .ledger {
@@ -1953,7 +1968,7 @@ footer .pied__avertissement {
     gap: 35px;
   }
   .tiny {
-    font-size: 8px;
+    font-size: 10px;
   }
   .ledger-title h2 {
     font-size: 47px;
@@ -2034,20 +2049,10 @@ footer .pied__avertissement {
   }
   footer p {
     width: calc(100% - 130px);
-    font-size: 9px;
+    font-size: 12px;
   }
   footer>span {
-    font-size: 8px;
-  }
-  /* « Contact » passe à la ligne sous les deux liens légaux : on annule
-     l'espacement du pied (20 px) pour qu'il en soit la suite, au même pas
-     de 44 px, et non un bloc détaché. */
-  .pied__contact {
-    width: 100%;
-    margin-top: -20px;
-  }
-  .pied__contact a {
-    min-height: 44px;
+    font-size: 11px;
   }
   footer .pied__avertissement {
     width: 100%;
@@ -2058,7 +2063,7 @@ footer .pied__avertissement {
     font-size: 24px;
   }
   .ticket small {
-    font-size: 7px;
+    font-size: 9px;
   }
 }
 
@@ -2192,7 +2197,6 @@ footer .pied__avertissement {
   .ticket small,
   footer p,
   footer>span,
-  .pied__contact span,
   footer .pied__avertissement {
     font-size: 11px;
   }
