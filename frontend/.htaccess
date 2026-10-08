@@ -123,10 +123,15 @@ AddType font/woff2 .woff2
   # ni style en ligne (règle de CLAUDE.md §5), et que polices et Chart.js
   # sont hébergés ici. Le bloc JSON-LD de l'accueil n'est pas concerné :
   # c'est une donnée, pas un script exécuté.
-  # ⚠️ À ÉLARGIR le jour où l'on ajoute une mesure d'audience ou tout service
-  # extérieur (script-src, connect-src, img-src…) : sinon il sera bloqué en
-  # silence. Voir CLAUDE.md §13.
-  Header always set Content-Security-Policy "default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'; connect-src 'self'; manifest-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'; object-src 'none'; upgrade-insecure-requests"
+  # Seule exception : Google Analytics 4 (08/10/2026, js/mesure.js), au strict
+  # nécessaire de la liste publiée par Google pour GA4 — gtag.js depuis
+  # googletagmanager.com (script-src), les mesures vers google-analytics.com
+  # et analytics.google.com (connect-src ; img-src pour le repli en pixel).
+  # Toujours aucun 'unsafe-inline' : l'initialisation de gtag est dans
+  # mesure.js, pas dans un extrait collé dans la page.
+  # ⚠️ Tout AUTRE service extérieur doit être ajouté ici, sinon il sera
+  # bloqué en silence. Voir CLAUDE.md §13.
+  Header always set Content-Security-Policy "default-src 'none'; script-src 'self' https://*.googletagmanager.com; style-src 'self'; img-src 'self' https://*.google-analytics.com https://*.googletagmanager.com; font-src 'self'; connect-src 'self' https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com; manifest-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'; object-src 'none'; upgrade-insecure-requests"
 
   # HSTS — PRÉVU LE 15/10/2026, une semaine après la redirection HTTPS
   # (checklist de CLAUDE.md §13). Une fois envoyé, les navigateurs refusent

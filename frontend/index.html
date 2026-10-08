@@ -42,6 +42,8 @@
   <link rel="preload" href="fonts/instrument-serif.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="fonts/instrument-serif-italique.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="fonts/dm-sans-variable.woff2" as="font" type="font/woff2" crossorigin>
+  <!-- Mesure d'audience, AVANT tout autre script : voir js/mesure.js. -->
+  <script src="/js/mesure.js" data-type-page="accueil"></script>
   <link rel="stylesheet" href="css/polices.css">
   <link rel="stylesheet" href="css/accueil.css">
   <!-- Données structurées. Pas de FAQPage : Google n'en affiche plus les
@@ -96,12 +98,12 @@
   <header class="masthead">
     <a class="brand" href="/" aria-label="Æquo, accueil">Æquo<span aria-hidden="true">↗</span></a>
     <span class="edition">SIMULATEUR ACHAT OU LOCATION <br>DE VOTRE RÉSIDENCE PRINCIPALE</span>
-    <a class="nav-cta" href="/simulateur">Le simulateur <span aria-hidden="true">↗</span></a>
+    <a class="nav-cta" href="/simulateur" data-mesure-cta="entete">Le simulateur <span aria-hidden="true">↗</span></a>
   </header>
 
   <main id="contenu">
 
-    <section class="cover" aria-labelledby="titre">
+    <section class="cover" data-mesure-section="hero" aria-labelledby="titre">
       <div class="cover-heading">
         <!-- Le surtitre fait partie du <h1> : le slogan seul ne dit rien du
              sujet à un moteur de recherche. Les deux sont visibles, rien n'est
@@ -153,11 +155,11 @@
           <span class="postcard-arrow" aria-hidden="true">↗</span>
         </div>
         <span class="stamp">100&nbsp;% GRATUIT <br><strong>0&nbsp;€</strong> <br>SANS INSCRIPTION</span>
-        <p class="scene-caption">Calculs faits dans votre navigateur. Aucune donnée envoyée.</p>
+        <p class="scene-caption">Calculs faits dans votre navigateur, sans compte.</p>
       </div>
       <div class="cover-bottom">
         <p>La question n’est pas seulement <br><strong>« combien ça coûte ? »</strong> <br>Mais aussi <strong>« qu’est-ce qu’il me reste ? »</strong></p>
-        <a class="round-cta" href="/simulateur"><span>Explorer <br>mon projet</span><span aria-hidden="true">↗</span></a>
+        <a class="round-cta" href="/simulateur" data-mesure-cta="couverture"><span>Explorer <br>mon projet</span><span aria-hidden="true">↗</span></a>
         <a class="read-on" href="#deux-camps">Tourner la page <span aria-hidden="true">↓</span></a>
       </div>
     </section>
@@ -168,7 +170,7 @@
          deux ont raison, parfois ». Les deux cartes et les deux ovales sont
          strictement identiques ; seule l'inclinaison change de sens. Un poids
          visuel inégal ferait pencher la page. -->
-    <section class="camps" id="deux-camps" aria-labelledby="campsTitre">
+    <section class="camps" data-mesure-section="croyances" id="deux-camps" aria-labelledby="campsTitre">
       <div class="section-label">
         <span>01 — DEUX CAMPS, DEUX CERTITUDES</span>
         <span aria-hidden="true">↙</span>
@@ -198,7 +200,7 @@
          correction. Le bloc chiffré reste caché tant que le calcul n'a pas
          réussi : sans JavaScript ou en cas d'échec, il ne reste que le titre
          et le lien — jamais un NaN. -->
-    <section class="apercu" id="apercu" aria-labelledby="apercuTitre">
+    <section class="apercu" data-mesure-section="apercu" id="apercu" aria-labelledby="apercuTitre">
       <div class="apercu__texte">
         <div class="section-label">
           <span>02 — CE QUE VOUS OBTENEZ</span>
@@ -228,10 +230,10 @@
           Exemple calculé avec le moteur du simulateur. Vos chiffres seront différents.
         </figcaption>
       </figure>
-      <a class="apercu__lien" href="/simulateur">Faire le calcul avec mon projet <span aria-hidden="true">↗</span></a>
+      <a class="apercu__lien" href="/simulateur" data-mesure-cta="apercu">Faire le calcul avec mon projet <span aria-hidden="true">↗</span></a>
     </section>
 
-    <section class="ledger" id="regle-du-jeu">
+    <section class="ledger" data-mesure-section="comparaison" id="regle-du-jeu">
       <div class="ledger-title">
         <span class="tiny">03 — LA RÈGLE DU JEU</span>
         <h2>Mêmes moyens. <br><em>Autres destinations.</em></h2>
@@ -270,7 +272,7 @@
          juste après. Les numéros dans les points de la courbe renvoient aux
          cartes ; décoratifs, donc masqués aux lecteurs d'écran, et retirés en
          mobile où la courbe s'estompe. -->
-    <section class="time-story" id="avenir">
+    <section class="time-story" data-mesure-section="ligne_droite" id="avenir">
       <div class="section-label">
         <span>04 — CE QUE PERSONNE NE PEUT PRÉVOIR</span>
         <span aria-hidden="true">↘</span>
@@ -314,7 +316,7 @@
          les piliers 2 et 3 aux « Et si » numérotés de la section 04. Dans les
          piliers 1 et 2, les deux volets ont chacun une moitié égale de la
          carte, et une grille partagée les aligne d'une carte à l'autre. -->
-    <section class="piliers" id="piliers" aria-labelledby="piliersTitre">
+    <section class="piliers" data-mesure-section="piliers" id="piliers" aria-labelledby="piliersTitre">
       <div class="section-label">
         <span>05 — LÀ OÙ LES AUTRES S’ARRÊTENT</span>
         <span aria-hidden="true">↓</span>
@@ -392,38 +394,38 @@
       </div>
     </section>
 
-    <section class="faq" id="questions" aria-labelledby="faqTitre">
+    <section class="faq" data-mesure-section="faq" id="questions" aria-labelledby="faqTitre">
       <div>
         <span class="tiny">QUELQUES NOTES AVANT DE PARTIR</span>
         <h2 id="faqTitre">On vous <br>explique <br><em>le reste.</em></h2>
         <span class="asterisk" aria-hidden="true">✳</span>
       </div>
       <div class="answers" data-apparait>
-        <details>
+        <details data-mesure-question="verdict">
           <summary>Est-ce qu’Æquo va me dire d’acheter ou de louer&nbsp;?</summary>
           <p>Non. Primo-accédant ou non, il compare vos deux patrimoines à la durée choisie, avec vos paramètres. Changer un prix, un loyer ou une hypothèse de marché peut inverser le résultat. La décision reste la vôtre.</p>
         </details>
-        <details>
+        <details data-mesure-question="investir">
           <summary>Pourquoi investir quand on reste locataire&nbsp;?</summary>
           <p>Pour comparer à effort égal&nbsp;: l’apport non dépensé et ce qui reste après le loyer sont placés. Cette discipline d’épargne est une hypothèse, pas une évidence&nbsp;; le simulateur vous laisse indiquer que vous ne la tiendriez pas.</p>
         </details>
-        <details>
+        <details data-mesure-question="calculs">
           <summary>Qu’est-ce qui entre dans les calculs&nbsp;?</summary>
           <p>Le crédit immobilier, les frais d’acquisition (notaire, agence…), la copropriété, la taxe foncière, les loyers, l’évolution du bien et celle des placements. Les placements capitalisent avant impôt&nbsp;; la fiscalité de sortie est déduite du patrimoine net affiché.</p>
           <p>Le modèle ne couvre pas tout&nbsp;: notamment les frais de revente, les gros travaux imprévus ou les changements de vie.</p>
         </details>
-        <details>
+        <details data-mesure-question="scenarios">
           <summary>Les scénarios prédisent-ils les marchés&nbsp;?</summary>
           <p>Non. «&nbsp;Le passé&nbsp;» applique l’évolution des marchés d’une autre époque à votre projet, avec votre taux de crédit, pas celui de l’époque. «&nbsp;Des futurs possibles&nbsp;» teste des hypothèses. Ni l’un ni l’autre ne prédit l’avenir, et leurs données sont encore provisoires&nbsp;: elles ne permettent pas de conclusion financière fiable à ce stade.</p>
         </details>
-        <details>
+        <details data-mesure-question="donnees">
           <summary>Où vont mes données&nbsp;?</summary>
           <p>Les calculs se font dans votre navigateur, sans compte. Votre brouillon est gardé sur cet appareil&nbsp;; il n’est pas synchronisé entre vos appareils.</p>
         </details>
       </div>
     </section>
 
-    <section class="finale" aria-labelledby="finaleTitre">
+    <section class="finale" data-mesure-section="finale" aria-labelledby="finaleTitre">
       <p class="tiny">ASSEZ PARLÉ DES DEUX CHEMINS.</p>
       <div class="finale__titre">
         <h2 id="finaleTitre">Et le <br><em>vôtre&nbsp;?</em></h2>
@@ -431,7 +433,7 @@
       </div>
       <div class="finale-side" data-apparait>
         <p>Un prix, un loyer, votre situation. <br>Commencez par un exemple. <br>Faites-en votre histoire.</p>
-        <a href="/simulateur" class="ticket">
+        <a href="/simulateur" class="ticket" data-mesure-cta="finale">
           <span>OUVRIR LE SIMULATEUR</span>
           <strong>C’est parti <span aria-hidden="true">↗</span></strong>
           <small>SANS INSCRIPTION / DANS VOTRE NAVIGATEUR</small>

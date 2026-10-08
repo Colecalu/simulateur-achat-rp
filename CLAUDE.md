@@ -6,6 +6,7 @@ Document de référence du projet. Court par nature : le détail vit dans `docs/
 |---|---|
 | Modèle de calcul, formules, écarts assumés | [docs/modele-de-calcul.md](docs/modele-de-calcul.md) |
 | Interface, design, visualisation | [docs/conventions-ui.md](docs/conventions-ui.md) |
+| Mesure d'audience (GA4) : événements, paramètres, `?moi`, `?debug_ga` | [docs/plan-de-marquage.md](docs/plan-de-marquage.md) — **source de vérité, à tenir à jour avec le code** |
 | Backend : comptes, sauvegarde, sécurité, RGPD | [docs/backend-spec.md](docs/backend-spec.md) — **en pause** |
 | Design system Perron | [docs/design/README.md](docs/design/README.md) — **le thème en service est désormais « Horizon », voir §12** |
 
@@ -217,6 +218,7 @@ frontend/                    servi tel quel, racine web en production
         accueil.css          feuille AUTONOME de l'accueil (ses propres jetons), une section par bloc ;
                              sert aussi aux pages légales et à la 404 (section « Document »)
   js/   vendor/chart.umd.min.js  Chart.js 4.4.1, fichier npm officiel inchangé (+ licence MIT)
+        mesure.js            GA4 + Mesure.suivre, premier script de CHAQUE page — docs/plan-de-marquage.md
         calc.js              moteur PUR : window.SimuRP / module.exports
         calc-location.js     pilier 3 — CONSOMME calc.js, ne le modifie jamais
         scenarios.js         pilier 2 — données de marché, pas de logique
@@ -920,7 +922,8 @@ déroulé, les textes et la fluidité qui ont changé. Branche `feat/accueil-tra
   et « Aucune donnée envoyée » (aucune requête réseau dans le code ; depuis le 06/10, plus aucun
   serveur tiers n'est appelé, polices et Chart.js compris). Si un jour une requête part avec la
   saisie — sauvegarde en compte, mesure d'audience —, **cette phrase devient fausse** : la
-  remplacer par « Calculs faits dans votre navigateur, sans compte. ».
+  remplacer par « Calculs faits dans votre navigateur, sans compte. ». **Fait le 08/10/2026**,
+  avec l'arrivée de Google Analytics.
 - **Le tampon de couverture a sa propre brique, `#9e3a23`**, plus sombre que `--orange` : il porte
   « 100 % gratuit / 0 € / sans inscription » en 8 px sur le jaune, où `--orange` n'atteint que
   3,8:1. Décision de Lucas. La carte postale de la couverture est un `<p class="postcard__titre">`,
@@ -1070,7 +1073,13 @@ cookie », « jamais transmis » : le jour où une requête part avec la saisie 
 d'audience est installé, `confidentialite.html` change dans le même commit (sa section « Mesure
 d'audience » porte un commentaire qui dit quoi écrire).
 
-**⚠️ La CSP devra être élargie avec la mesure d'audience** — et avec tout service extérieur
+**Mesure d'audience : Google Analytics 4 depuis le 08/10/2026** (`js/mesure.js`, plan dans
+[docs/plan-de-marquage.md](docs/plan-de-marquage.md)). La CSP a été élargie à GA4 seul
+(`*.googletagmanager.com`, `*.google-analytics.com`, `*.analytics.google.com`), toujours sans
+`'unsafe-inline'`. Rien ne part hors d'`aequo-immo.fr` ; `?moi=1` exclut un navigateur,
+`?debug_ga=1` envoie en mode test (DebugView), même en local.
+
+**⚠️ La CSP devra être élargie pour tout AUTRE service extérieur
 (police, carte, vidéo, formulaire…). Elle n'autorise **que** le site lui-même : le script d'un
 outil d'audience serait bloqué **sans erreur visible pour l'utilisateur**, seulement dans la
 console. Ajouter son domaine à `script-src` (le script), `connect-src` (l'envoi des mesures),
@@ -1107,6 +1116,9 @@ de l'hébergement.
 
 À dérouler **dans l'ordre**, le jour où le site doit être trouvé :
 
+- [ ] **Bandeau de consentement GA4 (Consent Mode v2) OBLIGATOIRE avant le retrait du noindex.**
+      Aujourd'hui les cookies `_ga` sont déposés sans consentement — toléré tant que le site
+      n'est pas public, jamais au-delà. Mettre à jour `confidentialite.html` dans le même commit.
 - [ ] **Retirer `<meta name="robots" content="noindex">`** de `index.html`, `simulateur.html`,
       `mentions-legales.html` et `confidentialite.html` — chacune porte le commentaire
       « À RETIRER AU LANCEMENT PUBLIC » (`git grep -n "À RETIRER AU LANCEMENT PUBLIC"`).
