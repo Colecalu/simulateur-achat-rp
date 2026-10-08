@@ -705,11 +705,22 @@ Corriger seulement 2012-2022 ferait **diverger les sept années communes** — 2
 7,51 % dans un scénario et resterait à 22,40 % dans l'autre. On aurait deux vérités dans le même
 produit. **Attendre la série complète 1991-2011 avant de toucher quoi que ce soit.**
 
+### 08/10/2026 — 1991-1998 convertis via le franc
+
+Point de méthode tranché (décision de Lucas) : avant l'euro, la série USD Net est convertie par le
+**franc français** — la parité fixe 6,55957 F/€ ne change aucun rendement.
+`r€(t) = (1 + r$(t)) × S(t) / S(t−1) − 1`, S = francs pour 1 $, **moyenne mensuelle de
+décembre** (FRED, série EXFRUS) prise comme approximation du cours de fin d'année. Les
+rendements USD 1991-1998 du code correspondent au MSCI World USD **Net** (comme l'EUR 2012+) :
+même nature, conversion légitime. Appliqué dans `scenarios.js` et
+`outils/fenetres-historiques.mjs`. Fenêtres inchangées (1992 reste la plus favorable à l'achat,
+2002 la moins).
+
 ### Ce qui reste à obtenir
 
-- **1991 à 2011**, MSCI World **EUR, Net**, rendements annuels, source et date d'extraction.
-  Point de méthode à trancher : **l'euro n'existe pas avant 1999.** MSCI publie une série EUR
-  rétropolée (ECU puis devises héritées) — il faut savoir laquelle et le documenter.
+- **1999 à 2011**, MSCI World **EUR, Net** (ou les cours EUR/USD de fin d'année pour convertir
+  la série USD de la même façon), source et date d'extraction. **Le point reste bloquant** tant
+  que ces treize années sont en dollars — dont toute la « Décennie perdue » (2000-2011).
 - **2023 à 2025 pour les trois autres séries** (immobilier INSEE, loyers IRL, inflation) si l'on
   veut profiter des rendements boursiers déjà disponibles jusqu'en 2025. Les quatre séries d'un
   scénario doivent couvrir la même période et avoir la même longueur.

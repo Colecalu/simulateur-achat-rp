@@ -39,8 +39,10 @@ const DONNEES = {
       'ici qu’à mesurer la STRUCTURE du problème (dispersion, robustesse), ' +
       'jamais à choisir une période.',
     valeurs: [
-      // 1991-2011 — PROVISOIRE, valeurs USD à remplacer par du MSCI World EUR Net
-      0.183, -0.052, 0.225, 0.051, 0.207, 0.135, 0.158, 0.243, 0.253, -0.132,
+      // 1991-1998 — USD Net converti en EUR via le franc : voir scenarios.js
+      0.2414, -0.0419, 0.3272, -0.0271, 0.1052, 0.2005, 0.3152, 0.1687,
+      // 1999-2011 — PROVISOIRE, valeurs USD à remplacer par du MSCI World EUR Net
+      0.253, -0.132,
       -0.165, -0.199, 0.331, 0.147, 0.095, 0.207, 0.09, -0.403, 0.3, 0.118, -0.055,
       // 2012-2025 — MSCI World EUR Net, fiche officielle au 31/08/2026
       0.1405, 0.212, 0.195, 0.1042, 0.1073, 0.0751, -0.0411, 0.3002, 0.0633,

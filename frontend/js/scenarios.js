@@ -104,7 +104,8 @@
    * quatre. Les fenêtres historiques y sont découpées ; rien d'autre dans ce
    * fichier n'est observé.
    *
-   * ⚠️ `rendementBourse` 1991-2011 est FAUX : ce sont des valeurs USD, pas EUR.
+   * ⚠️ `rendementBourse` 1999-2011 est FAUX : ce sont des valeurs USD, pas EUR
+   * (1991-1998 a été converti via le franc, voir le tableau).
    * Diagnostic confirmé (CLAUDE.md §10) : 9 années sur 11 coïncident au
    * centième avec le MSCI World USD Net, 0 sur 11 avec l'EUR. 2012-2022 vient
    * en revanche de la fiche officielle MSCI World EUR Net. La série est donc
@@ -120,8 +121,13 @@
 
   var SERIES_OBSERVEES = {
     rendementBourse: [
-      // 1991-2011 — ⚠️ PROVISOIRE, valeurs USD à remplacer par du MSCI World EUR Net
-      0.183, -0.052, 0.225, 0.051, 0.207, 0.135, 0.158, 0.243, 0.253, -0.132,
+      // 1991-1998 — MSCI World USD Net converti en EUR via le franc (parité fixe
+      // 6,55957 F/€, sans effet sur un rendement) : r€ = (1 + r$) × S(t) / S(t-1) − 1,
+      // S = francs pour 1 $, moyenne mensuelle de décembre (FRED EXFRUS), prise
+      // comme approximation du cours de fin d'année.
+      0.2414, -0.0419, 0.3272, -0.0271, 0.1052, 0.2005, 0.3152, 0.1687,
+      // 1999-2011 — ⚠️ PROVISOIRE, valeurs USD à remplacer par du MSCI World EUR Net
+      0.253, -0.132,
       -0.165, -0.199, 0.331, 0.147, 0.095, 0.207, 0.09, -0.403, 0.3, 0.118, -0.055,
       // 2012-2022 — MSCI World EUR Net, fiche officielle
       0.1405, 0.212, 0.195, 0.1042, 0.1073, 0.0751, -0.0411, 0.3002, 0.0633,
@@ -152,7 +158,8 @@
   var SOURCES_OBSERVEES = {
     rendementBourse:
       '⚠️ PROVISOIRE — MSCI World : 2012-2022 en EUR dividendes nets réinvestis ' +
-      '(fiche officielle), 1991-2011 en USD, à remplacer',
+      '(fiche officielle), 1991-1998 USD converti en EUR via le franc, ' +
+      '1999-2011 en USD, à remplacer',
     revalBien:
       'INSEE, indice Notaires-INSEE 010567059, France métropolitaine, maisons + appartements',
     revalLoyer:
