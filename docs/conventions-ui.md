@@ -658,3 +658,5 @@ d'`accueil.css` (sections « Téléphone ») et ne changent rien à la souris ni
   résultat (décision de Lucas, 08/10/2026). `.plateau__gauche` y est en `display: contents` pour
   que le rail et les deux cartes se placent chacun dans leur zone de grille. Au bureau, rien ne
   change.
+- **« Chaque mois » sur téléphone (≤ 720 px) : deux rangées fixes** — point d'équilibre et taux
+  d'endettement en haut, Achat et Location côte à côte en bas (décision de Lucas, 08/10/2026).

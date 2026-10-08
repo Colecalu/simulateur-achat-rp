@@ -2282,6 +2282,28 @@ input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; marg
   .kpis { gap: 16px 12px; }
   .kpi { padding: 0; border-left: 0; }
 }
+/*
+ * Sur téléphone, deux rangées fixes (demande de Lucas, 08/10/2026) : les deux
+ * chiffres seuls en haut — point d'équilibre, taux d'endettement —, puis Achat
+ * et Location côte à côte pour se comparer. Laissée à `auto-fit`, la grille
+ * séparait Achat et Location sur deux rangées (ou tout empilait à 375 px).
+ */
+@media (max-width: 720px) {
+  .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 24px; }
+  .kpi:nth-child(1) { order: 1; }
+  .kpi:nth-child(4) { order: 2; }
+  .kpi:nth-child(2) { order: 3; }
+  .kpi:nth-child(3) { order: 4; }
+  /* Une demi-largeur ne tient pas « Taux d'endettement » sur une ligne à
+     375 px : le libellé passe à la ligne plutôt que d'être coupé, et le
+     chiffre reste calé en bas pour s'aligner sur son voisin. */
+  .kpi__mot { white-space: normal; }
+  .kpi:nth-child(1), .kpi:nth-child(4) {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+}
 
 /* --- Rappel du curseur ------------------------------------------------- */
 
