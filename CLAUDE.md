@@ -603,11 +603,10 @@ tendance longue. C'est ce qui les rend lisibles : on sait exactement ce qui est 
   probablement d'une lecture externe de Friggit. Remplaçé par les valeurs recalculées.
 - **« Décennie perdue en bourse »** — les marchés stagnent une douzaine d'années puis repartent.
   La séquence 2000-2011 est reprise **telle quelle**, pas lissée : c'est le CHEMIN qui fait mal
-  (−42 % cumulé au creux de la 3ᵉ année, puis −40 % en 9ᵉ) alors que la moyenne ressort à
-  +0,4 %/an. Une stagnation plate au même rendement moyen serait un tout autre scénario.
-  ⚠️ *En place en dollars, faute de série EUR sur ces années.* **En euros l'épisode fut PLUS
-  dur** : le dollar s'est effondré de 2002 à 2008 (l'euro est passé de 0,85 à 1,60), donc les
-  rebonds de 2003-2007 vus d'Europe étaient bien plus faibles que ces chiffres.
+  (−42 % cumulé en 3ᵉ année, −43 % en 9ᵉ, encore −20 % au bout de douze ans, soit −1,8 %/an).
+  Une stagnation plate au même rendement moyen serait un tout autre scénario. **En euros**
+  depuis le 08/10/2026 (reconstitution, §10) : en dollars la séquence finissait à +0,4 %/an,
+  parce que la chute du dollar de 2002 à 2008 n'y apparaissait pas.
 
 ### Ce que le code porte aujourd'hui — structure définitive, données provisoires
 
@@ -665,9 +664,10 @@ historiques sont nommés par leur année de départ : « Acheter en 1992 ».
 
 ## 10. Dette bloquante pour la mise en ligne
 
-### 🔴 Devise des rendements MSCI World — CONFIRMÉ, BLOQUANT
+### ✅ Devise des rendements MSCI World — LEVÉ le 08/10/2026, par reconstitution
 
-**Le site ne doit pas être mis en ligne tant que ce point n'est pas corrigé.**
+**Ce point ne bloque plus.** La série 1991-2011 a été convertie en euros (voir « Le parti pris »
+plus bas). Ce qui suit est le diagnostic qui l'avait rendu bloquant, gardé pour mémoire.
 
 Diagnostic **confirmé et précisé** (25/09/2026), par comparaison avec les rendements officiels
 MSCI World **EUR, dividendes nets réinvestis** fournis pour 2012-2025 :
@@ -705,11 +705,31 @@ Corriger seulement 2012-2022 ferait **diverger les sept années communes** — 2
 7,51 % dans un scénario et resterait à 22,40 % dans l'autre. On aurait deux vérités dans le même
 produit. **Attendre la série complète 1991-2011 avant de toucher quoi que ce soit.**
 
+### Le parti pris (08/10/2026, décision de Lucas)
+
+> **MSCI World USD Net, converti en euros au change de fin d'année.** Juste dans les grandes
+> masses, approximatif année par année — et dit comme tel à l'écran.
+
+- `r€(t) = (1 + r$(t)) × S(t) / S(t−1) − 1`, S = unités de change pour 1 $, **moyenne mensuelle
+  de décembre** (FRED) prise comme approximation du cours de fin d'année.
+- **1991-1998 via le franc** (EXFRUS) : la parité fixe 6,55957 F/€ ne change aucun rendement.
+  **1999-2011 via l'euro** (EXUSEU). Raccord fin 1998 sans saut : 6,55957 / 5,5981 = 1,1717 $/€.
+- **Même nature des deux côtés** : les valeurs USD 1991-1998 du code sont du MSCI World USD
+  **Net**, comme l'EUR officiel de 2012 et après. ⚠️ De mémoire, non vérifié à la source : 1999,
+  2001, 2006 et 2008 ressemblent à du **Gross** (≈ 0,4 pt d'écart). Négligeable dans les grandes
+  masses ; à remplacer seulement si on les vérifie sur une source primaire.
+- **Méthode éprouvée là où l'officiel existe** : les valeurs USD de l'ancien code pour 2012-2022,
+  converties de la même façon, s'écartent de l'EUR officiel de **0,7 pt par an en moyenne** (9
+  années, 2014-2015 exclues car de source inconnue) ; cumul 2016-2022 : **82,4 % contre 80,4 %**.
+- **Conséquences** : la « Décennie perdue » devient plus dure (voir §9). Le classement des
+  fenêtres **ne change pas** — 1992 reste la plus favorable à l'achat (+584 589 €), 2002 la moins
+  (+252 109 €) — mais **2003 talonne 2002 à 909 € près** : le prolongement des séries jusqu'en
+  2025 pourrait l'inverser.
+- `scenarios.js` et `outils/fenetres-historiques.mjs` portent les mêmes valeurs. `STATUT_DONNEES`
+  reste `'PROVISOIRE'` pour d'autres raisons (tendance longue §9, séries arrêtées en 2022).
+
 ### Ce qui reste à obtenir
 
-- **1991 à 2011**, MSCI World **EUR, Net**, rendements annuels, source et date d'extraction.
-  Point de méthode à trancher : **l'euro n'existe pas avant 1999.** MSCI publie une série EUR
-  rétropolée (ECU puis devises héritées) — il faut savoir laquelle et le documenter.
 - **2023 à 2025 pour les trois autres séries** (immobilier INSEE, loyers IRL, inflation) si l'on
   veut profiter des rendements boursiers déjà disponibles jusqu'en 2025. Les quatre séries d'un
   scénario doivent couvrir la même période et avoir la même longueur.
@@ -1092,7 +1112,7 @@ de l'hébergement.
       « À RETIRER AU LANCEMENT PUBLIC » (`git grep -n "À RETIRER AU LANCEMENT PUBLIC"`).
       **Pas** celui de `404.html`, qui est définitif.
 - [ ] Vérifier que `robots.txt` ne bloque toujours rien.
-- [ ] Lever les points bloquants de contenu : devise des rendements MSCI (§10), données
+- [ ] Lever les points bloquants de contenu : devise des rendements MSCI (§10, levé le 08/10 par reconstitution), données
       provisoires des scénarios (§9), jeu d'exemple de l'aperçu (§12).
 - [ ] Retirer « Prototype en développement » des pieds de page, si ce n'en est plus un.
 - [ ] Mettre à jour les `lastmod` de `sitemap.xml`.

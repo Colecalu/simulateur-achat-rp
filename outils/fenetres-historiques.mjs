@@ -31,17 +31,16 @@ const { simuler } = calc;
 const DONNEES = {
   rendementBourse: {
     depart: 1991,
-    source: 'MSCI World — À CONSOLIDER',
-    statut: 'PROVISOIRE',
+    source: 'MSCI World Net en EUR (1991-2011 reconstitué depuis l’USD)',
+    statut: 'RECONSTITUÉ',
     note:
-      'Les années 1991-2011 sont celles actuellement dans scenarios.js, dont le ' +
-      'diagnostic a établi qu’elles sont en USD et non en EUR. Elles ne servent ' +
-      'ici qu’à mesurer la STRUCTURE du problème (dispersion, robustesse), ' +
-      'jamais à choisir une période.',
+      'Les années 1991-2011 sont le MSCI World USD Net converti en euros au ' +
+      'change de décembre (FRED) : justes dans les grandes masses, approximatives ' +
+      'année par année. Méthode et contrôle dans scenarios.js.',
     valeurs: [
-      // 1991-2011 — PROVISOIRE, valeurs USD à remplacer par du MSCI World EUR Net
-      0.183, -0.052, 0.225, 0.051, 0.207, 0.135, 0.158, 0.243, 0.253, -0.132,
-      -0.165, -0.199, 0.331, 0.147, 0.095, 0.207, 0.09, -0.403, 0.3, 0.118, -0.055,
+      // 1991-2011 — USD Net converti en EUR (franc puis euro) : voir scenarios.js
+      0.2414, -0.0419, 0.3272, -0.0271, 0.1052, 0.2005, 0.3152, 0.1687, 0.4522, -0.0231, -0.1583, -0.2997, 0.1033, 0.0522, 0.2376, 0.0842, -0.0114,
+      -0.3567, 0.2048, 0.2328, -0.0503,
       // 2012-2025 — MSCI World EUR Net, fiche officielle au 31/08/2026
       0.1405, 0.212, 0.195, 0.1042, 0.1073, 0.0751, -0.0411, 0.3002, 0.0633,
       0.3107, -0.1278, 0.196, 0.266, 0.0677,
