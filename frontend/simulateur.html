@@ -38,6 +38,8 @@
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="/apple-touch-icon.png">
   <meta name="theme-color" content="#f3da78">
+  <!-- Mesure d'audience, AVANT tout autre script : voir js/mesure.js. -->
+  <script src="/js/mesure.js" data-type-page="simulateur"></script>
   <link rel="stylesheet" href="css/polices.css">
   <link rel="stylesheet" href="css/theme-codex.css">
   <link rel="stylesheet" href="css/style.css">
@@ -840,7 +842,7 @@
             </label>
           </div>
 
-          <details class="mel__avance">
+          <details class="mel__avance" data-mesure-avance="location_fiscalite">
             <summary>Fiscalité et frais</summary>
             <div class="mel__avance-corps">
               <label class="champ">
@@ -948,7 +950,7 @@
             <div class="graphique graphique--court"><canvas id="graphMiseEnLocation"></canvas></div>
           </figure>
 
-          <details class="mel__detail">
+          <details class="mel__detail" data-mesure-avance="location_detail">
             <summary>Le détail du mois et de la revente</summary>
             <dl class="mel__postes" id="melPostes"></dl>
             <p class="mel__note" id="melNote"></p>
@@ -1023,7 +1025,7 @@
         <div class="graphique graphique--court"><canvas id="graphApercu"></canvas></div>
         <!-- Le détail se déplie à la demande : taux année par année, note de
              lecture, réserves et sources. Affiché d'emblée, il faisait peur. -->
-        <details class="apercu__details" id="apercuDetails">
+        <details class="apercu__details" id="apercuDetails" data-mesure-avance="scenario_annees">
           <summary>Le détail année par année</summary>
           <div class="suites" id="apercuSuites"></div>
           <p class="apercu__note" id="apercuNote"></p>

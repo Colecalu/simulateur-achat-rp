@@ -23,6 +23,9 @@
   const DEFAUTS_LOCATION = window.SimuRPLocation.DEFAUTS_LOCATION;
   const simulerMiseEnLocation = window.SimuRPLocation.simulerMiseEnLocation;
   const planchersEnveloppe = window.SimuRPLocation.planchersEnveloppe;
+  // Mesure d'audience (js/mesure.js, plan dans docs/plan-de-marquage.md).
+  // Repli muet : le simulateur ne dépend jamais d'elle.
+  const Mesure = window.Mesure || { suivre() {}, suivreUneFois() {} };
 
 /* ------------------------------------------------------------------ Outils */
 
@@ -155,7 +158,10 @@ function signalerVides(vides) {
     el.setAttribute('aria-invalid', 'true');
     el.closest('.champ')?.classList.add('champ--manquant');
   }
-  if (vides.length) vides[0].focus();
+  if (vides.length) {
+    Mesure.suivre('sim_erreur', { type: 'champs_vides' });
+    vides[0].focus();
+  }
 }
 
 function oublierSignalement(el) {
@@ -902,6 +908,7 @@ function initialiserDetail() {
     bouton.setAttribute('aria-expanded', String(ouvrir));
     bouton.textContent = ouvrir ? 'Masquer le détail' : "D'où vient cet écart ?";
     if (!ouvrir) return;
+    Mesure.suivre('sim_avance_ouvert', { bloc: 'detail_ecart' });
 
     // Un canevas dimensionné dans un conteneur masqué reste à zéro : on ne
     // crée les graphiques qu'une fois la zone visible, et on redimensionne
@@ -1029,13 +1036,21 @@ function construireScenarios() {
     b.addEventListener('click', () => {
       const dejaActif = scenarioActif && scenarioActif.cle === b.dataset.scenario;
       appliquerScenario(dejaActif ? '' : b.dataset.scenario);
+      // Ici et non dans `appliquerScenario`, que la restauration appelle aussi.
+      if (!dejaActif) Mesure.suivre('scenario_choisi', { scenario: b.dataset.scenario });
     });
   }
   for (const b of document.querySelectorAll('.scenario__apercu')) {
-    b.addEventListener('click', () => ouvrirApercu(b.dataset.apercu));
+    b.addEventListener('click', () => {
+      ouvrirApercu(b.dataset.apercu);
+      Mesure.suivre('sim_avance_ouvert', { bloc: 'scenario_apercu' });
+    });
   }
 
   $('#scenarioOuvrir').addEventListener('click', ouvrirIntro);
+  $('#scenarioOuvrir').addEventListener('click', () => {
+    Mesure.suivre('sim_avance_ouvert', { bloc: 'scenarios' });
+  });
   $('#introFermer').addEventListener('click', fermerIntro);
   $('#introValider').addEventListener('click', () => {
     scenariosDecouverts = true;
@@ -1056,6 +1071,13 @@ function ouvrirResultatMel() {
   // `resize()` ne replace pas ses points : on le recrée une fois visible.
   if (graphMel) { graphMel.destroy(); graphMel = null; }
   rafraichir();
+  if (dernieresOptionsMel && !$('#melResultats').hidden) {
+    // Une tranche, pas l'année exacte : on veut savoir à quel horizon les
+    // gens envisagent de louer, pas reconstituer une simulation.
+    const n = dernieresOptionsMel.anneeBascule;
+    const tranche = n <= 5 ? '1-5' : n <= 10 ? '6-10' : n <= 15 ? '11-15' : '16+';
+    Mesure.suivre('location_resultat_affiche', { tranche_annee_bascule: tranche });
+  }
   $('#melResultatFermer').focus();
 }
 
@@ -1589,6 +1611,7 @@ function restaurerBrouillon() {
   }
 
   direBrouillon('Simulation restaurée, telle que vous l’aviez laissée.');
+  Mesure.suivre('brouillon_restaure');
   return true;
 }
 
@@ -1610,6 +1633,7 @@ function initialiserBrouillon() {
         'conservée quand vous fermerez l’onglet.',
       true
     );
+    Mesure.suivre('sim_erreur', { type: 'stockage_indisponible' });
     return;
   }
 
@@ -1879,6 +1903,13 @@ function rafraichir() {
   // Avant le verdict : la question décide s'il peut se montrer.
   afficherMensuel(dernierResultat, horizon);
   afficherVerdict(dernierResultat, horizon);
+  // « Affiché » veut dire VU : tant que la question de l'épargne forcée
+  // attend sa réponse, le verdict est masqué (voir `afficherQuestion`).
+  if ($('#visu').dataset.question !== 'attente') {
+    Mesure.suivreUneFois('resultat', 'sim_resultat_affiche', {
+      verdict: $('#verdictGagnant').dataset.gagnant,
+    });
+  }
   dessinerGraphiques(dernierResultat, horizon, mel);
   dessinerDetail(dernierResultat, horizon);
   if (mel) afficherMel(mel, horizon);
@@ -2574,6 +2605,8 @@ function initialiser() {
   for (const id of ['#melOuvrir', '#melModifier']) {
     $(id).addEventListener('click', ouvrirFenetreMel);
   }
+  // L'entrée dans le module, pas ses retouches (#melModifier).
+  $('#melOuvrir').addEventListener('click', () => Mesure.suivre('location_module_ouvert'));
   // Depuis les résultats : on referme, puis on rouvre la saisie.
   $('#melModifierBis').addEventListener('click', () => {
     fermerResultatMel();
@@ -2610,6 +2643,18 @@ function initialiser() {
   // `recalculer` et non plus `rafraichir` : le loyer payé après la bascule
   // peut relever l'enveloppe du moteur de base (voir `recalculer`).
   $('#melFormulaire').addEventListener('input', surSaisie);
+
+  // Mesure : le NOM du champ touché, jamais sa valeur. Branché avant la
+  // restauration, qui remplit les champs sans émettre d'événement.
+  const suivreSaisie = (e) => {
+    const el = e.target;
+    if (!el.id || !el.matches('input, select, textarea')) return;
+    const champ = /^horizon(Bis|Mel)$/.test(el.id) ? 'horizon' : el.id;
+    Mesure.suivreUneFois('demarree', 'sim_demarree');
+    Mesure.suivreUneFois('champ:' + champ, 'sim_champ_modifie', { champ });
+  };
+  document.addEventListener('input', suivreSaisie);
+  document.addEventListener('change', suivreSaisie);
 
   // En dernier : la restauration écrase les défauts et l'état du parcours.
   initialiserBrouillon();
