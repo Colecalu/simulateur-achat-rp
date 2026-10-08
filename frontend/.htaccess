@@ -39,9 +39,7 @@ Options -MultiViews
   RewriteCond %{HTTP_HOST} ^www\. [NC]
   RewriteRule ^ https://aequo-immo.fr%{REQUEST_URI} [R=301,L,NE]
   #
-  # Une fois la redirection vérifiée en ligne pendant quelques jours,
-  # envisager l'en-tête HSTS (mod_headers, plus bas) — pas avant : il est
-  # mémorisé par les navigateurs et ne se retire pas d'un clic.
+  # HSTS : prévu le 15/10/2026, ligne commentée plus bas (mod_headers).
   # -------------------------------------------------------------------------
 
   # Les cibles des 301 ci-dessous sont des URL COMPLÈTES : avec un simple
@@ -79,6 +77,8 @@ Options -MultiViews
 AddType font/woff2 .woff2
 
 <IfModule mod_headers.c>
+
+  # --- Cache -----------------------------------------------------------
   # Les polices ne changent jamais sous le même nom : un an de cache évite
   # de les retélécharger à chaque visite. Si une police change, changer son
   # nom de fichier (et polices.css), sinon les visiteurs garderaient
@@ -86,4 +86,53 @@ AddType font/woff2 .woff2
   <FilesMatch "\.woff2$">
     Header set Cache-Control "public, max-age=31536000, immutable"
   </FilesMatch>
+
+  # HTML, CSS et JS : « no-cache » ne veut pas dire « pas de cache », mais
+  # « redemander au serveur avant chaque usage ». Le navigateur garde sa
+  # copie et envoie If-Modified-Since ; OVH répond 304, sans le fichier, tant
+  # que rien n'a changé (vérifié le 08/10/2026). Un visiteur ne peut donc
+  # JAMAIS combiner une page neuve et un app.js ancien après un déploiement.
+  # Sans cette règle, OVH impose 15 minutes de cache (max-age=900) aux CSS
+  # et JS, et rien au HTML. On retire aussi son Expires, qui disait pareil.
+  # Choisi contre un numéro de version injecté par le workflow : ce serait
+  # une étape de build, et les fichiers en ligne ne seraient plus ceux du
+  # dépôt.
+  <FilesMatch "\.(html|css|js)$">
+    Header set Cache-Control "no-cache"
+    Header unset Expires
+  </FilesMatch>
+
+  # --- Sécurité --------------------------------------------------------
+  # « always » : aussi sur les 301 et la 404, pas seulement sur les 200.
+
+  # Le navigateur s'en tient au type annoncé : un fichier servi en texte ne
+  # peut pas être exécuté comme script.
+  Header always set X-Content-Type-Options "nosniff"
+
+  # Vers un autre site, on ne transmet que l'origine, jamais l'adresse de la
+  # page.
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+
+  # Aucune page d'Æquo ne peut être affichée dans le cadre (iframe) d'un
+  # autre site. X-Frame-Options pour les anciens navigateurs, frame-ancestors
+  # (dans la CSP) pour les autres.
+  Header always set X-Frame-Options "DENY"
+
+  # Politique de sécurité du contenu (CSP) : tout vient du site lui-même,
+  # rien d'autre n'est autorisé. Possible parce que le site n'a AUCUN script
+  # ni style en ligne (règle de CLAUDE.md §5), et que polices et Chart.js
+  # sont hébergés ici. Le bloc JSON-LD de l'accueil n'est pas concerné :
+  # c'est une donnée, pas un script exécuté.
+  # ⚠️ À ÉLARGIR le jour où l'on ajoute une mesure d'audience ou tout service
+  # extérieur (script-src, connect-src, img-src…) : sinon il sera bloqué en
+  # silence. Voir CLAUDE.md §13.
+  Header always set Content-Security-Policy "default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'; connect-src 'self'; manifest-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'; object-src 'none'; upgrade-insecure-requests"
+
+  # HSTS — PRÉVU LE 15/10/2026, une semaine après la redirection HTTPS
+  # (checklist de CLAUDE.md §13). Une fois envoyé, les navigateurs refusent
+  # le http:// du site pendant un an : on ne l'active qu'après une semaine
+  # sans incident sur le certificat et la redirection. Pas de
+  # includeSubDomains ni de preload : ils engageraient tous les
+  # sous-domaines, et preload ne se retire pas.
+  # Header always set Strict-Transport-Security "max-age=31536000"
 </IfModule>

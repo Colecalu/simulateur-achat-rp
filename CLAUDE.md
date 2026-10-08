@@ -321,8 +321,10 @@ ces choix-là qui coûteront cher à défaire :
 - **`SCHEMA_VERSION` et les migrations se mettent à jour à chaque nouveau champ.** Ajouter un
   champ ne demande rien de plus que son défaut ; le renommer ou changer son unité demande une
   migration et un incrément.
-- **Aucun style en ligne** — des classes, alimentées par les jetons de thème. Une CSP stricte
-  suivra.
+- **Aucun style en ligne** — des classes, alimentées par les jetons de thème. **La CSP stricte
+  est en place depuis le 08/10/2026** (`style-src 'self'`, §13) : un attribut `style="…"` ou un
+  `<style>` serait désormais bloqué par le navigateur. Modifier un style par JavaScript
+  (`element.style.x = …`) reste permis — c'est ce que fait Chart.js.
 - **Jamais d'`innerHTML` sur une donnée utilisateur** — `textContent`. Le nom d'une simulation
   sera saisi par l'utilisateur : c'est le vecteur évident.
 
@@ -1039,6 +1041,8 @@ quand même à partir des liens qui y mènent.
 | Avertissement | « ni un conseil financier, ni un conseil en investissement, ni un conseil immobilier » : pied de **toutes** les pages (même phrase partout) et, en version courte, sous les résultats du simulateur (`.avertissement--conseil`). |
 | Pied du simulateur | `.pied` dans `style.css` : liens légaux, contact, avertissement. |
 | 404 | `404.html` + `ErrorDocument 404 /404.html`. **Chemins absolus obligatoires** : Apache la sert à l'adresse demandée, `/a/b/c` compris. `noindex` **définitif**, lui. |
+| Cache | HTML, CSS et JS en `Cache-Control: no-cache` : le navigateur garde sa copie mais la **revalide à chaque usage** (`If-Modified-Since` → 304 chez OVH, vérifié). Aucun visiteur ne peut combiner une page neuve et un `app.js` ancien après un déploiement. Polices : un an, `immutable`. Images : défaut d'OVH (15 min). Préféré à un numéro de version injecté par le workflow, qui serait une étape de build et rendrait les fichiers en ligne différents du dépôt. |
+| En-têtes de sécurité | `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`, `X-Frame-Options: DENY`, et une **CSP stricte** : tout en `'self'`, `default-src 'none'`, `frame-ancestors 'none'`. Vérifiée en local puis en ligne sur les quatre pages et la 404, simulateur rempli et graphiques tracés : aucune violation. Envoyés avec `Header always` : aussi sur les 301 et la 404. |
 | HTTPS | Redirection 301 HTTP → HTTPS et www → sans www, vers `https://aequo-immo.fr`, **active depuis le 08/10/2026** (certificats Let's Encrypt vérifiés sur les deux noms, échéance 05/01/2027, renouvellement automatique par OVH). En tête des règles du `.htaccess`. Si le certificat disparaît, la recommenter : sans lui, le site devient inaccessible. |
 
 **Les pages légales doivent rester vraies du code.** « Aucune donnée collectée », « aucun
@@ -1046,16 +1050,24 @@ cookie », « jamais transmis » : le jour où une requête part avec la saisie 
 d'audience est installé, `confidentialite.html` change dans le même commit (sa section « Mesure
 d'audience » porte un commentaire qui dit quoi écrire).
 
+**⚠️ La CSP devra être élargie avec la mesure d'audience** — et avec tout service extérieur
+(police, carte, vidéo, formulaire…). Elle n'autorise **que** le site lui-même : le script d'un
+outil d'audience serait bloqué **sans erreur visible pour l'utilisateur**, seulement dans la
+console. Ajouter son domaine à `script-src` (le script), `connect-src` (l'envoi des mesures),
+et `img-src` s'il utilise un pixel — dans le `.htaccess`, au même commit que le script et que
+`confidentialite.html`. Vérifier ensuite la console sur chaque page.
+
 #### Au premier déploiement
 
-0. **Secrets FTP** dans GitHub, puis un premier passage **en simulation** du workflow (§6) :
-   dans le journal, les `put` visent `www/`, et les seuls `rm` concernent la page « Site en
-   construction » d'OVH. Puis fusionner sur `main` : c'est la fusion qui envoie pour de vrai.
-1. ~~**Certificat SSL** actif dans l'espace client OVH (domaine nu ET www)~~ — fait le
-   08/10/2026, et la redirection est décommentée. **Reste à vérifier en ligne** après le premier
-   envoi : `http://aequo-immo.fr/`, `http://www.aequo-immo.fr/` et `https://www.aequo-immo.fr/`
-   répondent 301 vers `https://aequo-immo.fr/` en **un seul saut**, chemin conservé, sans boucle.
-2. **`.htaccess`** (il ne se teste pas en local) :
+Fait le 08/10/2026 — gardé comme procédure de contrôle après un changement du `.htaccess` ou
+de l'hébergement.
+
+- [x] **Secrets FTP** dans GitHub, simulation du workflow (§6) : les `put` visent `www/`, aucun
+      `rm` hors de `www/`. Premier envoi réel : voir l'échec sur `index.html` et sa parade (§6).
+- [x] **Certificat SSL** actif (domaine nu ET www), redirection décommentée et vérifiée :
+      `http://aequo-immo.fr/`, `http://www.aequo-immo.fr/` et `https://www.aequo-immo.fr/`
+      répondent 301 vers `https://aequo-immo.fr/` en **un seul saut**, chemin conservé.
+- [x] **`.htaccess`** (il ne se teste pas en local) :
    - `/simulateur`, `/mentions-legales`, `/confidentialite` s'affichent **sans** changer
      d'adresse ;
    - `/simulateur.html` → 301 vers `/simulateur` (idem pour les deux pages légales),
@@ -1064,7 +1076,12 @@ d'audience » porte un commentaire qui dit quoi écrire).
    - `/css/polices.css`, `/fonts/dm-sans-variable.woff2`, `/img/partage.png`, `/favicon.svg`,
      `/robots.txt`, `/sitemap.xml` répondent 200 ; les polices portent
      `Cache-Control: public, max-age=31536000, immutable`.
-3. **Boîte `contact@aequo-immo.fr`** créée et testée (elle figure sur toutes les pages).
+- [x] **Boîte `contact@aequo-immo.fr`** créée (redirigée vers la boîte de Lucas), 08/10/2026.
+- [ ] **15/10/2026 — activer HSTS** : décommenter la ligne `Strict-Transport-Security` du
+      `.htaccess` (`max-age=31536000`, sans `includeSubDomains` ni `preload`), si la semaine
+      s'est passée sans incident de certificat ni de redirection. Une fois envoyé, les
+      navigateurs refusent le `http://` du site pendant un an : c'est pour ça qu'on attend.
+      Vérifier ensuite : `curl -sI https://aequo-immo.fr/ | grep -i strict`.
 
 #### Checklist « Lancement public »
 
