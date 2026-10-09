@@ -127,7 +127,9 @@ export function lireFaq(html) {
   return questions;
 }
 
-const MOTIF_JSONLD = /(<script type="application\/ld\+json">\n)([\s\S]*?)(\n  <\/script>)/;
+// \r?\n : sous Windows, git (core.autocrlf) rend les fichiers en CRLF ; sur la
+// CI, en LF. L'outil et les tests doivent donner le même verdict des deux côtés.
+const MOTIF_JSONLD = /(<script type="application\/ld\+json">\r?\n)([\s\S]*?)(\r?\n  <\/script>)/;
 
 /** Le graphe JSON-LD du <head>. */
 export function lireDonneesStructurees(html) {
@@ -151,8 +153,11 @@ export function appliquerFaq(html) {
   const faq = graphe['@graph'].find((n) => n['@type'] === 'FAQPage');
   if (!faq) throw new Error('Nœud FAQPage introuvable dans le JSON-LD');
   faq.mainEntity = entitesFaq(html);
+  // Les fins de ligne du fichier, pas celles de JSON.stringify : sinon la page
+  // réécrite diffère de l'original sur un poste Windows, et --verifier échoue.
+  const fin = html.includes('\r\n') ? '\r\n' : '\n';
   return html.replace(MOTIF_JSONLD, (_, avant, __, apres) =>
-    avant + JSON.stringify(graphe, null, 2) + apres);
+    avant + JSON.stringify(graphe, null, 2).replace(/\n/g, fin) + apres);
 }
 
 /** La page complète, telle que le script l'écrit. */
