@@ -13,7 +13,7 @@ Document de référence du projet. Court par nature : le détail vit dans `docs/
 ## Commandes
 
 ```bash
-node --test "tests/*.test.mjs"   # 110 tests : moteur, location, indicateurs, séries, sauvegarde, scénarios
+node --test "tests/*.test.mjs"   # 124 tests : moteur, location, indicateurs, séries, sauvegarde, scénarios, référencement
 ```
 
 Le motif est entre guillemets : `node --test tests/` échoue sous Windows (Node tente de charger
@@ -60,7 +60,7 @@ structurante change.
   de feature ouverte par Claude Code est à considérer comme une expérimentation en cours.
 - **Une expérimentation ne remplace jamais l'implémentation en place automatiquement.** Elle est
   analysée sur demande, puis intégrée, adaptée ou écartée — décision de Lucas.
-- **Les 110 tests sont l'arbitre.** Une proposition qui les casse est rejetée, quelle que soit son
+- **Les 124 tests sont l'arbitre.** Une proposition qui les casse est rejetée, quelle que soit son
   élégance. La fixture Excel compare 25 années × 15 grandeurs **au centime** : elle ne se
   contourne pas, elle se respecte ou se discute explicitement.
 
@@ -156,8 +156,10 @@ les écarts délibérés documentés en fin de ce document-là.
   sur la plus-value nette cumulée : `max(valeur − cumul des versements ; 0) × taux`. **Jamais
   annuellement** — le portefeuille capitalise brut, l'impôt n'est retranché que pour afficher le
   patrimoine net à l'année considérée.
-- **Taux de fiscalité éditable**, 31,4 % par défaut (flat tax CTO 2026). Ne jamais le coder en
-  dur : PEA et assurance-vie ont d'autres taux.
+- **Taux de fiscalité éditable**, 31,4 % par défaut (flat tax CTO 2026 : 12,8 % d'impôt sur le
+  revenu + 18,6 % de prélèvements sociaux — LFSS 2026, loi n° 2025-1403 du 30/12/2025, CSG sur
+  les revenus du capital de 9,2 % à 10,6 %). Ne jamais le coder en dur : PEA et assurance-vie
+  ont d'autres taux.
 - **Données historiques : indices dividendes réinvestis (total return), jamais des indices de
   prix.** Un indice de prix sous-estime le rendement de 2 points par an et fausserait tout.
 - Frais de notaire : formule différenciée **Ancien / Neuf**.
@@ -208,6 +210,8 @@ frontend/                    servi tel quel, racine web en production
   404.html                   ErrorDocument — chemins ABSOLUS obligatoires, §13
   .htaccess                  HTTPS + sans www, adresses propres, 301, 404, cache des polices — Apache seulement, §13
   robots.txt, sitemap.xml    indexation — https://aequo-immo.fr, sans www, §13
+  llms.txt                   résumé du site pour les assistants IA — cohérent avec « Æquo en bref », §13
+  <32 hex>.txt               clé IndexNow, publique par construction, §13
   favicon.svg / .ico         générés par outils/favicon.mjs
   apple-touch-icon.png       idem
   img/partage.png            aperçu de partage 1200 × 630 — outils/image-partage.mjs
@@ -228,11 +232,12 @@ frontend/                    servi tel quel, racine web en production
 backend/                     vide aujourd'hui — voir docs/backend-spec.md
 outils/                      jamais déployé — scripts de développement
   fenetres-historiques.mjs   choix des fenêtres du pilier 2 (§9)
+  accueil-statique.mjs       chiffres de l'aperçu et FAQPage écrits en dur dans index.html, §13
   favicon.mjs                favicon.svg / .ico / apple-touch-icon.png
   image-partage.mjs (+ .html) img/partage.png
   package.json               fontkit, wawoff2, Playwright — devDependencies, §13
 docs/                        modèle, conventions UI, spec backend, design, Excel
-tests/                       node --test, 110 tests
+tests/                       node --test, 124 tests
 migrations/                  à créer : SQL numéroté, appliqué à la main
 ```
 
@@ -408,6 +413,9 @@ Ubuntu) et fait un `mirror` du dépôt vers le serveur :
   remplacer dans l'étape « Clé d'hôte du serveur SFTP ».
 - **Un envoi réel ne part que de `main`.** Lancé à la main depuis une autre branche, le job
   force la simulation, même case décochée.
+- **Après l'envoi, IndexNow** (09/10/2026) : une dernière étape signale les adresses du sitemap
+  aux moteurs du protocole — inerte tant que la variable de dépôt `INDEXNOW_ENABLED` ne vaut pas
+  `true`, jamais en simulation. Détail au §13.
 
 **Tant que les secrets ne sont pas renseignés, le job passe sans rien envoyer** (une note
 l'indique dans l'onglet Actions). Les secrets gardent leur nom `FTP_*` : ce sont les identifiants
@@ -494,9 +502,9 @@ inflation de **2,0 %** — la cible de la BCE, seule référence prospective non
 | Loyers (IRL) | **2,0 %** | L'IRL **est** légalement la moyenne sur 12 mois de l'IPC hors tabac et loyers (loi du 8 février 2008). L'indexation des loyers est l'inflation, par construction — pas une hypothèse. Écart observé 1991-2022 : +0,21 pt. |
 | Charges de copropriété | **2,0 %** | Inflation. |
 | Taxe foncière | **2,5 %** | Depuis 2018 la revalorisation forfaitaire des valeurs locatives suit l'IPCH, mais les taux communaux dérivent en plus. Inflation + 0,5 pt corrige la sous-estimation connue. |
-| Immobilier | **2,0 %** | Hypothèse centrale neutre : prix et loyers suivent l'inflation, rapport prix/loyer constant. Les prix partent d'un niveau élevé par rapport au revenu des ménages (Friggit, IGEDD) ; marché quasi stable à légèrement baissier en 2026 (Notaires-Insee). **Abaissé de 2,5 % le 08/10/2026** (décision de Lucas) : l'ancienne construction ajoutait la croissance réelle du revenu (≈ 0,5 %/an). |
-| Bourse | **6,8 %** | 2 % + rendement **réel** de long terme des actions **mondiales** (Dimson-Marsh-Staunton, *UBS Global Investment Returns Yearbook*, ≈ 5 %/an depuis 1900 — pas les États-Unis, ≈ 6,5 %), **moins ≈ 0,3 %/an de frais d'un ETF monde**. |
-| Taux de crédit | **3,5 %** | Pretto, sept. 2026 : 3,52 % sur 20 ans ; Crédit Logement/CSA, août 2026 : 3,31 % toutes durées. **À revoir chaque trimestre.** |
+| Immobilier | **2,0 %** | Hypothèse centrale neutre : prix et loyers suivent l'inflation, rapport prix/loyer constant. Les prix partent d'un niveau élevé par rapport au revenu des ménages (Friggit, IGEDD) ; marché en léger repli en 2026 : −0,8 % sur un an au 2ᵉ trimestre (indices Notaires-Insee, septembre 2026). **Abaissé de 2,5 % le 08/10/2026** (décision de Lucas) : l'ancienne construction ajoutait la croissance réelle du revenu (≈ 0,5 %/an). |
+| Bourse | **6,8 %** | 2 % + rendement **réel** de long terme des actions **mondiales** (Dimson-Marsh-Staunton, *UBS Global Investment Returns Yearbook*, édition 2026, ≈ 5 %/an depuis 1900 — pas les États-Unis), **moins ≈ 0,3 %/an de frais d'un ETF monde**. ⚠️ **TODO** : vérifier le rendement réel annualisé des actions **MONDE** 1900-2025 dans le résumé officiel du Yearbook 2026 — ne pas le confondre avec les 6,6 % des actions **américaines**. La valeur de 6,8 % ne change pas d'ici là. |
+| Taux de crédit | **3,5 %** | Pretto, oct. 2026 : 3,66 % sur 20 ans (3,52 % en septembre) ; Crédit Logement/CSA, août 2026 : 3,31 % toutes durées, sur les prêts réellement accordés. Taux en hausse depuis le printemps 2026 ; 3,5 % gardé (décision de Lucas, 09/10/2026). **À revoir chaque trimestre.** |
 
 **Ne PAS utiliser la moyenne MSCI 1991-2025 comme rendement de long terme** : elle est écrasée par
 la séquence haussière 2012-2025, qui vaut à elle seule +12,68 %/an. Une moyenne sur 35 ans reste
@@ -817,6 +825,16 @@ indiqués dans l'annonce (aide du champ et texte indicatif « voir l'annonce »)
   18,6 % sur les BIC du meublé (LMNP, régime par défaut), 17,2 % sur les revenus fonciers en
   nu, 17,2 % sur la plus-value immobilière dans les deux cas (LFSS 2026). `PRELEVEMENTS_SOCIAUX`
   dans `calc-location.js`.
+- **Plus-value immobilière de la mise en location** (`calc-location.js`) : 19 % d'IR (CGI art.
+  200 B) + 17,2 % de prélèvements sociaux, après abattements pour durée de détention (art.
+  150 VC). **Surtaxe au-delà de 50 000 € de plus-value nette (art. 1609 nonies G) non
+  modélisée.** En LMNP, les amortissements déduits sont réintégrés (art. 84 de la loi
+  n° 2025-127 du 14/02/2025, art. 150 VB du CGI, cessions depuis le 15/02/2025 — y compris les
+  amortissements antérieurs à 2025, réponse ministérielle n° 10097, JOAN du 24/03/2026) et le
+  module leur applique **les mêmes abattements** qu'au reste de la plus-value. ✅ **Question
+  close le 09/10/2026** (vérifié par Lucas) : c'est le bon calcul — les abattements pour durée
+  de détention s'appliquent à toute la plus-value, amortissements réintégrés compris. Ne pas
+  « corriger » vers une taxation sans abattement de la part des amortissements.
 
 ### Conflit des deux loyers — à traiter
 
@@ -927,6 +945,7 @@ déroulé, les textes et la fluidité qui ont changé. Branche `feat/accueil-tra
 | 03 | La règle du jeu — Mêmes moyens | Comment Æquo compare ? | papier |
 | 04 | Votre avenir n'est pas une ligne droite | Pourquoi personne ne peut me répondre d'avance ? | lavande |
 | 05 | Trois façons d'aller plus loin (les piliers) | Que fait Æquo que les autres ne font pas ? | blanc |
+| — | Æquo en bref (09/10/2026) | En deux phrases, c'est quoi ? | papier |
 | — | FAQ « On vous explique le reste » | Je peux vous faire confiance ? | papier, filet |
 | — | Finale « Et le vôtre ? » + contact en pied de page | Je commence comment ? | jaune |
 
@@ -972,24 +991,27 @@ déroulé, les textes et la fluidité qui ont changé. Branche `feat/accueil-tra
   carte. Aucun des deux n'est l'appendice de l'autre. Même règle pour les deux volets du pilier 1.
 - **Les noms suivent le simulateur** (« Le passé », « Des futurs possibles », « point mort »…).
   Rien n'est promis que le simulateur ne fait pas ; aucune affirmation absolue sur les concurrents.
-- **L'aperçu (02) est calculé par `calc.js`**, chargé sur l'accueil pour ce seul bloc.
-  `accueil.js` ne fait que mettre la sortie en forme. Le graphique est un SVG construit à la
-  largeur réelle de sa feuille (une unité = un pixel), pour que les textes restent lisibles en
-  mobile. Si le calcul échoue, chiffres et graphique restent cachés (`hidden`) : il ne reste que
-  le titre et le lien, jamais un `NaN`.
-- ⚠️ **Le jeu d'exemple de l'aperçu est provisoire** : 340 000 €, loyer 950 € (3,35 % brut),
-  apport 60 000 €, 25 ans — point mort en 8ᵉ année, achat devant de 15 k€ à 25 ans. **Remplacé le
-  08/10/2026 par un exemple FICTIF** (décision de Lucas : une illustration, pas une vérité de
-  marché) : loyer 750 €, immobilier 3 % et bourse 5 % propres à l'exemple (`ENTREES`,
-  `accueil.js`) — point mort en 7ᵉ année, achat devant de 130 k€. Ses paramètres ne sont plus
-  affichés ; la légende dit « Exemple fictif ». Avec la tendance longue (immobilier à 2,0 %),
-  l'ancien ne croisait plus. Recalé le
-  08/10/2026 avec la tendance longue : l'ancien (280 000 €, 1 000 €, repris de `09f7d0c`) passait
-  l'achat devant dès l'an 4, de 152 k€ — trop optimiste pour une vitrine (Lucas). Les deux jeux par défaut du simulateur n'ont pas de croisement
-  (`DEFAUTS` : achat devant dès l'an 1 ; `VALEURS_DE_TRAVAIL` : jamais), le point mort n'aurait
-  rien eu à montrer. Depuis le 06/10/2026, le simulateur n'a plus d'exemple par défaut (il part
-  vide, §11) : l'aperçu garde donc le sien, dans `ENTREES` (`accueil.js`). S'il change, vérifier
-  qu'il croise encore : le point mort est la réponse au « partir plus tôt ».
+- **L'aperçu (02) est calculé par `calc.js`… et écrit en dur dans le HTML** (09/10/2026). Les
+  robots des moteurs et des assistants IA n'exécutent pas le JavaScript : un « — » en attente ne
+  leur disait rien. Les entrées vivent dans la page (bloc JSON `#apercuEntrees`) ;
+  `node outils/accueil-statique.mjs` les fait tourner dans le moteur et réécrit les chiffres et
+  la phrase d'hypothèses, et `tests/referencement.test.mjs` fait tomber la CI s'ils divergent.
+  Au chargement, `accueil.js` recalcule sur les mêmes entrées (mêmes formats, à garder
+  identiques des deux côtés) et dessine le graphique — un SVG construit à la largeur réelle de
+  sa feuille, caché sans JavaScript.
+- **Le jeu d'exemple de l'aperçu est un projet type** (09/10/2026, décision de Lucas) : logement
+  ancien de 250 000 € dans une grande ville de région, loyer 820 € (3,94 % brut) — loyer actuel
+  et loyer du scénario —, apport 30 000 € sur 40 000 € de patrimoine, effort 1 320 €/mois
+  (820 + 500), 25 ans à 3,5 %, assurance 0,30 %, frais bancaires 1 500 €, copropriété
+  1 200 €/an, taxe foncière 1 100 €/an, **hypothèses de marché par défaut du simulateur** (un test
+  vérifie que l'exemple n'en fixe aucune). Résultat à 20 ans : **point mort en 10ᵉ année,
+  334 058 € contre 323 664 €** ; l'écart culmine en 19ᵉ année (+10 719 €) et reste positif
+  jusqu'à 25 ans (+1 224 €). Essayés le même jour : 950 € (point mort en 6ᵉ année, 72 k€
+  d'avance — trop favorable à l'achat pour une page qui dit « Les deux ont raison. Parfois. »)
+  et 800 € (point mort en 12ᵉ année, mais la location repassait devant en 21ᵉ année, juste
+  après l'horizon affiché). Deux tests l'exigent désormais : un point mort, et aucun
+  retournement jusqu'à 25 ans. Ses paramètres sont affichés en une phrase (« Exemple
+  illustratif… »). Le point mort est la réponse au « partir plus tôt ».
 - **Une seule animation** : apparition au défilement (`[data-apparait]`), par `translate` pour ne
   pas écraser les rotations des cartes, jamais sur un titre ; plus le tracé des courbes de 05.
   Tout est coupé sous `prefers-reduced-motion`.
@@ -1051,11 +1073,14 @@ formulations de la FAQ.
 
 | | |
 |---|---|
-| `<h1>` de l'accueil | contient le surtitre « Simulateur gratuit · sans inscription » ET le slogan — le slogan seul ne disait rien du sujet. Rendu identique à avant. |
-| Titres d'onglet | le mot-clé en tête : « Simulateur acheter ou louer sa résidence principale — Æquo ». Description ≤ 160 caractères. |
+| `<h1>` de l'accueil | **depuis le 09/10/2026 : « Acheter ou louer votre résidence principale ? »**, la ligne qui suivait le slogan, promue telle quelle. Le slogan et le surtitre sont des `<p>` ; `.cover__slogan` porte la typographie qu'avait le `<h1>`. Rendu identique, vérifié au pixel à 1440 et 390 px. |
+| Titres d'onglet | la question en tête (09/10/2026) : « Acheter ou louer sa résidence principale ? Simulateur gratuit — Æquo » et « Simulateur achat ou location : calculez votre point mort — Æquo ». Titre et description identiques dans `og:*`, `twitter:*` et le JSON-LD `WebPage` — un test le vérifie. |
 | Partage | balises `og:*` et `twitter:*` sur les deux pages ; une image `img/partage.png`. |
-| Données structurées | accueil seulement : `WebSite` + `WebApplication` (gratuite, Web, JavaScript requis). **Pas de `FAQPage`** : Google n'en affiche plus les résultats enrichis pour ce type de site. |
-| Polices | **hébergées sur le site** (`fonts/`, `css/polices.css`) : plus de requête vers Google, ni délai, ni IP envoyée. Déclarations identiques à celles de Google — DM Sans, fichier variable, reste déclaré quatre fois (400 à 700), sinon la graisse 650 du simulateur changerait. Trois préchargements au plus, sur l'accueil. |
+| Données structurées | graphe relié par `@id` (09/10/2026). Accueil : `Organization` (`#organization`, fondateur « Lucas »), `WebSite`, `WebPage` (`dateModified`), `FAQPage`. Simulateur : `WebApplication` (`featureList` = les phrases de « Æquo en bref », mot pour mot), `WebPage`. **`FAQPage` conservé** (décision de Lucas, 09/10/2026) **pour la lisibilité par les moteurs et les assistants IA, pas pour les résultats enrichis** — Google n'en affiche plus pour ce type de site, et ce n'est pas ce qu'on en attend. Il est **recopié** de la FAQ visible par `outils/accueil-statique.mjs`, jamais tapé ; un test compare. `dateModified` et `lastmod` du sitemap : à la main, ensemble. |
+| Contenu lisible sans JS | tout ce qui compte est dans le HTML servi : H1, exemple chiffré, « Æquo en bref », FAQ, et sur le simulateur le bloc « Hypothèses par défaut et sources » (`<details>` sous la bulle 4, pleinement lisible et cliquable même plateau verrouillé. Les autres blocs du plateau verrouillé sont atténués à 0,45 ET rendus `inert` par `app.js` (`majBulles`) : réellement inactifs, donc exemptés du contraste minimal (WCAG 1.4.3). Essayé à 0,86 sans `inert` — le minimum AA pour du texte actif — : le verrou ne se voyait presque plus). Ses valeurs portent `data-hypothese` (clé de `DEFAUTS`) : un test les compare au moteur. Ses sources sont celles de §8, citées de mémoire — **à relire à la source avant le lancement**. |
+| Robots d'IA | `robots.txt` autorise nommément OAI-SearchBot, ChatGPT-User, GPTBot, ClaudeBot, Claude-SearchBot, Claude-User, PerplexityBot, Perplexity-User, Google-Extended, Applebot-Extended et Bingbot. `llms.txt` résume le site, la méthode, les piliers et les limites — à tenir cohérent avec « Æquo en bref ». `.txt` servis en UTF-8 (`AddCharset`). |
+| IndexNow | clé dans `frontend/<32 hex>.txt` (publique par construction : le moteur la lit pour vérifier l'annonce). Étape « Signaler les pages à IndexNow » du workflow, après un envoi **réel** depuis `main`, **seulement si la variable de dépôt `INDEXNOW_ENABLED` vaut `true`** — non définie aujourd'hui, l'étape est inerte. Elle envoie les adresses de `sitemap.xml` à `api.indexnow.org` (Bing, Yandex… pas Google). Un échec n'invalide pas le déploiement (avertissement). Changer de clé = remplacer le fichier, rien d'autre. |
+| Polices | **hébergées sur le site** (`fonts/`, `css/polices.css`) : plus de requête vers Google, ni délai, ni IP envoyée. Déclarations identiques à celles de Google — DM Sans, fichier variable, reste déclaré quatre fois (400 à 700), sinon la graisse 650 du simulateur changerait. Trois préchargements au plus sur l'accueil, deux sur le simulateur. |
 | Adresses | `/` et `/simulateur` ; `.htaccess` réécrit et redirige ; `canonical`, `og:url` et `sitemap.xml` disent tous la même adresse. |
 
 ### Régénérer les images
@@ -1157,12 +1182,26 @@ de l'hébergement.
 - [ ] Vérifier que `robots.txt` ne bloque toujours rien.
 - [ ] Lever les points bloquants de contenu : devise des rendements MSCI (§10, levé le 08/10 par reconstitution),
       tendance longue (§8, adoptée le 08/10 — sources à relire à la source), données
-      provisoires des scénarios (§9), jeu d'exemple de l'aperçu (§12).
+      provisoires des scénarios (§9), jeu d'exemple de l'aperçu (§12, projet type depuis le 09/10).
 - [ ] Revoir le taux de crédit par défaut (trimestriel, voir « Entretien régulier »).
 - [x] Retirer « Prototype en développement » des pieds de page (08/10/2026).
 - [ ] Mettre à jour les `lastmod` de `sitemap.xml`.
+- [ ] **IndexNow** : définir la variable de dépôt `INDEXNOW_ENABLED` = `true` (Settings → Secrets
+      and variables → Actions → Variables), APRÈS le retrait du `noindex`. Le déploiement suivant
+      signale les pages ; vérifier la note « IndexNow : … adresses signalées » dans le journal.
+- [ ] **Sources des hypothèses** (bloc du simulateur et §8) : vérifiées par Lucas le 09/10/2026
+      — immobilier, crédit, IRL, charges, taxe foncière, PFU et prélèvements sociaux validés ou
+      corrigés. **Reste un TODO** : le rendement réel des actions MONDE 1900-2025 dans le résumé
+      officiel du Yearbook 2026 (§8).
 - [ ] **Google Search Console** : déclarer le domaine, soumettre
       `https://aequo-immo.fr/sitemap.xml`, demander l'indexation de `/` et `/simulateur`.
 - [ ] **Aperçu de partage** : tester l'accueil et le simulateur avec le Post Inspector de
       LinkedIn.
 - [ ] **Données structurées** : passer l'accueil au test des résultats enrichis de Google.
+
+#### Après le lancement
+
+- [ ] **Charger Chart.js à la demande, au premier graphique** — objectif : LCP du simulateur
+      < 2,5 s (Lighthouse mobile). Mesuré le 09/10/2026 : 4,9 s, dont ≈ 4,4 s de rendu retardé
+      par l'exécution de Chart.js et d'`app.js` (≈ 320 Ko) ; le premier affichage, lui, est à
+      2,2 s depuis le `defer`. Chart.js n'est utile qu'une fois le résultat affiché.

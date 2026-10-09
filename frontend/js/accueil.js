@@ -83,35 +83,20 @@
   /* -------------------------------------------------------------- Aperçu */
 
   /*
-   * Exemple FICTIF, choisi pour le dessin (décision de Lucas, 08/10/2026) :
-   * l'aperçu illustre ce que l'on obtient — deux trajectoires qui se croisent
-   * nettement — et ne prétend décrire aucun marché. Ses paramètres ne sont
-   * donc plus affichés. Loyer et taux de marché sont propres à l'exemple
-   * (immobilier 3 %, bourse 5 %), et non ceux du simulateur : avec la
-   * tendance longue, les courbes restaient collées ou ne se croisaient pas.
-   * Résultat : point mort en 7ᵉ année, achat devant de 130 k€ à 25 ans, sans
-   * recroisement. S'il change, vérifier qu'il croise encore : le point mort
-   * est la réponse au « Et si vous partiez plus tôt ? » (section 04).
+   * Projet type (09/10/2026) : un logement ancien de 250 000 € dans une
+   * grande ville de région, sur les hypothèses de marché par défaut du
+   * simulateur. Les entrées ne vivent pas ici mais dans la page (bloc JSON
+   * #apercuEntrees), où outils/accueil-statique.mjs les lit aussi pour écrire
+   * les chiffres en dur dans le HTML : une seule source, et la page servie
+   * affiche déjà ce que ce script recalcule. Les formats ci-dessous sont
+   * repris à l'identique dans ce script — changer l'un oblige à changer
+   * l'autre. Le point mort est la réponse au « Et si vous partiez plus
+   * tôt ? » (section 04) : si l'exemple change, vérifier qu'il croise encore.
    */
-  const ENTREES = {
-    prixNetVendeur: 340000,
-    valeurEstimee: 340000,
-    typeBien: 'ancien',
-    travaux: 0,
-    fraisAgence: 0,
-    apport: 60000,
-    capitalInitial: 80000,
-    dureeAnnees: 25,
-    chargesCopro: 1200,
-    taxeFonciere: 1000,
-    loyer: 750,
-    revalBien: 0.03,
-    rendementBourse: 0.05,
-    // Effort de 1 800 €/mois.
-    enveloppeMensuelle: 1800,
-    revenusFoyer: 5500,
-    horizon: 25,
-  };
+  function lireEntrees() {
+    const bloc = $('apercuEntrees');
+    return bloc ? JSON.parse(bloc.textContent) : null;
+  }
 
   const euros = new Intl.NumberFormat('fr-FR', {
     style: 'currency', currency: 'EUR', maximumFractionDigits: 0,
@@ -123,10 +108,11 @@
   function initialiserApercu() {
     let resultat;
     try {
-      if (!window.SimuRP) return;
-      resultat = window.SimuRP.simuler(Object.assign({}, window.SimuRP.DEFAUTS, ENTREES));
+      const entrees = lireEntrees();
+      if (!window.SimuRP || !entrees) return;
+      resultat = window.SimuRP.simuler(Object.assign({}, window.SimuRP.DEFAUTS, entrees));
     } catch (erreur) {
-      return; // la section garde son titre et son lien, rien d'autre
+      return; // la section garde ses chiffres écrits dans la page, sans graphique
     }
     const annees = resultat && resultat.annees;
     if (!annees || annees.length < 2) return;
@@ -146,7 +132,6 @@
     $('apercuPointMort').textContent =
       pointMort === null ? 'Jamais' : pointMort === 1 ? 'Dès la 1re année' : ans(pointMort);
 
-    $('apercuChiffres').hidden = false;
     $('apercuVisuel').hidden = false;
 
     // Le dessin se fait à la largeur réelle de la feuille : une unité du

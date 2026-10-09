@@ -76,6 +76,10 @@ Options -MultiViews
 # navigateur ou un proxy strict les refuse.
 AddType font/woff2 .woff2
 
+# robots.txt, llms.txt et la clé IndexNow sont du texte UTF-8 (« Æquo »,
+# accents) : sans charset déclaré, un robot peut les lire en Latin-1.
+AddCharset utf-8 .txt
+
 <IfModule mod_headers.c>
 
   # --- Cache -----------------------------------------------------------

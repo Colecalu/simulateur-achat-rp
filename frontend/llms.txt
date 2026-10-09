@@ -1,0 +1,40 @@
+# Æquo
+
+> Æquo (aussi écrit Aequo) est un simulateur gratuit et sans inscription qui compare l'achat de sa résidence principale et la location, en France. Les deux scénarios disposent du même budget mensuel ; le résultat compare leur patrimoine net d'impôt, année par année.
+
+Æquo s'adresse aux personnes qui hésitent entre acheter leur résidence principale et rester locataires, en particulier pour un premier achat. Il compare deux trajectoires de patrimoine ; il ne dit pas quoi faire. Ses simulations ont une visée pédagogique : elles ne constituent ni un conseil financier, ni un conseil en investissement, ni un conseil immobilier.
+
+## Méthode
+
+- Enveloppe identique : les deux scénarios disposent du même budget mensuel. Côté achat, il paie le crédit et les charges ; côté location, le loyer. Ce qui reste est investi.
+- Capital de départ : côté achat, l'apport entre dans le logement et le reste est investi ; côté location, tout le capital reste investi.
+- Patrimoine comparé : côté achat, la valeur du bien moins le capital restant dû, plus les placements ; côté location, les placements. Les deux sont nets d'impôt.
+- Fiscalité de sortie : les placements capitalisent avant impôt. L'impôt sur la plus-value cumulée est déduit une seule fois, à la sortie (31,4 % sur compte-titres par défaut, modifiable).
+- Point mort : la première année où le patrimoine net d'impôt du scénario achat dépasse celui du scénario location.
+- Éléments pris en compte : frais d'acquisition (notaire ancien ou neuf, agence, frais bancaires), crédit et assurance emprunteur, copropriété, taxe foncière, indexation des loyers (IRL), évolution du bien et des placements.
+- Calculs faits dans le navigateur ; aucun compte n'est nécessaire.
+
+## Les trois piliers
+
+- L'épargne réelle du locataire : Æquo compare d'abord à effort égal, puis permet d'indiquer que le locataire ne placerait pas la différence. Seul l'acheteur relève alors son effort, parce que le crédit l'y oblige.
+- Le passé et des futurs possibles : le projet est rejoué sur deux périodes historiques de 20 ans, et testé face à des hypothèses de choc (correction immobilière, décennie perdue en bourse). Ces scénarios ne prédisent pas les marchés.
+- La mise en location de la résidence principale : à partir d'une année donnée, en location nue ou en meublé (LMNP) au régime réel.
+
+## Ce que le modèle ne couvre pas
+
+- Les frais de revente (agence, diagnostics, mainlevée d'hypothèque).
+- Les gros travaux imprévus.
+- Les changements de vie.
+
+## Pages
+
+- [Accueil](https://aequo-immo.fr/) : présentation, exemple chiffré, questions fréquentes.
+- [Simulateur](https://aequo-immo.fr/simulateur) : la simulation complète, avec les hypothèses par défaut et leurs sources.
+- [Mentions légales](https://aequo-immo.fr/mentions-legales)
+- [Confidentialité](https://aequo-immo.fr/confidentialite)
+
+## Contact
+
+- [contact@aequo-immo.fr](mailto:contact@aequo-immo.fr)
+
+Mis à jour le 9 octobre 2026.

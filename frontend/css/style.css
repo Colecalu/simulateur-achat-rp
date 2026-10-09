@@ -439,8 +439,20 @@ h1, h2, h3 {
 #alerteApport { margin: 0; }
 #alerteApport[hidden] { display: none; }
 
-/* Rien n'est ouvrable tant que le profil n'est pas posé. */
-.plateau--bloque { opacity: .45; pointer-events: none; }
+/* Rien n'est ouvrable tant que le profil n'est pas posé.
+ *
+ * Ces blocs sont réellement INACTIFS : app.js (majBulles) leur pose `inert`.
+ * Un élément inactif est exempté du contraste minimal (WCAG 1.4.3) : d'où une
+ * atténuation franche, qui se voit (essayé le 09/10/2026 à 0,86, le minimum
+ * AA pour du texte actif : le verrou ne se voyait presque plus).
+ *
+ * L'atténuation porte sur les ENFANTS du plateau, pas sur le plateau : une
+ * opacité posée sur un parent ne peut pas être annulée par un enfant, et le
+ * bloc des sources doit rester pleinement lisible et actif — une référence,
+ * pas une étape, qu'on peut vouloir lire avant de rien saisir. Les sélecteurs
+ * sont les mêmes que ceux d'app.js : les changer ensemble. */
+.plateau--bloque > :not(.plateau__gauche),
+.plateau--bloque .plateau__gauche > :not(.sources) { opacity: .45; }
 
 /* ---------------------------------------------------------------- Plateau */
 
@@ -624,10 +636,11 @@ h1, h2, h3 {
        cartes « Scénarios » et « Mise en location », qui ne s'ouvrent qu'une
        fois le résultat obtenu, passent dessous. La colonne de gauche s'efface
        (`display: contents`) pour que ses enfants se placent un à un. */
-    grid-template-areas: "coin" "haut" "rail" "visu" "scenario" "location";
+    grid-template-areas: "coin" "haut" "rail" "sources" "visu" "scenario" "location";
   }
   .plateau__gauche { display: contents; }
   .rail { grid-area: rail; }
+  #sources { grid-area: sources; }
   #scenario { grid-area: scenario; }
   #melCarte { grid-area: location; }
   .rail {
@@ -1717,6 +1730,44 @@ input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; marg
  * appels du carnet — et devient la chose la plus visible du rail. L'ancienne
  * carte grisée à 45 % se confondait avec le fond : personne ne la cherchait.
  */
+/* --- Hypothèses par défaut et sources ------------------------------------
+ * Sous la quatrième bulle, fermé par défaut : une référence qu'on consulte,
+ * pas une étape. Habillage d'une carte au repos, sans ombre, pour ne pas
+ * concurrencer les bulles ni la carte des scénarios qui le suit.
+ */
+.sources {
+  padding: 10px 14px;
+  background: var(--surface);
+  border: 1px solid var(--trait);
+  border-radius: var(--rayon-large);
+}
+.sources__titre {
+  cursor: pointer;
+  font-size: .8125rem;
+  font-weight: 600;
+  color: var(--encre-2);
+}
+.sources__titre:hover { color: var(--accent); }
+.sources__corps { padding-top: 8px; }
+.sources__intro,
+.sources__date { margin: 0; font-size: .75rem; line-height: 1.45; color: var(--encre-3); }
+.sources__liste { margin: 10px 0; }
+.sources__ligne { padding: 8px 0; border-top: 1px solid var(--trait); }
+.sources__ligne dt {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: .75rem;
+  font-weight: 600;
+  color: var(--encre);
+}
+.sources__ligne dt span {
+  font-family: var(--police-chiffres);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.sources__ligne dd { margin: 4px 0 0; font-size: .75rem; line-height: 1.5; color: var(--encre-3); }
+
 .scenario {
   padding: 12px 14px;
   background: var(--surface);

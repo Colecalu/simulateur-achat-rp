@@ -2374,6 +2374,15 @@ const dureeVol = () => (matchMedia('(max-width: 560px)').matches ? 200 : 420);
 function majBulles() {
   const prochaine = prochaineBulle();
   $('#formulaire').classList.toggle('plateau--bloque', !profilValide);
+  // Verrouillé pour de vrai, pas seulement grisé : `inert` retire ces blocs du
+  // clavier, de la souris et des lecteurs d'écran, ce qui en fait des éléments
+  // inactifs — exemptés du contraste minimal (WCAG 1.4.3), d'où l'atténuation
+  // franche de style.css. Le bloc des sources n'en fait pas partie : c'est une
+  // référence, lisible et ouvrable avant toute saisie.
+  for (const el of document.querySelectorAll(
+    '#formulaire > :not(.plateau__gauche), .plateau__gauche > :not(#sources)')) {
+    el.inert = !profilValide;
+  }
 
   for (const n of BULLES) {
     const el = bulle(n);

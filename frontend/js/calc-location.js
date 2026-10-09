@@ -52,6 +52,10 @@
     achatMeubles: 0, // € dépensés en mobilier à la mise en location
 
     // --- Fiscalité ---
+    // Plus-value immobilière des particuliers : 19 % d'impôt sur le revenu
+    // (CGI, art. 200 B), après abattements pour durée de détention (art. 150 VC,
+    // voir abattementPlusValue). La surtaxe sur les plus-values nettes de plus de
+    // 50 000 € (art. 1609 nonies G, 2 à 6 %) n'est PAS modélisée.
     tauxImpotPlusValueIR: 0.19,
     plafondDeficitGlobal: 10700, // imputable sur le revenu global, par an
     dureeReportDeficit: 10, // années de report sur les revenus fonciers
@@ -66,12 +70,20 @@
     dureeAmortMobilier: 7,
 
     // Depuis la loi de finances 2025, les amortissements déduits sont
-    // réintégrés dans la plus-value imposable à la revente.
+    // réintégrés dans la plus-value imposable à la revente : art. 84 de la loi
+    // n° 2025-127 du 14 février 2025, qui complète l'art. 150 VB du CGI (prix
+    // d'acquisition minoré des amortissements admis en déduction, cessions
+    // depuis le 15/02/2025). Réponse ministérielle n° 10097, JOAN du 24 mars
+    // 2026 : réintégration de l'ensemble des amortissements, y compris ceux
+    // antérieurs à 2025, sous réserve des abattements pour durée de détention —
+    // qui s'appliquent donc à TOUTE la plus-value, amortissements compris
+    // (vérifié le 09/10/2026, voir CLAUDE.md §11).
     reintegrerAmortissements: true,
   };
 
   /**
-   * Abattements pour durée de détention, comptés depuis l'achat initial.
+   * Abattements pour durée de détention (CGI, art. 150 VC), comptés depuis
+   * l'achat initial.
    * IR   : 6 %/an de la 6e à la 21e année, 4 % la 22e → exonération à 22 ans.
    * PS   : 1,65 %/an de la 6e à la 21e, 1,60 % la 22e, 9 %/an ensuite
    *        → exonération à 30 ans.

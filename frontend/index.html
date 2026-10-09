@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Simulateur acheter ou louer sa résidence principale — Æquo</title>
-  <meta name="description" content="Acheter ou louer votre résidence principale ? Simulateur gratuit et sans inscription, pensé pour les primo-accédants : comparez deux trajectoires de patrimoine.">
+  <title>Acheter ou louer sa résidence principale ? Simulateur gratuit — Æquo</title>
+  <meta name="description" content="Acheter ou louer votre résidence principale ? Æquo compare vos deux patrimoines à budget mensuel égal : point mort, fiscalité, scénarios de marché. Gratuit, sans inscription.">
   <!-- À RETIRER AU LANCEMENT PUBLIC. Mise en ligne technique : la page est
        publique mais ne doit pas encore entrer dans l'index des moteurs. Ne
        rien bloquer dans robots.txt : un robot qui ne lit pas la page ne voit
@@ -17,16 +17,16 @@
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Æquo">
   <meta property="og:locale" content="fr_FR">
-  <meta property="og:title" content="Simulateur acheter ou louer sa résidence principale — Æquo">
-  <meta property="og:description" content="Acheter ou louer votre résidence principale ? Simulateur gratuit et sans inscription, pensé pour les primo-accédants : comparez deux trajectoires de patrimoine.">
+  <meta property="og:title" content="Acheter ou louer sa résidence principale ? Simulateur gratuit — Æquo">
+  <meta property="og:description" content="Acheter ou louer votre résidence principale ? Æquo compare vos deux patrimoines à budget mensuel égal : point mort, fiscalité, scénarios de marché. Gratuit, sans inscription.">
   <meta property="og:url" content="https://aequo-immo.fr/">
   <meta property="og:image" content="https://aequo-immo.fr/img/partage.png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta property="og:image:alt" content="Æquo, une maison en papier sur fond jaune : « La même porte. Pas la même histoire. » Simulateur gratuit pour acheter ou louer sa résidence principale.">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Simulateur acheter ou louer sa résidence principale — Æquo">
-  <meta name="twitter:description" content="Acheter ou louer votre résidence principale ? Simulateur gratuit et sans inscription, pensé pour les primo-accédants : comparez deux trajectoires de patrimoine.">
+  <meta name="twitter:title" content="Acheter ou louer sa résidence principale ? Simulateur gratuit — Æquo">
+  <meta name="twitter:description" content="Acheter ou louer votre résidence principale ? Æquo compare vos deux patrimoines à budget mensuel égal : point mort, fiscalité, scénarios de marché. Gratuit, sans inscription.">
   <meta name="twitter:image" content="https://aequo-immo.fr/img/partage.png">
   <!-- Icônes générées par outils/favicon.mjs. Le .ico d'abord, le SVG
        ensuite : les navigateurs récents retiennent le SVG, les anciens le
@@ -46,48 +46,159 @@
   <script src="/js/mesure.js" data-type-page="accueil"></script>
   <link rel="stylesheet" href="css/polices.css">
   <link rel="stylesheet" href="css/accueil.css">
-  <!-- Données structurées. Pas de FAQPage : Google n'en affiche plus les
-       résultats enrichis pour ce type de site, ce serait du balisage à
-       maintenir pour rien. Chaque valeur est vraie du produit : gratuit, sans
-       compte, dans le navigateur, JavaScript requis. -->
+  <!-- Données structurées, reliées par leurs @id. Chaque valeur est vraie
+       du produit et du texte visible.
+       - FAQPage : conservé (décision du 09/10/2026) pour la lisibilité par
+         les moteurs et les assistants IA, PAS pour les résultats enrichis —
+         Google n'en affiche plus pour ce type de site. Ses questions et réponses NE SE TAPENT PAS : elles
+         sont recopiées de la FAQ visible par `node outils/accueil-statique.mjs`,
+         et tests/referencement.test.mjs échoue si les deux divergent.
+       - dateModified (WebPage) : à changer à la main quand le contenu change
+         vraiment, avec le lastmod de sitemap.xml.
+       - L'application elle-même (WebApplication) est décrite sur
+         /simulateur, là où elle est. -->
   <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@graph": [
-      {
-        "@type": "WebSite",
-        "@id": "https://aequo-immo.fr/#site",
-        "name": "Æquo",
-        "alternateName": "Aequo",
-        "url": "https://aequo-immo.fr/",
-        "inLanguage": "fr-FR"
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://aequo-immo.fr/#organization",
+      "name": "Æquo",
+      "alternateName": "Aequo",
+      "url": "https://aequo-immo.fr/",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://aequo-immo.fr/apple-touch-icon.png",
+        "width": 180,
+        "height": 180
       },
-      {
-        "@type": "WebApplication",
-        "@id": "https://aequo-immo.fr/simulateur#application",
-        "name": "Æquo — simulateur acheter ou louer",
-        "url": "https://aequo-immo.fr/simulateur",
-        "isPartOf": {
-          "@id": "https://aequo-immo.fr/#site"
-        },
-        "applicationCategory": "FinanceApplication",
-        "operatingSystem": "Web",
-        "browserRequirements": "JavaScript requis",
-        "inLanguage": "fr-FR",
-        "isAccessibleForFree": true,
-        "offers": {
-          "@type": "Offer",
-          "price": "0",
-          "priceCurrency": "EUR"
-        },
-        "description": "Acheter ou louer votre résidence principale ? Simulateur gratuit et sans inscription, pensé pour les primo-accédants : comparez deux trajectoires de patrimoine.",
-        "audience": {
-          "@type": "Audience",
-          "audienceType": "Primo-accédants et futurs acquéreurs de résidence principale"
-        }
+      "email": "contact@aequo-immo.fr",
+      "description": "Æquo publie un simulateur gratuit et sans inscription qui compare l’achat de sa résidence principale et la location.",
+      "founder": {
+        "@type": "Person",
+        "name": "Lucas"
       }
-    ]
-  }
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://aequo-immo.fr/#website",
+      "name": "Æquo",
+      "alternateName": "Aequo",
+      "url": "https://aequo-immo.fr/",
+      "inLanguage": "fr-FR",
+      "publisher": {
+        "@id": "https://aequo-immo.fr/#organization"
+      }
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://aequo-immo.fr/#webpage",
+      "url": "https://aequo-immo.fr/",
+      "name": "Acheter ou louer sa résidence principale ? Simulateur gratuit — Æquo",
+      "description": "Acheter ou louer votre résidence principale ? Æquo compare vos deux patrimoines à budget mensuel égal : point mort, fiscalité, scénarios de marché. Gratuit, sans inscription.",
+      "inLanguage": "fr-FR",
+      "isPartOf": {
+        "@id": "https://aequo-immo.fr/#website"
+      },
+      "publisher": {
+        "@id": "https://aequo-immo.fr/#organization"
+      },
+      "dateModified": "2026-10-09"
+    },
+    {
+      "@type": "FAQPage",
+      "@id": "https://aequo-immo.fr/#faq",
+      "url": "https://aequo-immo.fr/",
+      "inLanguage": "fr-FR",
+      "isPartOf": {
+        "@id": "https://aequo-immo.fr/#website"
+      },
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Est-il plus rentable d’acheter ou de louer sa résidence principale ?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Cela dépend de votre projet : prix, loyer, taux du crédit, durée pendant laquelle vous garderez le logement et évolution des marchés. Sur une courte durée, les frais d’acquisition pèsent lourd et la location l’emporte souvent. Sur une longue durée, l’achat peut passer devant. Æquo calcule la réponse avec vos propres chiffres."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Au bout de combien d’années l’achat devient-il rentable ?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Il n’existe pas de durée universelle : c’est ce qu’on appelle le point mort, et il varie d’un projet à l’autre. Æquo l’affiche directement : c’est l’année à partir de laquelle votre patrimoine net est plus élevé en achetant qu’en louant."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Qu’est-ce que le point mort, entre acheter et louer ?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Le point mort est la première année où le patrimoine net d’impôt du scénario achat dépasse celui du scénario location, à budget mensuel égal. Si vous revendez avant, la location aurait été plus avantageuse. Si vous revendez après, c’est l’achat."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Est-ce qu’Æquo va me dire d’acheter ou de louer ?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Non. Primo-accédant ou non, il compare vos deux patrimoines à la durée choisie, avec vos paramètres. Changer un prix, un loyer ou une hypothèse de marché peut inverser le résultat. La décision reste la vôtre."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Pourquoi investir quand on reste locataire ?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Pour comparer à effort égal : l’apport non dépensé et ce qui reste après le loyer sont placés. Cette discipline d’épargne est une hypothèse, pas une évidence ; le simulateur vous laisse indiquer que vous ne la tiendriez pas."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Qu’est-ce qui entre dans les calculs ?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Le crédit immobilier, les frais d’acquisition (notaire, agence…), la copropriété, la taxe foncière, les loyers, l’évolution du bien et celle des placements. Les placements capitalisent avant impôt ; la fiscalité de sortie est déduite du patrimoine net affiché. Le modèle ne couvre pas tout : notamment les frais de revente, les gros travaux imprévus ou les changements de vie."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Les scénarios prédisent-ils les marchés ?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Non. « Le passé » applique l’évolution des marchés d’une autre époque à votre projet, avec votre taux de crédit, pas celui de l’époque. « Des futurs possibles » teste des hypothèses. Ni l’un ni l’autre ne prédit l’avenir."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "En quoi Æquo est-il différent des autres simulateurs acheter ou louer ?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Æquo donne le même budget mensuel aux deux scénarios et compare des patrimoines nets d’impôt, pas seulement une mensualité face à un loyer. Il y ajoute trois éléments : la question de l’épargne réelle du locataire ; des scénarios historiques et des hypothèses de choc sur les marchés ; la mise en location de votre résidence principale. Il reste gratuit et sans inscription."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Où vont mes données ?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Les calculs se font dans votre navigateur, sans compte. Votre brouillon est gardé sur cet appareil ; il n’est pas synchronisé entre vos appareils."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Qui est derrière Æquo ?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Æquo est conçu par Lucas, propriétaire bailleur. Il l’a construit pour répondre à sa propre question : acheter sa résidence principale ou continuer à louer. Pour toute remarque : contact@aequo-immo.fr."
+          }
+        }
+      ]
+    }
+  ]
+}
   </script>
   <script src="js/calc.js" defer></script>
   <script src="js/accueil.js"></script>
@@ -105,14 +216,16 @@
 
     <section class="cover" data-mesure-section="hero" aria-labelledby="titre">
       <div class="cover-heading">
-        <!-- Le surtitre fait partie du <h1> : le slogan seul ne dit rien du
-             sujet à un moteur de recherche. Les deux sont visibles, rien n'est
-             caché ; le rendu est celui d'avant (surtitre au-dessus, 24 px). -->
-        <h1 id="titre">
-          <span class="folio">SIMULATEUR GRATUIT · SANS INSCRIPTION</span>
-          <span class="cover__slogan">La même porte. <br><em>Pas la même histoire.</em></span>
-        </h1>
-        <p class="intro">Acheter ou louer votre résidence principale&nbsp;? <br>Comparez les deux avec vos chiffres, en quelques minutes.</p>
+        <!-- Le <h1> est la question du visiteur, mot pour mot ce qu'il tape
+             dans un moteur de recherche (09/10/2026). Le slogan, qui ne dit
+             rien du sujet, n'est plus un titre : un paragraphe au rendu
+             inchangé (.cover__slogan porte la typographie qu'avait le h1).
+             La question garde, elle aussi, son rendu de petite ligne
+             d'introduction. -->
+        <p class="folio cover__surtitre">SIMULATEUR GRATUIT · SANS INSCRIPTION</p>
+        <p class="cover__slogan">La même porte. <br><em>Pas la même histoire.</em></p>
+        <h1 class="intro" id="titre">Acheter ou louer votre résidence principale&nbsp;?</h1>
+        <p class="intro">Comparez les deux avec vos chiffres, en quelques minutes.</p>
       </div>
       <div class="theatre mode-achat" id="theatre">
         <div class="pencil-note">Votre premier achat&nbsp;? <br>C’est par ici.<svg viewBox="0 0 120 90" aria-hidden="true"><path d="M8 8Q100 0 88 65M70 52l18 13 15-16"/></svg></div>
@@ -194,38 +307,66 @@
       <p class="camps__texte" data-apparait>Tout dépend de votre prix, de votre loyer, du temps que vous resterez et de ce que feront les marchés. Æquo ne choisit pas de camp&nbsp;: il vous donne de quoi trancher.</p>
     </section>
 
-    <!-- Ce qu'on obtient en ouvrant le simulateur. Les chiffres sont calculés
-         au chargement par calc.js (accueil.js, initialiserApercu) : jamais
-         écrits à la main, ils divergeraient du moteur à la première
-         correction. Le bloc chiffré reste caché tant que le calcul n'a pas
-         réussi : sans JavaScript ou en cas d'échec, il ne reste que le titre
-         et le lien — jamais un NaN. -->
+    <!-- Ce qu'on obtient en ouvrant le simulateur, sur un projet type.
+         Les chiffres sont ÉCRITS dans le HTML, pour qu'un moteur de recherche
+         ou un assistant qui n'exécute pas le JavaScript les lise. Ils ne sont
+         jamais tapés à la main : `node outils/accueil-statique.mjs` les calcule
+         avec calc.js à partir des entrées ci-dessous et les réécrit ici, et un
+         test (tests/referencement.test.mjs) échoue — donc bloque le déploiement —
+         dès qu'ils divergent du moteur. Au chargement, accueil.js recalcule
+         sur les mêmes entrées (mêmes valeurs) et dessine le graphique, qui
+         reste caché sans JavaScript.
+         Entrées : celles du simulateur, telles qu'un visiteur les saisirait.
+         L'effort mensuel (enveloppeMensuelle) est loyer actuel 820 € +
+         épargne 500 € ; le loyer du scénario location est le même, 820 €. Les taux de marché ne figurent pas ici : ce sont ceux
+         du simulateur (DEFAUTS de calc.js, la tendance longue). -->
     <section class="apercu" data-mesure-section="apercu" id="apercu" aria-labelledby="apercuTitre">
+      <script type="application/json" id="apercuEntrees">
+      {
+        "capitalInitial": 40000,
+        "enveloppeMensuelle": 1320,
+        "prixNetVendeur": 250000,
+        "typeBien": "ancien",
+        "fraisAgence": 0,
+        "travaux": 0,
+        "fraisBancaires": 1500,
+        "valeurEstimee": 250000,
+        "apport": 30000,
+        "dureeAnnees": 25,
+        "tauxCredit": 0.035,
+        "tauxAssurance": 0.003,
+        "chargesCopro": 1200,
+        "taxeFonciere": 1100,
+        "loyer": 820,
+        "horizon": 20
+      }
+      </script>
       <div class="apercu__texte">
         <div class="section-label">
           <span>02 — CE QUE VOUS OBTENEZ</span>
         </div>
         <h2 id="apercuTitre">Deux trajectoires. <br><em>Une réponse à votre mesure.</em></h2>
-        <div class="apercu__chiffres" id="apercuChiffres" hidden>
+        <div class="apercu__chiffres" id="apercuChiffres">
           <dl class="apercu__kpis">
             <div class="apercu__kpi apercu__kpi--achat">
-              <dt>Achat <span>patrimoine net à <span id="apercuDuree">25 ans</span></span></dt>
-              <dd id="apercuAchat">—</dd>
+              <dt>Achat <span>patrimoine net d’impôt à <span id="apercuDuree">20 ans</span></span></dt>
+              <dd id="apercuAchat">334 058 €</dd>
             </div>
             <div class="apercu__kpi apercu__kpi--location">
-              <dt>Location <span>patrimoine net, même date</span></dt>
-              <dd id="apercuLocation">—</dd>
+              <dt>Location <span>patrimoine net d’impôt, même date</span></dt>
+              <dd id="apercuLocation">323 664 €</dd>
             </div>
             <div class="apercu__kpi apercu__kpi--point-mort">
               <dt>Point mort <span>l’année où l’achat passe devant</span></dt>
-              <dd id="apercuPointMort">—</dd>
+              <dd id="apercuPointMort">10 ans</dd>
             </div>
           </dl>
+          <p class="apercu__hypotheses" id="apercuHypotheses">Exemple illustratif : un logement ancien à 250 000 € dans une grande ville de région, 30 000 € d’apport, un crédit sur 25 ans à 3,5 %, face à un loyer de 820 € par mois, avec les hypothèses de marché par défaut du simulateur.</p>
         </div>
       </div>
       <figure class="apercu__visuel" id="apercuVisuel" hidden data-apparait>
         <div class="apercu__feuille" id="apercuGraphique"></div>
-        <figcaption class="apercu__legende">Exemple fictif. Vos chiffres seront différents.</figcaption>
+        <figcaption class="apercu__legende">Vos chiffres seront différents.</figcaption>
       </figure>
       <a class="apercu__lien" href="/simulateur" data-mesure-cta="apercu">Faire le calcul avec mon projet <span aria-hidden="true">↗</span></a>
     </section>
@@ -391,6 +532,33 @@
       </div>
     </section>
 
+    <!-- Æquo en bref : des phrases complètes, dont chacune se comprend seule.
+         Ce bloc s'adresse autant aux moteurs de recherche et aux assistants
+         IA, qui citent une phrase hors de son contexte, qu'au visiteur
+         pressé. Aucune formule ici : la page a assez de voix ailleurs. Garder
+         ces phrases cohérentes avec llms.txt et avec la featureList du
+         simulateur (JSON-LD de simulateur.html). -->
+    <section class="bref" data-mesure-section="en_bref" id="en-bref" aria-labelledby="brefTitre">
+      <div>
+        <span class="tiny">L’ESSENTIEL, SANS DÉTOUR</span>
+        <h2 id="brefTitre">Æquo <em>en bref.</em></h2>
+      </div>
+      <ul class="bref__liste">
+        <li>Æquo (aussi écrit Aequo) est un simulateur gratuit et sans inscription qui compare l’achat de sa résidence principale et la location.</li>
+        <li>Les deux scénarios disposent du même budget mensuel. Côté achat, il paie le crédit et les charges&nbsp;; côté location, le loyer. Ce qui reste est investi.</li>
+        <li>Le résultat compare le patrimoine net d’impôt des deux scénarios, année par année. Le point mort est l’année où l’achat passe devant.</li>
+        <li>Les frais d’acquisition, le crédit et l’assurance emprunteur, la copropriété, la taxe foncière et l’indexation des loyers (IRL) sont pris en compte. Il en va de même de la fiscalité des plus-values à la sortie (31,4&nbsp;% sur compte-titres par défaut).</li>
+        <li>Le simulateur rejoue votre projet sur deux périodes historiques de 20&nbsp;ans. Il le teste aussi face à des hypothèses de choc&nbsp;: correction immobilière, décennie perdue en bourse.</li>
+        <li>Il permet de simuler la mise en location de sa résidence principale à partir d’une année donnée, en location nue ou en meublé (LMNP) au régime réel.</li>
+        <li>Les calculs se font dans votre navigateur. Aucun compte n’est nécessaire.</li>
+      </ul>
+    </section>
+
+    <!-- Chaque réponse commence par une phrase qui répond seule : c'est elle
+         qu'un moteur ou un assistant reprend. Le texte est repris MOT POUR
+         MOT dans le JSON-LD FAQPage du <head> ; tests/referencement.test.mjs
+         vérifie qu'ils ne divergent pas. Une question ajoutée ici s'ajoute
+         là-bas, et dans docs/plan-de-marquage.md (data-mesure-question). -->
     <section class="faq" data-mesure-section="faq" id="questions" aria-labelledby="faqTitre">
       <div>
         <span class="tiny">QUELQUES NOTES AVANT DE PARTIR</span>
@@ -398,6 +566,18 @@
         <span class="asterisk" aria-hidden="true">✳</span>
       </div>
       <div class="answers" data-apparait>
+        <details data-mesure-question="rentable">
+          <summary>Est-il plus rentable d’acheter ou de louer sa résidence principale&nbsp;?</summary>
+          <p>Cela dépend de votre projet&nbsp;: prix, loyer, taux du crédit, durée pendant laquelle vous garderez le logement et évolution des marchés. Sur une courte durée, les frais d’acquisition pèsent lourd et la location l’emporte souvent. Sur une longue durée, l’achat peut passer devant. Æquo calcule la réponse avec vos propres chiffres.</p>
+        </details>
+        <details data-mesure-question="duree_rentabilite">
+          <summary>Au bout de combien d’années l’achat devient-il rentable&nbsp;?</summary>
+          <p>Il n’existe pas de durée universelle&nbsp;: c’est ce qu’on appelle le point mort, et il varie d’un projet à l’autre. Æquo l’affiche directement&nbsp;: c’est l’année à partir de laquelle votre patrimoine net est plus élevé en achetant qu’en louant.</p>
+        </details>
+        <details data-mesure-question="point_mort">
+          <summary>Qu’est-ce que le point mort, entre acheter et louer&nbsp;?</summary>
+          <p>Le point mort est la première année où le patrimoine net d’impôt du scénario achat dépasse celui du scénario location, à budget mensuel égal. Si vous revendez avant, la location aurait été plus avantageuse. Si vous revendez après, c’est l’achat.</p>
+        </details>
         <details data-mesure-question="verdict">
           <summary>Est-ce qu’Æquo va me dire d’acheter ou de louer&nbsp;?</summary>
           <p>Non. Primo-accédant ou non, il compare vos deux patrimoines à la durée choisie, avec vos paramètres. Changer un prix, un loyer ou une hypothèse de marché peut inverser le résultat. La décision reste la vôtre.</p>
@@ -413,11 +593,25 @@
         </details>
         <details data-mesure-question="scenarios">
           <summary>Les scénarios prédisent-ils les marchés&nbsp;?</summary>
-          <p>Non. «&nbsp;Le passé&nbsp;» applique l’évolution des marchés d’une autre époque à votre projet, avec votre taux de crédit, pas celui de l’époque. «&nbsp;Des futurs possibles&nbsp;» teste des hypothèses. Ni l’un ni l’autre ne prédit l’avenir, et leurs données sont encore provisoires&nbsp;: elles ne permettent pas de conclusion financière fiable à ce stade.</p>
+          <p>Non. «&nbsp;Le passé&nbsp;» applique l’évolution des marchés d’une autre époque à votre projet, avec votre taux de crédit, pas celui de l’époque. «&nbsp;Des futurs possibles&nbsp;» teste des hypothèses. Ni l’un ni l’autre ne prédit l’avenir.</p>
+        </details>
+        <details data-mesure-question="difference">
+          <summary>En quoi Æquo est-il différent des autres simulateurs acheter ou louer&nbsp;?</summary>
+          <p>Æquo donne le même budget mensuel aux deux scénarios et compare des patrimoines nets d’impôt, pas seulement une mensualité face à un loyer. Il y ajoute trois éléments&nbsp;:</p>
+          <ul>
+            <li>la question de l’épargne réelle du locataire&nbsp;;</li>
+            <li>des scénarios historiques et des hypothèses de choc sur les marchés&nbsp;;</li>
+            <li>la mise en location de votre résidence principale.</li>
+          </ul>
+          <p>Il reste gratuit et sans inscription.</p>
         </details>
         <details data-mesure-question="donnees">
           <summary>Où vont mes données&nbsp;?</summary>
           <p>Les calculs se font dans votre navigateur, sans compte. Votre brouillon est gardé sur cet appareil&nbsp;; il n’est pas synchronisé entre vos appareils.</p>
+        </details>
+        <details data-mesure-question="auteur">
+          <summary>Qui est derrière Æquo&nbsp;?</summary>
+          <p>Æquo est conçu par Lucas, propriétaire bailleur. Il l’a construit pour répondre à sa propre question&nbsp;: acheter sa résidence principale ou continuer à louer. Pour toute remarque&nbsp;: <a href="mailto:contact@aequo-immo.fr">contact@aequo-immo.fr</a>.</p>
         </details>
       </div>
     </section>
