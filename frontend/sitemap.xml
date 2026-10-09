@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Les pages, à leurs adresses propres (voir .htaccess), sur
+<!-- Les pages à indexer, à leurs adresses propres (voir .htaccess), sur
      https://aequo-immo.fr sans www. lastmod : à mettre à jour quand une page
-     change vraiment de contenu, pas à chaque correction de style. La 404 n'y
-     figure pas : ce n'est pas une page à indexer. -->
+     change vraiment de contenu, pas à chaque correction de style — avec le
+     dateModified du JSON-LD de la page. N'y figurent pas les pages en noindex
+     (mentions légales, confidentialité, 404) : une page qu'on demande de ne
+     pas indexer n'a rien à faire dans le sitemap. Ce fichier sert aussi de
+     liste à l'étape IndexNow du déploiement. -->
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://aequo-immo.fr/</loc>
@@ -11,13 +14,5 @@
   <url>
     <loc>https://aequo-immo.fr/simulateur</loc>
     <lastmod>2026-10-09</lastmod>
-  </url>
-  <url>
-    <loc>https://aequo-immo.fr/mentions-legales</loc>
-    <lastmod>2026-10-07</lastmod>
-  </url>
-  <url>
-    <loc>https://aequo-immo.fr/confidentialite</loc>
-    <lastmod>2026-10-07</lastmod>
   </url>
 </urlset>

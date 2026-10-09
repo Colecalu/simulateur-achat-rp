@@ -180,9 +180,9 @@ jobs:
       # au lieu d'attendre leur prochain passage. Google n'y participe pas.
       #
       # INACTIF tant que la variable de dépôt INDEXNOW_ENABLED ne vaut pas
-      # « true » (Settings → Secrets and variables → Actions → Variables). Elle
-      # n'est pas définie : inutile de signaler des pages en noindex. À
-      # définir le jour du lancement public (checklist, CLAUDE.md §13).
+      # « true » (Settings → Secrets and variables → Actions → Variables). Le
+      # noindex est retiré depuis le 09/10/2026 ; la variable se définit à part,
+      # par décision du propriétaire (checklist, CLAUDE.md §13).
       #
       # Seulement après un envoi RÉEL depuis main : jamais en simulation.
       # La clé n'est pas un secret : le protocole exige qu'elle soit publique,

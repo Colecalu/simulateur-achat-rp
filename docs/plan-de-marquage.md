@@ -118,9 +118,10 @@ visiteur a obtenu sa réponse), **`sim_demarree`** (entrée dans le simulateur) 
 
 Accès au stockage protégés : s'il est refusé, `?moi=1` ne vaut que pour la page en cours.
 
-## Consentement — à faire avant le lancement public
+## Consentement — reporté après le lancement public
 
-Les cookies `_ga` sont déposés **sans consentement** pendant la phase de test (site en `noindex`).
-Un **bandeau de consentement avec Consent Mode v2** est obligatoire avant le retrait du `noindex`
-(checklist « Lancement public », CLAUDE.md §13). Il s'insérera dans `mesure.js` : `gtag('consent',
+Les cookies `_ga` sont déposés **sans consentement**. Le **bandeau de consentement avec Consent
+Mode v2** devait précéder le retrait du `noindex` ; il a été **reporté** (décision du propriétaire,
+08/10/2026, risque CNIL connu et assumé) et le `noindex` a été retiré le 09/10/2026 sans lui. Il
+reste à faire (checklist « Lancement public », CLAUDE.md §13). Il s'insérera dans `mesure.js` : `gtag('consent',
 'default', {…: 'denied'})` avant le `config`, puis `'update'` au choix de l'utilisateur.
