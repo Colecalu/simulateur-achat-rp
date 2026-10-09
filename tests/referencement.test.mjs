@@ -166,3 +166,38 @@ test('IndexNow : un seul fichier de clé, qui contient son propre nom', () => {
   assert.equal(cles.length, 1);
   assert.equal(lire(cles[0]).trim(), cles[0].replace('.txt', ''));
 });
+
+/* ------------------------------------------------- Indexation (lancement) */
+
+const NOINDEX = /<meta name="robots" content="[^"]*noindex/;
+const sansCommentaires = (html) => html.replace(/<!--[\s\S]*?-->/g, '');
+
+test("lancement public : l'accueil et le simulateur sont indexables", () => {
+  for (const fichier of ['index.html', 'simulateur.html']) {
+    assert.doesNotMatch(sansCommentaires(lire(fichier)), NOINDEX, fichier);
+  }
+});
+
+test('pages légales et 404 : noindex gardé', () => {
+  for (const fichier of ['mentions-legales.html', 'confidentialite.html', '404.html']) {
+    assert.match(sansCommentaires(lire(fichier)), NOINDEX, fichier);
+  }
+});
+
+test('sitemap : exactement les pages indexables, aucune en noindex', () => {
+  const sitemap = lire('sitemap.xml');
+  const adresses = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1]);
+  assert.deepEqual(adresses, ['https://aequo-immo.fr/', 'https://aequo-immo.fr/simulateur']);
+  const fichiers = { 'https://aequo-immo.fr/': 'index.html', 'https://aequo-immo.fr/simulateur': 'simulateur.html' };
+  for (const adresse of adresses) {
+    const html = lire(fichiers[adresse]);
+    assert.doesNotMatch(sansCommentaires(html), NOINDEX, adresse);
+    // Même adresse que la balise canonical de la page.
+    assert.match(html, new RegExp('<link rel="canonical" href="' + adresse + '">'));
+  }
+  // lastmod au format AAAA-MM-JJ, égal au dateModified du JSON-LD de la page.
+  for (const m of sitemap.matchAll(/<loc>([^<]+)<\/loc>\s*<lastmod>([^<]+)<\/lastmod>/g)) {
+    const page = jsonLd(lire(fichiers[m[1]]))['@graph'].find((n) => n['@type'] === 'WebPage');
+    assert.equal(m[2], page.dateModified, m[1]);
+  }
+});

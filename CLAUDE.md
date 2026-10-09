@@ -13,7 +13,7 @@ Document de référence du projet. Court par nature : le détail vit dans `docs/
 ## Commandes
 
 ```bash
-node --test "tests/*.test.mjs"   # 124 tests : moteur, location, indicateurs, séries, sauvegarde, scénarios, référencement
+node --test "tests/*.test.mjs"   # 127 tests : moteur, location, indicateurs, séries, sauvegarde, scénarios, référencement
 ```
 
 Le motif est entre guillemets : `node --test tests/` échoue sous Windows (Node tente de charger
@@ -60,7 +60,7 @@ structurante change.
   de feature ouverte par Claude Code est à considérer comme une expérimentation en cours.
 - **Une expérimentation ne remplace jamais l'implémentation en place automatiquement.** Elle est
   analysée sur demande, puis intégrée, adaptée ou écartée — décision de Lucas.
-- **Les 124 tests sont l'arbitre.** Une proposition qui les casse est rejetée, quelle que soit son
+- **Les 127 tests sont l'arbitre.** Une proposition qui les casse est rejetée, quelle que soit son
   élégance. La fixture Excel compare 25 années × 15 grandeurs **au centime** : elle ne se
   contourne pas, elle se respecte ou se discute explicitement.
 
@@ -237,7 +237,7 @@ outils/                      jamais déployé — scripts de développement
   image-partage.mjs (+ .html) img/partage.png
   package.json               fontkit, wawoff2, Playwright — devDependencies, §13
 docs/                        modèle, conventions UI, spec backend, design, Excel
-tests/                       node --test, 124 tests
+tests/                       node --test, 127 tests
 migrations/                  à créer : SQL numéroté, appliqué à la main
 ```
 
@@ -1101,15 +1101,18 @@ Préparée le 07/10/2026 (branche `feat/mise-en-ligne`). **Domaine : `https://ae
 www**, dans toutes les URL absolues (canonical, `og:*`, JSON-LD, `robots.txt`, `sitemap.xml`).
 V1 **sans backend** : rien à masquer, l'interface n'a jamais exposé de compte.
 
-**Mise en ligne technique ≠ lancement public.** Le site est en ligne mais **toutes les pages
-portent `<meta name="robots" content="noindex">`** : on vérifie en conditions réelles avant que
-Google n'indexe quoi que ce soit. `robots.txt` ne bloque **rien**, et ne doit rien bloquer : un
-robot qui n'a pas le droit de lire une page n'y voit pas le `noindex`, et peut indexer son adresse
-quand même à partir des liens qui y mènent.
+**Lancement public le 09/10/2026** (décision de Lucas) : `index.html` et `simulateur.html` n'ont
+plus de `noindex`. Les pages légales (`mentions-legales`, `confidentialite`) le **gardent**, et la
+404 aussi (définitif) : elles n'apportent rien à un moteur. Elles sont donc **retirées de
+`sitemap.xml`**, qui ne liste que `/` et `/simulateur` — une page en `noindex` n'a rien à faire
+dans le sitemap. Trois tests verrouillent cet état (`tests/referencement.test.mjs`).
+`robots.txt` ne bloque **rien**, et ne doit rien bloquer : un robot qui n'a pas le droit de lire
+une page n'y voit pas le `noindex`, et peut indexer son adresse quand même à partir des liens qui y
+mènent. Avant cette date, toutes les pages étaient en `noindex` (mise en ligne technique du 07/10).
 
 | Ajouté le 07/10 | |
 |---|---|
-| Pages légales | `/mentions-legales` et `/confidentialite`, habillage de l'accueil (`accueil.css`, section « Document »), au sitemap. Éditeur déclaré **à titre non professionnel** (identité confiée à l'hébergeur) : à compléter si le site devient une activité professionnelle. |
+| Pages légales | `/mentions-legales` et `/confidentialite`, habillage de l'accueil (`accueil.css`, section « Document »). En `noindex` et hors du sitemap depuis le lancement (09/10/2026). Éditeur déclaré **à titre non professionnel** (identité confiée à l'hébergeur) : à compléter si le site devient une activité professionnelle. |
 | Avertissement | « ni un conseil financier, ni un conseil en investissement, ni un conseil immobilier » : pied de **toutes** les pages (même phrase partout) et, en version courte, sous les résultats du simulateur (`.avertissement--conseil`). |
 | Pied du simulateur | `.pied` dans `style.css` : liens légaux, contact, avertissement. |
 | 404 | `404.html` + `ErrorDocument 404 /404.html`. **Chemins absolus obligatoires** : Apache la sert à l'adresse demandée, `/a/b/c` compris. `noindex` **définitif**, lui. |
@@ -1175,19 +1178,20 @@ de l'hébergement.
       08/10/2026), à prévoir après le lancement.** N'est plus bloquant. Les cookies `_ga` restent
       déposés sans consentement en attendant : risque CNIL connu et assumé. Mettre à jour
       `confidentialite.html` dans le même commit que le bandeau.
-- [ ] **Retirer `<meta name="robots" content="noindex">`** de `index.html`, `simulateur.html`,
-      `mentions-legales.html` et `confidentialite.html` — chacune porte le commentaire
-      « À RETIRER AU LANCEMENT PUBLIC » (`git grep -n "À RETIRER AU LANCEMENT PUBLIC"`).
-      **Pas** celui de `404.html`, qui est définitif.
-- [ ] Vérifier que `robots.txt` ne bloque toujours rien.
+- [x] **`noindex` retiré** de `index.html` et `simulateur.html` (09/10/2026). **Gardé**, par
+      décision, sur `mentions-legales.html`, `confidentialite.html` et `404.html` ; ces pages
+      sont sorties du sitemap.
+- [x] `robots.txt` ne bloque toujours rien (09/10/2026, verrouillé par un test).
 - [ ] Lever les points bloquants de contenu : devise des rendements MSCI (§10, levé le 08/10 par reconstitution),
       tendance longue (§8, adoptée le 08/10 — sources à relire à la source), données
       provisoires des scénarios (§9), jeu d'exemple de l'aperçu (§12, projet type depuis le 09/10).
 - [ ] Revoir le taux de crédit par défaut (trimestriel, voir « Entretien régulier »).
 - [x] Retirer « Prototype en développement » des pieds de page (08/10/2026).
-- [ ] Mettre à jour les `lastmod` de `sitemap.xml`.
+- [x] `sitemap.xml` : `/` et `/simulateur` seuls, `lastmod` au 09/10/2026 (un test les compare au
+      `dateModified` du JSON-LD).
 - [ ] **IndexNow** : définir la variable de dépôt `INDEXNOW_ENABLED` = `true` (Settings → Secrets
-      and variables → Actions → Variables), APRÈS le retrait du `noindex`. Le déploiement suivant
+      and variables → Actions → Variables), APRÈS le retrait du `noindex` — fait le 09/10, la
+      variable reste à définir (décision de Lucas, pas dans le même geste). Le déploiement suivant
       signale les pages ; vérifier la note « IndexNow : … adresses signalées » dans le journal.
 - [ ] **Sources des hypothèses** (bloc du simulateur et §8) : vérifiées par Lucas le 09/10/2026
       — immobilier, crédit, IRL, charges, taxe foncière, PFU et prélèvements sociaux validés ou
