@@ -36,14 +36,15 @@
    */
   var TENDANCE_LONGUE = {
     // 2 % + rendement RÉEL de long terme des actions MONDIALES (Dimson-Marsh-
-    // Staunton, UBS Global Investment Returns Yearbook, ≈ 5 %/an depuis 1900),
+    // Staunton, UBS Global Investment Returns Yearbook, édition 2026, ≈ 5 %/an
+    // depuis 1900 — chiffre à vérifier dans le résumé officiel, CLAUDE.md §8),
     // moins ≈ 0,3 %/an de frais de gestion d'un ETF monde. Pas le marché
     // américain (≈ 6,5 % réel), qui est le gagnant connu après coup.
     rendementBourse: 0.068,
     // Hypothèse centrale neutre : prix et loyers suivent l'inflation (2 %),
     // rapport prix/loyer constant. Les prix partent d'un niveau élevé par
-    // rapport au revenu des ménages (Friggit, IGEDD) ; marché quasi stable à
-    // légèrement baissier en 2026 (Notaires-Insee).
+    // rapport au revenu des ménages (Friggit, IGEDD) ; marché en léger repli en
+    // 2026 : −0,8 % sur un an au 2e trimestre (indices Notaires-Insee, sept. 2026).
     revalBien: 0.02,
     // L'IRL EST légalement l'inflation (loi du 8 février 2008).
     revalLoyer: 0.02,
@@ -82,8 +83,10 @@
 
     apport: 100000,
     dureeAnnees: 20,
-    // Pretto, sept. 2026 : 3,52 % sur 20 ans ; Crédit Logement/CSA, août 2026 :
-    // 3,31 % toutes durées. À revoir chaque trimestre (CLAUDE.md, §13).
+    // Pretto, oct. 2026 : 3,66 % sur 20 ans (3,52 % en septembre) ; Crédit
+    // Logement/CSA, août 2026 : 3,31 % toutes durées, prêts réellement accordés.
+    // Taux en hausse depuis le printemps 2026 : 3,5 % gardé, revu chaque
+    // trimestre (CLAUDE.md, §13).
     tauxCredit: 0.035,
     tauxAssurance: 0.0015,
 

@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Simulateur : acheter ou louer ma résidence principale ? — Æquo</title>
-  <meta name="description" content="Comparez l'achat de votre résidence principale et la location, à enveloppe budgétaire identique.">
+  <title>Simulateur achat ou location : calculez votre point mort — Æquo</title>
+  <meta name="description" content="Simulez l'achat de votre résidence principale face à la location, à budget mensuel égal : patrimoine net d'impôt année par année, point mort, scénarios historiques, mise en location.">
   <!-- À RETIRER AU LANCEMENT PUBLIC. Mise en ligne technique : la page est
        publique mais ne doit pas encore entrer dans l'index des moteurs. Ne
        rien bloquer dans robots.txt : un robot qui ne lit pas la page ne voit
@@ -17,16 +17,16 @@
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Æquo">
   <meta property="og:locale" content="fr_FR">
-  <meta property="og:title" content="Simulateur : acheter ou louer ma résidence principale ? — Æquo">
-  <meta property="og:description" content="Comparez l'achat de votre résidence principale et la location, à enveloppe budgétaire identique.">
+  <meta property="og:title" content="Simulateur achat ou location : calculez votre point mort — Æquo">
+  <meta property="og:description" content="Simulez l'achat de votre résidence principale face à la location, à budget mensuel égal : patrimoine net d'impôt année par année, point mort, scénarios historiques, mise en location.">
   <meta property="og:url" content="https://aequo-immo.fr/simulateur">
   <meta property="og:image" content="https://aequo-immo.fr/img/partage.png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta property="og:image:alt" content="Æquo, une maison en papier sur fond jaune : « La même porte. Pas la même histoire. » Simulateur gratuit pour acheter ou louer sa résidence principale.">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Simulateur : acheter ou louer ma résidence principale ? — Æquo">
-  <meta name="twitter:description" content="Comparez l'achat de votre résidence principale et la location, à enveloppe budgétaire identique.">
+  <meta name="twitter:title" content="Simulateur achat ou location : calculez votre point mort — Æquo">
+  <meta name="twitter:description" content="Simulez l'achat de votre résidence principale face à la location, à budget mensuel égal : patrimoine net d'impôt année par année, point mort, scénarios historiques, mise en location.">
   <meta name="twitter:image" content="https://aequo-immo.fr/img/partage.png">
   <!-- Le thème porte toutes les valeurs : couleurs, polices, rayons, ombres.
        style.css, lui, ne contient que la structure. -->
@@ -38,11 +38,76 @@
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="/apple-touch-icon.png">
   <meta name="theme-color" content="#f3da78">
+  <!-- Deux préchargements : les polices visibles sans défiler (titre en
+       Instrument Serif, texte en DM Sans). Sans eux, le navigateur ne les
+       découvre qu'après avoir lu polices.css. -->
+  <link rel="preload" href="fonts/instrument-serif.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/dm-sans-variable.woff2" as="font" type="font/woff2" crossorigin>
   <!-- Mesure d'audience, AVANT tout autre script : voir js/mesure.js. -->
   <script src="/js/mesure.js" data-type-page="simulateur"></script>
   <link rel="stylesheet" href="css/polices.css">
   <link rel="stylesheet" href="css/theme-codex.css">
   <link rel="stylesheet" href="css/style.css">
+  <!-- Données structurées. Les @id renvoient au graphe de l'accueil
+       (#organization, #website). La featureList reprend MOT POUR MOT les
+       phrases du bloc « Æquo en bref » de l'accueil : tests/referencement.test.mjs
+       échoue si les deux divergent. dateModified : à changer à la main quand
+       le contenu change vraiment, avec le lastmod de sitemap.xml. -->
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebApplication",
+      "@id": "https://aequo-immo.fr/simulateur#application",
+      "name": "Simulateur acheter ou louer Æquo",
+      "alternateName": "Simulateur Aequo",
+      "url": "https://aequo-immo.fr/simulateur",
+      "description": "Simulez l'achat de votre résidence principale face à la location, à budget mensuel égal : patrimoine net d'impôt année par année, point mort, scénarios historiques, mise en location.",
+      "applicationCategory": "FinanceApplication",
+      "operatingSystem": "Web",
+      "browserRequirements": "JavaScript requis",
+      "inLanguage": "fr-FR",
+      "isAccessibleForFree": true,
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "EUR"
+      },
+      "featureList": [
+        "Æquo (aussi écrit Aequo) est un simulateur gratuit et sans inscription qui compare l’achat de sa résidence principale et la location.",
+        "Les deux scénarios disposent du même budget mensuel. Côté achat, il paie le crédit et les charges ; côté location, le loyer. Ce qui reste est investi.",
+        "Le résultat compare le patrimoine net d’impôt des deux scénarios, année par année. Le point mort est l’année où l’achat passe devant.",
+        "Les frais d’acquisition, le crédit et l’assurance emprunteur, la copropriété, la taxe foncière et l’indexation des loyers (IRL) sont pris en compte. Il en va de même de la fiscalité des plus-values à la sortie (31,4 % sur compte-titres par défaut).",
+        "Le simulateur rejoue votre projet sur deux périodes historiques de 20 ans. Il le teste aussi face à des hypothèses de choc : correction immobilière, décennie perdue en bourse.",
+        "Il permet de simuler la mise en location de sa résidence principale à partir d’une année donnée, en location nue ou en meublé (LMNP) au régime réel.",
+        "Les calculs se font dans votre navigateur. Aucun compte n’est nécessaire."
+      ],
+      "publisher": {
+        "@id": "https://aequo-immo.fr/#organization"
+      }
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://aequo-immo.fr/simulateur#webpage",
+      "url": "https://aequo-immo.fr/simulateur",
+      "name": "Simulateur achat ou location : calculez votre point mort — Æquo",
+      "description": "Simulez l'achat de votre résidence principale face à la location, à budget mensuel égal : patrimoine net d'impôt année par année, point mort, scénarios historiques, mise en location.",
+      "inLanguage": "fr-FR",
+      "isPartOf": {
+        "@id": "https://aequo-immo.fr/#website"
+      },
+      "mainEntity": {
+        "@id": "https://aequo-immo.fr/simulateur#application"
+      },
+      "publisher": {
+        "@id": "https://aequo-immo.fr/#organization"
+      },
+      "dateModified": "2026-10-09"
+    }
+  ]
+}
+  </script>
 </head>
 <body>
 
@@ -398,7 +463,7 @@
               <input type="number" id="fiscalitePlusValues" step="0.1" min="0" max="100" data-pourcentage>
               <span class="champ__unite">%</span>
             </span>
-            <span class="champ__aide">31,4&nbsp;% = flat tax sur compte-titres. Un PEA ou une assurance-vie sont moins taxés.</span>
+            <span class="champ__aide">31,4&nbsp;% = flat tax sur compte-titres&nbsp;: 12,8&nbsp;% d’impôt sur le revenu + 18,6&nbsp;% de prélèvements sociaux (LFSS 2026). Un PEA ou une assurance-vie sont moins taxés.</span>
           </label>
               </div>
               <div class="bulle__pied">
@@ -408,6 +473,51 @@
           </article>
         </div>
       </div>
+
+      <!-- Hypothèses par défaut et leurs sources (09/10/2026). Écrit dans le
+           HTML, pas généré : un moteur de recherche ou un assistant IA lit la
+           page sans exécuter le JavaScript, et c'est ce qui rend le résultat
+           vérifiable. Chaque valeur porte data-hypothese (la clé de DEFAUTS
+           dans calc.js) : tests/referencement.test.mjs échoue si elle diverge
+           du moteur. Les sources sont celles du commentaire de TENDANCE_LONGUE
+           et de CLAUDE.md §8 — n'en ajouter aucune qui n'y soit pas. -->
+      <details class="sources" id="sources" data-mesure-avance="hypotheses_sources">
+        <summary class="sources__titre">Hypothèses par défaut et sources</summary>
+        <div class="sources__corps">
+          <p class="sources__intro">Les valeurs de l’étape&nbsp;4 avant toute modification. Les taux de marché se construisent sur une inflation de 2&nbsp;%, la cible de la Banque centrale européenne.</p>
+          <dl class="sources__liste">
+            <div class="sources__ligne">
+              <dt>Rendement de la bourse <span data-hypothese="rendementBourse">6,8&nbsp;%/an</span></dt>
+              <dd>Brut, avant impôt. 2&nbsp;% d’inflation, plus le rendement réel de long terme des actions mondiales (≈&nbsp;5&nbsp;%/an depuis 1900, Dimson, Marsh et Staunton, <cite>UBS Global Investment Returns Yearbook</cite>, édition 2026), moins ≈&nbsp;0,3&nbsp;%/an de frais d’un ETF monde. Les scénarios historiques rejouent, eux, l’indice MSCI World dividendes nets réinvestis, converti de dollars en euros au change de fin d’année.</dd>
+            </div>
+            <div class="sources__ligne">
+              <dt>Revalorisation du bien <span data-hypothese="revalBien">2&nbsp;%/an</span></dt>
+              <dd>Hypothèse centrale&nbsp;: les prix suivent l’inflation, le rapport entre prix et loyers reste constant. Les prix partent d’un niveau élevé par rapport au revenu des ménages (Friggit, IGEDD), sur un marché en léger repli en 2026&nbsp;: −0,8&nbsp;% sur un an au 2<sup>e</sup>&nbsp;trimestre (indices Notaires-Insee, septembre 2026).</dd>
+            </div>
+            <div class="sources__ligne">
+              <dt>Revalorisation du loyer <span data-hypothese="revalLoyer">2&nbsp;%/an</span></dt>
+              <dd>L’indice de référence des loyers (IRL) est, depuis la loi du 8&nbsp;février 2008, la moyenne sur douze mois des prix à la consommation hors tabac et hors loyers&nbsp;: il suit l’inflation.</dd>
+            </div>
+            <div class="sources__ligne">
+              <dt>Revalorisation des charges <span data-hypothese="revalCharges">2&nbsp;%/an</span></dt>
+              <dd>L’inflation.</dd>
+            </div>
+            <div class="sources__ligne">
+              <dt>Revalorisation de la taxe foncière <span data-hypothese="revalTaxeFonciere">2,5&nbsp;%/an</span></dt>
+              <dd>L’inflation plus 0,5&nbsp;point&nbsp;: la revalorisation des valeurs locatives suit l’inflation, mais les taux votés par les communes augmentent en plus.</dd>
+            </div>
+            <div class="sources__ligne">
+              <dt>Taux du crédit <span data-hypothese="tauxCredit">3,5&nbsp;%</span></dt>
+              <dd>Pretto, octobre 2026&nbsp;: 3,66&nbsp;% sur 20&nbsp;ans (3,52&nbsp;% en septembre). Crédit Logement / CSA, août 2026&nbsp;: 3,31&nbsp;% toutes durées confondues, sur les prêts réellement accordés. Taux en hausse depuis le printemps 2026&nbsp;; revu chaque trimestre.</dd>
+            </div>
+            <div class="sources__ligne">
+              <dt>Fiscalité des plus-values <span data-hypothese="fiscalitePlusValues">31,4&nbsp;%</span></dt>
+              <dd>Prélèvement forfaitaire unique («&nbsp;flat tax&nbsp;») sur un compte-titres en 2026&nbsp;: 12,8&nbsp;% d’impôt sur le revenu et 18,6&nbsp;% de prélèvements sociaux. La loi de financement de la Sécurité sociale pour 2026 (loi n°&nbsp;2025-1403 du 30&nbsp;décembre 2025) a porté la CSG sur les revenus du capital de 9,2&nbsp;% à 10,6&nbsp;%. Il s’applique une seule fois, à la sortie, sur la plus-value cumulée. Un PEA ou une assurance-vie sont moins taxés.</dd>
+            </div>
+          </dl>
+          <p class="sources__date">Hypothèses à jour&nbsp;: octobre 2026.</p>
+        </div>
+      </details>
 
       <!-- Le filtre de scénarios s'applique PAR-DESSUS les quatre bulles : ce
            n'est pas une cinquième étape, d'où l'absence de numéro.
@@ -530,7 +640,7 @@
           Renseignez votre situation actuelle puis les quatre bulles. Rien n'est calculé tant qu'il manque une
           donnée&nbsp;: pas de chiffre inventé à partir de valeurs par défaut.
         </p>
-        <div class="attente__jauge" id="attenteJauge" role="progressbar"
+        <div class="attente__jauge" id="attenteJauge" role="progressbar" aria-label="Étapes validées"
              aria-valuemin="0" aria-valuemax="4" aria-valuenow="0"></div>
         <p class="attente__compte" id="attenteCompte"></p>
       </div>
@@ -1055,11 +1165,16 @@
 <!-- Chart.js 4.4.1, hébergé sur le site (js/vendor/, licence MIT à côté) :
      plus de dépendance à un CDN tiers, et la politique de sécurité prévue
      pourra se limiter à 'self'. Fichier officiel du paquet npm, inchangé. -->
-<script src="js/vendor/chart.umd.min.js"></script>
-<script src="js/calc.js"></script>
-<script src="js/calc-location.js"></script>
-  <script src="js/scenarios.js"></script>
-  <script src="js/sauvegarde.js"></script>
-<script src="js/app.js"></script>
+<!-- defer : même ordre d'exécution et même DOM complet qu'en fin de <body>
+     sans lui, mais le navigateur peint la page avant d'exécuter les scripts
+     (Lighthouse mobile du 09/10/2026 : ils retardaient le premier affichage
+     de plusieurs secondes). Ne pas mélanger avec un script sans defer, qui
+     passerait avant eux. -->
+<script src="js/vendor/chart.umd.min.js" defer></script>
+<script src="js/calc.js" defer></script>
+<script src="js/calc-location.js" defer></script>
+<script src="js/scenarios.js" defer></script>
+<script src="js/sauvegarde.js" defer></script>
+<script src="js/app.js" defer></script>
 </body>
 </html>

@@ -5,4 +5,44 @@
 User-agent: *
 Allow: /
 
+# Robots des moteurs de recherche et des assistants IA, autorisés
+# VOLONTAIREMENT et nommément (09/10/2026). Le groupe « * » ci-dessus les
+# couvre déjà ; les nommer rend la décision explicite, et la protège : un
+# robot qui trouve un groupe à son nom n'applique que celui-là, si bien
+# qu'une règle ajoutée plus tard sous « * » ne les bloquerait pas par
+# mégarde. Être lu et cité par ces assistants fait partie de l'objectif du
+# site (une réponse claire, sourcée, gratuite).
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: GPTBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Claude-SearchBot
+Allow: /
+
+User-agent: Claude-User
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Perplexity-User
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
 Sitemap: https://aequo-immo.fr/sitemap.xml

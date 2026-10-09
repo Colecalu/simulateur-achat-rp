@@ -174,3 +174,50 @@ jobs:
           mirror $OPTIONS ./frontend/ ./
           bye
           FIN
+
+      # IndexNow : prévient Bing, Yandex, Seznam… (api.indexnow.org relaie à
+      # tous les moteurs du protocole) que les pages du sitemap ont changé,
+      # au lieu d'attendre leur prochain passage. Google n'y participe pas.
+      #
+      # INACTIF tant que la variable de dépôt INDEXNOW_ENABLED ne vaut pas
+      # « true » (Settings → Secrets and variables → Actions → Variables). Elle
+      # n'est pas définie : inutile de signaler des pages en noindex. À
+      # définir le jour du lancement public (checklist, CLAUDE.md §13).
+      #
+      # Seulement après un envoi RÉEL depuis main : jamais en simulation.
+      # La clé n'est pas un secret : le protocole exige qu'elle soit publique,
+      # dans frontend/<clé>.txt, que le moteur va lire pour vérifier que
+      # l'annonce vient bien du propriétaire du site. Un échec ici ne fait pas
+      # échouer le déploiement, déjà fait : il apparaît en avertissement.
+      - name: Signaler les pages à IndexNow
+        if: >-
+          steps.secrets.outputs.pret == 'oui'
+          && vars.INDEXNOW_ENABLED == 'true'
+          && github.ref == 'refs/heads/main'
+          && !(github.event_name == 'workflow_dispatch' && inputs.essai)
+        continue-on-error: true
+        run: |
+          set -euo pipefail
+          # La clé : le seul fichier de 32 caractères hexadécimaux + .txt à la
+          # racine de frontend/. Le changer = générer une nouvelle clé et
+          # remplacer le fichier, rien d'autre.
+          FICHIER=$(ls frontend | grep -E '^[0-9a-f]{32}\.txt$' | head -n 1 || true)
+          if [ -z "$FICHIER" ]; then
+            echo "::warning::Fichier de clé IndexNow introuvable dans frontend/ : rien n'est signalé."
+            exit 0
+          fi
+          CLE="${FICHIER%.txt}"
+          # Les adresses viennent du sitemap : une seule liste des pages.
+          URLS=$(grep -oE '<loc>[^<]+</loc>' frontend/sitemap.xml | sed -E 's#</?loc>##g' | jq -R . | jq -sc .)
+          CORPS=$(jq -nc --arg cle "$CLE" --argjson urls "$URLS" \
+            '{host: "aequo-immo.fr", key: $cle, keyLocation: ("https://aequo-immo.fr/" + $cle + ".txt"), urlList: $urls}')
+          CODE=$(curl -sS -o reponse.txt -w '%{http_code}' -X POST \
+            -H 'Content-Type: application/json; charset=utf-8' \
+            --data "$CORPS" https://api.indexnow.org/indexnow)
+          # 200 : reçu ; 202 : reçu, clé en cours de vérification.
+          if [ "$CODE" = "200" ] || [ "$CODE" = "202" ]; then
+            echo "::notice::IndexNow : $(echo "$URLS" | jq length) adresses signalées (HTTP $CODE)."
+          else
+            echo "::warning::IndexNow a répondu HTTP $CODE : $(cat reponse.txt)"
+            exit 1
+          fi

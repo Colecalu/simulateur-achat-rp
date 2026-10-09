@@ -130,24 +130,20 @@ a:focus-visible, button:focus-visible, summary:focus-visible {
   letter-spacing: 1px;
 }
 
-.cover h1 {
+/* Le slogan porte la grande typographie de la couverture. Ce n'est plus le
+   <h1> depuis le 09/10/2026 : le titre de la page est la question, plus bas,
+   au rendu de ligne d'introduction (.intro). */
+.cover__slogan {
   font: clamp(60px,7.5vw,114px)/.95 var(--serif);
   letter-spacing: -3px;
   margin: 0 0 20px;
 }
 
-/* Le surtitre vit dans le <h1> mais garde son style (.folio, plus haut) et
-   l'écart de 24 px qu'il avait quand il était un paragraphe au-dessus. */
-.cover h1 .folio {
-  display: block;
+.cover__surtitre {
   margin-bottom: 24px;
 }
 
-.cover__slogan {
-  display: block;
-}
-
-.cover h1 em {
+.cover__slogan em {
   font-weight: 400;
 }
 
@@ -1492,6 +1488,16 @@ a.pilier__renvoi:hover {
   color: var(--muted);
 }
 
+/* La phrase d'hypothèses de l'exemple, sous les chiffres : dans le texte et
+   non sous le graphique, pour rester lisible sans JavaScript (le graphique,
+   lui, est dessiné par accueil.js). Même voix que la légende. */
+.apercu__hypotheses {
+  max-width: 440px;
+  margin-top: 18px;
+  font: 10px/1.7 var(--mono);
+  color: var(--muted);
+}
+
 .apercu__legende span {
   display: block;
   color: var(--ink);
@@ -1579,6 +1585,38 @@ a.pilier__renvoi:hover {
   display: none !important;
 }
 
+/* -------------------------------------------------------------------------
+ * Æquo en bref (09/10/2026). Même grille que la FAQ qui le suit — titre à
+ * gauche, filets à droite —, sans dessin ni note manuscrite : ce sont des
+ * phrases à lire et à citer telles quelles, la page a assez de voix ailleurs.
+ * ------------------------------------------------------------------------- */
+.bref {
+  padding: 90px 8% 0;
+  display: grid;
+  grid-template-columns: 1fr 1.3fr;
+  gap: 80px;
+}
+
+.bref h2 {
+  font: 65px/.95 var(--serif);
+  letter-spacing: -1px;
+  margin-top: 25px;
+}
+
+.bref__liste {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--line);
+}
+
+.bref__liste li {
+  padding: 18px 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
 .faq {
   padding: 90px 8% 100px;
   display: grid;
@@ -1637,6 +1675,18 @@ details p {
   padding: 0 10px 20px 0;
   font-size: 13px;
   color: var(--muted);
+}
+
+details ul {
+  margin: 0;
+  padding: 0 10px 20px 18px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+details a {
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }
 
 .finale {
@@ -1763,7 +1813,7 @@ footer .pied__avertissement {
 }
 
 @media (min-width:1500px) {
-  .cover h1 {
+  .cover__slogan {
     font-size: 120px;
   }
   .theatre {
@@ -1808,7 +1858,8 @@ footer .pied__avertissement {
   .ledger-title h2 {
     font-size: 50px;
   }
-  .faq {
+  .faq,
+  .bref {
     gap: 35px;
   }
   .time-notes {
@@ -1839,7 +1890,7 @@ footer .pied__avertissement {
   .folio {
     font-size: 10px;
   }
-  .cover h1 {
+  .cover__slogan {
     font-size: clamp(44px,10.8vw,74px);
     letter-spacing: -1.3px;
     line-height: 1;
@@ -2014,6 +2065,14 @@ footer .pied__avertissement {
     padding: 50px 25px 60px;
     grid-template-columns: 1fr;
     gap: 25px;
+  }
+  .bref {
+    padding: 50px 25px 0;
+    grid-template-columns: 1fr;
+    gap: 25px;
+  }
+  .bref h2 {
+    font-size: 56px;
   }
   .faq>div:first-child {
     position: relative;
@@ -2191,6 +2250,7 @@ footer .pied__avertissement {
   .camps__camp,
   .apercu__kpi dt>span,
   .apercu__legende,
+  .apercu__hypotheses,
   .route-bar span,
   .sheet-note,
   .pilier__renvoi,
