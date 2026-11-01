@@ -2262,25 +2262,28 @@ footer .pied__avertissement {
 
 /* ============================================================== Méthode
    /methode (01/11/2026). Une page à lire, comme les pages légales, mais
-   longue : une tête jaune qui reprend la couverture de l'accueil, un sommaire
-   qui reste à portée sur grand écran, une colonne de lecture d'environ 70
-   caractères. Les tableaux sont des feuilles de papier comme celle de la
-   règle du jeu, sans l'inclinaison : un tableau incliné se lit mal. */
+   longue : une tête jaune centrée, comme la couverture de l'accueil, puis une
+   seule colonne de lecture d'environ 70 caractères. Pas de sommaire (essayé
+   le 01/11/2026, retiré par Lucas : il n'apportait rien). Les tableaux sont
+   des feuilles de papier comme celle de la règle du jeu, sans l'inclinaison :
+   un tableau incliné se lit mal. */
 
 .methode__tete {
   background: var(--yellow);
   padding: 64px 8% 54px;
   border-bottom: 1px solid var(--ink);
+  text-align: center;
 }
 
 .methode__tete>* {
   max-width: 900px;
+  margin-inline: auto;
 }
 
 .methode h1 {
   font: clamp(44px, 5.6vw, 80px)/1 var(--serif);
   letter-spacing: -2px;
-  margin: 16px 0 26px;
+  margin-block: 16px 26px;
 }
 
 .methode h1 em {
@@ -2333,54 +2336,10 @@ footer .pied__avertissement {
 }
 
 .methode__corps {
-  display: grid;
-  grid-template-columns: 230px minmax(0, 720px);
-  justify-content: center;
-  gap: 70px;
+  box-sizing: content-box;
+  max-width: 720px;
+  margin: 0 auto;
   padding: 70px 8% 100px;
-}
-
-/* Le sommaire reste visible pendant la lecture : la page est longue et
-   chaque section répond à une question qu'on peut vouloir lire seule. */
-.methode__sommaire {
-  position: sticky;
-  top: 24px;
-  align-self: start;
-}
-
-.methode__sommaire ol {
-  margin: 14px 0 0;
-  padding: 0;
-  list-style: none;
-  counter-reset: sommaire;
-  border-top: 1px solid var(--line);
-}
-
-.methode__sommaire li {
-  counter-increment: sommaire;
-  border-bottom: 1px solid var(--line);
-}
-
-.methode__sommaire a {
-  display: flex;
-  gap: 10px;
-  padding: 9px 0;
-  font-size: 13px;
-  line-height: 1.4;
-}
-
-.methode__sommaire a:before {
-  content: counter(sommaire, decimal-leading-zero);
-  flex: none;
-  padding-top: 2px;
-  font: 10px/1.6 var(--mono);
-  color: var(--muted);
-}
-
-.methode__sommaire a:hover {
-  color: var(--purple);
-  text-decoration: underline;
-  text-underline-offset: 3px;
 }
 
 .methode__texte section+section {
@@ -2554,19 +2513,6 @@ footer .pied__avertissement {
   color: var(--muted);
 }
 
-/* Sous 1000 px, plus de place pour deux colonnes : le sommaire passe en
-   tête de l'article et ne colle plus. */
-@media (max-width:1000px) {
-  .methode__corps {
-    grid-template-columns: minmax(0, 720px);
-    gap: 40px;
-    padding: 50px 6% 80px;
-  }
-  .methode__sommaire {
-    position: static;
-  }
-}
-
 /* Téléphone : chaque rangée de tableau devient une petite grille — son
    intitulé sur toute la largeur, puis les deux colonnes côte à côte, sous
    leurs en-têtes. Trois colonnes de texte ne tiennent pas en 320 px, et un
@@ -2644,14 +2590,10 @@ footer .pied__avertissement {
 }
 
 @media (pointer:coarse) {
-  .masthead__lien,
-  .methode__sommaire a {
+  .masthead__lien {
     min-height: 44px;
     display: inline-flex;
     align-items: center;
-  }
-  .methode__sommaire a {
-    display: flex;
   }
 }
 
