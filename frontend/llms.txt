@@ -30,7 +30,7 @@
 
 - [Accueil](https://aequo-immo.fr/) : présentation, exemple chiffré, questions fréquentes.
 - [Simulateur](https://aequo-immo.fr/simulateur) : la simulation complète, avec les hypothèses par défaut et leurs sources.
-- [Notre méthode](https://aequo-immo.fr/methode) : comment Æquo compare achat et location à budget égal, avec un exemple chiffré sur le rôle du rapport entre loyer et prix d'achat.
+- [Notre méthode](https://aequo-immo.fr/methode) : comment Æquo compare achat et location à budget égal, avec un exemple chiffré sur le rôle du rendement locatif brut (loyer annuel rapporté au prix d'achat).
 - [Mentions légales](https://aequo-immo.fr/mentions-legales)
 - [Confidentialité](https://aequo-immo.fr/confidentialite)
 

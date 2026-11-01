@@ -2451,6 +2451,15 @@ footer .pied__avertissement {
   font-size: 14px;
 }
 
+/* Le terme que l'on cherche (« rendement locatif brut »), sous la formule
+   qui l'explique : discret, mais écrit en toutes lettres. */
+.methode__terme {
+  display: block;
+  font-weight: 400;
+  font-size: 12px;
+  color: var(--muted);
+}
+
 .methode__tableau tbody td {
   font-size: 14px;
   line-height: 1.55;

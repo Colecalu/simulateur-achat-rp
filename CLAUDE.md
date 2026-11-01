@@ -1093,6 +1093,13 @@ central est celui du §8 : le rapport loyer / prix du logement décide de quel c
 Indexable, dans le sitemap, reliée depuis l'en-tête de l'accueil (« Notre méthode »), la règle
 du jeu (section 03), le pied du simulateur et le bloc des sources.
 
+- **Ce qu'elle vise, et pas l'accueil** (audit SEO du 01/11/2026) : l'accueil prend « acheter
+  ou louer sa résidence principale » ; la méthode prend « comment faire le calcul » et le
+  rendement locatif. D'où son title (« Acheter ou louer : comment faire le bon calcul ? |
+  Æquo »), des H2 formulés comme des recherches, le terme « rendement locatif brut » écrit en
+  toutes lettres, et deux liens contextuels depuis la FAQ de l'accueil (`#duree`,
+  `#frais-et-hypotheses`) — posés sur du texte existant : le FAQPage ne change pas. Le H1 est
+  resté celui du texte d'origine. Pas de sommaire (essayé, retiré par Lucas).
 - **Statique et éditoriale** : `accueil.css` (section « Méthode »), aucun calcul, ni `calc.js`
   ni Chart.js. Mesure : `type_page` = `methode`, aucun attribut `data-mesure-*` de l'accueil
   (docs/plan-de-marquage.md).
