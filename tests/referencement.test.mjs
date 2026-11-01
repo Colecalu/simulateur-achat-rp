@@ -20,6 +20,7 @@ import {
 const lire = (fichier) => readFileSync(new URL('../frontend/' + fichier, import.meta.url), 'utf8');
 const accueil = lire('index.html');
 const simulateur = lire('simulateur.html');
+const methode = lire('methode.html');
 
 /** Le texte tel que l'affiche le navigateur : sans balises, blancs repliés. */
 const texte = (html) => html
@@ -90,7 +91,7 @@ test("accueil : relancer l'outil ne change rien (aperçu et FAQPage à jour)", (
 /* ---------------------------------------------------- Données structurées */
 
 test('JSON-LD : chaque référence @id pointe vers une entité décrite', () => {
-  const noeuds = [...jsonLd(accueil)['@graph'], ...jsonLd(simulateur)['@graph']];
+  const noeuds = [accueil, simulateur, methode].flatMap((html) => jsonLd(html)['@graph']);
   const definis = new Set(noeuds.map((n) => n['@id']));
   const references = [];
   const parcourir = (v) => {
@@ -115,7 +116,7 @@ test('JSON-LD du simulateur : la featureList reprend « Æquo en bref » mot pou
 });
 
 test('JSON-LD : nom et description de chaque page identiques à ses balises', () => {
-  for (const html of [accueil, simulateur]) {
+  for (const html of [accueil, simulateur, methode]) {
     const titre = meta(html, '<title>([^<]+)</title>');
     const description = meta(html, '<meta name="description" content="([^"]+)">');
     assert.equal(meta(html, '<meta property="og:title" content="([^"]+)">'), titre);
@@ -145,7 +146,7 @@ test('sources : les valeurs affichées sont les défauts du moteur', () => {
 /* ----------------------------------------------------------- Structure */
 
 test('un seul <h1> par page', () => {
-  for (const fichier of ['index.html', 'simulateur.html', 'mentions-legales.html', 'confidentialite.html', '404.html']) {
+  for (const fichier of ['index.html', 'simulateur.html', 'methode.html', 'mentions-legales.html', 'confidentialite.html', '404.html']) {
     const sansCommentaires = lire(fichier).replace(/<!--[\s\S]*?-->/g, '');
     assert.equal((sansCommentaires.match(/<h1[\s>]/g) || []).length, 1, fichier);
   }
@@ -172,8 +173,8 @@ test('IndexNow : un seul fichier de clé, qui contient son propre nom', () => {
 const NOINDEX = /<meta name="robots" content="[^"]*noindex/;
 const sansCommentaires = (html) => html.replace(/<!--[\s\S]*?-->/g, '');
 
-test("lancement public : l'accueil et le simulateur sont indexables", () => {
-  for (const fichier of ['index.html', 'simulateur.html']) {
+test("lancement public : l'accueil, le simulateur et la méthode sont indexables", () => {
+  for (const fichier of ['index.html', 'simulateur.html', 'methode.html']) {
     assert.doesNotMatch(sansCommentaires(lire(fichier)), NOINDEX, fichier);
   }
 });
@@ -187,8 +188,12 @@ test('pages légales et 404 : noindex gardé', () => {
 test('sitemap : exactement les pages indexables, aucune en noindex', () => {
   const sitemap = lire('sitemap.xml');
   const adresses = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1]);
-  assert.deepEqual(adresses, ['https://aequo-immo.fr/', 'https://aequo-immo.fr/simulateur']);
-  const fichiers = { 'https://aequo-immo.fr/': 'index.html', 'https://aequo-immo.fr/simulateur': 'simulateur.html' };
+  const fichiers = {
+    'https://aequo-immo.fr/': 'index.html',
+    'https://aequo-immo.fr/simulateur': 'simulateur.html',
+    'https://aequo-immo.fr/methode': 'methode.html',
+  };
+  assert.deepEqual(adresses, Object.keys(fichiers));
   for (const adresse of adresses) {
     const html = lire(fichiers[adresse]);
     assert.doesNotMatch(sansCommentaires(html), NOINDEX, adresse);
@@ -200,4 +205,82 @@ test('sitemap : exactement les pages indexables, aucune en noindex', () => {
     const page = jsonLd(lire(fichiers[m[1]]))['@graph'].find((n) => n['@type'] === 'WebPage');
     assert.equal(m[2], page.dateModified, m[1]);
   }
+});
+
+test(".htaccess : les règles d'adresse propre listent les mêmes pages, méthode comprise", () => {
+  // « Une nouvelle page s'ajoute dans les TROIS règles » (commentaire du
+  // .htaccess) : une page oubliée dans l'une serait servie en double ou en 404.
+  const listes = [...lire('.htaccess').matchAll(/^\s*Rewrite(?:Cond|Rule)\s.*?\(((?:[a-z-]+\|)+[a-z-]+)\)/gm)]
+    .map((m) => m[1]);
+  assert.equal(listes.length, 4, 'une condition et trois règles');
+  for (const liste of listes) assert.equal(liste, 'simulateur|methode|mentions-legales|confidentialite');
+});
+
+/* ------------------------------------------------------- Page /methode */
+
+// Les paramètres de l'exemple, FIGÉS et passés en entier : il ne doit dépendre
+// d'aucun défaut du moteur, qui peut évoluer (CLAUDE.md §13, « La page
+// /methode »). Si ce test tombe, la page publiée ne dit plus vrai : recalculer,
+// corriger les montants et la date du calcul dans methode.html, puis ici.
+const EXEMPLE_METHODE = {
+  capitalInitial: 200000, enveloppeMensuelle: 3400, revenusFoyer: 0, locatairePlaceDifference: true,
+  prixNetVendeur: 300000, typeBien: 'ancien', fraisAgence: 0, travaux: 0, fraisBancaires: 2000,
+  valeurEstimee: 300000, apport: 100000, dureeAnnees: 20, tauxCredit: 0.035, tauxAssurance: 0.0015,
+  chargesCopro: 1500, taxeFonciere: 1500, revalBien: 0.02, revalTaxeFonciere: 0.025, revalCharges: 0.02,
+  revalLoyer: 0.02, rendementBourse: 0.068, fiscalitePlusValues: 0.314, horizon: 15,
+};
+
+test("méthode : l'exemple ne laisse aucun paramètre aux défauts du moteur", () => {
+  for (const cle of Object.keys(calc.DEFAUTS)) {
+    assert.ok(cle === 'loyer' || cle in EXEMPLE_METHODE, cle + " doit être fixé par l'exemple");
+  }
+});
+
+test('méthode : les deux écarts publiés sont ceux du moteur', () => {
+  const quinzeAns = (loyer) => {
+    const res = calc.simuler(Object.assign({}, EXEMPLE_METHODE, { loyer }));
+    assert.equal(res.annees.length, 15);
+    return res.annees[14];
+  };
+  const a = quinzeAns(750);
+  const b = quinzeAns(1250);
+  // Valeurs vérifiées le 01/11/2026, au centime.
+  assert.ok(Math.abs(a.ecart - -80959.76) < 0.01, 'cas A : ' + a.ecart);
+  assert.ok(Math.abs(b.ecart - 66252.59) < 0.01, 'cas B : ' + b.ecart);
+  // « Le patrimoine de l'acheteur est identique dans les deux cas. »
+  assert.equal(a.patrimoineTotalAchat, b.patrimoineTotalAchat);
+
+  // Ce que la page affiche : l'écart arrondi au millier, avec le bon gagnant.
+  // Espaces insécables (page) et fines (Intl) ramenées à l'espace simple.
+  const espaces = (s) => s.replace(/[  ]/g, ' ');
+  const milliers = (n) => espaces(new Intl.NumberFormat('fr-FR').format(Math.round(n / 1000) * 1000)) + ' €';
+  const affiche = (id) =>
+    espaces(texte(new RegExp('<span class="methode__montant" id="' + id + '">([^<]+)</span>').exec(methode)[1]));
+  assert.equal(affiche('ecartA'), milliers(-a.ecart));
+  assert.equal(affiche('ecartB'), milliers(b.ecart));
+  assert.ok(a.ecart < 0);
+  assert.match(methode, /La location laisse environ <span class="methode__montant" id="ecartA">/);
+  assert.ok(b.ecart > 0);
+  assert.match(methode, /L’achat laisse environ <span class="methode__montant" id="ecartB">/);
+  assert.match(methode, /data-loyer="A">750&nbsp;€</);
+  assert.match(methode, /data-loyer="B">1&nbsp;250&nbsp;€</);
+});
+
+test('méthode : titre, date de révision visible et JSON-LD concordent', () => {
+  const page = jsonLd(methode)['@graph'].find((n) => n['@type'] === 'WebPage');
+  const h1 = texte(/<h1>([\s\S]*?)<\/h1>/.exec(methode)[1]).replace(/ /g, ' ');
+  assert.equal(page.headline, h1);
+  assert.equal(page.url, 'https://aequo-immo.fr/methode');
+  // La date affichée sous le titre est le dateModified.
+  assert.match(methode, new RegExp('DERNIÈRE RÉVISION&nbsp;: <time datetime="' + page.dateModified + '">'));
+});
+
+test("méthode : sa propre mesure, aucun événement de l'accueil, aucun calcul", () => {
+  // data-mesure-cta et data-mesure-section émettent des home_* (plan de marquage).
+  const code = sansCommentaires(methode);
+  assert.doesNotMatch(code, /data-mesure-(cta|section)/);
+  // Page éditoriale : ni moteur ni Chart.js, aucun style en ligne (CSP).
+  const scripts = [...code.matchAll(/<script([^>]*)>/g)].map((m) => m[1]);
+  assert.deepEqual(scripts, [' src="/js/mesure.js" data-type-page="methode"', ' type="application/ld+json"']);
+  assert.doesNotMatch(code, /\sstyle=|<style/);
 });

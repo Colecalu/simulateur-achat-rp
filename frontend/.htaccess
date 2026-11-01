@@ -55,20 +55,21 @@ Options -MultiViews
   RewriteCond %{THE_REQUEST} \s/+index\.html[\s?] [NC]
   RewriteRule ^index\.html$ https://aequo-immo.fr/ [R=301,L]
 
-  # Les pages à adresse propre : le simulateur et les deux pages légales.
+  # Les pages à adresse propre : le simulateur, la méthode et les deux pages
+  # légales.
   # Une nouvelle page s'ajoute dans les TROIS règles ci-dessous.
-  RewriteCond %{THE_REQUEST} \s/+(simulateur|mentions-legales|confidentialite)\.html[\s?] [NC]
-  RewriteRule ^(simulateur|mentions-legales|confidentialite)\.html$ https://aequo-immo.fr/$1 [R=301,L]
+  RewriteCond %{THE_REQUEST} \s/+(simulateur|methode|mentions-legales|confidentialite)\.html[\s?] [NC]
+  RewriteRule ^(simulateur|methode|mentions-legales|confidentialite)\.html$ https://aequo-immo.fr/$1 [R=301,L]
 
   # Avec une barre finale, les chemins relatifs de la page (css/, js/)
   # partiraient de /simulateur/ et ne trouveraient rien : la page serait nue.
-  RewriteRule ^(simulateur|mentions-legales|confidentialite)/$ https://aequo-immo.fr/$1 [R=301,L]
+  RewriteRule ^(simulateur|methode|mentions-legales|confidentialite)/$ https://aequo-immo.fr/$1 [R=301,L]
 
   # L'adresse propre, servie sans redirection visible. Les fichiers qui
   # existent (css/, js/, fonts/, img/, favicon, robots.txt, sitemap.xml)
   # ne sont concernés par aucune de ces règles : elles ne visent que ces
   # adresses précises.
-  RewriteRule ^(simulateur|mentions-legales|confidentialite)$ $1.html [L]
+  RewriteRule ^(simulateur|methode|mentions-legales|confidentialite)$ $1.html [L]
 </IfModule>
 
 # OVH sert les .woff2 sans type de contenu (constaté le 08/10/2026). Les

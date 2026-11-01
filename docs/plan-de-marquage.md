@@ -7,7 +7,7 @@ l'est ici dans le même commit — et inversement. Mis en place le 08/10/2026 (b
 | | |
 |---|---|
 | Propriété | GA4, ID de mesure **`G-1G05M0043V`** |
-| Code | [`frontend/js/mesure.js`](../frontend/js/mesure.js) — chargé dans `<head>`, sans `defer`, sur les 5 pages |
+| Code | [`frontend/js/mesure.js`](../frontend/js/mesure.js) — chargé dans `<head>`, sans `defer`, sur les 6 pages (`/methode` depuis le 01/11/2026) |
 | Point d'envoi unique | `Mesure.suivre(nom, params)` et `Mesure.suivreUneFois(cle, nom, params)` |
 | Simulateur | appels dans [`frontend/js/app.js`](../frontend/js/app.js) (repli muet si `window.Mesure` manque) |
 | Accueil, pieds de page, 404, `<details>` | **déclaratif** : attributs `data-mesure-*` dans le HTML, lus par `mesure.js` |
@@ -31,9 +31,16 @@ l'est ici dans le même commit — et inversement. Mis en place le 08/10/2026 (b
 
 | Paramètre | Portée | Valeurs |
 |---|---|---|
-| `type_page` | `page_view` et tous les événements de la page (passé à `gtag('config')`) | `accueil` · `simulateur` · `legal` · `404` |
+| `type_page` | `page_view` et tous les événements de la page (passé à `gtag('config')`) | `accueil` · `simulateur` · `methode` (depuis le 01/11/2026) · `legal` · `404` |
 
 Il est lu sur la balise : `<script src="/js/mesure.js" data-type-page="…">`.
+
+**`/methode` n'a aucun événement propre** : sa page vue (`type_page` = `methode`) et les clics
+de son pied de page (`lien_pied_clic`) suffisent. Elle ne porte **ni `data-mesure-cta` ni
+`data-mesure-section`** : ces attributs émettent `home_cta_clic` et `home_section_vue`, qui
+compteraient la méthode comme l'accueil. Un test le vérifie (`tests/referencement.test.mjs`).
+Ce qu'elle apporte au simulateur se lit dans GA4 par la page de provenance des vues de
+`/simulateur`.
 
 ## Événements
 
@@ -52,7 +59,7 @@ Il est lu sur la balise : `<script src="/js/mesure.js" data-type-page="…">`.
 
 | Événement | Question | Déclencheur | Paramètres |
 |---|---|---|---|
-| `lien_pied_clic` | Les pieds de page servent-ils ? Cherche-t-on le contact, les mentions ? | Clic sur n'importe quel lien d'un `<footer>` (accueil, simulateur, pages légales, 404). | `lien` : `accueil` · `mentions_legales` · `confidentialite` · `contact` |
+| `lien_pied_clic` | Les pieds de page servent-ils ? Cherche-t-on le contact, les mentions ? | Clic sur n'importe quel lien d'un `<footer>` (accueil, simulateur, méthode, pages légales, 404). | `lien` : `accueil` · `methode` (pied du simulateur, depuis le 01/11/2026) · `mentions_legales` · `confidentialite` · `contact` |
 
 ### Simulateur
 
@@ -61,7 +68,7 @@ Il est lu sur la balise : `<script src="/js/mesure.js" data-type-page="…">`.
 | `sim_demarree` | Combien de visiteurs du simulateur commencent vraiment ? | Premier `input` ou `change` sur un champ (`input`, `select`, `textarea` avec un `id`), une fois par page vue. | — |
 | `sim_champ_modifie` | Quels champs sont touchés, lesquels jamais ? Où s'arrête-t-on ? | Premier `input`/`change` sur un champ donné, une fois par champ et par page vue. | `champ` : l'`id` du champ dans `simulateur.html` (`prixNetVendeur`, `apport`, `loyerActuel`, `tauxCredit`, `locatairePlaceDifference`, `melAnneeBascule`…). Les trois curseurs d'horizon (`horizon`, `horizonBis`, `horizonMel`) sont regroupés sous `horizon`. |
 | `sim_resultat_affiche` | Combien vont jusqu'au verdict ? Lequel obtiennent-ils ? | Premier résultat **visible** par page vue : parcours complet ET question de l'épargne forcée répondue (ou sans objet). Un brouillon restauré complet le déclenche au chargement. | `verdict` : `achat` · `location` · `egal` (écart < 1 % du patrimoine, l'interface affiche « Les deux se valent ») |
-| `sim_avance_ouvert` | Les explications et réglages avancés sont-ils consultés ? | Ouverture d'un bloc (pas la fermeture), à chaque ouverture. | `bloc` : `detail_ecart` (bouton « D'où vient cet écart ? ») · `scenarios` (carte « Et si les marchés changeaient ? », `#scenarioOuvrir`, qui ouvre l'introduction des scénarios) · `scenario_apercu` (aperçu d'un scénario) · `scenario_annees` (« Le détail année par année » de l'aperçu) · `location_fiscalite` (« Fiscalité et frais » de la mise en location) · `location_detail` (« Le détail du mois et de la revente ») · `hypotheses_sources` (« Hypothèses par défaut et sources », sous la bulle 4, depuis le 09/10/2026) |
+| `sim_avance_ouvert` | Les explications et réglages avancés sont-ils consultés ? | Ouverture d'un bloc (pas la fermeture), à chaque ouverture. | `bloc` : `detail_ecart` (bouton « D'où vient cet écart ? ») · `scenarios` (carte « Et si les marchés changeaient ? », `#scenarioOuvrir`, qui ouvre l'introduction des scénarios) · `scenario_apercu` (aperçu d'un scénario) · `scenario_annees` (« Le détail année par année » de l'aperçu) · `location_fiscalite` (« Fiscalité et frais » de la mise en location) · `location_detail` (« Le détail du mois et de la revente ») · `hypotheses_sources` (« Hypothèses par défaut et sources », sous la bulle 4, depuis le 09/10/2026 ; **aussi émis à l'arrivée par `/simulateur#sources`**, lien de la page méthode, qui ouvre le bloc — depuis le 01/11/2026) |
 | `scenario_choisi` | Quels scénarios de marché intéressent ? | Clic sur un scénario qui l'applique (pas le second clic qui le retire, pas la restauration du brouillon). | `scenario` : `passe-favorable-achat` (« Acheter en 1992 ») · `passe-defavorable-achat` (« Acheter en 2002 ») · `correction-immobiliere` · `decennie-perdue-bourse` — les `cle` de `scenarios.js` |
 | `location_module_ouvert` | Le pilier 3 est-il découvert ? | Clic sur la carte « Et si vous la mettiez en location ? » (`#melOuvrir`), pas sur « Modifier ». | — |
 | `location_resultat_affiche` | À quel horizon envisage-t-on de louer sa RP ? | Ouverture de la fenêtre de résultats de la mise en location avec un résultat calculable — après validation de la saisie (`#melValider`) ou à sa réouverture (`#melVoir`), à chaque ouverture. | `tranche_annee_bascule` : `1-5` · `6-10` · `11-15` · `16+` (année de mise en location, comptée depuis l'achat) |
