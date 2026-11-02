@@ -13,7 +13,7 @@ Document de référence du projet. Court par nature : le détail vit dans `docs/
 ## Commandes
 
 ```bash
-node --test "tests/*.test.mjs"   # 127 tests : moteur, location, indicateurs, séries, sauvegarde, scénarios, référencement
+node --test "tests/*.test.mjs"   # 132 tests : moteur, location, indicateurs, séries, sauvegarde, scénarios, référencement
 ```
 
 Le motif est entre guillemets : `node --test tests/` échoue sous Windows (Node tente de charger
@@ -60,7 +60,7 @@ structurante change.
   de feature ouverte par Claude Code est à considérer comme une expérimentation en cours.
 - **Une expérimentation ne remplace jamais l'implémentation en place automatiquement.** Elle est
   analysée sur demande, puis intégrée, adaptée ou écartée — décision de Lucas.
-- **Les 127 tests sont l'arbitre.** Une proposition qui les casse est rejetée, quelle que soit son
+- **Les 132 tests sont l'arbitre.** Une proposition qui les casse est rejetée, quelle que soit son
   élégance. La fixture Excel compare 25 années × 15 grandeurs **au centime** : elle ne se
   contourne pas, elle se respecte ou se discute explicitement.
 
@@ -205,6 +205,7 @@ serveur, pas de migrations automatiques, aucune dépendance qui exige une étape
 frontend/                    servi tel quel, racine web en production
   index.html                 page d'accueil « Carnet d'un choix » — diverge de Codex depuis le 02/10, §12
   simulateur.html            le simulateur — servi à /simulateur en production (.htaccess)
+  methode.html               « Notre méthode », page éditoriale servie à /methode — §13, « La page /methode »
   mentions-legales.html      servie à /mentions-legales — §13
   confidentialite.html       servie à /confidentialite — doit rester VRAIE du code, §13
   404.html                   ErrorDocument — chemins ABSOLUS obligatoires, §13
@@ -237,7 +238,7 @@ outils/                      jamais déployé — scripts de développement
   image-partage.mjs (+ .html) img/partage.png
   package.json               fontkit, wawoff2, Playwright — devDependencies, §13
 docs/                        modèle, conventions UI, spec backend, design, Excel
-tests/                       node --test, 127 tests
+tests/                       node --test, 132 tests
 migrations/                  à créer : SQL numéroté, appliqué à la main
 ```
 
@@ -1081,7 +1082,45 @@ formulations de la FAQ.
 | Robots d'IA | `robots.txt` autorise nommément OAI-SearchBot, ChatGPT-User, GPTBot, ClaudeBot, Claude-SearchBot, Claude-User, PerplexityBot, Perplexity-User, Google-Extended, Applebot-Extended et Bingbot. `llms.txt` résume le site, la méthode, les piliers et les limites — à tenir cohérent avec « Æquo en bref ». `.txt` servis en UTF-8 (`AddCharset`). |
 | IndexNow | clé dans `frontend/<32 hex>.txt` (publique par construction : le moteur la lit pour vérifier l'annonce). Étape « Signaler les pages à IndexNow » du workflow, après un envoi **réel** depuis `main`, **seulement si la variable de dépôt `INDEXNOW_ENABLED` vaut `true`** — non définie aujourd'hui, l'étape est inerte. Elle envoie les adresses de `sitemap.xml` à `api.indexnow.org` (Bing, Yandex… pas Google). Un échec n'invalide pas le déploiement (avertissement). Changer de clé = remplacer le fichier, rien d'autre. |
 | Polices | **hébergées sur le site** (`fonts/`, `css/polices.css`) : plus de requête vers Google, ni délai, ni IP envoyée. Déclarations identiques à celles de Google — DM Sans, fichier variable, reste déclaré quatre fois (400 à 700), sinon la graisse 650 du simulateur changerait. Trois préchargements au plus sur l'accueil, deux sur le simulateur. |
-| Adresses | `/` et `/simulateur` ; `.htaccess` réécrit et redirige ; `canonical`, `og:url` et `sitemap.xml` disent tous la même adresse. |
+| Adresses | `/`, `/simulateur` et `/methode` (01/11/2026) ; `.htaccess` réécrit et redirige ; `canonical`, `og:url` et `sitemap.xml` disent tous la même adresse. |
+
+### La page /methode
+
+Ajoutée le 01/11/2026 (branche `feat/page-methode`). Search Console ne montrait qu'une vingtaine
+d'impressions : le site n'avait qu'une page de contenu à indexer. **`/methode` est la page qu'un
+moteur ou un assistant peut citer pour « comment comparer acheter et louer »**, et son message
+central est celui du §8 : le rapport loyer / prix du logement décide de quel côté on tombe.
+Indexable, dans le sitemap, reliée depuis l'en-tête de l'accueil (« Notre méthode »), la règle
+du jeu (section 03), le pied du simulateur et le bloc des sources.
+
+- **Ce qu'elle vise, et pas l'accueil** (audit SEO du 01/11/2026) : l'accueil prend « acheter
+  ou louer sa résidence principale » ; la méthode prend « comment faire le calcul » et le
+  rendement locatif. D'où son title (« Acheter ou louer : comment faire le bon calcul ? |
+  Æquo »), des H2 formulés comme des recherches, le terme « rendement locatif brut » écrit en
+  toutes lettres, et deux liens contextuels depuis la FAQ de l'accueil (`#duree`,
+  `#frais-et-hypotheses`) — posés sur du texte existant : le FAQPage ne change pas. Le H1 est
+  resté celui du texte d'origine. Pas de sommaire (essayé, retiré par Lucas).
+- **Statique et éditoriale** : `accueil.css` (section « Méthode »), aucun calcul, ni `calc.js`
+  ni Chart.js. Mesure : `type_page` = `methode`, aucun attribut `data-mesure-*` de l'accueil
+  (docs/plan-de-marquage.md).
+- **L'exemple A/B est figé**, avec ses paramètres écrits **en entier** dans
+  `tests/referencement.test.mjs` (`EXEMPLE_METHODE`) — aucun défaut du moteur n'y entre : un
+  changement de `TENDANCE_LONGUE` ne doit pas déplacer un texte publié. Logement ancien de
+  300 000 € (valeur estimée identique), capital 200 000 €, apport 100 000 €, enveloppe
+  3 400 €/mois, revenus 0, épargne du locataire placée, 20 ans à 3,5 %, assurance 0,15 %, frais
+  bancaires 2 000 €, agence et travaux 0, copropriété et taxe foncière 1 500 €/an, bien / loyers
+  / charges +2 %/an, taxe foncière +2,5 %/an, bourse 6,8 %, fiscalité 31,4 %, horizon 15 ans.
+  Loyer 750 € (A) : écart −80 959,76 € ; 1 250 € (B) : +66 252,59 € — affichés « environ
+  81 000 € » pour la location et « environ 66 000 € » pour l'achat. Aucune valeur de
+  `scenarios.js`.
+- **Si le test tombe**, la page ne dit plus vrai : recalculer avec les mêmes paramètres,
+  corriger les montants (`#ecartA`, `#ecartB`) **et la date du calcul** dans `methode.html`,
+  les valeurs du test, puis `dateModified` du JSON-LD, la date « Dernière révision » visible et
+  le `lastmod` du sitemap — les trois ensemble, un test les compare.
+- **Révision éditoriale** (texte changé) : même trio de dates. Une correction de style ne
+  change aucune date.
+- `/simulateur#sources` ouvre le bloc des sources à l'arrivée (`app.js`, fin
+  d'`initialiser`), sans toucher au parcours ni au brouillon.
 
 ### Régénérer les images
 
@@ -1157,6 +1196,11 @@ de l'hébergement.
    - `/css/polices.css`, `/fonts/dm-sans-variable.woff2`, `/img/partage.png`, `/favicon.svg`,
      `/robots.txt`, `/sitemap.xml` répondent 200 ; les polices portent
      `Cache-Control: public, max-age=31536000, immutable`.
+- [ ] **`/methode`, après son premier déploiement** (01/11/2026) : `/methode` répond 200 sans
+      changer d'adresse ; `/methode.html` et `/methode/` → 301 vers `https://aequo-immo.fr/methode`
+      en un seul saut ; `http://` et `www.` → 301 vers la même adresse ; aucune boucle. Console
+      sans violation de CSP ; Search Console : soumettre de nouveau le sitemap et demander
+      l'indexation de `/methode`.
 - [x] **Boîte `contact@aequo-immo.fr`** créée (redirigée vers la boîte de Lucas), 08/10/2026.
 - [ ] **15/10/2026 — activer HSTS** : décommenter la ligne `Strict-Transport-Security` du
       `.htaccess` (`max-age=31536000`, sans `includeSubDomains` ni `preload`), si la semaine

@@ -2744,6 +2744,16 @@ function initialiser() {
   initialiserBrouillon();
 
   recalculer();
+
+  // /simulateur#sources (lien de la page /methode) : le navigateur fait
+  // défiler jusqu'au bloc, mais le laisse fermé — on arriverait sur un titre.
+  // On l'ouvre, sans rien changer au parcours ni au brouillon : le bloc est
+  // une référence, hors des bulles et jamais inerte (voir `majBulles`).
+  const ouvrirSources = () => {
+    if (location.hash === '#sources') $('#sources').open = true;
+  };
+  ouvrirSources();
+  window.addEventListener('hashchange', ouvrirSources);
 }
 
 initialiser();

@@ -114,6 +114,26 @@ a:focus-visible, button:focus-visible, summary:focus-visible {
   font-size: 20px;
 }
 
+/* Navigation de l'en-tête (01/11/2026) : la méthode, puis le simulateur.
+   Le lien de la méthode reste discret à côté du bouton : c'est le
+   simulateur qu'on vient chercher. */
+.masthead__nav {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+}
+
+.masthead__lien {
+  font-size: 12px;
+  padding: 7px 0;
+  border-bottom: 1px solid transparent;
+}
+
+.masthead__lien:hover,
+.masthead__lien[aria-current="page"] {
+  border-bottom-color: currentColor;
+}
+
 .cover {
   background: var(--yellow);
   padding: 42px 5% 32px;
@@ -692,6 +712,19 @@ a:focus-visible, button:focus-visible, summary:focus-visible {
   font-size: 14px;
   color: var(--muted);
   max-width: 400px;
+}
+
+/* Renvoi vers /methode (01/11/2026) : un lien de lecture, pas un bouton —
+   le seul bouton de la section reste celui du simulateur, plus haut. */
+.ledger__lien {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  margin-top: 14px;
+  font-size: 14px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
 .ledger-sheet {
@@ -1884,6 +1917,16 @@ footer .pied__avertissement {
     font-size: 11px;
     gap: 18px;
   }
+  /* À 360 px, marque + deux liens tiennent sur une ligne à ces écarts. */
+  .masthead {
+    gap: 16px;
+  }
+  .masthead__nav {
+    gap: 16px;
+  }
+  .masthead__lien {
+    font-size: 11px;
+  }
   .cover {
     padding: 30px 20px 25px;
   }
@@ -2214,6 +2257,352 @@ footer .pied__avertissement {
   }
   .document__chapeau {
     font-size: 16px;
+  }
+}
+
+/* ============================================================== Méthode
+   /methode (01/11/2026). Une page à lire, comme les pages légales, mais
+   longue : une tête jaune centrée, comme la couverture de l'accueil, puis une
+   seule colonne de lecture d'environ 70 caractères. Pas de sommaire (essayé
+   le 01/11/2026, retiré par Lucas : il n'apportait rien). Les tableaux sont
+   des feuilles de papier comme celle de la règle du jeu, sans l'inclinaison :
+   un tableau incliné se lit mal. */
+
+.methode__tete {
+  background: var(--yellow);
+  padding: 64px 8% 54px;
+  border-bottom: 1px solid var(--ink);
+  text-align: center;
+}
+
+.methode__tete>* {
+  max-width: 900px;
+  margin-inline: auto;
+}
+
+.methode h1 {
+  font: clamp(44px, 5.6vw, 80px)/1 var(--serif);
+  letter-spacing: -2px;
+  margin-block: 16px 26px;
+}
+
+.methode h1 em {
+  display: block;
+  color: var(--purple);
+}
+
+.methode__chapeau {
+  max-width: 62ch;
+  font-size: 18px;
+  line-height: 1.6;
+}
+
+.methode__chapeau+.methode__chapeau {
+  margin-top: 14px;
+}
+
+.methode__chapeau strong {
+  font-weight: 600;
+}
+
+/* Le bouton de l'aperçu, avec une ombre claire : la jaune disparaîtrait
+   sur la tête jaune. */
+.methode__bouton {
+  display: inline-flex;
+  align-items: center;
+  gap: 18px;
+  min-height: 48px;
+  margin-top: 32px;
+  padding: 13px 26px;
+  border-radius: 30px;
+  background: var(--ink);
+  color: var(--paper);
+  font-size: 14px;
+  box-shadow: 4px 4px 0 var(--white);
+  transition: translate .2s, box-shadow .2s;
+}
+
+.methode__bouton span {
+  font-size: 20px;
+}
+
+.methode__bouton:hover {
+  translate: 2px 2px;
+  box-shadow: 2px 2px 0 var(--white);
+}
+
+.methode__maj {
+  margin-top: 30px;
+}
+
+.methode__corps {
+  box-sizing: content-box;
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 70px 8% 100px;
+}
+
+.methode__texte section+section {
+  margin-top: 46px;
+  padding-top: 46px;
+  border-top: 1px dashed var(--line);
+}
+
+.methode__texte h2 {
+  font: 40px/1.08 var(--serif);
+  letter-spacing: -.5px;
+  margin-bottom: 18px;
+}
+
+.methode__texte h3 {
+  font: 28px/1.15 var(--serif);
+  margin: 36px 0 12px;
+}
+
+.methode__texte p+p,
+.methode__texte p+ul,
+.methode__texte ul+p {
+  margin-top: 14px;
+}
+
+.methode__texte strong {
+  font-weight: 600;
+}
+
+/* Dans le texte, un lien doit se voir comme tel (même règle que .document). */
+.methode__texte a:not(.methode__bouton) {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.methode__liste {
+  margin: 0;
+  padding-left: 1.2em;
+}
+
+.methode__liste li+li {
+  margin-top: 6px;
+}
+
+.methode__renvoi {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  font-weight: 500;
+}
+
+/* --- Les tableaux ------------------------------------------------------ */
+
+.methode__feuille {
+  position: relative;
+  margin: 30px 0;
+  padding: 26px 28px 18px;
+  background: var(--white);
+  border: 1px solid var(--line);
+  box-shadow: 8px 9px 0 var(--lavender);
+}
+
+/* Le ruban adhésif de la règle du jeu. */
+.methode__feuille:before {
+  content: '';
+  position: absolute;
+  top: -16px;
+  left: 45%;
+  width: 84px;
+  height: 32px;
+  background: rgb(243 218 120 / .7);
+  transform: rotate(-5deg);
+}
+
+.methode__tableau {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.methode__tableau caption {
+  padding-bottom: 14px;
+  text-align: left;
+  font: 10px/1.6 var(--mono);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.methode__tableau th,
+.methode__tableau td {
+  padding: 12px 10px;
+  text-align: left;
+  vertical-align: top;
+  border-bottom: 1px solid var(--line);
+}
+
+.methode__tableau thead th {
+  font: 24px/1.1 var(--serif);
+  border-bottom-color: var(--ink);
+}
+
+.methode__tableau thead .methode__vide {
+  border-bottom-color: var(--ink);
+}
+
+.methode__tableau tbody th {
+  font-weight: 500;
+  font-size: 14px;
+}
+
+/* Le terme que l'on cherche (« rendement locatif brut »), sous la formule
+   qui l'explique : discret, mais écrit en toutes lettres. */
+.methode__terme {
+  display: block;
+  font-weight: 400;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.methode__tableau tbody td {
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.methode__tableau tbody tr:last-child>* {
+  border-bottom: 0;
+}
+
+.methode__tableau--chiffres th[scope="col"],
+.methode__tableau--chiffres td {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.methode__resultats>* {
+  padding-top: 18px;
+}
+
+.methode__resultat strong {
+  font-weight: 500;
+}
+
+/* Les deux écarts : ce que la section veut montrer. Couleurs de série de
+   l'accueil — achat en brique, location en violet (aperçu, 02). */
+.methode__montant {
+  display: block;
+  margin: 4px 0;
+  font: 40px/1.05 var(--serif);
+  letter-spacing: -1px;
+  white-space: nowrap;
+}
+
+.methode__resultat--location {
+  color: var(--purple);
+}
+
+.methode__resultat--achat,
+.methode__col--achat {
+  color: var(--orange);
+}
+
+.methode__col--location {
+  color: var(--purple);
+}
+
+.methode__fin .methode__bouton {
+  box-shadow: 4px 4px 0 var(--yellow);
+}
+
+.methode__fin .methode__bouton:hover {
+  box-shadow: 2px 2px 0 var(--yellow);
+}
+
+.methode__mention {
+  margin-top: 14px;
+  font: 10px/1.6 var(--mono);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* Téléphone : chaque rangée de tableau devient une petite grille — son
+   intitulé sur toute la largeur, puis les deux colonnes côte à côte, sous
+   leurs en-têtes. Trois colonnes de texte ne tiennent pas en 320 px, et un
+   défilement horizontal cacherait la moitié de la comparaison. Les rôles
+   ARIA du HTML gardent la sémantique de tableau. */
+@media (max-width:700px) {
+  .methode__tete {
+    padding: 40px 20px 36px;
+  }
+  .methode h1 {
+    font-size: clamp(36px, 10.5vw, 52px);
+    letter-spacing: -1px;
+  }
+  .methode__chapeau {
+    font-size: 16px;
+  }
+  .methode__corps {
+    padding: 36px 20px 60px;
+  }
+  .methode__texte h2 {
+    font-size: 31px;
+  }
+  .methode__texte h3 {
+    font-size: 24px;
+  }
+  .methode__feuille {
+    padding: 22px 16px 10px;
+    box-shadow: 5px 6px 0 var(--lavender);
+  }
+  .methode__tableau,
+  .methode__tableau caption,
+  .methode__tableau thead,
+  .methode__tableau tbody {
+    display: block;
+  }
+  .methode__tableau tr {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 14px;
+  }
+  .methode__tableau .methode__vide {
+    display: none;
+  }
+  .methode__tableau th,
+  .methode__tableau td {
+    padding: 10px 0;
+  }
+  .methode__tableau thead th {
+    font-size: 21px;
+  }
+  .methode__tableau tbody th {
+    grid-column: 1 / -1;
+    padding: 14px 0 0;
+    border-bottom: 0;
+    font-size: 11px;
+    font-family: var(--mono);
+    font-weight: 400;
+    letter-spacing: .5px;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .methode__tableau tbody td {
+    font-size: 13px;
+  }
+  .methode__tableau tbody tr:last-child>td {
+    border-bottom: 0;
+  }
+  .methode__tableau--chiffres th[scope="col"],
+  .methode__tableau--chiffres td {
+    text-align: left;
+  }
+  .methode__montant {
+    font-size: 28px;
+  }
+}
+
+@media (pointer:coarse) {
+  .masthead__lien {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
   }
 }
 

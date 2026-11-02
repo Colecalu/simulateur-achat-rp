@@ -99,7 +99,7 @@
       "publisher": {
         "@id": "https://aequo-immo.fr/#organization"
       },
-      "dateModified": "2026-10-09"
+      "dateModified": "2026-11-01"
     },
     {
       "@type": "FAQPage",
@@ -123,7 +123,7 @@
           "name": "Au bout de combien d’années l’achat devient-il rentable ?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Il n’existe pas de durée universelle : c’est ce qu’on appelle le point mort, et il varie d’un projet à l’autre. Æquo l’affiche directement : c’est l’année à partir de laquelle votre patrimoine net est plus élevé en achetant qu’en louant."
+            "text": "Il n’existe pas de durée universelle. Le point mort correspond à la première année où le patrimoine net en achetant dépasse celui obtenu en restant locataire. Ce croisement peut ne pas se produire pendant la durée simulée. Comparez les deux patrimoines à l’année où vous pensez revendre."
           }
         },
         {
@@ -131,7 +131,7 @@
           "name": "Qu’est-ce que le point mort, entre acheter et louer ?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Le point mort est la première année où le patrimoine net d’impôt du scénario achat dépasse celui du scénario location, à budget mensuel égal. Si vous revendez avant, la location aurait été plus avantageuse. Si vous revendez après, c’est l’achat."
+            "text": "Le point mort est la première année où le patrimoine net d’impôt du scénario achat dépasse celui du scénario location, à budget mensuel égal. Les trajectoires peuvent ensuite se recroiser. Pour votre décision, regardez l’écart à l’année où vous pensez revendre."
           }
         },
         {
@@ -204,7 +204,10 @@
   <header class="masthead">
     <a class="brand" href="/" aria-label="Æquo, accueil">Æquo<span aria-hidden="true">↗</span></a>
     <span class="edition">SIMULATEUR ACHAT OU LOCATION <br>DE VOTRE RÉSIDENCE PRINCIPALE</span>
-    <a class="nav-cta" href="/simulateur" data-mesure-cta="entete">Le simulateur <span aria-hidden="true">↗</span></a>
+    <nav class="masthead__nav" aria-label="Navigation principale">
+      <a class="masthead__lien" href="/methode">Notre méthode</a>
+      <a class="nav-cta" href="/simulateur" data-mesure-cta="entete">Le simulateur <span aria-hidden="true">↗</span></a>
+    </nav>
   </header>
 
   <main id="contenu">
@@ -371,6 +374,7 @@
         <span class="tiny">03 — LA RÈGLE DU JEU</span>
         <h2>Mêmes moyens. <br><em>Autres destinations.</em></h2>
         <p>Chaque mois, le même budget dans les deux cas. Côté achat, il paie le crédit et les charges&nbsp;; côté location, le loyer. Ce qui reste est investi — c’est la référence. À l’arrivée, on compare ce que vous possédez vraiment.</p>
+        <a class="ledger__lien" href="/methode">Comprendre comment nous comparons achat et location <span aria-hidden="true">→</span></a>
       </div>
       <div class="ledger-sheet" data-apparait>
         <div class="sheet-heading">
@@ -567,11 +571,11 @@
         </details>
         <details data-mesure-question="duree_rentabilite">
           <summary>Au bout de combien d’années l’achat devient-il rentable&nbsp;?</summary>
-          <p>Il n’existe pas de durée universelle&nbsp;: c’est ce qu’on appelle le point mort, et il varie d’un projet à l’autre. Æquo l’affiche directement&nbsp;: c’est l’année à partir de laquelle votre patrimoine net est plus élevé en achetant qu’en louant.</p>
+          <p>Il n’existe pas de durée universelle. Le point mort correspond à la première année où le patrimoine net en achetant dépasse celui obtenu en restant locataire. Ce croisement peut ne pas se produire pendant la durée simulée. <a href="/methode#duree">Comparez les deux patrimoines à l’année où vous pensez revendre</a>.</p>
         </details>
         <details data-mesure-question="point_mort">
           <summary>Qu’est-ce que le point mort, entre acheter et louer&nbsp;?</summary>
-          <p>Le point mort est la première année où le patrimoine net d’impôt du scénario achat dépasse celui du scénario location, à budget mensuel égal. Si vous revendez avant, la location aurait été plus avantageuse. Si vous revendez après, c’est l’achat.</p>
+          <p>Le point mort est la première année où le patrimoine net d’impôt du scénario achat dépasse celui du scénario location, à budget mensuel égal. Les trajectoires peuvent ensuite se recroiser. Pour votre décision, regardez l’écart à l’année où vous pensez revendre.</p>
         </details>
         <details data-mesure-question="verdict">
           <summary>Est-ce qu’Æquo va me dire d’acheter ou de louer&nbsp;?</summary>
@@ -583,7 +587,7 @@
         </details>
         <details data-mesure-question="calculs">
           <summary>Qu’est-ce qui entre dans les calculs&nbsp;?</summary>
-          <p>Le crédit immobilier, les frais d’acquisition (notaire, agence…), la copropriété, la taxe foncière, les loyers, l’évolution du bien et celle des placements. Les placements capitalisent avant impôt&nbsp;; la fiscalité de sortie est déduite du patrimoine net affiché.</p>
+          <p>Le crédit immobilier, les frais d’acquisition (notaire, agence…), la copropriété, la taxe foncière, les loyers, l’évolution du bien et celle des placements. Les placements capitalisent avant impôt&nbsp;; <a href="/methode#frais-et-hypotheses">la fiscalité de sortie est déduite du patrimoine net affiché</a>.</p>
           <p>Le modèle ne couvre pas tout&nbsp;: notamment les frais de revente, les gros travaux imprévus ou les changements de vie.</p>
         </details>
         <details data-mesure-question="scenarios">
